@@ -5,6 +5,11 @@ defmodule Api.Router do
     plug :accepts, ["json"]
   end
 
+  scope "/", Api.Controllers do
+    pipe_through :api
+    get '/',
+  end
+
   scope "/api", Api do
     pipe_through :api
   end
