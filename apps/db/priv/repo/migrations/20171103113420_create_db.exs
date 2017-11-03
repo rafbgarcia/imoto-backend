@@ -51,6 +51,7 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       add :state, :string, default: "pending"
       add :confirmed_at, :utc_datetime
       add :finished_at, :utc_datetime
+      add :canceled_at, :utc_datetime
       timestamps()
     end
 
@@ -74,8 +75,9 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       add :lng, :string
     end
 
-    create table(:order_histories) do
+    create table(:history) do
       add :order_id, references(:orders)
+      add :motoboy_id, references(:motoboys)
       add :text, :string
       timestamps()
     end
