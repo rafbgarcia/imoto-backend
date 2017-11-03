@@ -36,7 +36,7 @@ defmodule Central.Endpoint do
   plug Plug.Session,
     store: :cookie,
     key: "_central_key",
-    signing_salt: "gdzqNwd+"
+    signing_salt: "W8swqUH8"
 
   plug Central.Router
 
