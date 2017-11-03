@@ -37,7 +37,11 @@ defmodule Db.Mixfile do
   defp deps do
     [
       {:postgrex, ">= 0.0.0"},
-      {:ecto, "~> 2.1"}
+      {:ecto, "~> 2.1"},
+      {:timex, "~> 3.1.24"},
+      {:timex_ecto, "~> 3.2.1"},
+      {:money, "~> 1.2.1"},
+      {:ecto_state_machine, "~> 0.2.1"}
     ]
   end
 
