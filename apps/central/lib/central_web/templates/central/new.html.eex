@@ -1,5 +1,0 @@
-<h2>New Central</h2>
-
-<%= render "form.html", Map.put(assigns, :action, central_path(@conn, :create)) %>
-
-<span><%= link "Back", to: central_path(@conn, :index) %></span>

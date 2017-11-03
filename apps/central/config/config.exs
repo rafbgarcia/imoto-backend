@@ -8,12 +8,12 @@ use Mix.Config
 # General application configuration
 config :central,
   namespace: Central,
-  ecto_repos: [Db.Repo]
+  ecto_repos: [Central.Repo]
 
 # Configures the endpoint
 config :central, Central.Endpoint,
   url: [host: "localhost"],
-  secret_key_base: "zNT3u/7UrHK44cJXeh/84mNFgGksrrpP7G3sKOQk2klvK7++qiMJb2Z9kUId8A5S",
+  secret_key_base: "LjQEdUHr2QCss+UKhLV73vwzK5xc2NaU4vNQNBxtb2zgzaFtSBr+HWj/8ZRHzQOf",
   render_errors: [view: Central.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Central.PubSub,
            adapter: Phoenix.PubSub.PG2]
@@ -24,7 +24,7 @@ config :logger, :console,
   metadata: [:request_id]
 
 config :central, :generators,
-  context_app: :central
+  context_app: false
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
