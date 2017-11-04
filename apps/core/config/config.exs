@@ -26,6 +26,14 @@ config :logger, :console,
 config :core, :generators,
   context_app: false
 
+config :money,
+  default_currency: :BRL,
+  separator: ".",
+  delimeter: ",",
+  symbol: false,
+  symbol_on_right: false,
+  symbol_space: true
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env}.exs"

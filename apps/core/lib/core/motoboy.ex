@@ -9,6 +9,15 @@ defmodule Core.Motoboy do
         from:     [:busy, :unavailable],
         to:       :available,
         callback: fn(motoboy) ->
+          Chanset.change(motoboy, last_available_at: Ecto.DateTime.utc)
+          # TODO: add to History
+        end
+      ], [
+        name:     :in_delivery,
+        from:     [:available],
+        to:       :busy,
+        callback: fn(motoboy) ->
+          Chanset.change(motoboy, last_busy_at: Ecto.DateTime.utc)
           # TODO: add to History
         end
       ], [

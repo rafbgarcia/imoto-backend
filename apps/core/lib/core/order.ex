@@ -34,7 +34,7 @@ defmodule Core.Order do
   schema "orders" do
     belongs_to :motoboy, Core.Motoboy
     belongs_to :customer, Core.Customer
-    field :price, :integer
+    field :price, Money.Ecto.Type
     field :state, :string
     field :confirmed_at, Timex.Ecto.DateTimeWithTimezone
     field :finished_at, Timex.Ecto.DateTimeWithTimezone

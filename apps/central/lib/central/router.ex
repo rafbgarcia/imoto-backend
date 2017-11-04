@@ -13,14 +13,10 @@ defmodule Central.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", Central do
+  scope "/extranet", Central do
     pipe_through :browser # Use the default browser stack
 
-    get "/", PageController, :index
+    get "/", CentralController, :orders
+    resources "/central", CentralController
   end
-
-  # Other scopes may use custom stacks.
-  # scope "/api", Central do
-  #   pipe_through :api
-  # end
 end

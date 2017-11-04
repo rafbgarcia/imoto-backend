@@ -12,7 +12,8 @@
   </head>
 
   <body>
-    <main role="main">
+
+    <main class="container-fluid" role="main">
       <%= render @view_module, @view_template, assigns %>
     </main>
 
