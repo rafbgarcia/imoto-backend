@@ -19,16 +19,12 @@ class OrdersContainer extends React.Component{
         price
         insertedAt
         confirmedAt
-        customer {
-          name
-          phoneNumber
-        }
         stops {
-          address { line1 }
+          sequence
+          location { reference, line1 }
         }
-        motoboy {
-          name
-        }
+        customer { name, phoneNumber }
+        motoboy { name }
       }
 
       motoboys {

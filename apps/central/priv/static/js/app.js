@@ -42684,7 +42684,7 @@ var OrdersContainer = function (_React$Component) {
   _createClass(OrdersContainer, [{
     key: 'query',
     value: function query() {
-      return 'query getOrdersAndMotoboys {\n      orders {\n        id\n        state\n        price\n        insertedAt\n        confirmedAt\n        customer {\n          name\n          phoneNumber\n        }\n        stops {\n          address { line1 }\n        }\n        motoboy {\n          name\n        }\n      }\n\n      motoboys {\n        name\n        state\n        lastAvailableAt\n        lastBusyAt\n      }\n    }';
+      return 'query getOrdersAndMotoboys {\n      orders {\n        id\n        state\n        price\n        insertedAt\n        confirmedAt\n        stops {\n          sequence\n          location { reference, line1 }\n        }\n        customer { name, phoneNumber }\n        motoboy { name }\n      }\n\n      motoboys {\n        name\n        state\n        lastAvailableAt\n        lastBusyAt\n      }\n    }';
     }
   }, {
     key: 'componentDidMount',
@@ -42939,7 +42939,7 @@ window.bootstrap = require("bootstrap");
         });
     }
   };
-  var port = ar.port || 9485;
+  var port = ar.port || 9486;
   var host = br.server || window.location.hostname || 'localhost';
 
   var connect = function(){

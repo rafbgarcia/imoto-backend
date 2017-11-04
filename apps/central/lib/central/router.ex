@@ -19,4 +19,6 @@ defmodule Central.Router do
     get "/", CentralController, :orders
     resources "/central", CentralController
   end
+
+  forward "/api", Api.Router
 end
