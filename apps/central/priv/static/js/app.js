@@ -42644,11 +42644,34 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 ;require.register("js/orders.jsx", function(exports, require, module) {
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
 
 var _reactDom = require('react-dom');
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
+
+var _container = require('./orders/container');
+
+var _container2 = _interopRequireDefault(_container);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+document.addEventListener('DOMContentLoaded', function () {
+  _reactDom2.default.render(_react2.default.createElement(_container2.default, null), document.querySelector('#orders'));
+});
+
+});
+
+require.register("js/orders/container.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = require('react');
 
@@ -42657,6 +42680,14 @@ var _react2 = _interopRequireDefault(_react);
 var _axios = require('axios');
 
 var _axios2 = _interopRequireDefault(_axios);
+
+var _motoboys = require('./motoboys');
+
+var _motoboys2 = _interopRequireDefault(_motoboys);
+
+var _orders = require('./orders');
+
+var _orders2 = _interopRequireDefault(_orders);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -42682,16 +42713,11 @@ var OrdersContainer = function (_React$Component) {
   }
 
   _createClass(OrdersContainer, [{
-    key: 'query',
-    value: function query() {
-      return 'query getOrdersAndMotoboys {\n      orders {\n        id\n        state\n        price\n        insertedAt\n        confirmedAt\n        stops {\n          sequence\n          location { reference, line1 }\n        }\n        customer { name, phoneNumber }\n        motoboy { name }\n      }\n\n      motoboys {\n        name\n        state\n        lastAvailableAt\n        lastBusyAt\n      }\n    }';
-    }
-  }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
       var _this2 = this;
 
-      _axios2.default.get('/api/graphql?query=' + this.query()).then(function (res) {
+      _axios2.default.get('/api/graphql?query=' + query()).then(function (res) {
         var orders = res.data.data.orders;
         var motoboys = res.data.data.motoboys;
         _this2.setState({ orders: orders, motoboys: motoboys });
@@ -42706,12 +42732,12 @@ var OrdersContainer = function (_React$Component) {
         _react2.default.createElement(
           'div',
           { className: 'col-sm-8' },
-          _react2.default.createElement(Orders, { orders: 'this.state.orders' })
+          _react2.default.createElement(_orders2.default, { orders: this.state.orders })
         ),
         _react2.default.createElement(
           'div',
           { className: 'col-sm-4' },
-          _react2.default.createElement(Motoboys, { motoboys: 'this.state.motoboys' })
+          _react2.default.createElement(_motoboys2.default, { motoboys: this.state.motoboys })
         )
       );
     }
@@ -42720,8 +42746,136 @@ var OrdersContainer = function (_React$Component) {
   return OrdersContainer;
 }(_react2.default.Component);
 
-var Orders = function (_React$Component2) {
-  _inherits(Orders, _React$Component2);
+exports.default = OrdersContainer;
+
+
+function query() {
+  return 'query getOrdersAndMotoboys {\n    orders {\n      id\n      price\n      pending\n      confirmed\n      orderedAt\n      confirmedAt\n      stops {\n        sequence\n        location { reference, line1 }\n      }\n      customer { name, phoneNumber }\n      motoboy { name }\n    }\n\n    motoboys {\n      name\n      available, busy, unavailable\n      lastAvailableAt, lastBusyAt\n    }\n  }';
+}
+
+});
+
+;require.register("js/orders/motoboys.jsx", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require("react");
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Motoboys = function (_React$Component) {
+  _inherits(Motoboys, _React$Component);
+
+  function Motoboys() {
+    _classCallCheck(this, Motoboys);
+
+    return _possibleConstructorReturn(this, (Motoboys.__proto__ || Object.getPrototypeOf(Motoboys)).apply(this, arguments));
+  }
+
+  _createClass(Motoboys, [{
+    key: "render",
+    value: function render() {
+      return _react2.default.createElement(
+        "div",
+        null,
+        _react2.default.createElement(
+          "h4",
+          null,
+          "Motoboys"
+        ),
+        this.motoboys()
+      );
+    }
+  }, {
+    key: "motoboys",
+    value: function motoboys() {
+      var motoboys = this.props.motoboys;
+
+      return motoboys.map(function (motoboy) {
+        return _react2.default.createElement(Motoboy, { key: motoboy.name, motoboy: motoboy });
+      });
+    }
+  }]);
+
+  return Motoboys;
+}(_react2.default.Component);
+
+exports.default = Motoboys;
+
+var Motoboy = function (_React$Component2) {
+  _inherits(Motoboy, _React$Component2);
+
+  function Motoboy() {
+    _classCallCheck(this, Motoboy);
+
+    return _possibleConstructorReturn(this, (Motoboy.__proto__ || Object.getPrototypeOf(Motoboy)).apply(this, arguments));
+  }
+
+  _createClass(Motoboy, [{
+    key: "render",
+    value: function render() {
+      var motoboy = this.props.motoboy;
+
+
+      var iconClass = void 0;
+      if (motoboy.available) {
+        iconClass = "text-success";
+      } else if (motoboy.busy) {
+        iconClass = "text-warning";
+      } else {
+        iconClass = "text-danger";
+      }
+
+      return _react2.default.createElement(
+        "div",
+        null,
+        _react2.default.createElement("i", { className: "fa fa-circle " + iconClass }),
+        motoboy.name
+      );
+    }
+  }]);
+
+  return Motoboy;
+}(_react2.default.Component);
+
+});
+
+require.register("js/orders/orders.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Orders = function (_React$Component) {
+  _inherits(Orders, _React$Component);
 
   function Orders() {
     _classCallCheck(this, Orders);
@@ -42747,36 +42901,7 @@ var Orders = function (_React$Component2) {
   return Orders;
 }(_react2.default.Component);
 
-var Motoboys = function (_React$Component3) {
-  _inherits(Motoboys, _React$Component3);
-
-  function Motoboys() {
-    _classCallCheck(this, Motoboys);
-
-    return _possibleConstructorReturn(this, (Motoboys.__proto__ || Object.getPrototypeOf(Motoboys)).apply(this, arguments));
-  }
-
-  _createClass(Motoboys, [{
-    key: 'render',
-    value: function render() {
-      return _react2.default.createElement(
-        'div',
-        null,
-        _react2.default.createElement(
-          'h4',
-          null,
-          'Motoboys'
-        )
-      );
-    }
-  }]);
-
-  return Motoboys;
-}(_react2.default.Component);
-
-document.addEventListener('DOMContentLoaded', function () {
-  _reactDom2.default.render(_react2.default.createElement(OrdersContainer, null), document.querySelector('#orders'));
-});
+exports.default = Orders;
 
 });
 
