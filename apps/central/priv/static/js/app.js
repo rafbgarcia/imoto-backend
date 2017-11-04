@@ -42888,22 +42888,45 @@ var Orders = function (_React$Component) {
     value: function render() {
       return _react2.default.createElement(
         "div",
-        null,
+        { className: "row" },
         _react2.default.createElement(
-          "h4",
-          null,
-          "Novos Pedidos"
+          "div",
+          { className: "col-sm-6" },
+          _react2.default.createElement(
+            "h4",
+            null,
+            "Novos Pedidos"
+          ),
+          this.pendingOrders()
         ),
-        this.orders()
+        _react2.default.createElement(
+          "div",
+          { className: "col-sm-6" },
+          _react2.default.createElement(
+            "h4",
+            null,
+            "Pedidos em entrega"
+          ),
+          this.confirmedOrders()
+        )
       );
     }
   }, {
-    key: "orders",
-    value: function orders() {
+    key: "pendingOrders",
+    value: function pendingOrders() {
       var orders = this.props.orders;
 
       return orders.map(function (order, i) {
-        return _react2.default.createElement(Order, { key: i, order: order });
+        return order.pending && _react2.default.createElement(Order, { key: i, order: order });
+      });
+    }
+  }, {
+    key: "confirmedOrders",
+    value: function confirmedOrders() {
+      var orders = this.props.orders;
+
+      return orders.map(function (order, i) {
+        return order.confirmed && _react2.default.createElement(Order, { key: i, order: order });
       });
     }
   }]);
@@ -42929,26 +42952,58 @@ var Order = function (_React$Component2) {
 
       return _react2.default.createElement(
         "section",
-        { className: "card" },
+        { className: "card mb-3" },
         _react2.default.createElement(
           "div",
           { className: "card-header d-flex align-items-center justify-content-between" },
           _react2.default.createElement(
             "span",
             null,
-            order.customer.name
+            "#",
+            order.id
           ),
           _react2.default.createElement(
             "span",
             null,
             order.orderedAt
           )
+        ),
+        _react2.default.createElement(
+          "div",
+          { className: "card-body" },
+          this.stops(order.stops)
         )
       );
+    }
+  }, {
+    key: "stops",
+    value: function stops(_stops) {
+      return _stops.map(function (stop, i) {
+        return _react2.default.createElement(Stop, { key: i, stop: stop });
+      });
     }
   }]);
 
   return Order;
+}(_react2.default.Component);
+
+var Stop = function (_React$Component3) {
+  _inherits(Stop, _React$Component3);
+
+  function Stop() {
+    _classCallCheck(this, Stop);
+
+    return _possibleConstructorReturn(this, (Stop.__proto__ || Object.getPrototypeOf(Stop)).apply(this, arguments));
+  }
+
+  _createClass(Stop, [{
+    key: "render",
+    value: function render() {
+      return _react2.default.createElement("div", null);
+    }
+  }]);
+
+  return Stop;
 }(_react2.default.Component);
 
 });
@@ -43112,7 +43167,7 @@ window.bootstrap = require("bootstrap");
         });
     }
   };
-  var port = ar.port || 9486;
+  var port = ar.port || 9485;
   var host = br.server || window.location.hostname || 'localhost';
 
   var connect = function(){

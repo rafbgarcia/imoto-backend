@@ -13,8 +13,8 @@ defmodule Api.Graphql.Type.Order do
   object :order do
     field :id, :id
     field :price, :float
-    field :pending, :boolean
-    field :confirmed, :boolean
+    field :pending, :boolean, resolve: &Api.Orders.Order.pending/3
+    field :confirmed, :boolean, resolve: &Api.Orders.Order.confirmed/3
     field :ordered_at, :string, resolve: &Api.Orders.Order.ordered_at/3
     field :inserted_at, :datetime
     field :confirmed_at, :datetime
