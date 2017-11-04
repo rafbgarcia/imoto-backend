@@ -42804,8 +42804,8 @@ var Motoboys = function (_React$Component) {
     value: function motoboys() {
       var motoboys = this.props.motoboys;
 
-      return motoboys.map(function (motoboy) {
-        return _react2.default.createElement(Motoboy, { key: motoboy.name, motoboy: motoboy });
+      return motoboys.map(function (motoboy, i) {
+        return _react2.default.createElement(Motoboy, { key: i, motoboy: motoboy });
       });
     }
   }]);
@@ -42854,7 +42854,7 @@ var Motoboy = function (_React$Component2) {
 });
 
 require.register("js/orders/orders.jsx", function(exports, require, module) {
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -42862,7 +42862,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = require('react');
+var _react = require("react");
 
 var _react2 = _interopRequireDefault(_react);
 
@@ -42884,17 +42884,27 @@ var Orders = function (_React$Component) {
   }
 
   _createClass(Orders, [{
-    key: 'render',
+    key: "render",
     value: function render() {
       return _react2.default.createElement(
-        'div',
+        "div",
         null,
         _react2.default.createElement(
-          'h4',
+          "h4",
           null,
-          'Novos Pedidos'
-        )
+          "Novos Pedidos"
+        ),
+        this.orders()
       );
+    }
+  }, {
+    key: "orders",
+    value: function orders() {
+      var orders = this.props.orders;
+
+      return orders.map(function (order, i) {
+        return _react2.default.createElement(Order, { key: i, order: order });
+      });
     }
   }]);
 
@@ -42902,6 +42912,44 @@ var Orders = function (_React$Component) {
 }(_react2.default.Component);
 
 exports.default = Orders;
+
+var Order = function (_React$Component2) {
+  _inherits(Order, _React$Component2);
+
+  function Order() {
+    _classCallCheck(this, Order);
+
+    return _possibleConstructorReturn(this, (Order.__proto__ || Object.getPrototypeOf(Order)).apply(this, arguments));
+  }
+
+  _createClass(Order, [{
+    key: "render",
+    value: function render() {
+      var order = this.props.order;
+
+      return _react2.default.createElement(
+        "section",
+        { className: "card" },
+        _react2.default.createElement(
+          "div",
+          { className: "card-header d-flex align-items-center justify-content-between" },
+          _react2.default.createElement(
+            "span",
+            null,
+            order.customer.name
+          ),
+          _react2.default.createElement(
+            "span",
+            null,
+            order.orderedAt
+          )
+        )
+      );
+    }
+  }]);
+
+  return Order;
+}(_react2.default.Component);
 
 });
 

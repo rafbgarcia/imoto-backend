@@ -11,7 +11,7 @@ defmodule Core.Customer do
 
   def changeset(changeset, params \\ %{}) do
     changeset
-    |> cast(params, [:phone_number])
+    |> cast(params, [:phone_number, :name, :auth_token])
     |> validate_required([:phone_number])
   end
 end

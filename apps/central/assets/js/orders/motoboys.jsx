@@ -12,7 +12,7 @@ export default class Motoboys extends React.Component {
 
   motoboys() {
     const {motoboys} = this.props
-    return motoboys.map((motoboy) => <Motoboy key={motoboy.name} motoboy={motoboy} />)
+    return motoboys.map((motoboy, i) => <Motoboy key={i} motoboy={motoboy} />)
   }
 }
 

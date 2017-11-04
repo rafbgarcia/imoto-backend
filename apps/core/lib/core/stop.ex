@@ -10,7 +10,7 @@ defmodule Core.Stop do
 
   def changeset(changeset, params \\ %{}) do
     changeset
-    |> cast(params, [:name])
-    |> validate_required([:name])
+    |> cast(params, [:instructions])
+    |> validate_required([:instructions])
   end
 end

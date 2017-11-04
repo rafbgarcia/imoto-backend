@@ -6,7 +6,7 @@ defmodule Api.Orders.Order do
   end
 
   def ordered_at(order, _args, _ctx) do
-    {:ok, order.inserted_at }
+    {:ok, Timex.format!(order.inserted_at, "{relative}", :relative) }
   end
 
   def pending(order, _args, _ctx) do

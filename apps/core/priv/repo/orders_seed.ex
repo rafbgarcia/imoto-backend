@@ -1,47 +1,59 @@
-unimoto = Db.Repo.insert!(Core.Central.changeset(%Core.Central{}, %{name: "Unimoto"}))
-Db.Repo.insert!(%Core.Motoboy{name: "Anderson", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "João", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Pedro", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Paulo Andrade", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "João Paulo", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Mateus", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Danilo", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Tota", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Rafael", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Sandro", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "José", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Silvio", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Isac", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Vinicius", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Erasmo", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Alfredo", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Teodósio", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Aurélio", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "António", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "César", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Fabricio", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Artur", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Afonso", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Herberto", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Guilherme", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Diego", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Romario", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Ronaldo", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Victor", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Rodrigo", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Antelmo", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Helder", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Bonifacio", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Altair", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Simão", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Gabriel", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Dimas", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Osvaldo", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Rodolfo", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Túlio", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Jeremias", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Mariano", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Dinis", central_id: unimoto.id})
-Db.Repo.insert!(%Core.Motoboy{name: "Viriato", central_id: unimoto.id})
+##### Pedido 1
+angelo = Db.Repo.insert!(%Core.Customer{name: "Angelo da Silva", phone_number: "(84) 98141-4140"})
 
-coopex = Db.Repo.insert!(%Core.Central{name: "Coopex"})
+order = Db.Repo.insert!(%Core.Order{price: 3430, customer_id: angelo.id})
+
+stop1 = Db.Repo.insert!(%Core.Stop{instructions: "Pegar documento com Angelo", sequence: 0, order_id: order.id})
+Db.Repo.insert!(%Core.Location{
+  street: "Rua Lafayette Lamartine", number: "1785", neighborhood: "Candelária", zipcode: "59064-510",
+  complement: "Apt 1502 bloco B", reference: "Próximo a Cabo Telecom", city: "Natal", uf: "RN", stop_id: stop1.id
+})
+
+stop2 = Db.Repo.insert!(%Core.Stop{instructions: "Entregar documento a Sidney no cartório", sequence: 1, order_id: order.id})
+Db.Repo.insert!(%Core.Location{
+  street: "Av. Roberto Freire", number: "2920", neighborhood: "Campim Macio", zipcode: "59082-400",
+  complement: nil, reference: nil, city: "Natal", uf: "RN", stop_id: stop2.id
+})
+
+
+##### Pedido 2
+carlos = Db.Repo.insert!(%Core.Customer{name: "Carlos Almeida", phone_number: "(84) 98812-3029"})
+
+order = Db.Repo.insert!(%Core.Order{price: 853, customer_id: carlos.id})
+
+stop1 = Db.Repo.insert!(%Core.Stop{instructions: "Pegar certidão de casamento", sequence: 0, order_id: order.id})
+Db.Repo.insert!(%Core.Location{
+  street: "Av. Roberto Freire", number: "2920", neighborhood: "Campim Macio", zipcode: "59082-400",
+  complement: nil, reference: nil, city: "Natal", uf: "RN", stop_id: stop1.id
+})
+
+stop2 = Db.Repo.insert!(%Core.Stop{instructions: "Me entregar no meu endereço", sequence: 1, order_id: order.id})
+Db.Repo.insert!(%Core.Location{
+  street: "Avenida Campos Sales", number: "703", neighborhood: "Tirol", zipcode: "59020-300",
+  complement: "Apt 703", reference: "Ao lado da câmara municipal", city: "Natal", uf: "RN", stop_id: stop2.id
+})
+
+
+
+##### Pedido 3
+sandro = Db.Repo.insert!(%Core.Customer{name: "Sandro Júnior", phone_number: "(84) 98002-2030"})
+
+order = Db.Repo.insert!(%Core.Order{price: 5000, customer_id: sandro.id})
+
+stop1 = Db.Repo.insert!(%Core.Stop{instructions: "Pegar certidão de casamento e tirar cópia", sequence: 0, order_id: order.id})
+Db.Repo.insert!(%Core.Location{
+  street: "Av. Roberto Freire", number: "2920", neighborhood: "Campim Macio", zipcode: "59082-400",
+  complement: nil, reference: nil, city: "Natal", uf: "RN", stop_id: stop1.id
+})
+
+stop2 = Db.Repo.insert!(%Core.Stop{instructions: "Entregar uma via no meu escritório", sequence: 1, order_id: order.id})
+Db.Repo.insert!(%Core.Location{
+  street: "Avenida Campos Sales", number: "703", neighborhood: "Tirol", zipcode: "59020-300",
+  complement: "Apt 703", reference: "Ao lado da câmara municipal", city: "Natal", uf: "RN", stop_id: stop2.id
+})
+
+stop3 = Db.Repo.insert!(%Core.Stop{instructions: "Entregar outra via no meu apartamento", sequence: 2, order_id: order.id})
+Db.Repo.insert!(%Core.Location{
+  street: "Rua Lafayette Lamartine", number: "1785", neighborhood: "Candelária", zipcode: "59064-510",
+  complement: "Apt 1502 bloco B", reference: "Próximo a Cabo Telecom", city: "Natal", uf: "RN", stop_id: stop3.id
+})
