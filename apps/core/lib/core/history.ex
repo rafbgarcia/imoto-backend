@@ -4,6 +4,7 @@ defmodule Core.History do
   schema "history" do
     belongs_to :order, Core.Order
     belongs_to :motoboy, Core.Motoboy
+    field :event, :string
     field :text, :string
 
     timestamps()
@@ -11,7 +12,7 @@ defmodule Core.History do
 
   def changeset(changeset, params \\ %{}) do
     changeset
-    |> cast(params, [:name])
-    |> validate_required([:name])
+    |> cast(params, [:event, :text, :motoboy_id, :order_id])
+    |> validate_required([:event, :text])
   end
 end

@@ -48,15 +48,16 @@ export default class Orders extends React.Component {
   }
 
   onCancel = (order) => {
-    const {pendingOrders, confirmedOrders} = this.state
+    graphql.run(cancelOrderMutation(order.id))
+    .then((data) => {
+      const {pendingOrders} = this.state
 
-    if (order.pending) {
-      order.pending = false
-      this.setState({ pendingOrders: pendingOrders.filter((aOrder) => aOrder.id != order.id) })
-    } else if (order.confirmed) {
-      order.confirmed = false
-      this.setState({ confirmedOrders: confirmedOrders.filter((aOrder) => aOrder.id != order.id) })
-    }
+      if (data.order.error) {
+        alert(data.order.error)
+      } else {
+        this.setState({ pendingOrders: pendingOrders.filter((aOrder) => aOrder.id != order.id) })
+      }
+    })
   }
 
   pending() {
@@ -134,6 +135,16 @@ function confirmOrderMutation(orderId) {
         motoboy { name }
       }
 
+      ... on Error {
+        error
+      }
+    }
+  }`
+}
+
+function cancelOrderMutation(orderId) {
+  return `mutation cancelOrder {
+    order: cancelOrder(orderId: ${orderId}) {
       ... on Error {
         error
       }

@@ -13,10 +13,14 @@ defmodule Api.Graphql.Type.Order do
 
   # Mutations
   object :orders_mutations do
-    @desc "Get orders"
     field :confirm_order, :confirm_order_result do
       arg :order_id, :integer
       resolve &Api.Orders.Order.confirm/2
+    end
+
+    field :cancel_order, :error do
+      arg :order_id, :integer
+      resolve &Api.Orders.Order.cancel/2
     end
   end
 

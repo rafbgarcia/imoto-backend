@@ -15,6 +15,7 @@
     "popper.js": "1.12.6",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
+    "react-ladda": "5.0.7",
     "react-timeago": "3.4.3",
     "tether": "1.4.0"
   },

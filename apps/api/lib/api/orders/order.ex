@@ -17,6 +17,21 @@ defmodule Api.Orders.Order do
     {:ok, Money.to_string(order.price)}
   end
 
+  def cancel(%{order_id: order_id} = args, _ctx) do
+    cancel(order_id)
+    |> case do
+      {:ok, order} ->
+        Api.Orders.History.did_cancel_order(order)
+        {:ok, order}
+      {:error, _} -> {:ok, %{error: "Ocorreu um erro ao cancelar o pedido"}}
+    end
+  end
+  defp cancel(order_id) do
+    get_order(order_id)
+    |> Core.Order.changeset(%{state: "canceled", canceled_at: Timex.local})
+    |> Repo.update
+  end
+
   def confirm(%{order_id: order_id} = args, _ctx) do
     case confirm(order_id) do
       {:ok, order} -> {:ok, order}
@@ -25,10 +40,11 @@ defmodule Api.Orders.Order do
   end
   defp confirm(order_id) do
     Repo.transaction(fn ->
-      motoboy = next_in_queue!
+      motoboy = Api.Orders.Motoboy.next_in_queue!
       order = confirm!(order_id, motoboy)
-      mark_motoboy_busy!(motoboy)
-      # Api.Orders.History.did_confirm_order(motoboy, order)
+      Api.Orders.Motoboy.mark_busy!(motoboy)
+      Api.Orders.History.did_confirm_order(order)
+      Api.Orders.History.motoboy_busy(motoboy)
       order
     end)
   rescue
@@ -37,22 +53,12 @@ defmodule Api.Orders.Order do
   end
 
   defp confirm!(order_id, motoboy) do
-    Repo.get(Core.Order, order_id)
+    get_order(order_id)
     |> Core.Order.changeset(%{state: "confirmed", motoboy_id: motoboy.id, confirmed_at: Timex.local})
     |> Repo.update!
   end
 
-  defp mark_motoboy_busy!(motoboy) do
-    motoboy
-    |> Core.Motoboy.changeset(%{state: "busy", became_busy_at: Timex.local})
-    |> Repo.update!
-  end
-
-  defp next_in_queue! do
-    Core.Motoboy
-    # |> where([central_id: central_id])
-    |> where([state: "available"])
-    |> first([desc: :became_available_at])
-    |> Repo.one!
+  defp get_order(id) do
+    Repo.get(Core.Order, id)
   end
 end

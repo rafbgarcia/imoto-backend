@@ -43502,22 +43502,18 @@ var Orders = function (_React$Component) {
       enumerable: true,
       writable: true,
       value: function value(order) {
-        var _this$state2 = _this.state,
-            pendingOrders = _this$state2.pendingOrders,
-            confirmedOrders = _this$state2.confirmedOrders;
+        _graphql2.default.run(cancelOrderMutation(order.id)).then(function (data) {
+          var pendingOrders = _this.state.pendingOrders;
 
 
-        if (order.pending) {
-          order.pending = false;
-          _this.setState({ pendingOrders: pendingOrders.filter(function (aOrder) {
-              return aOrder.id != order.id;
-            }) });
-        } else if (order.confirmed) {
-          order.confirmed = false;
-          _this.setState({ confirmedOrders: confirmedOrders.filter(function (aOrder) {
-              return aOrder.id != order.id;
-            }) });
-        }
+          if (data.order.error) {
+            alert(data.order.error);
+          } else {
+            _this.setState({ pendingOrders: pendingOrders.filter(function (aOrder) {
+                return aOrder.id != order.id;
+              }) });
+          }
+        });
       }
     }), _temp), _possibleConstructorReturn(_this, _ret);
   }
@@ -43623,6 +43619,10 @@ function query() {
 
 function confirmOrderMutation(orderId) {
   return 'mutation confirmOrder {\n    order: confirmOrder(orderId: ' + orderId + ') {\n      ... on Order {\n        id\n        formattedPrice\n        pending\n        confirmed\n        insertedAt\n        confirmedAt\n        stops {\n          sequence\n          instructions\n          location { reference, line1 }\n        }\n        customer { name, phoneNumber }\n        motoboy { name }\n      }\n\n      ... on Error {\n        error\n      }\n    }\n  }';
+}
+
+function cancelOrderMutation(orderId) {
+  return 'mutation cancelOrder {\n    order: cancelOrder(orderId: ' + orderId + ') {\n      ... on Error {\n        error\n      }\n    }\n  }';
 }
 
 });
