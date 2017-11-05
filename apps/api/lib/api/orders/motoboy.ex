@@ -22,16 +22,12 @@ defmodule Api.Orders.Motoboy do
     # |> where([central_id: central_id])
     |> where([state: "available"])
     |> first([desc: :became_available_at])
-    |> Repo.one
-    |> case do
-      nil -> {:error, "Nenhum motoboy disponível no momento"}
-      motoboy -> {:ok, motoboy}
-    end
+    |> Repo.one!
   end
 
-  def mark_busy(motoboy) do
+  def mark_busy!(motoboy) do
     motoboy
-    |> Core.Motoboy.changeset(state: "busy", became_busy_at: Timex.local)
-    |> Repo.update
+    |> Core.Motoboy.changeset(%{state: "busy", became_busy_at: Timex.local})
+    |> Repo.update!
   end
 end

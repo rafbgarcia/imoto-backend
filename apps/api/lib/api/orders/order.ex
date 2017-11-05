@@ -6,20 +6,25 @@ defmodule Api.Orders.Order do
   end
 
   def confirm(%{order_id: order_id} = args, _ctx) do
-    with {:ok, motoboy} <- Api.Orders.Motoboy.next_in_queue,
-      {:ok, order} <- confirm!(order_id, motoboy),
-      _ <- Api.Orders.Motoboy.mark_busy(motoboy)
-    do
-      {:ok, order}
-    else
-      {:error, error} -> {:ok, %{error: error}}
-      nil -> {:ok, %{error: "Nenhum motoboy disponível"}}
+    case confirm(order_id) do
+      {:ok, order} -> {:ok, order}
+      {:error, error} -> {:ok, %{error: "Nenhum motoboy disponível"}}
     end
   end
+  defp confirm(order_id) do
+    Repo.transaction(fn ->
+      motoboy = Api.Orders.Motoboy.next_in_queue
+      order = confirm!(order_id, motoboy)
+      Api.Orders.Motoboy.mark_busy!(motoboy)
+      order
+    end)
+  end
   defp confirm!(order_id, motoboy) do
+    now = Timex.local
+
     Repo.get(Core.Order, order_id)
-    |> Core.Order.changeset(%{state: "confirmed", motoboy_id: motoboy.id, confirmed_at: Timex.local})
-    |> Repo.update
+    |> Core.Order.changeset(%{state: "confirmed", motoboy_id: motoboy.id, confirmed_at: now})
+    |> Repo.update!
   end
 
   def ordered_at(%Core.Order{} = order, _args, _ctx) do
