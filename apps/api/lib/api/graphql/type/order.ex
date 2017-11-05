@@ -23,8 +23,8 @@ defmodule Api.Graphql.Type.Order do
   union :confirm_order_result do
     types [:error, :order]
     resolve_type fn
-      _, %Core.Order{} -> :order
-      _, _ -> :error
+      %Core.Order{}, _ -> :order
+      %{error: _}, _ -> :error
     end
   end
 
@@ -34,7 +34,6 @@ defmodule Api.Graphql.Type.Order do
     field :formatted_price, :string, resolve: &Api.Orders.Order.formatted_price/3
     field :pending, :boolean, resolve: &Api.Orders.Order.pending/3
     field :confirmed, :boolean, resolve: &Api.Orders.Order.confirmed/3
-    field :ordered_at, :string, resolve: &Api.Orders.Order.ordered_at/3
     field :inserted_at, :datetime
     field :confirmed_at, :datetime
     field :canceled_at, :datetime

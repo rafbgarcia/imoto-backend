@@ -1,13 +1,13 @@
 import React from 'react'
 import Timeago from 'js/timeago'
 
-export default class PendingOrder extends React.Component {
+export default class ConfirmedOrder extends React.Component {
   render() {
-    const {order, onConfirm, onCancel} = this.props
+    const {order, onCancel} = this.props
 
     return (
-      <section className="card border-info mb-3">
-        <div className="card-header bg-info text-white d-flex align-items-center justify-content-between">
+      <section className="card mb-3">
+        <div className="card-header d-flex align-items-center justify-content-between">
           <span>#{order.id}</span>
           <span>pedido <Timeago date={order.insertedAt} /></span>
         </div>
@@ -21,21 +21,13 @@ export default class PendingOrder extends React.Component {
               <i className="fa fa-phone mr-2"></i>
               {order.customer.phoneNumber}
             </div>
-          </div>
-
-          {this.stops(order.stops)}
-
-          <div className="mt-4"><strong>Total:</strong> {order.formattedPrice}</div>
-
-          <div className="mt-4 d-flex align-items-center justify-content-between">
-            <a href="javascript:;" onClick={e => onCancel(order)} className="btn btn-outline-danger">
-              <i className="fa fa-times mr-2"></i>
-              Cancelar
-            </a>
-            <a href="javascript:;" onClick={e => onConfirm(order)} className="btn btn-outline-primary">
-              <i className="fa fa-check mr-2"></i>
-              Confirmar
-            </a>
+            <div>
+              <i className="fa fa-motorcycle mr-2"></i>
+              {order.motoboy.name}
+              <div className="text-muted">
+                confirmada <Timeago date={order.confirmedAt} />
+              </div>
+            </div>
           </div>
         </div>
       </section>

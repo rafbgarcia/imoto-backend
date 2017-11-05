@@ -11,8 +11,8 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       add :login, :string
       add :password, :string
       add :available, :boolean, default: false, null: false
-      add :last_opened_at, :utc_datetime
-      add :last_closed_at, :utc_datetime
+      add :became_available_at, :utc_datetime
+      add :became_unavailable_at, :utc_datetime
       add :phone_number, :string
       timestamps()
     end
@@ -80,6 +80,7 @@ defmodule Db.Repo.Migrations.CreateCentrals do
     create table(:history) do
       add :order_id, references(:orders)
       add :motoboy_id, references(:motoboys)
+      add :event, :string
       add :text, :string
       timestamps()
     end

@@ -1,7 +1,7 @@
 import React from 'react'
 import graphql from 'js/graphql'
-
 import PendingOrder from './pending_order'
+import ConfirmedOrder from './confirmed_order'
 
 export default class Orders extends React.Component {
   state = {
@@ -32,14 +32,19 @@ export default class Orders extends React.Component {
   }
 
   onConfirm = (order) => {
-    this.moveOrderToConfirmedQueue(order)
+    // this.moveOrderToConfirmedQueue(order)
 
     graphql.run(confirmOrderMutation(order.id))
-      .then((data) => {
-        if (data.order.error) {
-          alert(data.order.error)
-        }
-      })
+    .then((data) => {
+      if (data.order.error) {
+        alert(data.order.error)
+      } else {
+        const {pendingOrders, confirmedOrders} = this.state
+        const newPendingOrders = pendingOrders.filter((aOrder) => aOrder.id != data.order.id)
+        confirmedOrders.push(data.order)
+        this.setState({pendingOrders: newPendingOrders})
+      }
+    })
   }
 
   onCancel = (order) => {
@@ -70,7 +75,7 @@ export default class Orders extends React.Component {
   confirmed() {
     const {confirmedOrders} = this.state
     return confirmedOrders.map((order, i) =>
-      <PendingOrder key={i} order={order} />
+      <ConfirmedOrder key={i} order={order} />
     )
   }
 
@@ -97,7 +102,7 @@ function query() {
       formattedPrice
       pending
       confirmed
-      orderedAt
+      insertedAt
       confirmedAt
       stops {
         sequence
@@ -118,7 +123,7 @@ function confirmOrderMutation(orderId) {
         formattedPrice
         pending
         confirmed
-        orderedAt
+        insertedAt
         confirmedAt
         stops {
           sequence

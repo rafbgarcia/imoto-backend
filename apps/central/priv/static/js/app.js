@@ -39066,6 +39066,350 @@ if ('development' === 'production') {
   })();
 });
 
+require.register("react-timeago/lib/dateParser.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "react-timeago");
+  (function() {
+    "use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = dateParser;
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function _toArray(arr) { return Array.isArray(arr) ? arr : Array.from(arr); }
+
+function dateParser(date) {
+  var parsed = new Date(date);
+  if (!Number.isNaN(parsed.valueOf())) {
+    return parsed;
+  }
+
+  var parts = String(date).match(/\d+/g);
+  if (parts == null || parts.length <= 2) {
+    return parsed;
+  } else {
+    var _parts$map = parts.map(function (x) {
+      return parseInt(x);
+    }),
+        _parts$map2 = _toArray(_parts$map),
+        firstP = _parts$map2[0],
+        secondP = _parts$map2[1],
+        restPs = _parts$map2.slice(2);
+
+    var correctedParts = [firstP, secondP - 1].concat(_toConsumableArray(restPs));
+    var isoDate = new Date(Date.UTC.apply(Date, _toConsumableArray(correctedParts)));
+    return isoDate;
+  }
+}
+  })();
+});
+
+require.register("react-timeago/lib/defaultFormatter.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "react-timeago");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = defaultFormatter;
+function defaultFormatter(value, unit, suffix) {
+  if (value !== 1) {
+    unit += 's';
+  }
+  return value + ' ' + unit + ' ' + suffix;
+}
+  })();
+});
+
+require.register("react-timeago/lib/formatters/buildFormatter.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "react-timeago");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = buildFormatter;
+
+
+// If the numbers array is present, format numbers with it,
+// otherwise just cast the number to a string and return it
+var normalizeNumber = function normalizeNumber(numbers, value) {
+  return numbers && numbers.length === 10 ? String(value).split('').map(function (digit) {
+    return digit.match(/^[0-9]$/) ? numbers[parseInt(digit)] : digit;
+  }).join('') : String(value);
+};
+
+// Take a string or a function that takes number of days and returns a string
+// and provide a uniform API to create string parts
+var normalizeFn = function normalizeFn(value, millisDelta, numbers) {
+  return function (stringOrFn) {
+    return typeof stringOrFn === 'function' ? stringOrFn(value, millisDelta).replace(/%d/g, normalizeNumber(numbers, value)) : stringOrFn.replace(/%d/g, normalizeNumber(numbers, value));
+  };
+};
+
+function buildFormatter(strings) {
+  return function formatter(value, unit, suffix, epochMillis) {
+    // convert weeks to days if strings don't handle weeks
+    var now = Date.now();
+    if (unit === 'week' && !strings.week && !strings.weeks) {
+      var _days = Math.round(Math.abs(epochMillis - now) / (1000 * 60 * 60 * 24));
+      value = _days;
+      unit = 'day';
+    }
+
+    // create a normalize function for given value
+    var normalize = normalizeFn(value, now - epochMillis, strings.numbers);
+
+    // The eventual return value stored in an array so that the wordSeparator can be used
+    var dateString = [];
+
+    // handle prefixes
+    if (suffix === 'ago' && strings.prefixAgo) {
+      dateString.push(normalize(strings.prefixAgo));
+    }
+    if (suffix === 'from now' && strings.prefixFromNow) {
+      dateString.push(normalize(strings.prefixFromNow));
+    }
+
+    // Handle Main number and unit
+    var isPlural = value > 1;
+    if (isPlural) {
+      var stringFn = strings[unit + 's'] || strings[unit] || '%d ' + unit;
+      dateString.push(normalize(stringFn));
+    } else {
+      var _stringFn = strings[unit] || strings[unit + 's'] || '%d ' + unit;
+      dateString.push(normalize(_stringFn));
+    }
+
+    // Handle Suffixes
+    if (suffix === 'ago' && strings.suffixAgo) {
+      dateString.push(normalize(strings.suffixAgo));
+    }
+    if (suffix === 'from now' && strings.suffixFromNow) {
+      dateString.push(normalize(strings.suffixFromNow));
+    }
+
+    // join the array into a string and return it
+    var wordSeparator = strings.wordSeparator || ' ';
+    return dateString.join(wordSeparator);
+  };
+}
+  })();
+});
+
+require.register("react-timeago/lib/index.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "react-timeago");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.YEAR = exports.MONTH = exports.WEEK = exports.DAY = exports.HOUR = exports.MINUTE = undefined;
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _defaultFormatter = require('./defaultFormatter');
+
+var _defaultFormatter2 = _interopRequireDefault(_defaultFormatter);
+
+var _dateParser = require('./dateParser');
+
+var _dateParser2 = _interopRequireDefault(_dateParser);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _objectWithoutProperties(obj, keys) { var target = {}; for (var i in obj) { if (keys.indexOf(i) >= 0) continue; if (!Object.prototype.hasOwnProperty.call(obj, i)) continue; target[i] = obj[i]; } return target; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var MINUTE = exports.MINUTE = 60;
+var HOUR = exports.HOUR = MINUTE * 60;
+var DAY = exports.DAY = HOUR * 24;
+var WEEK = exports.WEEK = DAY * 7;
+var MONTH = exports.MONTH = DAY * 30;
+var YEAR = exports.YEAR = DAY * 365;
+
+var TimeAgo = function (_Component) {
+  _inherits(TimeAgo, _Component);
+
+  function TimeAgo() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
+    _classCallCheck(this, TimeAgo);
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = TimeAgo.__proto__ || Object.getPrototypeOf(TimeAgo)).call.apply(_ref, [this].concat(args))), _this), _this.isStillMounted = false, _this.tick = function (refresh) {
+      if (!_this.isStillMounted || !_this.props.live) {
+        return;
+      }
+
+      var then = (0, _dateParser2.default)(_this.props.date).valueOf();
+      if (!then) {
+        console.warn('[react-timeago] Invalid Date provided');
+        return;
+      }
+
+      var now = _this.props.now();
+      var seconds = Math.round(Math.abs(now - then) / 1000);
+
+      var unboundPeriod = seconds < MINUTE ? 1000 : seconds < HOUR ? 1000 * MINUTE : seconds < DAY ? 1000 * HOUR : 0;
+      var period = Math.min(Math.max(unboundPeriod, _this.props.minPeriod * 1000), _this.props.maxPeriod * 1000);
+
+      if (period) {
+        _this.timeoutId = setTimeout(_this.tick, period);
+      }
+
+      if (!refresh) {
+        _this.forceUpdate();
+      }
+    }, _temp), _possibleConstructorReturn(_this, _ret);
+  }
+
+  _createClass(TimeAgo, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.isStillMounted = true;
+      if (this.props.live) {
+        this.tick(true);
+      }
+    }
+  }, {
+    key: 'componentDidUpdate',
+    value: function componentDidUpdate(lastProps) {
+      if (this.props.live !== lastProps.live || this.props.date !== lastProps.date) {
+        if (!this.props.live && this.timeoutId) {
+          clearTimeout(this.timeoutId);
+        }
+        this.tick();
+      }
+    }
+  }, {
+    key: 'componentWillUnmount',
+    value: function componentWillUnmount() {
+      this.isStillMounted = false;
+      if (this.timeoutId) {
+        clearTimeout(this.timeoutId);
+        this.timeoutId = undefined;
+      }
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      /* eslint-disable no-unused-vars */
+      var _props = this.props,
+          date = _props.date,
+          formatter = _props.formatter,
+          Komponent = _props.component,
+          live = _props.live,
+          minPeriod = _props.minPeriod,
+          maxPeriod = _props.maxPeriod,
+          title = _props.title,
+          now = _props.now,
+          passDownProps = _objectWithoutProperties(_props, ['date', 'formatter', 'component', 'live', 'minPeriod', 'maxPeriod', 'title', 'now']);
+      /* eslint-enable no-unused-vars */
+
+
+      var then = (0, _dateParser2.default)(date).valueOf();
+      if (!then) {
+        return null;
+      }
+      var timeNow = now();
+      var seconds = Math.round(Math.abs(timeNow - then) / 1000);
+      var suffix = then < timeNow ? 'ago' : 'from now';
+
+      var _ref2 = seconds < MINUTE ? [Math.round(seconds), 'second'] : seconds < HOUR ? [Math.round(seconds / MINUTE), 'minute'] : seconds < DAY ? [Math.round(seconds / HOUR), 'hour'] : seconds < WEEK ? [Math.round(seconds / DAY), 'day'] : seconds < MONTH ? [Math.round(seconds / WEEK), 'week'] : seconds < YEAR ? [Math.round(seconds / MONTH), 'month'] : [Math.round(seconds / YEAR), 'year'],
+          _ref3 = _slicedToArray(_ref2, 2),
+          value = _ref3[0],
+          unit = _ref3[1];
+
+      var passDownTitle = typeof title === 'undefined' ? typeof date === 'string' ? date : (0, _dateParser2.default)(date).toISOString().substr(0, 16).replace('T', ' ') : title;
+
+      if (Komponent === 'time') {
+        passDownProps.dateTime = (0, _dateParser2.default)(date).toISOString();
+      }
+
+      var nextFormatter = _defaultFormatter2.default.bind(null, value, unit, suffix);
+
+      return _react2.default.createElement(
+        Komponent,
+        _extends({}, passDownProps, { title: passDownTitle }),
+        this.props.formatter(value, unit, suffix, then, nextFormatter)
+      );
+    }
+  }]);
+
+  return TimeAgo;
+}(_react.Component);
+
+TimeAgo.displayName = 'TimeAgo';
+TimeAgo.defaultProps = {
+  live: true,
+  component: 'time',
+  minPeriod: 0,
+  maxPeriod: Infinity,
+  formatter: _defaultFormatter2.default,
+  now: function now() {
+    return Date.now();
+  }
+};
+exports.default = TimeAgo;
+  })();
+});
+
+require.register("react-timeago/lib/language-strings/pt-br.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "react-timeago");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+
+// Brazilian Portuguese
+var strings = {
+  prefixAgo: 'há',
+  prefixFromNow: 'em',
+  suffixAgo: null,
+  suffixFromNow: null,
+  seconds: 'alguns segundos',
+  minute: 'um minuto',
+  minutes: '%d minutos',
+  hour: 'uma hora',
+  hours: '%d horas',
+  day: 'um dia',
+  days: '%d dias',
+  month: 'um mês',
+  months: '%d meses',
+  year: 'um ano',
+  years: '%d anos'
+};
+exports.default = strings;
+  })();
+});
+
 require.register("react/cjs/react.development.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {"transform":["loose-envify"]}, "react");
   (function() {
@@ -42695,6 +43039,159 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
+require.register("js/orders/confirmed_order.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _timeago = require('js/timeago');
+
+var _timeago2 = _interopRequireDefault(_timeago);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ConfirmedOrder = function (_React$Component) {
+  _inherits(ConfirmedOrder, _React$Component);
+
+  function ConfirmedOrder() {
+    _classCallCheck(this, ConfirmedOrder);
+
+    return _possibleConstructorReturn(this, (ConfirmedOrder.__proto__ || Object.getPrototypeOf(ConfirmedOrder)).apply(this, arguments));
+  }
+
+  _createClass(ConfirmedOrder, [{
+    key: 'render',
+    value: function render() {
+      var _props = this.props,
+          order = _props.order,
+          onCancel = _props.onCancel;
+
+
+      return _react2.default.createElement(
+        'section',
+        { className: 'card mb-3' },
+        _react2.default.createElement(
+          'div',
+          { className: 'card-header d-flex align-items-center justify-content-between' },
+          _react2.default.createElement(
+            'span',
+            null,
+            '#',
+            order.id
+          ),
+          _react2.default.createElement(
+            'span',
+            null,
+            'pedido ',
+            _react2.default.createElement(_timeago2.default, { date: order.insertedAt })
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'card-body' },
+          _react2.default.createElement(
+            'div',
+            { className: 'd-flex align-items-center justify-content-between' },
+            _react2.default.createElement(
+              'div',
+              null,
+              _react2.default.createElement('i', { className: 'fa fa-user mr-2' }),
+              order.customer.name,
+              _react2.default.createElement('br', null),
+              _react2.default.createElement('i', { className: 'fa fa-phone mr-2' }),
+              order.customer.phoneNumber
+            ),
+            _react2.default.createElement(
+              'div',
+              null,
+              _react2.default.createElement('i', { className: 'fa fa-motorcycle mr-2' }),
+              order.motoboy.name,
+              _react2.default.createElement(
+                'div',
+                { className: 'text-muted' },
+                'confirmada ',
+                _react2.default.createElement(_timeago2.default, { date: order.confirmedAt })
+              )
+            )
+          )
+        )
+      );
+    }
+  }, {
+    key: 'stops',
+    value: function stops(_stops) {
+      return _stops.map(function (stop, i) {
+        return _react2.default.createElement(Stop, { key: i, stop: stop });
+      });
+    }
+  }]);
+
+  return ConfirmedOrder;
+}(_react2.default.Component);
+
+exports.default = ConfirmedOrder;
+
+var Stop = function (_React$Component2) {
+  _inherits(Stop, _React$Component2);
+
+  function Stop() {
+    _classCallCheck(this, Stop);
+
+    return _possibleConstructorReturn(this, (Stop.__proto__ || Object.getPrototypeOf(Stop)).apply(this, arguments));
+  }
+
+  _createClass(Stop, [{
+    key: 'render',
+    value: function render() {
+      var stop = this.props.stop;
+
+      return _react2.default.createElement(
+        'section',
+        { className: 'mt-4 mb-2' },
+        _react2.default.createElement(
+          'div',
+          null,
+          _react2.default.createElement(
+            'strong',
+            null,
+            stop.sequence + 1,
+            '\xAA parada'
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          null,
+          _react2.default.createElement('i', { className: 'fa fa-map-marker mr-2' }),
+          stop.location.line1
+        ),
+        _react2.default.createElement(
+          'div',
+          null,
+          stop.instructions
+        )
+      );
+    }
+  }]);
+
+  return Stop;
+}(_react2.default.Component);
+
+});
+
 require.register("js/orders/container.jsx", function(exports, require, module) {
 'use strict';
 
@@ -42780,6 +43277,10 @@ var _react2 = _interopRequireDefault(_react);
 var _graphql = require('js/graphql');
 
 var _graphql2 = _interopRequireDefault(_graphql);
+
+var _timeago = require('js/timeago');
+
+var _timeago2 = _interopRequireDefault(_timeago);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -42867,20 +43368,46 @@ var Motoboy = function (_React$Component2) {
       var motoboy = this.props.motoboy;
 
 
-      var iconClass = void 0;
+      var iconClass = void 0,
+          dateToShow = void 0;
       if (motoboy.available) {
         iconClass = "text-success";
+        dateToShow = _react2.default.createElement(
+          'span',
+          null,
+          'dispon\xEDvel ',
+          _react2.default.createElement(_timeago2.default, { date: motoboy.becameAvailableAt })
+        );
       } else if (motoboy.busy) {
         iconClass = "text-warning";
+        dateToShow = _react2.default.createElement(
+          'span',
+          null,
+          'ocupado ',
+          _react2.default.createElement(_timeago2.default, { date: motoboy.becameBusyAt })
+        );
       } else {
         iconClass = "text-danger";
       }
 
       return _react2.default.createElement(
         'div',
-        null,
-        _react2.default.createElement('i', { className: 'fa fa-circle ' + iconClass }),
-        motoboy.name
+        { className: 'card mb-2' },
+        _react2.default.createElement(
+          'div',
+          { className: 'card-body p-2' },
+          _react2.default.createElement('i', { className: 'fa fa-circle ' + iconClass + ' mr-2' }),
+          motoboy.name,
+          _react2.default.createElement(
+            'div',
+            null,
+            _react2.default.createElement(
+              'small',
+              { className: 'text-muted' },
+              dateToShow
+            )
+          )
+        )
       );
     }
   }]);
@@ -42914,6 +43441,10 @@ var _graphql2 = _interopRequireDefault(_graphql);
 var _pending_order = require('./pending_order');
 
 var _pending_order2 = _interopRequireDefault(_pending_order);
+
+var _confirmed_order = require('./confirmed_order');
+
+var _confirmed_order2 = _interopRequireDefault(_confirmed_order);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -42949,11 +43480,21 @@ var Orders = function (_React$Component) {
       enumerable: true,
       writable: true,
       value: function value(order) {
-        _this.moveOrderToConfirmedQueue(order);
+        // this.moveOrderToConfirmedQueue(order)
 
         _graphql2.default.run(confirmOrderMutation(order.id)).then(function (data) {
           if (data.order.error) {
             alert(data.order.error);
+          } else {
+            var _this$state = _this.state,
+                pendingOrders = _this$state.pendingOrders,
+                confirmedOrders = _this$state.confirmedOrders;
+
+            var newPendingOrders = pendingOrders.filter(function (aOrder) {
+              return aOrder.id != data.order.id;
+            });
+            confirmedOrders.push(data.order);
+            _this.setState({ pendingOrders: newPendingOrders });
           }
         });
       }
@@ -42961,9 +43502,9 @@ var Orders = function (_React$Component) {
       enumerable: true,
       writable: true,
       value: function value(order) {
-        var _this$state = _this.state,
-            pendingOrders = _this$state.pendingOrders,
-            confirmedOrders = _this$state.confirmedOrders;
+        var _this$state2 = _this.state,
+            pendingOrders = _this$state2.pendingOrders,
+            confirmedOrders = _this$state2.confirmedOrders;
 
 
         if (order.pending) {
@@ -43037,7 +43578,7 @@ var Orders = function (_React$Component) {
       var confirmedOrders = this.state.confirmedOrders;
 
       return confirmedOrders.map(function (order, i) {
-        return _react2.default.createElement(_pending_order2.default, { key: i, order: order });
+        return _react2.default.createElement(_confirmed_order2.default, { key: i, order: order });
       });
     }
   }, {
@@ -43077,17 +43618,17 @@ exports.default = Orders;
 
 
 function query() {
-  return 'query getOrdersAndMotoboys {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      orderedAt\n      confirmedAt\n      stops {\n        sequence\n        instructions\n        location { reference, line1 }\n      }\n      customer { name, phoneNumber }\n      motoboy { name }\n    }\n  }';
+  return 'query getOrdersAndMotoboys {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      insertedAt\n      confirmedAt\n      stops {\n        sequence\n        instructions\n        location { reference, line1 }\n      }\n      customer { name, phoneNumber }\n      motoboy { name }\n    }\n  }';
 }
 
 function confirmOrderMutation(orderId) {
-  return 'mutation confirmOrder {\n    order: confirmOrder(orderId: ' + orderId + ') {\n      ... on Order {\n        id\n        formattedPrice\n        pending\n        confirmed\n        orderedAt\n        confirmedAt\n        stops {\n          sequence\n          instructions\n          location { reference, line1 }\n        }\n        customer { name, phoneNumber }\n        motoboy { name }\n      }\n\n      ... on Error {\n        error\n      }\n    }\n  }';
+  return 'mutation confirmOrder {\n    order: confirmOrder(orderId: ' + orderId + ') {\n      ... on Order {\n        id\n        formattedPrice\n        pending\n        confirmed\n        insertedAt\n        confirmedAt\n        stops {\n          sequence\n          instructions\n          location { reference, line1 }\n        }\n        customer { name, phoneNumber }\n        motoboy { name }\n      }\n\n      ... on Error {\n        error\n      }\n    }\n  }';
 }
 
 });
 
 ;require.register("js/orders/pending_order.jsx", function(exports, require, module) {
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -43095,9 +43636,13 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = require("react");
+var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _timeago = require('js/timeago');
+
+var _timeago2 = _interopRequireDefault(_timeago);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -43117,7 +43662,7 @@ var PendingOrder = function (_React$Component) {
   }
 
   _createClass(PendingOrder, [{
-    key: "render",
+    key: 'render',
     value: function render() {
       var _props = this.props,
           order = _props.order,
@@ -43126,79 +43671,77 @@ var PendingOrder = function (_React$Component) {
 
 
       return _react2.default.createElement(
-        "section",
-        { className: "card mb-3" },
+        'section',
+        { className: 'card border-info mb-3' },
         _react2.default.createElement(
-          "div",
-          { className: "card-header d-flex align-items-center justify-content-between" },
+          'div',
+          { className: 'card-header bg-info text-white d-flex align-items-center justify-content-between' },
           _react2.default.createElement(
-            "span",
+            'span',
             null,
-            "#",
+            '#',
             order.id
           ),
           _react2.default.createElement(
-            "span",
+            'span',
             null,
-            order.orderedAt
+            'pedido ',
+            _react2.default.createElement(_timeago2.default, { date: order.insertedAt })
           )
         ),
         _react2.default.createElement(
-          "div",
-          { className: "card-body" },
+          'div',
+          { className: 'card-body' },
           _react2.default.createElement(
-            "div",
-            { className: "d-flex align-items-center justify-content-between" },
+            'div',
+            { className: 'd-flex align-items-center justify-content-between' },
             _react2.default.createElement(
-              "div",
+              'div',
               null,
-              _react2.default.createElement("i", { className: "fa fa-user mr-2" }),
-              order.customer.name
-            ),
-            _react2.default.createElement(
-              "div",
-              null,
-              _react2.default.createElement("i", { className: "fa fa-phone mr-2" }),
+              _react2.default.createElement('i', { className: 'fa fa-user mr-2' }),
+              order.customer.name,
+              _react2.default.createElement('br', null),
+              _react2.default.createElement('i', { className: 'fa fa-phone mr-2' }),
               order.customer.phoneNumber
             )
           ),
           this.stops(order.stops),
           _react2.default.createElement(
-            "div",
-            { className: "mt-4" },
+            'div',
+            { className: 'mt-4' },
             _react2.default.createElement(
-              "strong",
+              'strong',
               null,
-              "Total:"
+              'Total:'
             ),
-            " ",
+            ' ',
             order.formattedPrice
           ),
           _react2.default.createElement(
-            "div",
-            { className: "mt-4 d-flex align-items-center justify-content-between" },
+            'div',
+            { className: 'mt-4 d-flex align-items-center justify-content-between' },
             _react2.default.createElement(
-              "a",
-              { href: "javascript:;", onClick: function onClick(e) {
+              'a',
+              { href: 'javascript:;', onClick: function onClick(e) {
                   return onCancel(order);
-                }, className: "btn btn-outline-danger" },
-              _react2.default.createElement("i", { className: "fa fa-times mr-2" }),
-              "Cancelar"
+                }, className: 'btn btn-outline-danger' },
+              _react2.default.createElement('i', { className: 'fa fa-times mr-2' }),
+              'Cancelar'
             ),
             _react2.default.createElement(
-              "a",
-              { href: "javascript:;", onClick: function onClick(e) {
+              'a',
+              { href: 'javascript:;', onClick: function onClick(e) {
                   return onConfirm(order);
-                }, className: "btn btn-outline-primary" },
-              _react2.default.createElement("i", { className: "fa fa-check mr-2" }),
-              "Confirmar"
+                }, className: 'btn btn-outline-primary' },
+              _react2.default.createElement('i', { className: 'fa fa-check mr-2' }),
+              'Confirmar'
             )
           )
         )
       );
     }
   }, {
-    key: "stops",
+    key: 'stops',
     value: function stops(_stops) {
       return _stops.map(function (stop, i) {
         return _react2.default.createElement(Stop, { key: i, stop: stop });
@@ -43221,31 +43764,31 @@ var Stop = function (_React$Component2) {
   }
 
   _createClass(Stop, [{
-    key: "render",
+    key: 'render',
     value: function render() {
       var stop = this.props.stop;
 
       return _react2.default.createElement(
-        "section",
-        { className: "mt-4 mb-2" },
+        'section',
+        { className: 'mt-4 mb-2' },
         _react2.default.createElement(
-          "div",
+          'div',
           null,
           _react2.default.createElement(
-            "strong",
+            'strong',
             null,
             stop.sequence + 1,
-            "\xAA parada"
+            '\xAA parada'
           )
         ),
         _react2.default.createElement(
-          "div",
+          'div',
           null,
-          _react2.default.createElement("i", { className: "fa fa-map-marker mr-2" }),
+          _react2.default.createElement('i', { className: 'fa fa-map-marker mr-2' }),
           stop.location.line1
         ),
         _react2.default.createElement(
-          "div",
+          'div',
           null,
           stop.instructions
         )
@@ -43332,6 +43875,66 @@ exports.default = socket;
 
 });
 
+require.register("js/timeago.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactTimeago = require('react-timeago');
+
+var _reactTimeago2 = _interopRequireDefault(_reactTimeago);
+
+var _ptBr = require('react-timeago/lib/language-strings/pt-br');
+
+var _ptBr2 = _interopRequireDefault(_ptBr);
+
+var _buildFormatter = require('react-timeago/lib/formatters/buildFormatter');
+
+var _buildFormatter2 = _interopRequireDefault(_buildFormatter);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var formatter = (0, _buildFormatter2.default)(_ptBr2.default);
+
+var Timeago = function (_React$Component) {
+  _inherits(Timeago, _React$Component);
+
+  function Timeago() {
+    _classCallCheck(this, Timeago);
+
+    return _possibleConstructorReturn(this, (Timeago.__proto__ || Object.getPrototypeOf(Timeago)).apply(this, arguments));
+  }
+
+  _createClass(Timeago, [{
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(_reactTimeago2.default, _extends({ formatter: formatter }, this.props));
+    }
+  }]);
+
+  return Timeago;
+}(_react2.default.Component);
+
+exports.default = Timeago;
+
+});
+
 require.alias("axios/lib/adapters/xhr.js", "axios/lib/adapters/http");
 require.alias("axios/lib/adapters/xhr.js", "axios/lib/adapters/http.js");
 require.alias("bootstrap/dist/js/bootstrap.js", "bootstrap");
@@ -43340,6 +43943,7 @@ require.alias("phoenix/priv/static/phoenix.js", "phoenix");
 require.alias("phoenix_html/priv/static/phoenix_html.js", "phoenix_html");
 require.alias("popper.js/dist/umd/popper.js", "popper.js");
 require.alias("process/browser.js", "process");
+require.alias("react-timeago/lib/index.js", "react-timeago");
 require.alias("tether/dist/js/tether.js", "tether");process = require('process');require.register("___globals___", function(exports, require, module) {
   
 

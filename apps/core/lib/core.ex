@@ -2,8 +2,8 @@ defmodule Core do
   def schema do
     quote do
       use Ecto.Schema
-      @timestamps_opts [type: Timex.Ecto.TimestampWithTimezone,
-        autogenerate: {Timex.Ecto.TimestampWithTimezone, :autogenerate, []}]
+      @timestamps_opts [type: Timex.Ecto.DateTime,
+                    autogenerate: {Timex.Ecto.DateTime, :autogenerate, []}]
 
       import Ecto.Changeset
     end

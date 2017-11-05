@@ -37,8 +37,8 @@ defmodule Core.Motoboy do
     field :login, :string
     field :password, :string
     field :auth_token, :string
-    field :became_available_at, Timex.Ecto.DateTimeWithTimezone
-    field :became_busy_at, Timex.Ecto.DateTimeWithTimezone
+    field :became_available_at, Timex.Ecto.DateTime
+    field :became_busy_at, Timex.Ecto.DateTime
 
     timestamps()
   end

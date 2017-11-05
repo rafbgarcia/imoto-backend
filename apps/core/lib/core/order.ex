@@ -37,9 +37,9 @@ defmodule Core.Order do
     belongs_to :customer, Core.Customer
     field :price, Money.Ecto.Type
     field :state, :string
-    field :confirmed_at, Timex.Ecto.DateTimeWithTimezone
-    field :finished_at, Timex.Ecto.DateTimeWithTimezone
-    field :canceled_at, Timex.Ecto.DateTimeWithTimezone
+    field :confirmed_at, Timex.Ecto.DateTime
+    field :finished_at, Timex.Ecto.DateTime
+    field :canceled_at, Timex.Ecto.DateTime
 
     timestamps()
   end

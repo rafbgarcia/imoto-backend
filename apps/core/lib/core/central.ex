@@ -7,8 +7,8 @@ defmodule Core.Central do
     field :password, :string
     field :available, :boolean
     field :phone_number, :string
-    field :last_opened_at, Timex.Ecto.DateTimeWithTimezone
-    field :last_closed_at, Timex.Ecto.DateTimeWithTimezone
+    field :became_available_at, Timex.Ecto.DateTime
+    field :became_unavailable_at, Timex.Ecto.DateTime
 
     timestamps()
   end
