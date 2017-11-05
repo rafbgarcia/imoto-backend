@@ -1,5 +1,4 @@
 import React from 'react'
-import { Modal, Spinner } from 'elemental'
 
 export default class Motoboys extends React.Component {
   state = {
@@ -14,20 +13,11 @@ export default class Motoboys extends React.Component {
       })
   }
 
-  onSelectMotoboy = (motoboy) => {
-    this.toggleModal()
-  }
-
   render() {
     return (
       <div>
         <h4>Motoboys</h4>
-        <Modal isOpen={this.props.showMotoboys} onCancel={this.toggleModal}>
-          <ModalHeader text="Selecione o Motoboy desta entrega" />
-          <ModalBody>
-            {this.motoboys()}
-          </ModalBody>
-        </Modal>
+        {this.motoboys()}
       </div>
     )
   }
@@ -55,19 +45,21 @@ class Motoboy extends React.Component {
       <div>
         <i className={`fa fa-circle ${iconClass}`}></i>
         {motoboy.name}
-        <Button type="primary" onClick={e => this.onSelectMotoboy(motoboy)}>Selecionar</Button>
-
       </div>
     )
   }
 }
 
 function query() {
-  return `query getAvailableMotoboys() {
-    motoboys(available: true) {
+  return `query getMotoboys {
+    motoboys {
       name
-      available, busy, unavailable
-      lastAvailableAt, lastBusyAt
+      available
+      busy
+      unavailable
+      lastAvailableAt
+      lastBusyAt
     }
   }`
 }
+

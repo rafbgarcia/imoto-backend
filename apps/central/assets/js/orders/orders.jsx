@@ -1,7 +1,6 @@
 import React from 'react'
 import PendingOrder from './pending_order'
 import axios from 'axios'
-import Motoboys from './motoboys'
 
 export default class Orders extends React.Component {
   state = {
@@ -25,7 +24,7 @@ export default class Orders extends React.Component {
     order.pending = false
     order.confirmed = true
 
-    const newPendingOrders = pendingOrders.filter((order) => order.id != id)
+    const newPendingOrders = pendingOrders.filter((aOrder) => aOrder.id != order.id)
     confirmedOrders.push(order)
 
     this.setState({pendingOrders: newPendingOrders})
@@ -36,12 +35,13 @@ export default class Orders extends React.Component {
 
     if (order.pending) {
       order.pending = false
-      this.setState({ pendingOrders: pendingOrders.filter((order) => order.id != id) })
+      this.setState({ pendingOrders: pendingOrders.filter((aOrder) => aOrder.id != order.id) })
     } else if (order.confirmed) {
       order.confirmed = false
-      this.setState({ confirmedOrders: confirmedOrders.filter((order) => order.id != id) })
+      this.setState({ confirmedOrders: confirmedOrders.filter((aOrder) => aOrder.id != order.id) })
     }
-    axios.post()
+
+    // axios.post()
   }
 
   pending() {
@@ -76,8 +76,6 @@ export default class Orders extends React.Component {
           <h4>Pedidos em entrega</h4>
           {this.confirmed()}
         </div>
-
-        <Motoboys showMotoboys={this.state.showMotoboys} />
       </div>
     )
   }

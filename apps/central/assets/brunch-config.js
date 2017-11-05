@@ -83,6 +83,7 @@ exports.config = {
       Tether: 'tether',
       Popper: 'popper.js',
       bootstrap: 'bootstrap', // require Bootstrap JavaScript globally too
+      axios: 'axios',
     },
   }
 };

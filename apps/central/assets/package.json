@@ -8,15 +8,13 @@
   "dependencies": {
     "axios": "0.17.0",
     "bootstrap": "4.0.0-beta.2",
-    "elemental": "elementalui/elemental#43d25fdb280957ec382c88404b1a81c3101825ec",
     "font-awesome": "4.7.0",
     "jquery": "3.2.1",
     "phoenix": "file:../../../deps/phoenix",
     "phoenix_html": "file:../../../deps/phoenix_html",
     "popper.js": "1.12.6",
-    "react": "16.0.0",
-    "react-dom": "16.0.0",
-    "react-transition-group": "1.2.1",
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0",
     "tether": "1.4.0"
   },
   "devDependencies": {

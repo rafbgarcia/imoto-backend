@@ -42685,6 +42685,10 @@ var _orders = require('./orders');
 
 var _orders2 = _interopRequireDefault(_orders);
 
+var _motoboys = require('./motoboys');
+
+var _motoboys2 = _interopRequireDefault(_motoboys);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -42705,7 +42709,20 @@ var OrdersContainer = function (_React$Component) {
   _createClass(OrdersContainer, [{
     key: 'render',
     value: function render() {
-      return _react2.default.createElement(_orders2.default, null);
+      return _react2.default.createElement(
+        'div',
+        { className: 'row' },
+        _react2.default.createElement(
+          'div',
+          { className: 'col-sm-10' },
+          _react2.default.createElement(_orders2.default, null)
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'col-sm-2' },
+          _react2.default.createElement(_motoboys2.default, null)
+        )
+      );
     }
   }]);
 
@@ -42716,7 +42733,133 @@ exports.default = OrdersContainer;
 
 });
 
-require.register("js/orders/orders.jsx", function(exports, require, module) {
+require.register("js/orders/motoboys.jsx", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require("react");
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Motoboys = function (_React$Component) {
+  _inherits(Motoboys, _React$Component);
+
+  function Motoboys() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
+    _classCallCheck(this, Motoboys);
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = Motoboys.__proto__ || Object.getPrototypeOf(Motoboys)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, "state", {
+      enumerable: true,
+      writable: true,
+      value: {
+        motoboys: []
+      }
+    }), _temp), _possibleConstructorReturn(_this, _ret);
+  }
+
+  _createClass(Motoboys, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      var _this2 = this;
+
+      axios.post("/api/graphql?query=" + query()).then(function (res) {
+        var motoboys = res.data.data.motoboys;
+        _this2.setState({ motoboys: motoboys });
+      });
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      return _react2.default.createElement(
+        "div",
+        null,
+        _react2.default.createElement(
+          "h4",
+          null,
+          "Motoboys"
+        ),
+        this.motoboys()
+      );
+    }
+  }, {
+    key: "motoboys",
+    value: function motoboys() {
+      var motoboys = this.state.motoboys;
+
+      return motoboys.map(function (motoboy, i) {
+        return _react2.default.createElement(Motoboy, { key: i, motoboy: motoboy });
+      });
+    }
+  }]);
+
+  return Motoboys;
+}(_react2.default.Component);
+
+exports.default = Motoboys;
+
+var Motoboy = function (_React$Component2) {
+  _inherits(Motoboy, _React$Component2);
+
+  function Motoboy() {
+    _classCallCheck(this, Motoboy);
+
+    return _possibleConstructorReturn(this, (Motoboy.__proto__ || Object.getPrototypeOf(Motoboy)).apply(this, arguments));
+  }
+
+  _createClass(Motoboy, [{
+    key: "render",
+    value: function render() {
+      var motoboy = this.props.motoboy;
+
+
+      var iconClass = void 0;
+      if (motoboy.available) {
+        iconClass = "text-success";
+      } else if (motoboy.busy) {
+        iconClass = "text-warning";
+      } else {
+        iconClass = "text-danger";
+      }
+
+      return _react2.default.createElement(
+        "div",
+        null,
+        _react2.default.createElement("i", { className: "fa fa-circle " + iconClass }),
+        motoboy.name
+      );
+    }
+  }]);
+
+  return Motoboy;
+}(_react2.default.Component);
+
+function query() {
+  return "query getMotoboys {\n    motoboys {\n      name\n      available\n      busy\n      unavailable\n      lastAvailableAt\n      lastBusyAt\n    }\n  }";
+}
+
+});
+
+;require.register("js/orders/orders.jsx", function(exports, require, module) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -42736,10 +42879,6 @@ var _pending_order2 = _interopRequireDefault(_pending_order);
 var _axios = require('axios');
 
 var _axios2 = _interopRequireDefault(_axios);
-
-var _motoboys = require('./motoboys');
-
-var _motoboys2 = _interopRequireDefault(_motoboys);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -42783,8 +42922,8 @@ var Orders = function (_React$Component) {
         order.pending = false;
         order.confirmed = true;
 
-        var newPendingOrders = pendingOrders.filter(function (order) {
-          return order.id != id;
+        var newPendingOrders = pendingOrders.filter(function (aOrder) {
+          return aOrder.id != order.id;
         });
         confirmedOrders.push(order);
 
@@ -42801,16 +42940,17 @@ var Orders = function (_React$Component) {
 
         if (order.pending) {
           order.pending = false;
-          _this.setState({ pendingOrders: pendingOrders.filter(function (order) {
-              return order.id != id;
+          _this.setState({ pendingOrders: pendingOrders.filter(function (aOrder) {
+              return aOrder.id != order.id;
             }) });
         } else if (order.confirmed) {
           order.confirmed = false;
-          _this.setState({ confirmedOrders: confirmedOrders.filter(function (order) {
-              return order.id != id;
+          _this.setState({ confirmedOrders: confirmedOrders.filter(function (aOrder) {
+              return aOrder.id != order.id;
             }) });
         }
-        _axios2.default.post();
+
+        // axios.post()
       }
     }), _temp), _possibleConstructorReturn(_this, _ret);
   }
@@ -42881,8 +43021,7 @@ var Orders = function (_React$Component) {
             'Pedidos em entrega'
           ),
           this.confirmed()
-        ),
-        _react2.default.createElement(_motoboys2.default, { showMotoboys: this.state.showMotoboys })
+        )
       );
     }
   }]);
@@ -43151,6 +43290,7 @@ window.jQuery = require("jquery");
 window.Tether = require("tether");
 window.Popper = require("popper.js");
 window.bootstrap = require("bootstrap");
+window.axios = require("axios");
 
 
 });})();require('___globals___');
