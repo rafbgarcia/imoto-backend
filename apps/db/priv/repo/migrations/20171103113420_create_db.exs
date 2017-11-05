@@ -54,6 +54,7 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       add :confirmed_at, :utc_datetime
       add :finished_at, :utc_datetime
       add :canceled_at, :utc_datetime
+      add :last_order_received_at, :utc_datetime, usec: true
       timestamps()
     end
 

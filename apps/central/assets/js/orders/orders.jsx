@@ -99,7 +99,7 @@ export default class Orders extends React.Component {
 }
 
 function query() {
-  return `query getOrdersAndMotoboys {
+  return `query getOrders {
     orders {
       id
       formattedPrice

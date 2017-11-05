@@ -44158,7 +44158,7 @@ exports.default = Orders;
 
 
 function query() {
-  return 'query getOrdersAndMotoboys {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      insertedAt\n      confirmedAt\n      stops {\n        sequence\n        instructions\n        location { reference, line1 }\n      }\n      customer { name, phoneNumber }\n      motoboy { name }\n    }\n  }';
+  return 'query getOrders {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      insertedAt\n      confirmedAt\n      stops {\n        sequence\n        instructions\n        location { reference, line1 }\n      }\n      customer { name, phoneNumber }\n      motoboy { name }\n    }\n  }';
 }
 
 function confirmOrderMutation(orderId) {

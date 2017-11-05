@@ -1,36 +1,6 @@
 defmodule Core.Order do
   use Core, :schema
 
-  # use EctoStateMachine,
-  #   states: [:pending, :confirmed, :finished, :canceled],
-  #   events: [
-  #     [
-  #       name:     :confirm,
-  #       from:     [:pending],
-  #       to:       :confirmed,
-  #       callback: fn(order) ->
-  #         # TOOD: write to the history
-  #         Changeset.change(order, confirmed_at: Ecto.DateTime.utc)
-  #       end
-  #     ], [
-  #       name:     :finish,
-  #       from:     [:confirmed],
-  #       to:       :finished,
-  #       callback: fn(order) ->
-  #         # TOOD: write to the history
-  #         Changeset.change(order, finished_at: Ecto.DateTime.utc)
-  #       end
-  #     ], [
-  #       name:     :cancel,
-  #       from:     [:pending, :confirmed],
-  #       to:       :canceled,
-  #       callback: fn(order) ->
-  #         # TOOD: write to the history
-  #         Changeset.change(order, canceled_at: Ecto.DateTime.utc)
-  #       end
-  #     ]
-  #   ]
-
   schema "orders" do
     has_many :stops, Core.Stop
     belongs_to :motoboy, Core.Motoboy
@@ -47,6 +17,7 @@ defmodule Core.Order do
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, [:price, :state, :confirmed_at, :finished_at, :canceled_at, :motoboy_id])
-    |> validate_required([:price, :state])
+    |> validate_required([:price, :state, :customer_id])
+    |> validate_inclusion(:state, ["pending", "confirmed", "finished", "canceled"])
   end
 end

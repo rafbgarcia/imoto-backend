@@ -11,9 +11,45 @@ defmodule Api.Graphql.Type.Order do
     end
   end
 
+
   # Mutations
+  input_object :order_params do
+    field :customer_id, :id
+    field :stops, list_of(:stop)
+  end
+  input_object :stop do
+    field :sequence, :integer
+    field :instructions, :string
+    field :location, :location
+  end
+  input_object :location do
+    field :street, :string
+    field :number, :string
+    field :neighborhood, :string
+    field :zipcode, :string
+    field :complement, :string
+    field :reference, :string
+    field :city, :string
+    field :uf, :string
+    field :lat, :string
+    field :lng, :string
+  end
+
+  union :order_or_error do
+    types [:error, :order]
+    resolve_type fn
+      %Core.Order{}, _ -> :order
+      %{error: _}, _ -> :error
+    end
+  end
+
   object :orders_mutations do
-    field :confirm_order, :confirm_order_result do
+    field :create_order, :order_or_error do
+      arg :params, :order_params
+      resolve &Api.Orders.Order.create/2
+    end
+
+    field :confirm_order, :order_or_error do
       arg :order_id, :integer
       resolve &Api.Orders.Order.confirm/2
     end
@@ -24,14 +60,8 @@ defmodule Api.Graphql.Type.Order do
     end
   end
 
-  union :confirm_order_result do
-    types [:error, :order]
-    resolve_type fn
-      %Core.Order{}, _ -> :order
-      %{error: _}, _ -> :error
-    end
-  end
 
+  # Objects
   object :order do
     field :id, :id
     field :price, :float

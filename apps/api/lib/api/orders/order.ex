@@ -17,7 +17,16 @@ defmodule Api.Orders.Order do
     {:ok, Money.to_string(order.price)}
   end
 
-  def cancel(%{order_id: order_id} = args, _ctx) do
+  def create(%{params: params} = _args, _ctx) do
+    Core.Order.changeset(%Core.Order{}, params)
+    |> Repo.insert
+    |> case do
+      {:ok, order} -> {:ok, order}
+      {:error, errors} -> {:ok, %{error: errors}}
+    end
+  end
+
+  def cancel(%{order_id: order_id} = _args, _ctx) do
     cancel(order_id)
     |> case do
       {:ok, order} ->
@@ -32,8 +41,7 @@ defmodule Api.Orders.Order do
     |> Repo.update
   end
 
-  def confirm(%{order_id: order_id} = args, _ctx) do
-    :timer.sleep(2000)
+  def confirm(%{order_id: order_id} = _args, _ctx) do
     case confirm(order_id) do
       {:ok, order} -> {:ok, order}
       {:error, error} -> {:ok, %{error: error}}

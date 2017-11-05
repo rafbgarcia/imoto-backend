@@ -40,7 +40,6 @@ defmodule Core.Mixfile do
       {:timex, "~> 3.1.24"},
       {:timex_ecto, "~> 3.2.1"},
       {:money, "~> 1.2.1"},
-      {:ecto_state_machine, "~> 0.2.1"}
     ]
   end
 
