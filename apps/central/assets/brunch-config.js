@@ -31,7 +31,7 @@ exports.config = {
   },
 
   conventions: {
-    // This option sets where we should place non-css and non-js assets in.
+    // This option sets where `we should place non-css and non-js assets in.
     // By default, we set this to "/assets/static". Files in this directory
     // will be copied to `paths.public`, which is "priv/static" by default.
     assets: /^(static)/
@@ -70,6 +70,7 @@ exports.config = {
   },
 
   modules: {
+    js: "web/static/js",
     autoRequire: {
       "js/app.js": ["js/app"]
     }
@@ -83,7 +84,6 @@ exports.config = {
       Tether: 'tether',
       Popper: 'popper.js',
       bootstrap: 'bootstrap', // require Bootstrap JavaScript globally too
-      axios: 'axios',
     },
   }
 };

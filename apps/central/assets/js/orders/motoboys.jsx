@@ -1,4 +1,5 @@
 import React from 'react'
+import graphql from 'js/graphql'
 
 export default class Motoboys extends React.Component {
   state = {
@@ -6,9 +7,9 @@ export default class Motoboys extends React.Component {
   }
 
   componentDidMount() {
-    axios.post(`/api/graphql?query=${query()}`)
-      .then((res) => {
-        const motoboys = res.data.data.motoboys
+    graphql.run(query())
+      .then((data) => {
+        const motoboys = data.motoboys
         this.setState({ motoboys })
       })
   }
@@ -57,8 +58,8 @@ function query() {
       available
       busy
       unavailable
-      lastAvailableAt
-      lastBusyAt
+      becameAvailableAt
+      becameBusyAt
     }
   }`
 }

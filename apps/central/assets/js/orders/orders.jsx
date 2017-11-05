@@ -1,6 +1,7 @@
 import React from 'react'
+import graphql from 'js/graphql'
+
 import PendingOrder from './pending_order'
-import axios from 'axios'
 
 export default class Orders extends React.Component {
   state = {
@@ -10,15 +11,15 @@ export default class Orders extends React.Component {
   }
 
   componentDidMount() {
-    axios.post(`/api/graphql?query=${query()}`)
-      .then((res) => {
-        const pendingOrders = res.data.data.orders.filter((order) => order.pending)
-        const confirmedOrders = res.data.data.orders.filter((order) => order.confirmed)
+    graphql.run(query())
+      .then((data) => {
+        const pendingOrders = data.orders.filter((order) => order.pending)
+        const confirmedOrders = data.orders.filter((order) => order.confirmed)
         this.setState({ pendingOrders, confirmedOrders })
       })
   }
 
-  onConfirm = (order) => {
+  moveOrderToConfirmedQueue(order) {
     const {pendingOrders, confirmedOrders} = this.state
 
     order.pending = false
@@ -28,6 +29,17 @@ export default class Orders extends React.Component {
     confirmedOrders.push(order)
 
     this.setState({pendingOrders: newPendingOrders})
+  }
+
+  onConfirm = (order) => {
+    this.moveOrderToConfirmedQueue(order)
+
+    graphql.run(confirmOrderMutation(order.id))
+      .then((data) => {
+        if (data.order.error) {
+          alert(data.order.error)
+        }
+      })
   }
 
   onCancel = (order) => {
@@ -40,28 +52,25 @@ export default class Orders extends React.Component {
       order.confirmed = false
       this.setState({ confirmedOrders: confirmedOrders.filter((aOrder) => aOrder.id != order.id) })
     }
-
-    // axios.post()
   }
 
   pending() {
     const {pendingOrders} = this.state
 
     return pendingOrders.map((order, i) =>
-      order.pending &&
-        <PendingOrder
-          key={i}
-          order={order}
-          onConfirm={this.onConfirm}
-          onCancel={this.onCancel}
-          />
+      <PendingOrder
+        key={i}
+        order={order}
+        onConfirm={this.onConfirm}
+        onCancel={this.onCancel}
+        />
     )
   }
 
   confirmed() {
     const {confirmedOrders} = this.state
     return confirmedOrders.map((order, i) =>
-      order.confirmed && <PendingOrder key={i} order={order} />
+      <PendingOrder key={i} order={order} />
     )
   }
 
@@ -85,7 +94,7 @@ function query() {
   return `query getOrdersAndMotoboys {
     orders {
       id
-      price
+      formattedPrice
       pending
       confirmed
       orderedAt
@@ -97,6 +106,32 @@ function query() {
       }
       customer { name, phoneNumber }
       motoboy { name }
+    }
+  }`
+}
+
+function confirmOrderMutation(orderId) {
+  return `mutation confirmOrder {
+    order: confirmOrder(orderId: ${orderId}) {
+      ... on Order {
+        id
+        formattedPrice
+        pending
+        confirmed
+        orderedAt
+        confirmedAt
+        stops {
+          sequence
+          instructions
+          location { reference, line1 }
+        }
+        customer { name, phoneNumber }
+        motoboy { name }
+      }
+
+      ... on Error {
+        error
+      }
     }
   }`
 }

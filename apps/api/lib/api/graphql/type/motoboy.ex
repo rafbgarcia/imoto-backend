@@ -15,7 +15,7 @@ defmodule Api.Graphql.Type.Motoboy do
     field :busy, :boolean, resolve: &Api.Orders.Motoboy.busy/3
     field :available, :boolean, resolve: &Api.Orders.Motoboy.available/3
     field :unavailable, :boolean, resolve: &Api.Orders.Motoboy.unavailable/3
-    field :last_available_at, :datetime
-    field :last_busy_at, :datetime
+    field :became_available_at, :datetime
+    field :became_busy_at, :datetime
   end
 end

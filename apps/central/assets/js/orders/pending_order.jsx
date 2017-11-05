@@ -25,7 +25,9 @@ export default class PendingOrder extends React.Component {
 
           {this.stops(order.stops)}
 
-          <div className="mt-5 d-flex align-items-center justify-content-between">
+          <div className="mt-4"><strong>Total:</strong> {order.formattedPrice}</div>
+
+          <div className="mt-4 d-flex align-items-center justify-content-between">
             <a href="javascript:;" onClick={e => onCancel(order)} className="btn btn-outline-danger">
               <i className="fa fa-times mr-2"></i>
               Cancelar

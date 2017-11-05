@@ -42641,7 +42641,38 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 });
 
-;require.register("js/orders.jsx", function(exports, require, module) {
+;require.register("js/graphql.js", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _axios = require('axios');
+
+var _axios2 = _interopRequireDefault(_axios);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var endpoint = "/api/graphql?query=";
+
+var graphql = {
+  run: function run(query) {
+    return _axios2.default.post('' + endpoint + prepare(query)).then(function (res) {
+      return res.data.data;
+    });
+  }
+};
+
+function prepare(query) {
+  return query.replace(/\s+/g, ' ');
+}
+
+exports.default = graphql;
+
+});
+
+require.register("js/orders.jsx", function(exports, require, module) {
 'use strict';
 
 var _react = require('react');
@@ -42734,7 +42765,7 @@ exports.default = OrdersContainer;
 });
 
 require.register("js/orders/motoboys.jsx", function(exports, require, module) {
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -42742,9 +42773,13 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = require("react");
+var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _graphql = require('js/graphql');
+
+var _graphql2 = _interopRequireDefault(_graphql);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -42768,7 +42803,7 @@ var Motoboys = function (_React$Component) {
       args[_key] = arguments[_key];
     }
 
-    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = Motoboys.__proto__ || Object.getPrototypeOf(Motoboys)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, "state", {
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = Motoboys.__proto__ || Object.getPrototypeOf(Motoboys)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
       enumerable: true,
       writable: true,
       value: {
@@ -42778,31 +42813,31 @@ var Motoboys = function (_React$Component) {
   }
 
   _createClass(Motoboys, [{
-    key: "componentDidMount",
+    key: 'componentDidMount',
     value: function componentDidMount() {
       var _this2 = this;
 
-      axios.post("/api/graphql?query=" + query()).then(function (res) {
-        var motoboys = res.data.data.motoboys;
+      _graphql2.default.run(query()).then(function (data) {
+        var motoboys = data.motoboys;
         _this2.setState({ motoboys: motoboys });
       });
     }
   }, {
-    key: "render",
+    key: 'render',
     value: function render() {
       return _react2.default.createElement(
-        "div",
+        'div',
         null,
         _react2.default.createElement(
-          "h4",
+          'h4',
           null,
-          "Motoboys"
+          'Motoboys'
         ),
         this.motoboys()
       );
     }
   }, {
-    key: "motoboys",
+    key: 'motoboys',
     value: function motoboys() {
       var motoboys = this.state.motoboys;
 
@@ -42827,7 +42862,7 @@ var Motoboy = function (_React$Component2) {
   }
 
   _createClass(Motoboy, [{
-    key: "render",
+    key: 'render',
     value: function render() {
       var motoboy = this.props.motoboy;
 
@@ -42842,9 +42877,9 @@ var Motoboy = function (_React$Component2) {
       }
 
       return _react2.default.createElement(
-        "div",
+        'div',
         null,
-        _react2.default.createElement("i", { className: "fa fa-circle " + iconClass }),
+        _react2.default.createElement('i', { className: 'fa fa-circle ' + iconClass }),
         motoboy.name
       );
     }
@@ -42854,7 +42889,7 @@ var Motoboy = function (_React$Component2) {
 }(_react2.default.Component);
 
 function query() {
-  return "query getMotoboys {\n    motoboys {\n      name\n      available\n      busy\n      unavailable\n      lastAvailableAt\n      lastBusyAt\n    }\n  }";
+  return 'query getMotoboys {\n    motoboys {\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameBusyAt\n    }\n  }';
 }
 
 });
@@ -42872,13 +42907,13 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _graphql = require('js/graphql');
+
+var _graphql2 = _interopRequireDefault(_graphql);
+
 var _pending_order = require('./pending_order');
 
 var _pending_order2 = _interopRequireDefault(_pending_order);
-
-var _axios = require('axios');
-
-var _axios2 = _interopRequireDefault(_axios);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -42914,28 +42949,21 @@ var Orders = function (_React$Component) {
       enumerable: true,
       writable: true,
       value: function value(order) {
-        var _this$state = _this.state,
-            pendingOrders = _this$state.pendingOrders,
-            confirmedOrders = _this$state.confirmedOrders;
+        _this.moveOrderToConfirmedQueue(order);
 
-
-        order.pending = false;
-        order.confirmed = true;
-
-        var newPendingOrders = pendingOrders.filter(function (aOrder) {
-          return aOrder.id != order.id;
+        _graphql2.default.run(confirmOrderMutation(order.id)).then(function (data) {
+          if (data.order.error) {
+            alert(data.order.error);
+          }
         });
-        confirmedOrders.push(order);
-
-        _this.setState({ pendingOrders: newPendingOrders });
       }
     }), Object.defineProperty(_this, 'onCancel', {
       enumerable: true,
       writable: true,
       value: function value(order) {
-        var _this$state2 = _this.state,
-            pendingOrders = _this$state2.pendingOrders,
-            confirmedOrders = _this$state2.confirmedOrders;
+        var _this$state = _this.state,
+            pendingOrders = _this$state.pendingOrders,
+            confirmedOrders = _this$state.confirmedOrders;
 
 
         if (order.pending) {
@@ -42949,8 +42977,6 @@ var Orders = function (_React$Component) {
               return aOrder.id != order.id;
             }) });
         }
-
-        // axios.post()
       }
     }), _temp), _possibleConstructorReturn(_this, _ret);
   }
@@ -42960,15 +42986,33 @@ var Orders = function (_React$Component) {
     value: function componentDidMount() {
       var _this2 = this;
 
-      _axios2.default.post('/api/graphql?query=' + query()).then(function (res) {
-        var pendingOrders = res.data.data.orders.filter(function (order) {
+      _graphql2.default.run(query()).then(function (data) {
+        var pendingOrders = data.orders.filter(function (order) {
           return order.pending;
         });
-        var confirmedOrders = res.data.data.orders.filter(function (order) {
+        var confirmedOrders = data.orders.filter(function (order) {
           return order.confirmed;
         });
         _this2.setState({ pendingOrders: pendingOrders, confirmedOrders: confirmedOrders });
       });
+    }
+  }, {
+    key: 'moveOrderToConfirmedQueue',
+    value: function moveOrderToConfirmedQueue(order) {
+      var _state = this.state,
+          pendingOrders = _state.pendingOrders,
+          confirmedOrders = _state.confirmedOrders;
+
+
+      order.pending = false;
+      order.confirmed = true;
+
+      var newPendingOrders = pendingOrders.filter(function (aOrder) {
+        return aOrder.id != order.id;
+      });
+      confirmedOrders.push(order);
+
+      this.setState({ pendingOrders: newPendingOrders });
     }
   }, {
     key: 'pending',
@@ -42979,7 +43023,7 @@ var Orders = function (_React$Component) {
 
 
       return pendingOrders.map(function (order, i) {
-        return order.pending && _react2.default.createElement(_pending_order2.default, {
+        return _react2.default.createElement(_pending_order2.default, {
           key: i,
           order: order,
           onConfirm: _this3.onConfirm,
@@ -42993,7 +43037,7 @@ var Orders = function (_React$Component) {
       var confirmedOrders = this.state.confirmedOrders;
 
       return confirmedOrders.map(function (order, i) {
-        return order.confirmed && _react2.default.createElement(_pending_order2.default, { key: i, order: order });
+        return _react2.default.createElement(_pending_order2.default, { key: i, order: order });
       });
     }
   }, {
@@ -43033,7 +43077,11 @@ exports.default = Orders;
 
 
 function query() {
-  return 'query getOrdersAndMotoboys {\n    orders {\n      id\n      price\n      pending\n      confirmed\n      orderedAt\n      confirmedAt\n      stops {\n        sequence\n        instructions\n        location { reference, line1 }\n      }\n      customer { name, phoneNumber }\n      motoboy { name }\n    }\n  }';
+  return 'query getOrdersAndMotoboys {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      orderedAt\n      confirmedAt\n      stops {\n        sequence\n        instructions\n        location { reference, line1 }\n      }\n      customer { name, phoneNumber }\n      motoboy { name }\n    }\n  }';
+}
+
+function confirmOrderMutation(orderId) {
+  return 'mutation confirmOrder {\n    order: confirmOrder(orderId: ' + orderId + ') {\n      ... on Order {\n        id\n        formattedPrice\n        pending\n        confirmed\n        orderedAt\n        confirmedAt\n        stops {\n          sequence\n          instructions\n          location { reference, line1 }\n        }\n        customer { name, phoneNumber }\n        motoboy { name }\n      }\n\n      ... on Error {\n        error\n      }\n    }\n  }';
 }
 
 });
@@ -43117,7 +43165,18 @@ var PendingOrder = function (_React$Component) {
           this.stops(order.stops),
           _react2.default.createElement(
             "div",
-            { className: "mt-5 d-flex align-items-center justify-content-between" },
+            { className: "mt-4" },
+            _react2.default.createElement(
+              "strong",
+              null,
+              "Total:"
+            ),
+            " ",
+            order.formattedPrice
+          ),
+          _react2.default.createElement(
+            "div",
+            { className: "mt-4 d-flex align-items-center justify-content-between" },
             _react2.default.createElement(
               "a",
               { href: "javascript:;", onClick: function onClick(e) {
@@ -43290,7 +43349,6 @@ window.jQuery = require("jquery");
 window.Tether = require("tether");
 window.Popper = require("popper.js");
 window.bootstrap = require("bootstrap");
-window.axios = require("axios");
 
 
 });})();require('___globals___');

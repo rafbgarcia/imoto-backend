@@ -1,35 +1,35 @@
 defmodule Core.Order do
   use Core, :schema
 
-  use EctoStateMachine,
-    states: [:pending, :confirmed, :finished, :canceled],
-    events: [
-      [
-        name:     :confirm,
-        from:     [:pending],
-        to:       :confirmed,
-        callback: fn(order) ->
-          # TOOD: write to the history
-          Changeset.change(order, confirmed_at: Ecto.DateTime.utc)
-        end
-      ], [
-        name:     :finish,
-        from:     [:confirmed],
-        to:       :finished,
-        callback: fn(order) ->
-          # TOOD: write to the history
-          Changeset.change(order, finished_at: Ecto.DateTime.utc)
-        end
-      ], [
-        name:     :cancel,
-        from:     [:pending, :confirmed],
-        to:       :canceled,
-        callback: fn(order) ->
-          # TOOD: write to the history
-          Changeset.change(order, canceled_at: Ecto.DateTime.utc)
-        end
-      ]
-    ]
+  # use EctoStateMachine,
+  #   states: [:pending, :confirmed, :finished, :canceled],
+  #   events: [
+  #     [
+  #       name:     :confirm,
+  #       from:     [:pending],
+  #       to:       :confirmed,
+  #       callback: fn(order) ->
+  #         # TOOD: write to the history
+  #         Changeset.change(order, confirmed_at: Ecto.DateTime.utc)
+  #       end
+  #     ], [
+  #       name:     :finish,
+  #       from:     [:confirmed],
+  #       to:       :finished,
+  #       callback: fn(order) ->
+  #         # TOOD: write to the history
+  #         Changeset.change(order, finished_at: Ecto.DateTime.utc)
+  #       end
+  #     ], [
+  #       name:     :cancel,
+  #       from:     [:pending, :confirmed],
+  #       to:       :canceled,
+  #       callback: fn(order) ->
+  #         # TOOD: write to the history
+  #         Changeset.change(order, canceled_at: Ecto.DateTime.utc)
+  #       end
+  #     ]
+  #   ]
 
   schema "orders" do
     has_many :stops, Core.Stop
@@ -46,7 +46,7 @@ defmodule Core.Order do
 
   def changeset(changeset, params \\ %{}) do
     changeset
-    |> cast(params, [:price])
-    |> validate_required([:price])
+    |> cast(params, [:price, :state, :confirmed_at, :finished_at, :canceled_at, :motoboy_id])
+    |> validate_required([:price, :state])
   end
 end

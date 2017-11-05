@@ -30,7 +30,7 @@ config :money,
   default_currency: :BRL,
   separator: ".",
   delimeter: ",",
-  symbol: false,
+  symbol: true,
   symbol_on_right: false,
   symbol_space: true
 

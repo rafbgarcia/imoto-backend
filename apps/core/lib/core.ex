@@ -3,7 +3,7 @@ defmodule Core do
     quote do
       use Ecto.Schema
       @timestamps_opts [type: Timex.Ecto.TimestampWithTimezone,
-        autogenerate: {Timex.Ecto.TimestampWithTimezone, :autogenerate, []} ]
+        autogenerate: {Timex.Ecto.TimestampWithTimezone, :autogenerate, []}]
 
       import Ecto.Changeset
     end

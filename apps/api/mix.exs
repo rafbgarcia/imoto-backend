@@ -47,6 +47,7 @@ defmodule Api.Mixfile do
       {:absinthe_ecto, "~> 0.1.2"},
       {:cors_plug, "~> 1.4.0"},
       {:timex, "~> 3.1"},
+      {:timex_ecto, "~> 3.2.1"},
       {:money, "~> 1.2.1"},
     ]
   end
