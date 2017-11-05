@@ -31,11 +31,12 @@ export default class Orders extends React.Component {
     this.setState({pendingOrders: newPendingOrders})
   }
 
-  onConfirm = (order) => {
+  onConfirm = (order, cb) => {
     // this.moveOrderToConfirmedQueue(order)
 
     graphql.run(confirmOrderMutation(order.id))
     .then((data) => {
+      cb()
       if (data.order.error) {
         alert(data.order.error)
       } else {
@@ -47,14 +48,15 @@ export default class Orders extends React.Component {
     })
   }
 
-  onCancel = (order) => {
+  onCancel = (order, cb) => {
     graphql.run(cancelOrderMutation(order.id))
     .then((data) => {
-      const {pendingOrders} = this.state
+      cb()
 
       if (data.order.error) {
         alert(data.order.error)
       } else {
+        const {pendingOrders} = this.state
         this.setState({ pendingOrders: pendingOrders.filter((aOrder) => aOrder.id != order.id) })
       }
     })

@@ -9,6 +9,7 @@
 
     <title><%= "CentralName" %> | MyApp</title>
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Ladda/1.0.0/ladda-themeless.min.css">
   </head>
 
   <body>

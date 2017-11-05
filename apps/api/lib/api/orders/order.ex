@@ -33,6 +33,7 @@ defmodule Api.Orders.Order do
   end
 
   def confirm(%{order_id: order_id} = args, _ctx) do
+    :timer.sleep(2000)
     case confirm(order_id) do
       {:ok, order} -> {:ok, order}
       {:error, error} -> {:ok, %{error: error}}

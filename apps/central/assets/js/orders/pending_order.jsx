@@ -1,9 +1,26 @@
 import React from 'react'
 import Timeago from 'js/timeago'
+import LaddaButton, { S, EXPAND_RIGHT } from 'react-ladda'
 
 export default class PendingOrder extends React.Component {
+  state = { loading: false }
+
+  onConfirm = () => {
+    const {order, onConfirm} = this.props
+
+    this.setState({loading: true})
+    onConfirm(order, () => this.setState({loading: false}))
+  }
+
+  onCancel = () => {
+    const {order, onCancel} = this.props
+
+    this.setState({loading: true})
+    onCancel(order, () => this.setState({loading: false}))
+  }
+
   render() {
-    const {order, onConfirm, onCancel} = this.props
+    const {order} = this.props
 
     return (
       <section className="card border-info mb-3">
@@ -28,14 +45,33 @@ export default class PendingOrder extends React.Component {
           <div className="mt-4"><strong>Total:</strong> {order.formattedPrice}</div>
 
           <div className="mt-4 d-flex align-items-center justify-content-between">
-            <a href="javascript:;" onClick={e => onCancel(order)} className="btn btn-outline-danger">
+            <LaddaButton
+              loading={this.state.loading}
+              onClick={e => this.onCancel()}
+              data-size={S}
+              data-style={EXPAND_RIGHT}
+              data-spinner-color="#666"
+              data-spinner-size={25}
+              data-spinner-lines={12}
+              className="btn btn-outline-danger"
+            >
               <i className="fa fa-times mr-2"></i>
               Cancelar
-            </a>
-            <a href="javascript:;" onClick={e => onConfirm(order)} className="btn btn-outline-primary">
+            </LaddaButton>
+
+            <LaddaButton
+              loading={this.state.loading}
+              onClick={e => this.onConfirm()}
+              data-size={S}
+              data-style={EXPAND_RIGHT}
+              data-spinner-color="#666"
+              data-spinner-size={25}
+              data-spinner-lines={12}
+              className="btn btn-outline-info"
+            >
               <i className="fa fa-check mr-2"></i>
               Confirmar
-            </a>
+            </LaddaButton>
           </div>
         </div>
       </section>
