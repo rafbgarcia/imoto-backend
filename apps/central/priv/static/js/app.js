@@ -42681,10 +42681,6 @@ var _axios = require('axios');
 
 var _axios2 = _interopRequireDefault(_axios);
 
-var _motoboys = require('./motoboys');
-
-var _motoboys2 = _interopRequireDefault(_motoboys);
-
 var _orders = require('./orders');
 
 var _orders2 = _interopRequireDefault(_orders);
@@ -42700,46 +42696,16 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var OrdersContainer = function (_React$Component) {
   _inherits(OrdersContainer, _React$Component);
 
-  function OrdersContainer(props) {
+  function OrdersContainer() {
     _classCallCheck(this, OrdersContainer);
 
-    var _this = _possibleConstructorReturn(this, (OrdersContainer.__proto__ || Object.getPrototypeOf(OrdersContainer)).call(this, props));
-
-    _this.state = {
-      orders: [],
-      motoboys: []
-    };
-    return _this;
+    return _possibleConstructorReturn(this, (OrdersContainer.__proto__ || Object.getPrototypeOf(OrdersContainer)).apply(this, arguments));
   }
 
   _createClass(OrdersContainer, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      var _this2 = this;
-
-      _axios2.default.get('/api/graphql?query=' + query()).then(function (res) {
-        var orders = res.data.data.orders;
-        var motoboys = res.data.data.motoboys;
-        _this2.setState({ orders: orders, motoboys: motoboys });
-      });
-    }
-  }, {
     key: 'render',
     value: function render() {
-      return _react2.default.createElement(
-        'div',
-        { className: 'row' },
-        _react2.default.createElement(
-          'div',
-          { className: 'col-sm-8' },
-          _react2.default.createElement(_orders2.default, { orders: this.state.orders })
-        ),
-        _react2.default.createElement(
-          'div',
-          { className: 'col-sm-4' },
-          _react2.default.createElement(_motoboys2.default, { motoboys: this.state.motoboys })
-        )
-      );
+      return _react2.default.createElement(_orders2.default, null);
     }
   }]);
 
@@ -42748,113 +42714,10 @@ var OrdersContainer = function (_React$Component) {
 
 exports.default = OrdersContainer;
 
-
-function query() {
-  return 'query getOrdersAndMotoboys {\n    orders {\n      id\n      price\n      pending\n      confirmed\n      orderedAt\n      confirmedAt\n      stops {\n        sequence\n        location { reference, line1 }\n      }\n      customer { name, phoneNumber }\n      motoboy { name }\n    }\n\n    motoboys {\n      name\n      available, busy, unavailable\n      lastAvailableAt, lastBusyAt\n    }\n  }';
-}
-
-});
-
-;require.register("js/orders/motoboys.jsx", function(exports, require, module) {
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _react = require("react");
-
-var _react2 = _interopRequireDefault(_react);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Motoboys = function (_React$Component) {
-  _inherits(Motoboys, _React$Component);
-
-  function Motoboys() {
-    _classCallCheck(this, Motoboys);
-
-    return _possibleConstructorReturn(this, (Motoboys.__proto__ || Object.getPrototypeOf(Motoboys)).apply(this, arguments));
-  }
-
-  _createClass(Motoboys, [{
-    key: "render",
-    value: function render() {
-      return _react2.default.createElement(
-        "div",
-        null,
-        _react2.default.createElement(
-          "h4",
-          null,
-          "Motoboys"
-        ),
-        this.motoboys()
-      );
-    }
-  }, {
-    key: "motoboys",
-    value: function motoboys() {
-      var motoboys = this.props.motoboys;
-
-      return motoboys.map(function (motoboy, i) {
-        return _react2.default.createElement(Motoboy, { key: i, motoboy: motoboy });
-      });
-    }
-  }]);
-
-  return Motoboys;
-}(_react2.default.Component);
-
-exports.default = Motoboys;
-
-var Motoboy = function (_React$Component2) {
-  _inherits(Motoboy, _React$Component2);
-
-  function Motoboy() {
-    _classCallCheck(this, Motoboy);
-
-    return _possibleConstructorReturn(this, (Motoboy.__proto__ || Object.getPrototypeOf(Motoboy)).apply(this, arguments));
-  }
-
-  _createClass(Motoboy, [{
-    key: "render",
-    value: function render() {
-      var motoboy = this.props.motoboy;
-
-
-      var iconClass = void 0;
-      if (motoboy.available) {
-        iconClass = "text-success";
-      } else if (motoboy.busy) {
-        iconClass = "text-warning";
-      } else {
-        iconClass = "text-danger";
-      }
-
-      return _react2.default.createElement(
-        "div",
-        null,
-        _react2.default.createElement("i", { className: "fa fa-circle " + iconClass }),
-        motoboy.name
-      );
-    }
-  }]);
-
-  return Motoboy;
-}(_react2.default.Component);
-
 });
 
 require.register("js/orders/orders.jsx", function(exports, require, module) {
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -42862,9 +42725,21 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _react = require("react");
+var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _pending_order = require('./pending_order');
+
+var _pending_order2 = _interopRequireDefault(_pending_order);
+
+var _axios = require('axios');
+
+var _axios2 = _interopRequireDefault(_axios);
+
+var _motoboys = require('./motoboys');
+
+var _motoboys2 = _interopRequireDefault(_motoboys);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -42878,56 +42753,137 @@ var Orders = function (_React$Component) {
   _inherits(Orders, _React$Component);
 
   function Orders() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
     _classCallCheck(this, Orders);
 
-    return _possibleConstructorReturn(this, (Orders.__proto__ || Object.getPrototypeOf(Orders)).apply(this, arguments));
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = Orders.__proto__ || Object.getPrototypeOf(Orders)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
+      enumerable: true,
+      writable: true,
+      value: {
+        pendingOrders: [],
+        confirmedOrders: [],
+        showMotoboys: false
+      }
+    }), Object.defineProperty(_this, 'onConfirm', {
+      enumerable: true,
+      writable: true,
+      value: function value(order) {
+        var _this$state = _this.state,
+            pendingOrders = _this$state.pendingOrders,
+            confirmedOrders = _this$state.confirmedOrders;
+
+
+        order.pending = false;
+        order.confirmed = true;
+
+        var newPendingOrders = pendingOrders.filter(function (order) {
+          return order.id != id;
+        });
+        confirmedOrders.push(order);
+
+        _this.setState({ pendingOrders: newPendingOrders });
+      }
+    }), Object.defineProperty(_this, 'onCancel', {
+      enumerable: true,
+      writable: true,
+      value: function value(order) {
+        var _this$state2 = _this.state,
+            pendingOrders = _this$state2.pendingOrders,
+            confirmedOrders = _this$state2.confirmedOrders;
+
+
+        if (order.pending) {
+          order.pending = false;
+          _this.setState({ pendingOrders: pendingOrders.filter(function (order) {
+              return order.id != id;
+            }) });
+        } else if (order.confirmed) {
+          order.confirmed = false;
+          _this.setState({ confirmedOrders: confirmedOrders.filter(function (order) {
+              return order.id != id;
+            }) });
+        }
+        _axios2.default.post();
+      }
+    }), _temp), _possibleConstructorReturn(_this, _ret);
   }
 
   _createClass(Orders, [{
-    key: "render",
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      var _this2 = this;
+
+      _axios2.default.post('/api/graphql?query=' + query()).then(function (res) {
+        var pendingOrders = res.data.data.orders.filter(function (order) {
+          return order.pending;
+        });
+        var confirmedOrders = res.data.data.orders.filter(function (order) {
+          return order.confirmed;
+        });
+        _this2.setState({ pendingOrders: pendingOrders, confirmedOrders: confirmedOrders });
+      });
+    }
+  }, {
+    key: 'pending',
+    value: function pending() {
+      var _this3 = this;
+
+      var pendingOrders = this.state.pendingOrders;
+
+
+      return pendingOrders.map(function (order, i) {
+        return order.pending && _react2.default.createElement(_pending_order2.default, {
+          key: i,
+          order: order,
+          onConfirm: _this3.onConfirm,
+          onCancel: _this3.onCancel
+        });
+      });
+    }
+  }, {
+    key: 'confirmed',
+    value: function confirmed() {
+      var confirmedOrders = this.state.confirmedOrders;
+
+      return confirmedOrders.map(function (order, i) {
+        return order.confirmed && _react2.default.createElement(_pending_order2.default, { key: i, order: order });
+      });
+    }
+  }, {
+    key: 'render',
     value: function render() {
       return _react2.default.createElement(
-        "div",
-        { className: "row" },
+        'div',
+        { className: 'row' },
         _react2.default.createElement(
-          "div",
-          { className: "col-sm-6" },
+          'div',
+          { className: 'col-sm-6' },
           _react2.default.createElement(
-            "h4",
+            'h4',
             null,
-            "Novos Pedidos"
+            'Novos Pedidos'
           ),
-          this.pendingOrders()
+          this.pending()
         ),
         _react2.default.createElement(
-          "div",
-          { className: "col-sm-6" },
+          'div',
+          { className: 'col-sm-6' },
           _react2.default.createElement(
-            "h4",
+            'h4',
             null,
-            "Pedidos em entrega"
+            'Pedidos em entrega'
           ),
-          this.confirmedOrders()
-        )
+          this.confirmed()
+        ),
+        _react2.default.createElement(_motoboys2.default, { showMotoboys: this.state.showMotoboys })
       );
-    }
-  }, {
-    key: "pendingOrders",
-    value: function pendingOrders() {
-      var orders = this.props.orders;
-
-      return orders.map(function (order, i) {
-        return order.pending && _react2.default.createElement(Order, { key: i, order: order });
-      });
-    }
-  }, {
-    key: "confirmedOrders",
-    value: function confirmedOrders() {
-      var orders = this.props.orders;
-
-      return orders.map(function (order, i) {
-        return order.confirmed && _react2.default.createElement(Order, { key: i, order: order });
-      });
     }
   }]);
 
@@ -42936,19 +42892,51 @@ var Orders = function (_React$Component) {
 
 exports.default = Orders;
 
-var Order = function (_React$Component2) {
-  _inherits(Order, _React$Component2);
 
-  function Order() {
-    _classCallCheck(this, Order);
+function query() {
+  return 'query getOrdersAndMotoboys {\n    orders {\n      id\n      price\n      pending\n      confirmed\n      orderedAt\n      confirmedAt\n      stops {\n        sequence\n        instructions\n        location { reference, line1 }\n      }\n      customer { name, phoneNumber }\n      motoboy { name }\n    }\n  }';
+}
 
-    return _possibleConstructorReturn(this, (Order.__proto__ || Object.getPrototypeOf(Order)).apply(this, arguments));
+});
+
+;require.register("js/orders/pending_order.jsx", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require("react");
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var PendingOrder = function (_React$Component) {
+  _inherits(PendingOrder, _React$Component);
+
+  function PendingOrder() {
+    _classCallCheck(this, PendingOrder);
+
+    return _possibleConstructorReturn(this, (PendingOrder.__proto__ || Object.getPrototypeOf(PendingOrder)).apply(this, arguments));
   }
 
-  _createClass(Order, [{
+  _createClass(PendingOrder, [{
     key: "render",
     value: function render() {
-      var order = this.props.order;
+      var _props = this.props,
+          order = _props.order,
+          onConfirm = _props.onConfirm,
+          onCancel = _props.onCancel;
+
 
       return _react2.default.createElement(
         "section",
@@ -42971,7 +42959,43 @@ var Order = function (_React$Component2) {
         _react2.default.createElement(
           "div",
           { className: "card-body" },
-          this.stops(order.stops)
+          _react2.default.createElement(
+            "div",
+            { className: "d-flex align-items-center justify-content-between" },
+            _react2.default.createElement(
+              "div",
+              null,
+              _react2.default.createElement("i", { className: "fa fa-user mr-2" }),
+              order.customer.name
+            ),
+            _react2.default.createElement(
+              "div",
+              null,
+              _react2.default.createElement("i", { className: "fa fa-phone mr-2" }),
+              order.customer.phoneNumber
+            )
+          ),
+          this.stops(order.stops),
+          _react2.default.createElement(
+            "div",
+            { className: "mt-5 d-flex align-items-center justify-content-between" },
+            _react2.default.createElement(
+              "a",
+              { href: "javascript:;", onClick: function onClick(e) {
+                  return onCancel(order);
+                }, className: "btn btn-outline-danger" },
+              _react2.default.createElement("i", { className: "fa fa-times mr-2" }),
+              "Cancelar"
+            ),
+            _react2.default.createElement(
+              "a",
+              { href: "javascript:;", onClick: function onClick(e) {
+                  return onConfirm(order);
+                }, className: "btn btn-outline-primary" },
+              _react2.default.createElement("i", { className: "fa fa-check mr-2" }),
+              "Confirmar"
+            )
+          )
         )
       );
     }
@@ -42984,11 +43008,13 @@ var Order = function (_React$Component2) {
     }
   }]);
 
-  return Order;
+  return PendingOrder;
 }(_react2.default.Component);
 
-var Stop = function (_React$Component3) {
-  _inherits(Stop, _React$Component3);
+exports.default = PendingOrder;
+
+var Stop = function (_React$Component2) {
+  _inherits(Stop, _React$Component2);
 
   function Stop() {
     _classCallCheck(this, Stop);
@@ -42999,7 +43025,33 @@ var Stop = function (_React$Component3) {
   _createClass(Stop, [{
     key: "render",
     value: function render() {
-      return _react2.default.createElement("div", null);
+      var stop = this.props.stop;
+
+      return _react2.default.createElement(
+        "section",
+        { className: "mt-4 mb-2" },
+        _react2.default.createElement(
+          "div",
+          null,
+          _react2.default.createElement(
+            "strong",
+            null,
+            stop.sequence + 1,
+            "\xAA parada"
+          )
+        ),
+        _react2.default.createElement(
+          "div",
+          null,
+          _react2.default.createElement("i", { className: "fa fa-map-marker mr-2" }),
+          stop.location.line1
+        ),
+        _react2.default.createElement(
+          "div",
+          null,
+          stop.instructions
+        )
+      );
     }
   }]);
 

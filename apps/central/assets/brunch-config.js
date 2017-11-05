@@ -50,7 +50,13 @@ exports.config = {
     babel: {
       // Do not use ES6 compiler in vendor code
       ignore: [/vendor/],
-      presets: ['latest', 'react']
+      presets: [
+        'latest',
+        'react'
+      ],
+      plugins: [
+        ['transform-class-properties', {spec: true}]
+      ]
     },
     copycat: {
       "fonts": ["node_modules/font-awesome/fonts"] // copy node_modules/font-awesome/fonts/* to priv/static/fonts/
@@ -76,7 +82,7 @@ exports.config = {
       jQuery: 'jquery',
       Tether: 'tether',
       Popper: 'popper.js',
-      bootstrap: 'bootstrap' // require Bootstrap JavaScript globally too
+      bootstrap: 'bootstrap', // require Bootstrap JavaScript globally too
     },
   }
 };

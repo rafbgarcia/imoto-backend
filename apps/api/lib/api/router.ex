@@ -7,6 +7,6 @@ defmodule Api.Router do
 
   scope "/" do
     pipe_through :api
-    get "/graphql", Absinthe.Plug, schema: Api.GraphqlSchema
+    post "/graphql", Absinthe.Plug, schema: Api.GraphqlSchema
   end
 end
