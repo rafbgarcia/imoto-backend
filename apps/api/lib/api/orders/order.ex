@@ -27,6 +27,9 @@ defmodule Api.Orders.Order do
       {:error, errors} -> {:ok, %{error: errors}}
     end
   end
+  def create(%{params: params} = _args, _ctx) do
+    {:ok, %{error: "Algo deu errado, por favor feche e reabra a app"}}
+  end
 
   def cancel(%{order_id: order_id} = _args, _ctx) do
     cancel(order_id)
