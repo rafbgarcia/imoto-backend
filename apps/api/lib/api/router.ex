@@ -3,6 +3,7 @@ defmodule Api.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug Api.Plug.CustomerAuth
   end
 
   scope "/api" do

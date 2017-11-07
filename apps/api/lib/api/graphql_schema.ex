@@ -5,6 +5,7 @@ defmodule Api.GraphqlSchema do
   query do
     import_fields :orders_queries
     import_fields :motoboys_queries
+    import_fields :customer_queries
   end
 
   mutation do
