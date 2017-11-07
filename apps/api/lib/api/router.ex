@@ -5,7 +5,7 @@ defmodule Api.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/" do
+  scope "/api" do
     pipe_through :api
     post "/graphql", Absinthe.Plug, schema: Api.GraphqlSchema
   end

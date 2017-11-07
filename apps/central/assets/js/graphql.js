@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const endpoint = "/api/graphql?query="
+const endpoint = "http://localhost:4001/api/graphql?query="
 
 const graphql = {
   run: (query) => {
