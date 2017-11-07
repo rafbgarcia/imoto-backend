@@ -17,7 +17,9 @@ defmodule Api.Orders.Order do
     {:ok, Money.to_string(order.price)}
   end
 
-  def create(%{params: params} = _args, _ctx) do
+  def create(%{params: params} = _args, %{current_user: current_user} = _ctx) do
+    params = Map.put(params, :customer_id, current_user.id)
+
     Core.Order.changeset(%Core.Order{}, params)
     |> Repo.insert
     |> case do
