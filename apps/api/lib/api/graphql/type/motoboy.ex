@@ -3,11 +3,9 @@ defmodule Api.Graphql.Type.Motoboy do
   import_types Api.Graphql.Field.Datetime
 
   object :motoboys_queries do
-    @desc "Get orders"
-    field :motoboys, list_of(:motoboy) do
-      # TODO: scope this query by Central
-      resolve &Api.Orders.Motoboy.all/2
-    end
+    # TODO: scope this query by Central
+    field :motoboys, list_of(:motoboy), resolve: &Api.Orders.Motoboy.all/2
+    field :current_motoboy, :motoboy, resolve: &Api.Auth.Motoboy.current_or_new/2
   end
 
   object :motoboy do
@@ -17,5 +15,7 @@ defmodule Api.Graphql.Type.Motoboy do
     field :unavailable, :boolean, resolve: &Api.Orders.Motoboy.unavailable/3
     field :became_available_at, :datetime
     field :became_busy_at, :datetime
+
+    field :central, :central, resolve: assoc(:central)
   end
 end

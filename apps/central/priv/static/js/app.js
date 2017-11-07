@@ -43594,7 +43594,7 @@ var _axios2 = _interopRequireDefault(_axios);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var endpoint = "http://localhost:4001/api/graphql?query=";
+var endpoint = "http://localhost:4001/api/central/graphql?query=";
 
 var graphql = {
   run: function run(query) {

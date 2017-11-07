@@ -8,4 +8,5 @@ defmodule Api.Graphql.Types do
   import_types Api.Graphql.Type.Customer
   import_types Api.Graphql.Type.Stop
   import_types Api.Graphql.Type.Location
+  import_types Api.Graphql.Type.Central
 end
