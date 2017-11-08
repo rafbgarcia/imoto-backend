@@ -11,4 +11,15 @@ defmodule Api.GraphqlSchema do
   mutation do
     import_fields :orders_mutations
   end
+
+  subscription do
+    field :new_order, :order do
+      arg :user_id, non_null(:id)
+
+      config fn args, _ ->
+        {:ok, topic: args.user_id}
+      end
+    end
+  end
+
 end

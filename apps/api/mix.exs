@@ -45,6 +45,7 @@ defmodule Api.Mixfile do
       {:absinthe, "~> 1.4.0-rc.3"},
       {:absinthe_plug, "~> 1.4.0-rc.2"},
       {:absinthe_ecto, github: "rafbgarcia/absinthe_ecto", branch: "master"},
+      {:absinthe_phoenix, github: "absinthe-graphql/absinthe_phoenix"},
       {:cors_plug, "~> 1.4.0"},
       {:timex, "~> 3.1"},
       {:timex_ecto, "~> 3.2.1"},
