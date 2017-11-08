@@ -8,25 +8,25 @@ defmodule Api.Channels.OrderSocket do
   alias Db.Repo
   alias Core.Motoboy
 
-  def connect(params, socket) do
-    # socket = Absinthe.Phoenix.Socket.put_opts(socket, context: %{
-    #   current_motoboy: current_motoboy(params)
-    # })
-    spawn &push/0
+  def connect(%{"authToken" => auth_token}, socket) do
+    motoboy = current_motoboy(auth_token)
+    socket = Absinthe.Phoenix.Socket.put_opts(socket, context: %{
+      current_motoboy: motoboy
+    })
+    spawn fn -> push(motoboy.id) end
     {:ok, socket}
   end
 
-  def push do
-    :timer.sleep(10000)
-    Absinthe.Subscription.publish(Api.Endpoint, %Core.Order{id: 1}, [motoboy_orders: "my-auth-token"])
-    spawn &push/0
+  def push(motoboy_id) do
+    :timer.sleep(3000)
+    Absinthe.Subscription.publish(Api.Endpoint, %Core.Order{id: 1}, [motoboy_orders: motoboy_id])
   end
 
-  # defp current_motoboy(%{"auth_token" => auth_token}) do
-  #   from(m in Motoboy, where: [auth_token: ^auth_token])
-  #   |> first
-  #   |> Repo.one
-  # end
+  defp current_motoboy(auth_token) do
+    from(m in Motoboy, where: [auth_token: ^auth_token])
+    |> first
+    |> Repo.one
+  end
 
   def id(_socket), do: nil
 end

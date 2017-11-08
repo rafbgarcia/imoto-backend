@@ -14,14 +14,12 @@ defmodule Api.GraphqlSchema do
 
   subscription do
     field :motoboy_orders, :order do
-      arg :auth_token, non_null(:string)
-
-      config fn args, _ ->
-        {:ok, topic: args.auth_token}
+      config fn _args, socket ->
+        {:ok, topic: socket.context.current_motoboy.id}
       end
 
       trigger :create_order, topic: fn order ->
-        order.motoboy.auth_token
+        order.motoboy_id
       end
     end
   end
