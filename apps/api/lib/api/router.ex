@@ -8,7 +8,7 @@ defmodule Api.Router do
 
   pipeline :motoboy_api do
     plug :accepts, ["json"]
-    # plug Api.Plug.MotoboyAuth
+    plug Api.Plug.MotoboyAuth
   end
 
   pipeline :central_api do
@@ -19,7 +19,7 @@ defmodule Api.Router do
     pipe_through :customer_api
     post "/graphql", Absinthe.Plug.GraphiQL,
       schema: Api.GraphqlSchema,
-      socket: Api.OrderSocket,
+      socket: Api.Channels.OrderSocket,
       interface: :simple
   end
 
@@ -27,7 +27,7 @@ defmodule Api.Router do
     # pipe_through :motoboy_api
     forward "/graphql", Absinthe.Plug,
       schema: Api.GraphqlSchema,
-      socket: Api.OrderSocket,
+      socket: Api.Channels.OrderSocket,
       interface: :simple
   end
 
@@ -35,7 +35,7 @@ defmodule Api.Router do
     pipe_through :central_api
     post "/graphql", Absinthe.Plug.GraphiQL,
       schema: Api.GraphqlSchema,
-      socket: Api.OrderSocket,
+      socket: Api.Channels.OrderSocket,
       interface: :simple
   end
 end

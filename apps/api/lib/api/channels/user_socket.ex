@@ -1,4 +1,4 @@
-defmodule Api.UserSocket do
+defmodule Api.Channels.UserSocket do
   use Phoenix.Socket
 
   ## Channels

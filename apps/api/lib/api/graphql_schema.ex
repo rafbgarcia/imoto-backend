@@ -13,11 +13,15 @@ defmodule Api.GraphqlSchema do
   end
 
   subscription do
-    field :new_order, :order do
-      arg :user_id, non_null(:id)
+    field :motoboy_orders, :order do
+      arg :auth_token, non_null(:string)
 
       config fn args, _ ->
-        {:ok, topic: args.user_id}
+        {:ok, topic: args.auth_token}
+      end
+
+      trigger :create_order, topic: fn order ->
+        order.motoboy.auth_token
       end
     end
   end
