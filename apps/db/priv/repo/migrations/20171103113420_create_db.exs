@@ -24,6 +24,7 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       add :login, :string
       add :password, :string
       add :auth_token, :string
+      add :became_unavailable_at, :utc_datetime
       add :became_available_at, :utc_datetime
       add :became_busy_at, :utc_datetime
       timestamps()

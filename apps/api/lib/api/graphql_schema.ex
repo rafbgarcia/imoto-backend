@@ -10,6 +10,7 @@ defmodule Api.GraphqlSchema do
 
   mutation do
     import_fields :orders_mutations
+    import_fields :motoboys_mutations
   end
 
   subscription do

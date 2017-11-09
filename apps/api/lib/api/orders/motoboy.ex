@@ -1,8 +1,17 @@
 defmodule Api.Orders.Motoboy do
   use Api, :context
 
+  def current(_args, %{context: %{current_motoboy: current_motoboy}}) do
+    {:ok, current_motoboy}
+  end
+
   def all(_args, _ctx) do
     {:ok, Core.Motoboy |> order_by([desc: :became_available_at, desc: :became_busy_at]) |> Db.Repo.all }
+  end
+
+  def first_name(motoboy, _args, _ctx) do
+    first_name = motoboy.name |> String.split(" ") |> Enum.at(0)
+    {:ok, first_name }
   end
 
   def available(motoboy, _args, _ctx) do
@@ -44,6 +53,30 @@ defmodule Api.Orders.Motoboy do
     end
   end
 
+  @doc """
+  Motoboy estava online e ficou offline
+  """
+  def make_unavailable_and_publish(_args, %{context: %{current_motoboy: current_motoboy}}) do
+    current_motoboy
+    |> Core.Motoboy.changeset(%{state: "unavailable", became_unavailable_at: Timex.local})
+    |> Repo.update
+    |> case do
+      {:ok, motoboy} ->
+        Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_state: motoboy.id])
+        Api.Orders.History.motoboy_unavailable(motoboy.id)
+        {:ok, motoboy}
+    end
+  end
+
+  @doc """
+  Motoboy was offline and became online.
+  """
+  def make_available_and_publish(_args, %{context: %{current_motoboy: current_motoboy}}) do
+    with {:ok, motoboy} <- make_available_and_publish(current_motoboy) do
+      Api.Orders.History.motoboy_unavailable(motoboy.id)
+      {:ok, motoboy}
+    end
+  end
   defp make_available_and_publish(motoboy) do
     motoboy
     |> Core.Motoboy.changeset(%{state: "available", became_available_at: Timex.local})
@@ -51,7 +84,7 @@ defmodule Api.Orders.Motoboy do
     |> case do
       {:ok, motoboy} ->
         Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_state: motoboy.id])
-        motoboy
+        {:ok, motoboy}
     end
   end
 

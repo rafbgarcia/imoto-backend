@@ -27,4 +27,12 @@ defmodule Api.Orders.History do
   def order_finished(order_id, motoboy_id) do
     Repo.insert(%Core.History{event: "pedido_finalizado", text: "Pedido finalizado", order_id: order_id, motoboy_id: motoboy_id})
   end
+
+  def motoboy_available(motoboy_id) do
+    Repo.insert(%Core.History{event: "motoboy_online", text: "O motoboy ficou online", motoboy_id: motoboy_id})
+  end
+
+  def motoboy_unavailable(motoboy_id) do
+    Repo.insert(%Core.History{event: "motoboy_offline", text: "O motoboy ficou offline", motoboy_id: motoboy_id})
+  end
 end

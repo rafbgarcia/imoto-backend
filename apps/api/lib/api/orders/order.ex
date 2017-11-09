@@ -23,6 +23,9 @@ defmodule Api.Orders.Order do
     -> Add to History
     -> Notify next motoboy in queue
   """
+  def create(_, %{context: %{current_customer: nil}}) do
+    {:ok, %{error: "Algo deu errado, por favor feche e abra a app, e tente novamente"}}
+  end
   def create(%{params: params}, %{context: %{current_customer: current_customer}}) do
     params = Map.put(params, :customer_id, current_customer.id)
 
@@ -36,9 +39,6 @@ defmodule Api.Orders.Order do
       {:error, errors} ->
         {:ok, %{error: errors}}
     end
-  end
-  def create(_, %{context: %{current_customer: nil}}) do
-    {:ok, %{error: "Algo deu errado, por favor feche e reabra a app"}}
   end
 
   @doc """

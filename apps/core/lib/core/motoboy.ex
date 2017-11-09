@@ -9,6 +9,7 @@ defmodule Core.Motoboy do
     field :password, :string
     field :auth_token, :string
     field :became_available_at, Timex.Ecto.DateTime
+    field :became_unavailable_at, Timex.Ecto.DateTime
     field :became_busy_at, Timex.Ecto.DateTime
 
     timestamps()
@@ -16,7 +17,7 @@ defmodule Core.Motoboy do
 
   def changeset(changeset, params \\ %{}) do
     changeset
-    |> cast(params, [:name, :became_available_at, :became_busy_at, :state, :auth_token])
+    |> cast(params, [:name, :became_available_at, :became_unavailable_at, :became_busy_at, :state, :auth_token])
     |> validate_inclusion(:state, ["available", "busy", "unavailable"])
     |> validate_required([:name])
     |> unique_constraint(:login)

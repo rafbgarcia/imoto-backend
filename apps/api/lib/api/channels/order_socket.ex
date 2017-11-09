@@ -9,23 +9,15 @@ defmodule Api.Channels.OrderSocket do
   alias Core.Motoboy
 
   def connect(%{"authToken" => auth_token}, socket) do
-    motoboy = current_motoboy(auth_token)
-    socket = Absinthe.Phoenix.Socket.put_opts(socket, context: %{
-      current_motoboy: motoboy
-    })
-
-    spawn fn -> _push(motoboy.id) end
-    {:ok, socket}
-  end
-
-  @doc """
-  Helper method for developing UI
-  TODO: Remove it
-  """
-  def _push(motoboy_id) do
-    :timer.sleep(10)
-    order = Core.Order |> Repo.get(1)
-    Absinthe.Subscription.publish(Api.Endpoint, order, [motoboy_orders: motoboy_id])
+    case current_motoboy(auth_token) do
+      nil ->
+        :error
+      motoboy ->
+        socket = Absinthe.Phoenix.Socket.put_opts(socket, context: %{
+          current_motoboy: motoboy
+        })
+        {:ok, socket}
+    end
   end
 
   defp current_motoboy(auth_token) do
