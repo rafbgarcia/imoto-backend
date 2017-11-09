@@ -13,15 +13,41 @@ defmodule Api.GraphqlSchema do
   end
 
   subscription do
-    field :motoboy_orders, :order do
+    field :motoboy_orders, :order_or_error do
       config fn _args, socket ->
         {:ok, topic: socket.context.current_motoboy.id}
       end
 
-      trigger :create_order, topic: fn order ->
+      trigger :confirm_order, topic: fn order ->
         order.motoboy_id
       end
     end
+
+    # field :customer_order, :order_or_error do
+    #   config fn _args, socket ->
+    #     {:ok, topic: socket.context.current_customer.id}
+    #   end
+
+    #   trigger :confirm_order, topic: fn order ->
+    #     order.customer_id
+    #   end
+    # end
+
+    # field :central_orders, :order_or_error do
+    #   config fn _args, socket ->
+    #     {:ok, topic: socket.context.current_central.id}
+    #   end
+
+    #   trigger :confirm_order, topic: fn order ->
+    #     order.motoboy.central_id
+    #   end
+    # end
+
+    # field :central_motoboys, :motoboy do
+    #   config fn _args, socket ->
+    #     {:ok, topic: socket.context.current_central.id}
+    #   end
+    # end
   end
 
 end

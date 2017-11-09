@@ -17,8 +17,21 @@ defmodule Api.Orders.Order do
     {:ok, Money.to_string(order.price)}
   end
 
-  def create(%{params: params} = _args, %{current_user: current_user} = _ctx) do
-    params = Map.put(params, :customer_id, current_user.id)
+  def create(%{params: params}, %{context: %{current_customer: current_customer}}) do
+    case create_order(params, current_customer) do
+      {:ok, %{error: errors}} -> {:ok, %{error: errors}}
+      {:ok, order} ->
+        motoboy = Api.Orders.Motoboy.next_in_queue!
+        Absinthe.Subscription.publish(Api.Endpoint, order, [motoboy_orders: motoboy.id])
+        {:ok, order}
+    end
+  end
+  def create(_, %{context: %{current_customer: nil}}) do
+    {:ok, %{error: "Algo deu errado, por favor feche e reabra a app"}}
+  end
+
+  defp create_order(params, customer) do
+    params = Map.put(params, :customer_id, customer.id)
 
     Core.Order.changeset(%Core.Order{}, params)
     |> Repo.insert
@@ -27,11 +40,8 @@ defmodule Api.Orders.Order do
       {:error, errors} -> {:ok, %{error: errors}}
     end
   end
-  def create(%{params: params} = _args, _ctx) do
-    {:ok, %{error: "Algo deu errado, por favor feche e reabra a app"}}
-  end
 
-  def cancel(%{order_id: order_id} = _args, _ctx) do
+  def cancel(%{order_id: order_id}, _ctx) do
     cancel(order_id)
     |> case do
       {:ok, order} ->
@@ -46,16 +56,16 @@ defmodule Api.Orders.Order do
     |> Repo.update
   end
 
-  def confirm(%{order_id: order_id} = _args, _ctx) do
-    case confirm(order_id) do
+  def confirm(%{order_id: order_id}, %{context: %{current_motoboy: current_motoboy}}) do
+    case confirm_order(order_id, current_motoboy) do
       {:ok, order} -> {:ok, order}
       {:error, error} -> {:ok, %{error: error}}
     end
   end
-  defp confirm(order_id) do
+
+  defp confirm_order(order_id, motoboy) do
     Repo.transaction(fn ->
-      motoboy = Api.Orders.Motoboy.next_in_queue!
-      order = confirm!(order_id, motoboy)
+      order = confirm!(order_id, motoboy.id)
       Api.Orders.Motoboy.mark_busy!(motoboy)
       Api.Orders.History.did_confirm_order(order)
       Api.Orders.History.motoboy_busy(motoboy)
@@ -66,9 +76,9 @@ defmodule Api.Orders.Order do
     Ecto.NoResultsError -> {:error,  "Nenhum motoboy disponível"}
   end
 
-  defp confirm!(order_id, motoboy) do
+  defp confirm!(order_id, motoboy_id) do
     get_order(order_id)
-    |> Core.Order.changeset(%{state: "confirmed", motoboy_id: motoboy.id, confirmed_at: Timex.local})
+    |> Core.Order.changeset(%{state: "confirmed", motoboy_id: motoboy_id, confirmed_at: Timex.local})
     |> Repo.update!
   end
 

@@ -50,7 +50,7 @@ defmodule Api.Graphql.Type.Order do
     end
 
     field :confirm_order, :order_or_error do
-      arg :order_id, :integer
+      arg :order_id, non_null(:id)
       resolve &Api.Orders.Order.confirm/2
     end
 

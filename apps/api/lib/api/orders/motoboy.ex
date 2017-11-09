@@ -30,4 +30,8 @@ defmodule Api.Orders.Motoboy do
     |> first([desc: :became_available_at])
     |> Repo.one!
   end
+
+  def get(id) do
+    Core.Motoboy |> Repo.get(id)
+  end
 end

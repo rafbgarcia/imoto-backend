@@ -18,8 +18,9 @@ defmodule Api.Channels.OrderSocket do
   end
 
   def push(motoboy_id) do
-    :timer.sleep(3000)
-    Absinthe.Subscription.publish(Api.Endpoint, %Core.Order{id: 1}, [motoboy_orders: motoboy_id])
+    :timer.sleep(10)
+    order = Core.Order |> Repo.get(1)
+    Absinthe.Subscription.publish(Api.Endpoint, order, [motoboy_orders: motoboy_id])
   end
 
   defp current_motoboy(auth_token) do
