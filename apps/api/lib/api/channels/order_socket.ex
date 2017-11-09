@@ -13,11 +13,16 @@ defmodule Api.Channels.OrderSocket do
     socket = Absinthe.Phoenix.Socket.put_opts(socket, context: %{
       current_motoboy: motoboy
     })
-    spawn fn -> push(motoboy.id) end
+
+    spawn fn -> _push(motoboy.id) end
     {:ok, socket}
   end
 
-  def push(motoboy_id) do
+  @doc """
+  Helper method for developing UI
+  TODO: Remove it
+  """
+  def _push(motoboy_id) do
     :timer.sleep(10)
     order = Core.Order |> Repo.get(1)
     Absinthe.Subscription.publish(Api.Endpoint, order, [motoboy_orders: motoboy_id])

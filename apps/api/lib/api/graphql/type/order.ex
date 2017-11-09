@@ -54,9 +54,14 @@ defmodule Api.Graphql.Type.Order do
       resolve &Api.Orders.Order.confirm/2
     end
 
-    field :cancel_order, :error do
+    field :cancel_order, :order_or_error do
       arg :order_id, :integer
       resolve &Api.Orders.Order.cancel/2
+    end
+
+    field :finish_order, :order_or_error do
+      arg :order_id, :integer
+      resolve &Api.Orders.Order.finish/2
     end
   end
 

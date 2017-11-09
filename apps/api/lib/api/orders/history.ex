@@ -1,15 +1,30 @@
 defmodule Api.Orders.History do
   use Api, :context
 
-  def did_confirm_order(order) do
-    Repo.insert(%Core.History{event: "confirmed", text: "Pedido confirmado", order_id: order.id})
+  @doc """
+  A order disso é:
+  Pedido é feito
+    :confirmado -> :finalizado
+    :cancelado <-> :novo_motoboy -> :confirmado -> :finalizado
+  """
+
+  def new_order(order_id, motoboy_id) do
+    Repo.insert(%Core.History{event: "novo_pedido", text: "Pedido enviado", order_id: order_id, motoboy_id: motoboy_id})
   end
 
-  def motoboy_busy(motoboy) do
-    Repo.insert(%Core.History{event: "busy", text: "Motoboy selecionado para fazer uma entrega", motoboy_id: motoboy.id})
+  def order_confirmed(order_id, motoboy_id) do
+    Repo.insert(%Core.History{event: "pedido_confirmado", text: "Pedido confirmado", order_id: order_id, motoboy_id: motoboy_id})
   end
 
-  def did_cancel_order(order) do
-    Repo.insert(%Core.History{event: "canceled", text: "Pedido cancelado", order_id: order.id})
+  def order_canceled(order_id, motoboy_id) do
+    Repo.insert(%Core.History{event: "pedido_cancelado", text: "Pedido cancelado", order_id: order_id, motoboy_id: motoboy_id})
+  end
+
+  def order_new_motoboy(order_id, motoboy_id) do
+    Repo.insert(%Core.History{event: "pedido_novo_motoboy", text: "Pedido enviado a outro motoboy", order_id: order_id, motoboy_id: motoboy_id})
+  end
+
+  def order_finished(order_id, motoboy_id) do
+    Repo.insert(%Core.History{event: "pedido_finalizado", text: "Pedido finalizado", order_id: order_id, motoboy_id: motoboy_id})
   end
 end

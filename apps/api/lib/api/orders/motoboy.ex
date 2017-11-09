@@ -13,22 +13,66 @@ defmodule Api.Orders.Motoboy do
     {:ok, motoboy.state == "unavailable" }
   end
 
+  def confirming_order(motoboy, _args, _ctx) do
+    {:ok, motoboy.state == "confirming_order" }
+  end
+
   def busy(motoboy, _args, _ctx) do
     {:ok, motoboy.state == "busy" }
   end
 
-  def mark_busy!(motoboy) do
-    motoboy
-    |> Core.Motoboy.changeset(%{state: "busy", became_busy_at: Timex.local})
-    |> Repo.update!
+  def did_confirm_order(motoboy) do
+    make_busy_and_publish(motoboy)
   end
 
-  def next_in_queue! do
+  def did_cancel_order(motoboy) do
+    make_available_and_publish(motoboy)
+  end
+
+  def did_finish_order(motoboy) do
+    make_available_and_publish(motoboy)
+  end
+
+  defp make_busy_and_publish(motoboy) do
+    motoboy
+    |> Core.Motoboy.changeset(%{state: "busy", became_busy_at: Timex.local})
+    |> Repo.update
+    |> case do
+      {:ok, motoboy} ->
+        Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_state: motoboy.id])
+        motoboy
+    end
+  end
+
+  defp make_available_and_publish(motoboy) do
+    motoboy
+    |> Core.Motoboy.changeset(%{state: "available", became_available_at: Timex.local})
+    |> Repo.update
+    |> case do
+      {:ok, motoboy} ->
+        Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_state: motoboy.id])
+        motoboy
+    end
+  end
+
+  @doc """
+  Get next motoboy in queue and mark his state as "busy"
+  to avoid him from being picked for the next order.
+  Publish his new state
+  """
+  def get_next_in_queue_and_publish do
     Core.Motoboy
     # |> where([central_id: central_id])
     |> where([state: "available"])
-    |> first([desc: :became_available_at])
+    |> first([asc: :became_available_at])
     |> Repo.one!
+    |> Core.Motoboy.changeset(%{state: "busy"})
+    |> Repo.update
+    |> case do
+      {:ok, motoboy} ->
+        Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_state: motoboy.id])
+        motoboy
+    end
   end
 
   def get(id) do
