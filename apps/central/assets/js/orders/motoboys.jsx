@@ -3,31 +3,28 @@ import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
 import Timeago from 'js/timeago'
 
+const MOTOBOY_FIELDS = gql`
+  fragment Fields on Motoboy {
+    id
+    name
+    available
+    busy
+    unavailable
+    becameAvailableAt
+    becameBusyAt
+  }
+`
 const MOTOBOYS_QUERY = gql`
   query getMotoboys {
-    motoboys {
-      id
-      name
-      available
-      busy
-      unavailable
-      becameAvailableAt
-      becameBusyAt
-    }
+    motoboys { ...Fields }
   }
+  ${MOTOBOY_FIELDS}
 `
 const MOTOBOY_UPDATES_SUBSCRIPTION = gql`
   subscription motoboyUpdates {
-    motoboy: motoboyUpdates {
-      id
-      name
-      available
-      busy
-      unavailable
-      becameAvailableAt
-      becameBusyAt
-    }
+    motoboy: motoboyUpdates { ...Fields }
   }
+  ${MOTOBOY_FIELDS}
 `
 
 export default graphql(MOTOBOYS_QUERY, {

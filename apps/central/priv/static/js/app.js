@@ -59683,8 +59683,9 @@ Object.defineProperty(exports, "__esModule", {
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-var _templateObject = _taggedTemplateLiteral(['\n  query getMotoboys {\n    motoboys {\n      id\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameBusyAt\n    }\n  }\n'], ['\n  query getMotoboys {\n    motoboys {\n      id\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameBusyAt\n    }\n  }\n']),
-    _templateObject2 = _taggedTemplateLiteral(['\n  subscription motoboyUpdates {\n    motoboy: motoboyUpdates {\n      id\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameBusyAt\n    }\n  }\n'], ['\n  subscription motoboyUpdates {\n    motoboy: motoboyUpdates {\n      id\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameBusyAt\n    }\n  }\n']);
+var _templateObject = _taggedTemplateLiteral(['\n  fragment Fields on Motoboy {\n    id\n    name\n    available\n    busy\n    unavailable\n    becameAvailableAt\n    becameBusyAt\n  }\n'], ['\n  fragment Fields on Motoboy {\n    id\n    name\n    available\n    busy\n    unavailable\n    becameAvailableAt\n    becameBusyAt\n  }\n']),
+    _templateObject2 = _taggedTemplateLiteral(['\n  query getMotoboys {\n    motoboys { ...Fields }\n  }\n  ', '\n'], ['\n  query getMotoboys {\n    motoboys { ...Fields }\n  }\n  ', '\n']),
+    _templateObject3 = _taggedTemplateLiteral(['\n  subscription motoboyUpdates {\n    motoboy: motoboyUpdates { ...Fields }\n  }\n  ', '\n'], ['\n  subscription motoboyUpdates {\n    motoboy: motoboyUpdates { ...Fields }\n  }\n  ', '\n']);
 
 var _react = require('react');
 
@@ -59704,8 +59705,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
-var MOTOBOYS_QUERY = (0, _graphqlTag2.default)(_templateObject);
-var MOTOBOY_UPDATES_SUBSCRIPTION = (0, _graphqlTag2.default)(_templateObject2);
+var MOTOBOY_FIELDS = (0, _graphqlTag2.default)(_templateObject);
+var MOTOBOYS_QUERY = (0, _graphqlTag2.default)(_templateObject2, MOTOBOY_FIELDS);
+var MOTOBOY_UPDATES_SUBSCRIPTION = (0, _graphqlTag2.default)(_templateObject3, MOTOBOY_FIELDS);
 
 exports.default = (0, _reactApollo.graphql)(MOTOBOYS_QUERY, {
   props: function props(_props) {
