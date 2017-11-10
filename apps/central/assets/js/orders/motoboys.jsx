@@ -3,9 +3,10 @@ import { graphql } from 'react-apollo'
 import gql from 'graphql-tag'
 import Timeago from 'js/timeago'
 
-export default graphql(gql`
+const MOTOBOYS_QUERY = gql`
   query getMotoboys {
     motoboys {
+      id
       name
       available
       busy
@@ -14,10 +15,53 @@ export default graphql(gql`
       becameBusyAt
     }
   }
-`)(Motoboys)
+`
+const MOTOBOY_UPDATES_SUBSCRIPTION = gql`
+  subscription motoboyUpdates {
+    motoboy: motoboyUpdates {
+      id
+      name
+      available
+      busy
+      unavailable
+      becameAvailableAt
+      becameBusyAt
+    }
+  }
+`
 
-function Motoboys({data: {loading, error, motoboys}}) {
+export default graphql(MOTOBOYS_QUERY, {
+  props: (props) => {
+    return {
+      ...props,
+      subscribeToMotoboyUpdates: params => {
+        return props.data.subscribeToMore({
+          document: MOTOBOY_UPDATES_SUBSCRIPTION,
+          variables: {
+            testing: ">>> here doh",
+          },
+          updateQuery: ({motoboys}, {subscriptionData: { motoboy }}) => {
+            if (!motoboy) {
+              return motoboys
+            }
+
+            return motoboys.map((aMotoboy) => {
+              if (motoboy.id === aMotoboy.id) {
+                return {...aMotoboy, ...motoboy}
+              }
+              return aMotoboy
+            })
+          }
+        })
+      }
+    }
+  },
+})(Motoboys)
+
+function Motoboys({data: {loading, error, motoboys}, subscribeToMotoboyUpdates}) {
   if (loading) return null
+  subscribeToMotoboyUpdates()
+
   return (
     <div>
       <h4>Motoboys</h4>

@@ -55,7 +55,8 @@ exports.config = {
         'react'
       ],
       plugins: [
-        ['transform-class-properties', {spec: true}]
+        ['transform-class-properties', {spec: true}],
+        ["transform-object-rest-spread"]
       ]
     },
     copycat: {
