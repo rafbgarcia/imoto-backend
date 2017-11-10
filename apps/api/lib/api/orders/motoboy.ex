@@ -1,12 +1,25 @@
 defmodule Api.Orders.Motoboy do
   use Api, :context
+  alias Core.Motoboy
 
   def current(_args, %{context: %{current_motoboy: current_motoboy}}) do
     {:ok, current_motoboy}
   end
 
   def all(_args, _ctx) do
-    {:ok, Core.Motoboy |> order_by([desc: :became_available_at, desc: :became_busy_at]) |> Db.Repo.all }
+    motoboys = from(m in Motoboy,
+      order_by: fragment(
+        """
+        CASE m0.state WHEN ? THEN 1 WHEN ? THEN 2 ELSE 3 END,
+        m0.became_available_at ASC,
+        m0.became_busy_at ASC,
+        m0.became_unavailable_at ASC
+        """, "available", "busy"
+      )
+    )
+    |> Repo.all
+
+    {:ok, motoboys }
   end
 
   def first_name(motoboy, _args, _ctx) do
@@ -44,7 +57,7 @@ defmodule Api.Orders.Motoboy do
 
   defp make_busy_and_publish(motoboy) do
     motoboy
-    |> Core.Motoboy.changeset(%{state: "busy", became_busy_at: Timex.local})
+    |> Motoboy.changeset(%{state: "busy", became_busy_at: Timex.local})
     |> Repo.update
     |> case do
       {:ok, motoboy} ->
@@ -58,7 +71,7 @@ defmodule Api.Orders.Motoboy do
   """
   def make_unavailable_and_publish(_args, %{context: %{current_motoboy: current_motoboy}}) do
     current_motoboy
-    |> Core.Motoboy.changeset(%{state: "unavailable", became_unavailable_at: Timex.local})
+    |> Motoboy.changeset(%{state: "unavailable", became_unavailable_at: Timex.local})
     |> Repo.update
     |> case do
       {:ok, motoboy} ->
@@ -79,7 +92,7 @@ defmodule Api.Orders.Motoboy do
   end
   defp make_available_and_publish(motoboy) do
     motoboy
-    |> Core.Motoboy.changeset(%{state: "available", became_available_at: Timex.local})
+    |> Motoboy.changeset(%{state: "available", became_available_at: Timex.local})
     |> Repo.update
     |> case do
       {:ok, motoboy} ->
@@ -94,12 +107,12 @@ defmodule Api.Orders.Motoboy do
   Publish his new state
   """
   def get_next_in_queue_and_publish do
-    Core.Motoboy
+    Motoboy
     # |> where([central_id: central_id])
     |> where([state: "available"])
     |> first([asc: :became_available_at])
     |> Repo.one!
-    |> Core.Motoboy.changeset(%{state: "busy"})
+    |> Motoboy.changeset(%{state: "busy"})
     |> Repo.update
     |> case do
       {:ok, motoboy} ->
@@ -109,6 +122,6 @@ defmodule Api.Orders.Motoboy do
   end
 
   def get(id) do
-    Core.Motoboy |> Repo.get(id)
+    Motoboy |> Repo.get(id)
   end
 end
