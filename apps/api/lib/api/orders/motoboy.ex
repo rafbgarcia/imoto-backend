@@ -107,16 +107,20 @@ defmodule Api.Orders.Motoboy do
   @doc """
   Get next motoboy in queue and mark his state as "busy"
   to avoid him from being picked for the next order.
-  Publish his new state
+  Use pessimistic locking to avoid sending 2 orders to the same motoboy.
+  Publish his new state.
   """
   def get_next_in_queue_and_publish do
-    Motoboy
-    # |> where([central_id: central_id])
-    |> where([state: "available"])
-    |> first([asc: :became_available_at])
-    |> Repo.one!
-    |> Motoboy.changeset(%{state: "busy"})
-    |> Repo.update
+    Repo.transaction(fn ->
+      Motoboy
+      # |> where([central_id: central_id])
+      |> lock("FOR UPDATE")
+      |> where([state: "available"])
+      |> first([asc: :became_available_at])
+      |> Repo.one!
+      |> Motoboy.changeset(%{state: "busy"})
+      |> Repo.update
+    end)
     |> case do
       {:ok, motoboy} ->
         Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_state: motoboy.id])
