@@ -34,14 +34,6 @@ defmodule Api.GraphqlSchema do
       config fn _args, socket ->
         {:ok, topic: socket.context.current_central.id}
       end
-
-      trigger :make_motoboy_available, topic: fn motoboy ->
-        motoboy.central_id
-      end
-
-      trigger :make_motoboy_unavailable, topic: fn motoboy ->
-        motoboy.central_id
-      end
     end
 
     # field :customer_order, :order_or_error do

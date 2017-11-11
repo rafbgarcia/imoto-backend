@@ -59681,6 +59681,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 var _templateObject = _taggedTemplateLiteral(['\n  fragment Fields on Motoboy {\n    id\n    name\n    available\n    busy\n    unavailable\n    becameAvailableAt\n    becameBusyAt\n  }\n'], ['\n  fragment Fields on Motoboy {\n    id\n    name\n    available\n    busy\n    unavailable\n    becameAvailableAt\n    becameBusyAt\n  }\n']),
@@ -59703,6 +59705,12 @@ var _timeago2 = _interopRequireDefault(_timeago);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
 function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
 var MOTOBOY_FIELDS = (0, _graphqlTag2.default)(_templateObject);
@@ -59715,12 +59723,13 @@ exports.default = (0, _reactApollo.graphql)(MOTOBOYS_QUERY, {
       subscribeToMotoboyUpdates: function subscribeToMotoboyUpdates(params) {
         return _props.data.subscribeToMore({
           document: MOTOBOY_UPDATES_SUBSCRIPTION,
-          variables: {
-            testing: ">>> here doh"
-          },
+          variables: {},
           updateQuery: function updateQuery(_ref, _ref2) {
             var motoboys = _ref.motoboys;
             var motoboy = _ref2.subscriptionData.motoboy;
+
+            console.log('1');
+            if (!motoboys) return;
 
             if (!motoboy) {
               return motoboys;
@@ -59737,30 +59746,48 @@ exports.default = (0, _reactApollo.graphql)(MOTOBOYS_QUERY, {
       }
     });
   }
-})(Motoboys);
+})(function (props) {
+  return _react2.default.createElement(Motoboys, props);
+});
 
+var Motoboys = function (_React$Component) {
+  _inherits(Motoboys, _React$Component);
 
-function Motoboys(_ref3) {
-  var _ref3$data = _ref3.data,
-      loading = _ref3$data.loading,
-      error = _ref3$data.error,
-      motoboys = _ref3$data.motoboys,
-      subscribeToMotoboyUpdates = _ref3.subscribeToMotoboyUpdates;
+  function Motoboys() {
+    _classCallCheck(this, Motoboys);
 
-  if (loading) return null;
-  subscribeToMotoboyUpdates();
+    return _possibleConstructorReturn(this, (Motoboys.__proto__ || Object.getPrototypeOf(Motoboys)).apply(this, arguments));
+  }
 
-  return _react2.default.createElement(
-    'div',
-    null,
-    _react2.default.createElement(
-      'h4',
-      null,
-      'Motoboys'
-    ),
-    motoboys.map(Motoboy)
-  );
-}
+  _createClass(Motoboys, [{
+    key: 'componentWillMount',
+    value: function componentWillMount() {
+      this.props.subscribeToMotoboyUpdates();
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _props$data = this.props.data,
+          loading = _props$data.loading,
+          error = _props$data.error,
+          motoboys = _props$data.motoboys;
+
+      if (loading) return null;
+      return _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement(
+          'h4',
+          null,
+          'Motoboys'
+        ),
+        motoboys.map(Motoboy)
+      );
+    }
+  }]);
+
+  return Motoboys;
+}(_react2.default.Component);
 
 function Motoboy(motoboy, index) {
   var iconClass = getIconClass(motoboy);
@@ -59787,9 +59814,9 @@ function Motoboy(motoboy, index) {
   );
 }
 
-function getIconClass(_ref4) {
-  var available = _ref4.available,
-      busy = _ref4.busy;
+function getIconClass(_ref3) {
+  var available = _ref3.available,
+      busy = _ref3.busy;
 
   if (available) {
     return "text-success";
@@ -59800,11 +59827,11 @@ function getIconClass(_ref4) {
   }
 }
 
-function getDateToShow(_ref5) {
-  var available = _ref5.available,
-      busy = _ref5.busy,
-      becameBusyAt = _ref5.becameBusyAt,
-      becameAvailableAt = _ref5.becameAvailableAt;
+function getDateToShow(_ref4) {
+  var available = _ref4.available,
+      busy = _ref4.busy,
+      becameBusyAt = _ref4.becameBusyAt,
+      becameAvailableAt = _ref4.becameAvailableAt;
 
   if (available) {
     return _react2.default.createElement(

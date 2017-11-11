@@ -34,10 +34,11 @@ export default graphql(MOTOBOYS_QUERY, {
       subscribeToMotoboyUpdates: params => {
         return props.data.subscribeToMore({
           document: MOTOBOY_UPDATES_SUBSCRIPTION,
-          variables: {
-            testing: ">>> here doh",
-          },
+          variables: {},
           updateQuery: ({motoboys}, {subscriptionData: { motoboy }}) => {
+            console.log('1')
+            if (!motoboys) return
+
             if (!motoboy) {
               return motoboys
             }
@@ -53,18 +54,23 @@ export default graphql(MOTOBOYS_QUERY, {
       }
     }
   },
-})(Motoboys)
+})((props) => <Motoboys {...props} />)
 
-function Motoboys({data: {loading, error, motoboys}, subscribeToMotoboyUpdates}) {
-  if (loading) return null
-  subscribeToMotoboyUpdates()
+class Motoboys extends React.Component {
+  componentWillMount() {
+    this.props.subscribeToMotoboyUpdates()
+  }
 
-  return (
-    <div>
-      <h4>Motoboys</h4>
-      {motoboys.map(Motoboy)}
-    </div>
-  )
+  render() {
+    const {data: {loading, error, motoboys}} = this.props
+    if (loading) return null
+    return (
+      <div>
+        <h4>Motoboys</h4>
+        {motoboys.map(Motoboy)}
+      </div>
+    )
+  }
 }
 
 function Motoboy(motoboy, index) {

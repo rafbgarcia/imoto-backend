@@ -62,6 +62,7 @@ defmodule Api.Orders.Motoboy do
     |> case do
       {:ok, motoboy} ->
         Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_state: motoboy.id])
+        Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_updates: motoboy.central_id])
         motoboy
     end
   end
@@ -76,6 +77,7 @@ defmodule Api.Orders.Motoboy do
     |> case do
       {:ok, motoboy} ->
         Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_state: motoboy.id])
+        Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_updates: motoboy.central_id])
         Api.Orders.History.motoboy_unavailable(motoboy.id)
         {:ok, motoboy}
     end
@@ -86,7 +88,7 @@ defmodule Api.Orders.Motoboy do
   """
   def make_available_and_publish(_args, %{context: %{current_motoboy: current_motoboy}}) do
     with {:ok, motoboy} <- make_available_and_publish(current_motoboy) do
-      Api.Orders.History.motoboy_unavailable(motoboy.id)
+      Api.Orders.History.motoboy_available(motoboy.id)
       {:ok, motoboy}
     end
   end
@@ -97,6 +99,7 @@ defmodule Api.Orders.Motoboy do
     |> case do
       {:ok, motoboy} ->
         Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_state: motoboy.id])
+        Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_updates: motoboy.central_id])
         {:ok, motoboy}
     end
   end
