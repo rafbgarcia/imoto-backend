@@ -67,6 +67,8 @@ defmodule Db.Repo.Migrations.CreateCentrals do
 
     create table(:locations) do
       add :stop_id, references(:stops)
+      add :customer_id, references(:customers)
+      add :name, :string
       add :street, :string
       add :number, :string
       add :neighborhood, :string
@@ -77,6 +79,11 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       add :uf, :string
       add :lat, :string
       add :lng, :string
+      add :formatted_address, :string
+      add :formatted_phone_number, :string
+      add :google_place_id, :string
+      add :used_count, :integer, limit: 5
+      add :last_used_at, :utc_datetime
     end
 
     create table(:history) do

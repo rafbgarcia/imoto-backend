@@ -35,32 +35,6 @@ defmodule Api.GraphqlSchema do
         {:ok, topic: socket.context.current_central.id}
       end
     end
-
-    # field :customer_order, :order_or_error do
-    #   config fn _args, socket ->
-    #     {:ok, topic: socket.context.current_customer.id}
-    #   end
-
-    #   trigger :confirm_order, topic: fn order ->
-    #     order.customer_id
-    #   end
-    # end
-
-    # field :central_orders, :order_or_error do
-    #   config fn _args, socket ->
-    #     {:ok, topic: socket.context.current_central.id}
-    #   end
-
-    #   trigger :confirm_order, topic: fn order ->
-    #     order.motoboy.central_id
-    #   end
-    # end
-
-    # field :central_motoboys, :motoboy do
-    #   config fn _args, socket ->
-    #     {:ok, topic: socket.context.current_central.id}
-    #   end
-    # end
   end
 
 end

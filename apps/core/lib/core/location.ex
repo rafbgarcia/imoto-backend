@@ -3,6 +3,8 @@ defmodule Core.Location do
 
   schema "locations" do
     belongs_to :stop, Core.Stop
+    belongs_to :customer, Core.Customer
+    field :name, :string
     field :street, :string
     field :number, :string
     field :neighborhood, :string
@@ -13,11 +15,21 @@ defmodule Core.Location do
     field :uf, :string
     field :lat, :string
     field :lng, :string
+    field :google_place_id, :string
+    field :formatted_address, :string
+    field :formatted_phone_number, :string
+    field :used_count, :integer
+    field :last_used_at, Timex.Ecto.DateTime
   end
 
   def changeset(changeset, params \\ %{}) do
     changeset
-    |> cast(params, [:street])
+    |> cast(params, [
+      :customer_id, :stop_id,
+      :name, :street, :number, :neighborhood, :zipcode, :formatted_address, :formatted_phone_number,
+      :complement, :reference, :city, :uf, :lat, :lng, :google_place_id,
+      :last_used_at, :used_count,
+    ])
     |> validate_required([:street])
   end
 end

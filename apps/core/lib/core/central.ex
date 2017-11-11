@@ -2,6 +2,7 @@ defmodule Core.Central do
   use Core, :schema
 
   schema "centrals" do
+    has_many :motoboys, Core.Motoboy
     field :name, :string
     field :login, :string
     field :password, :string

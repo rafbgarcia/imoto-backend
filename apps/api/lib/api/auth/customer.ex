@@ -9,7 +9,7 @@ defmodule Api.Auth.Customer do
   @doc """
   If a customer is not present in the context, we create a new one.
   """
-  def current_or_new(_, %{current_customer: current_customer} = _ctx) do
+  def current_or_new(_, %{current_customer: current_customer}) do
     {:ok, current_customer}
   end
   def current_or_new(_, _) do

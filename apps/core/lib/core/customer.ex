@@ -2,6 +2,7 @@ defmodule Core.Customer do
   use Core, :schema
 
   schema "customers" do
+    has_many :locations, Core.Location
     field :name, :string
     field :phone_number, :string
     field :auth_token, :string
