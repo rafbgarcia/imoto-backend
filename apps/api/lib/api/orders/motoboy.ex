@@ -20,7 +20,7 @@ defmodule Api.Orders.Motoboy do
         m0.became_busy_at ASC,
         m0.became_unavailable_at ASC
         """,
-        "available", "busy"
+        ^Motoboy.available, ^Motoboy.busy
       )
     )
     |> Repo.all
@@ -31,20 +31,20 @@ defmodule Api.Orders.Motoboy do
     {:ok, first_name }
   end
 
-  def available(motoboy, _args, _ctx) do
-    {:ok, motoboy.state == "available" }
+  def available(%{state: state}, _args, _ctx) do
+    {:ok, state == Motoboy.available }
   end
 
-  def unavailable(motoboy, _args, _ctx) do
-    {:ok, motoboy.state == "unavailable" }
+  def unavailable(%{state: state}, _args, _ctx) do
+    {:ok, state == Motoboy.unavailable }
   end
 
-  def confirming_order(motoboy, _args, _ctx) do
-    {:ok, motoboy.state == "confirming_order" }
+  def confirming_order(%{state: state}, _args, _ctx) do
+    {:ok, state == Motoboy.confirming_order }
   end
 
-  def busy(motoboy, _args, _ctx) do
-    {:ok, motoboy.state == "busy" }
+  def busy(%{state: state}, _args, _ctx) do
+    {:ok, state == Motoboy.busy }
   end
 
   def did_confirm_order(motoboy) do
@@ -61,7 +61,7 @@ defmodule Api.Orders.Motoboy do
 
   defp make_busy_and_publish(motoboy) do
     motoboy
-    |> Motoboy.changeset(%{state: "busy", became_busy_at: Timex.local})
+    |> Motoboy.changeset(%{state: Motoboy.busy, became_busy_at: Timex.local})
     |> Repo.update
     |> case do
       {:ok, motoboy} ->
@@ -76,7 +76,7 @@ defmodule Api.Orders.Motoboy do
   """
   def make_unavailable_and_publish(_args, %{context: %{current_motoboy: current_motoboy}}) do
     current_motoboy
-    |> Motoboy.changeset(%{state: "unavailable", became_unavailable_at: Timex.local})
+    |> Motoboy.changeset(%{state: Motoboy.unavailable, became_unavailable_at: Timex.local})
     |> Repo.update
     |> case do
       {:ok, motoboy} ->
@@ -98,7 +98,7 @@ defmodule Api.Orders.Motoboy do
   end
   defp make_available_and_publish(motoboy) do
     motoboy
-    |> Motoboy.changeset(%{state: "available", became_available_at: Timex.local})
+    |> Motoboy.changeset(%{state: Motoboy.available, became_available_at: Timex.local})
     |> Repo.update
     |> case do
       {:ok, motoboy} ->
@@ -126,7 +126,7 @@ defmodule Api.Orders.Motoboy do
         join: c in assoc(m, :central),
         preload: [central: c],
         where: m.central_id == ^central_id,
-        where: m.state == "available",
+        where: m.state == ^Motoboy.available,
         where: m.id != ^current_motoboy_id,
         order_by: fragment(
           """
@@ -143,7 +143,7 @@ defmodule Api.Orders.Motoboy do
           Repo.rollback("Nenhum motoboy disponível")
         motoboy ->
           motoboy.central |> Central.changeset(%{last_order_taken_at: Timex.local}) |> Repo.update!
-          motoboy |> Motoboy.changeset(%{state: "busy"}) |> Repo.update!
+          motoboy |> Motoboy.changeset(%{state: Motoboy.busy}) |> Repo.update!
       end
     end)
   end
@@ -169,7 +169,7 @@ defmodule Api.Orders.Motoboy do
         lock: "FOR UPDATE",
         join: c in assoc(m, :central),
         preload: [central: c],
-        where: m.state == "available",
+        where: m.state == ^Motoboy.available,
         order_by: [asc: m.became_available_at, asc: c.last_order_taken_at]
       )
       |> first
@@ -179,7 +179,7 @@ defmodule Api.Orders.Motoboy do
           Repo.rollback("Nenhum motoboy disponível")
         motoboy ->
           motoboy.central |> Central.changeset(%{last_order_taken_at: Timex.local}) |> Repo.update!
-          motoboy |> Motoboy.changeset(%{state: "busy"}) |> Repo.update!
+          motoboy |> Motoboy.changeset(%{state: Motoboy.busy}) |> Repo.update!
       end
     end)
   end

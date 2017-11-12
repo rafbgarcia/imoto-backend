@@ -23,6 +23,7 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       add :name, :string
       add :central_id, references(:centrals)
       add :state, :string, default: "unavailable"
+      add :phone_number, :string
       add :login, :string
       add :password, :string
       add :auth_token, :string

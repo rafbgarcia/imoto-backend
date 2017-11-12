@@ -4,27 +4,37 @@ defmodule Api.Orders.Order do
   alias Core.Order
 
   def all(_args, _ctx) do
-    {:ok, Order |> Repo.all }
+    {:ok, Order |> Repo.all}
+  end
+
+  def get(%{id: id}, %{context: %{current_customer: current_customer}}) do
+    Order
+    |> where(id: ^id, customer_id: ^current_customer.id)
+    |> first |> Repo.one
+    |> case do
+      nil -> {:ok, %{error: "Pedido não encontrado"}}
+      order -> {:ok, order}
+    end
   end
 
   def pending(%{state: state}, _args, _ctx) do
-    {:ok, state == "pending" }
+    {:ok, state == Order.pending}
   end
 
   def confirmed(%{state: state}, _args, _ctx) do
-    {:ok, state == "confirmed" }
+    {:ok, state == Order.confirmed}
   end
 
   def finished(%{state: state}, _args, _ctx) do
-    {:ok, state == "finished" }
+    {:ok, state == Order.finished}
   end
 
   def no_motoboy(%{state: state}, _args, _ctx) do
-    {:ok, state == "no_motoboy" }
+    {:ok, state == Order.no_motoboys}
   end
 
   def canceled(%{state: state}, _args, _ctx) do
-    {:ok, state == "canceled" }
+    {:ok, state == Order.canceled}
   end
 
   def formatted_price(%Order{} = order, _args, _ctx) do
@@ -79,12 +89,12 @@ defmodule Api.Orders.Order do
     with order <- get_order(order_id) do
       Api.Orders.History.order_canceled(order.id, current_motoboy.id)
 
-      case Api.Orders.Motoboy.get_next_of_same_central(current_motoboy) do
+      with {:ok, new_motoboy} <- Api.Orders.Motoboy.get_next_of_same_central(current_motoboy) do
+        Api.Orders.History.order_new_motoboy(order.id, new_motoboy.id)
+        Absinthe.Subscription.publish(Api.Endpoint, order, [motoboy_orders: new_motoboy.id])
+      else
         {:error, _} ->
-          order |> Order.changeset(%{state: "no_motoboys"}) |> Repo.update
-        {:ok, new_motoboy} ->
-          Api.Orders.History.order_new_motoboy(order.id, new_motoboy.id)
-          Absinthe.Subscription.publish(Api.Endpoint, order, [motoboy_orders: new_motoboy.id])
+          order |> Order.changeset(%{state: Order.no_motoboys}) |> Repo.update
       end
 
       Api.Orders.Motoboy.did_cancel_order(current_motoboy)
@@ -117,7 +127,7 @@ defmodule Api.Orders.Order do
 
   defp confirm_order!(order_id, motoboy_id) do
     get_order(order_id)
-    |> Order.changeset(%{state: "confirmed", motoboy_id: motoboy_id, confirmed_at: Timex.local})
+    |> Order.changeset(%{state: Order.confirmed, motoboy_id: motoboy_id, confirmed_at: Timex.local})
     |> Repo.update!
   end
 
@@ -146,7 +156,7 @@ defmodule Api.Orders.Order do
 
   defp finish_order!(order_id) do
     get_order(order_id)
-    |> Order.changeset(%{state: "finished", finished_at: Timex.local})
+    |> Order.changeset(%{state: Order.finished, finished_at: Timex.local})
     |> Repo.update!
   end
 

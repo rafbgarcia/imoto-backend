@@ -18,6 +18,7 @@ defmodule Api.Graphql.Type.Motoboy do
     field :first_name, :string, resolve: &Api.Orders.Motoboy.first_name/3
     field :name, :string
     field :auth_token, :string
+    field :phone_number, :string
     field :busy, :boolean, resolve: &Api.Orders.Motoboy.busy/3
     field :available, :boolean, resolve: &Api.Orders.Motoboy.available/3
     field :unavailable, :boolean, resolve: &Api.Orders.Motoboy.unavailable/3

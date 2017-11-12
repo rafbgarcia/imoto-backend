@@ -4,6 +4,11 @@ defmodule Api.Graphql.Type.Order do
 
   # Queries
   object :orders_queries do
+    field :order, :order_or_error do
+      arg :id, non_null(:id)
+      resolve &Api.Orders.Order.get/2
+    end
+
     @desc "Get orders"
     field :orders, list_of(:order) do
       # TODO: can't be all here, must be orders per Central since last opened
