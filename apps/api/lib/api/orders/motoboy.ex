@@ -7,20 +7,23 @@ defmodule Api.Orders.Motoboy do
   end
 
   def all(_args, %{context: %{current_central: current_central}}) do
-    motoboys = from(m in Motoboy,
-      where: [central_id: ^current_central.id],
+    {:ok, all_for_central(current_central.id)}
+  end
+
+  defp all_for_central(central_id) do
+    from(m in Motoboy,
+      where: [central_id: ^central_id],
       order_by: fragment(
         """
         CASE m0.state WHEN ? THEN 1 WHEN ? THEN 2 ELSE 3 END,
         m0.became_available_at ASC,
         m0.became_busy_at ASC,
         m0.became_unavailable_at ASC
-        """, "available", "busy"
+        """,
+        "available", "busy"
       )
     )
     |> Repo.all
-
-    {:ok, motoboys }
   end
 
   def first_name(motoboy, _args, _ctx) do
@@ -106,22 +109,60 @@ defmodule Api.Orders.Motoboy do
   end
 
   @doc """
+  This method is called when the order is canceled.
+  In this scenario we want to get a motoboy of the same central, if there's any available,
+  otherwise it'll get the next motoboy for the next central in the queue.
+  """
+  def get_next_of_same_central(%{id: id, central_id: central_id} = _motoboy) do
+    with {:ok, motoboy} <- get_next_of_same_central(id, central_id) do
+      Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_state: motoboy.id])
+      {:ok, motoboy}
+    end
+  end
+  defp get_next_of_same_central(current_motoboy_id, central_id) do
+    Repo.transaction(fn ->
+      from(m in Motoboy,
+        lock: "FOR UPDATE",
+        join: c in assoc(m, :central),
+        preload: [central: c],
+        where: m.central_id == ^central_id,
+        where: m.state == "available",
+        where: m.id != ^current_motoboy_id,
+        order_by: fragment(
+          """
+          CASE c1.id WHEN ? THEN 1 ELSE 2 END,
+          m0.became_available_at ASC,
+          c1.last_order_taken_at ASC
+          """, ^central_id
+        )
+      )
+      |> first
+      |> Repo.one
+      |> case do
+        nil ->
+          Repo.rollback("Nenhum motoboy disponível")
+        motoboy ->
+          motoboy.central |> Central.changeset(%{last_order_taken_at: Timex.local}) |> Repo.update!
+          motoboy |> Motoboy.changeset(%{state: "busy"}) |> Repo.update!
+      end
+    end)
+  end
+
+  @doc """
   Get next motoboy in queue and mark his state as "busy"
   to avoid him from being picked for the next order.
   Use pessimistic locking to avoid sending 2 orders to the same motoboy.
   Publish his new state.
   """
   def get_next_in_queue_and_publish do
-    get_next_in_queue()
-    |> case do
-      {:ok, :error} ->
-        {:error, "Nenhum motoboy disponível no momento"}
-      {:ok, motoboy} ->
-        Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_state: motoboy.id])
-        {:ok, motoboy}
+    with {:ok, motoboy} <- get_next_in_queue() do
+      Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_state: motoboy.id])
+      {:ok, motoboy}
     end
   end
 
+  # Gets next motoboy for the next central.
+  # If a central has no available motoboys, get a motoboy of the next one.
   defp get_next_in_queue do
     Repo.transaction(fn ->
       from(m in Motoboy,
@@ -135,10 +176,10 @@ defmodule Api.Orders.Motoboy do
       |> Repo.one
       |> case do
         nil ->
-          :error
+          Repo.rollback("Nenhum motoboy disponível")
         motoboy ->
-          motoboy.central |> Central.changeset(%{last_order_taken_at: Timex.local}) |> Repo.update
-          motoboy |> Motoboy.changeset(%{state: "busy"}) |> Repo.update
+          motoboy.central |> Central.changeset(%{last_order_taken_at: Timex.local}) |> Repo.update!
+          motoboy |> Motoboy.changeset(%{state: "busy"}) |> Repo.update!
       end
     end)
   end

@@ -1,19 +1,33 @@
 defmodule Api.Orders.Order do
   use Api, :context
 
+  alias Core.Order
+
   def all(_args, _ctx) do
-    {:ok, Core.Order |> Repo.all }
+    {:ok, Order |> Repo.all }
   end
 
-  def pending(%Core.Order{} = order, _args, _ctx) do
-    {:ok, order.state == "pending" }
+  def pending(%{state: state}, _args, _ctx) do
+    {:ok, state == "pending" }
   end
 
-  def confirmed(%Core.Order{} = order, _args, _ctx) do
-    {:ok, order.state == "confirmed" }
+  def confirmed(%{state: state}, _args, _ctx) do
+    {:ok, state == "confirmed" }
   end
 
-  def formatted_price(%Core.Order{} = order, _args, _ctx) do
+  def finished(%{state: state}, _args, _ctx) do
+    {:ok, state == "finished" }
+  end
+
+  def no_motoboy(%{state: state}, _args, _ctx) do
+    {:ok, state == "no_motoboy" }
+  end
+
+  def canceled(%{state: state}, _args, _ctx) do
+    {:ok, state == "canceled" }
+  end
+
+  def formatted_price(%Order{} = order, _args, _ctx) do
     {:ok, Money.to_string(order.price)}
   end
 
@@ -33,12 +47,13 @@ defmodule Api.Orders.Order do
     |> Map.put(:state, "pending")
     |> Map.put(:price, 1232) # TODO: fix this
 
-    Core.Order.changeset(%Core.Order{}, params)
-    |> Repo.insert
+    Order.changeset(%Order{}, params)
+    |> Repo.insert(returning: true)
     |> case do
       {:ok, order} ->
-        with {:ok, motoboy} <- get_and_notify_next_motoboy_in_queue!(order) do
+        with {:ok, motoboy} <- Api.Orders.Motoboy.get_next_in_queue_and_publish do
           Api.Orders.History.new_order(order.id, motoboy.id)
+          Absinthe.Subscription.publish(Api.Endpoint, order, [motoboy_orders: motoboy.id])
           spawn fn -> after_create(order) end
           {:ok, order}
         else
@@ -61,12 +76,18 @@ defmodule Api.Orders.Order do
       -> Publish his new state
   """
   def cancel(%{order_id: order_id}, %{context: %{current_motoboy: current_motoboy}}) do
-    Api.Orders.History.order_canceled(order_id, current_motoboy.id)
-    Api.Orders.Motoboy.did_cancel_order(current_motoboy)
+    with order <- get_order(order_id) do
+      Api.Orders.History.order_canceled(order.id, current_motoboy.id)
 
-    order = get_order(order_id)
-    with {:ok, new_motoboy} <- get_and_notify_next_motoboy_in_queue!(order) do
-      Api.Orders.History.order_new_motoboy(order.id, new_motoboy.id)
+      case Api.Orders.Motoboy.get_next_of_same_central(current_motoboy) do
+        {:error, _} ->
+          order |> Order.changeset(%{state: "no_motoboys"}) |> Repo.update
+        {:ok, new_motoboy} ->
+          Api.Orders.History.order_new_motoboy(order.id, new_motoboy.id)
+          Absinthe.Subscription.publish(Api.Endpoint, order, [motoboy_orders: new_motoboy.id])
+      end
+
+      Api.Orders.Motoboy.did_cancel_order(current_motoboy)
       {:ok, order}
     end
   end
@@ -94,6 +115,12 @@ defmodule Api.Orders.Order do
     Ecto.NoResultsError -> {:error,  "Nenhum motoboy disponível"}
   end
 
+  defp confirm_order!(order_id, motoboy_id) do
+    get_order(order_id)
+    |> Order.changeset(%{state: "confirmed", motoboy_id: motoboy_id, confirmed_at: Timex.local})
+    |> Repo.update!
+  end
+
   @doc """
   onFinishOrder
     -> Finish order
@@ -117,27 +144,14 @@ defmodule Api.Orders.Order do
     Ecto.NoResultsError -> {:error,  "Nenhum motoboy disponível"}
   end
 
-  defp confirm_order!(order_id, motoboy_id) do
-    get_order(order_id)
-    |> Core.Order.changeset(%{state: "confirmed", motoboy_id: motoboy_id, confirmed_at: Timex.local})
-    |> Repo.update!
-  end
-
   defp finish_order!(order_id) do
     get_order(order_id)
-    |> Core.Order.changeset(%{state: "finished", finished_at: Timex.local})
+    |> Order.changeset(%{state: "finished", finished_at: Timex.local})
     |> Repo.update!
-  end
-
-  defp get_and_notify_next_motoboy_in_queue!(order) do
-    with {:ok, motoboy} <- Api.Orders.Motoboy.get_next_in_queue_and_publish do
-      Absinthe.Subscription.publish(Api.Endpoint, order, [motoboy_orders: motoboy.id])
-      {:ok, motoboy}
-    end
   end
 
   defp get_order(id) do
-    Repo.get(Core.Order, id)
+    Repo.get(Order, id)
   end
 
   # Parallel

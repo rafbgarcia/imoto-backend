@@ -1,5 +1,6 @@
 defmodule Api.Orders.Location do
   use Api, :context
+  alias Core.Location
 
   def line1(location, _args, _ctx) do
     {:ok, line1(location) }
@@ -33,8 +34,7 @@ defmodule Api.Orders.Location do
   end
 
   def after_create_order(order) do
-    order.stops
-    |> Enum.map(&Map.get(&1, :location))
+    Repo.all(assoc(order, :locations))
     |> Enum.each(fn location ->
       Core.Location.changeset(location, %{
         last_used_at: Timex.local,

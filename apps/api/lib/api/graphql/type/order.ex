@@ -59,12 +59,12 @@ defmodule Api.Graphql.Type.Order do
     end
 
     field :cancel_order, :order_or_error do
-      arg :order_id, :integer
+      arg :order_id, non_null(:id)
       resolve &Api.Orders.Order.cancel/2
     end
 
     field :finish_order, :order_or_error do
-      arg :order_id, :integer
+      arg :order_id, non_null(:id)
       resolve &Api.Orders.Order.finish/2
     end
   end
@@ -77,6 +77,9 @@ defmodule Api.Graphql.Type.Order do
     field :formatted_price, :string, resolve: &Api.Orders.Order.formatted_price/3
     field :pending, :boolean, resolve: &Api.Orders.Order.pending/3
     field :confirmed, :boolean, resolve: &Api.Orders.Order.confirmed/3
+    field :canceled, :boolean, resolve: &Api.Orders.Order.canceled/3
+    field :finished, :boolean, resolve: &Api.Orders.Order.finished/3
+    field :no_motoboy, :boolean, resolve: &Api.Orders.Order.no_motoboy/3
     field :inserted_at, :datetime
     field :confirmed_at, :datetime
     field :canceled_at, :datetime

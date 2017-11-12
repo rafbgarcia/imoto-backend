@@ -3,6 +3,7 @@ defmodule Core.Order do
 
   schema "orders" do
     has_many :stops, Core.Stop
+    has_many :locations, through: [:stops, :location]
     belongs_to :motoboy, Core.Motoboy
     belongs_to :customer, Core.Customer
     field :price, Money.Ecto.Type
@@ -21,6 +22,6 @@ defmodule Core.Order do
       :canceled_at, :motoboy_id, :customer_id,
     ])
     |> validate_required([:price, :state, :customer_id])
-    |> validate_inclusion(:state, ["pending", "confirmed", "finished", "canceled"])
+    |> validate_inclusion(:state, ["pending", "confirmed", "finished", "canceled", "no_motoboy"])
   end
 end

@@ -28,14 +28,16 @@ defmodule Api do
     quote do
       alias Db.Repo
       import Ecto.Query
+      import Ecto
     end
   end
 
   def mix do
     quote do
-      alias Db.Repo
+      import Ecto
       import Ecto.Query
-      alias Core.{Central, Motoboy, Customer, Location, Stop}
+      alias Db.Repo
+      alias Core.{Order, Central, Motoboy, Customer, Location, Stop}
     end
   end
 
