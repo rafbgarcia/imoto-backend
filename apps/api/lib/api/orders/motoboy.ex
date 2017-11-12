@@ -1,13 +1,14 @@
 defmodule Api.Orders.Motoboy do
   use Api, :context
-  alias Core.Motoboy
+  alias Core.{Motoboy, Central}
 
   def current(_args, %{context: %{current_motoboy: current_motoboy}}) do
     {:ok, current_motoboy}
   end
 
-  def all(_args, _ctx) do
+  def all(_args, %{context: %{current_central: current_central}}) do
     motoboys = from(m in Motoboy,
+      where: [central_id: ^current_central.id],
       order_by: fragment(
         """
         CASE m0.state WHEN ? THEN 1 WHEN ? THEN 2 ELSE 3 END,
@@ -111,21 +112,35 @@ defmodule Api.Orders.Motoboy do
   Publish his new state.
   """
   def get_next_in_queue_and_publish do
-    Repo.transaction(fn ->
-      Motoboy
-      # |> where([central_id: central_id])
-      |> lock("FOR UPDATE")
-      |> where([state: "available"])
-      |> first([asc: :became_available_at])
-      |> Repo.one!
-      |> Motoboy.changeset(%{state: "busy"})
-      |> Repo.update
-    end)
+    get_next_in_queue()
     |> case do
+      {:ok, :error} ->
+        {:error, "Nenhum motoboy disponível no momento"}
       {:ok, motoboy} ->
         Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_state: motoboy.id])
-        motoboy
+        {:ok, motoboy}
     end
+  end
+
+  defp get_next_in_queue do
+    Repo.transaction(fn ->
+      from(m in Motoboy,
+        lock: "FOR UPDATE",
+        join: c in assoc(m, :central),
+        preload: [central: c],
+        where: m.state == "available",
+        order_by: [asc: m.became_available_at, asc: c.last_order_taken_at]
+      )
+      |> first
+      |> Repo.one
+      |> case do
+        nil ->
+          :error
+        motoboy ->
+          motoboy.central |> Central.changeset(%{last_order_taken_at: Timex.local}) |> Repo.update
+          motoboy |> Motoboy.changeset(%{state: "busy"}) |> Repo.update
+      end
+    end)
   end
 
   def get(id) do

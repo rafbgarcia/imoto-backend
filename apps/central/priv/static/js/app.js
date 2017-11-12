@@ -6123,6 +6123,57 @@ exports.warnOnceInDevelopment = warnOnceInDevelopment;
   })();
 });
 
+require.register("apollo-link-context/lib/bundle.umd.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "apollo-link-context");
+  (function() {
+    (function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('apollo-link')) :
+	typeof define === 'function' && define.amd ? define(['exports', 'apollo-link'], factory) :
+	(factory((global.errorLink = {}),global.apolloLink));
+}(this, (function (exports,apolloLink) { 'use strict';
+
+var __rest = (undefined && undefined.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
+            t[p[i]] = s[p[i]];
+    return t;
+};
+var setContext = function (setter) {
+    return new apolloLink.ApolloLink(function (operation, forward) {
+        var request = __rest(operation, []);
+        return new apolloLink.Observable(function (observer) {
+            var handle;
+            Promise.resolve(request)
+                .then(function (req) { return setter(req, operation.getContext()); })
+                .then(operation.setContext)
+                .then(function () {
+                handle = forward(operation).subscribe({
+                    next: observer.next.bind(observer),
+                    error: observer.error.bind(observer),
+                    complete: observer.complete.bind(observer),
+                });
+            })
+                .catch(observer.error.bind(observer));
+            return function () {
+                if (handle)
+                    handle.unsubscribe();
+            };
+        });
+    });
+};
+
+exports.setContext = setContext;
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+})));
+//# sourceMappingURL=bundle.umd.js.map
+  })();
+});
+
 require.register("apollo-link-dedup/lib/bundle.umd.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "apollo-link-dedup");
   (function() {
@@ -59444,6 +59495,8 @@ exports.default = graphql;
 require.register("js/orders.jsx", function(exports, require, module) {
 'use strict';
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
@@ -59464,6 +59517,8 @@ var _apolloLinkHttp = require('apollo-link-http');
 
 var _apolloCacheInmemory = require('apollo-cache-inmemory');
 
+var _apolloLinkContext = require('apollo-link-context');
+
 var _apolloLink = require('apollo-link');
 
 var _utilsGraphql = require('@jumpn/utils-graphql');
@@ -59480,14 +59535,26 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var absintheSocketLink = (0, _socketApolloLink.createAbsintheSocketLink)(AbsintheSocket.create(new _phoenix.Socket("ws://localhost:4001/socket", { params: { centralId: "2" } })));
+var authLink = (0, _apolloLinkContext.setContext)(function (_, _ref) {
+  var headers = _ref.headers;
+
+  return {
+    headers: _extends({}, headers, {
+      authorization: "unimoto-token"
+    })
+  };
+});
+
+var httpLink = authLink.concat(new _apolloLinkHttp.HttpLink({ uri: 'http://localhost:4001/api/central/graphql' }));
 
 // Socket
 
 
+var absintheSocketLink = (0, _socketApolloLink.createAbsintheSocketLink)(AbsintheSocket.create(new _phoenix.Socket("ws://localhost:4001/socket", { params: { centralId: "1" } })));
+
 var link = new _apolloLink.ApolloLink.split(function (operation) {
   return (0, _utilsGraphql.hasSubscription)(operation.query);
-}, absintheSocketLink, new _apolloLinkHttp.HttpLink({ uri: 'http://localhost:4001/api/motoboy/graphql' }));
+}, absintheSocketLink, httpLink);
 
 // Client
 
@@ -59954,17 +60021,12 @@ var Orders = function (_React$Component) {
   _createClass(Orders, [{
     key: 'componentDidMount',
     value: function componentDidMount() {
-      var _this2 = this;
-
-      _graphql2.default.run(query()).then(function (data) {
-        var pendingOrders = data.orders.filter(function (order) {
-          return order.pending;
-        });
-        var confirmedOrders = data.orders.filter(function (order) {
-          return order.confirmed;
-        });
-        _this2.setState({ pendingOrders: pendingOrders, confirmedOrders: confirmedOrders });
-      });
+      // graphql.run(query())
+      //   .then((data) => {
+      //     const pendingOrders = data.orders.filter((order) => order.pending)
+      //     const confirmedOrders = data.orders.filter((order) => order.confirmed)
+      //     this.setState({ pendingOrders, confirmedOrders })
+      //   })
     }
   }, {
     key: 'moveOrderToConfirmedQueue',
@@ -59987,7 +60049,7 @@ var Orders = function (_React$Component) {
   }, {
     key: 'pending',
     value: function pending() {
-      var _this3 = this;
+      var _this2 = this;
 
       var pendingOrders = this.state.pendingOrders;
 
@@ -59996,8 +60058,8 @@ var Orders = function (_React$Component) {
         return _react2.default.createElement(_pending_order2.default, {
           key: i,
           order: order,
-          onConfirm: _this3.onConfirm,
-          onCancel: _this3.onCancel
+          onConfirm: _this2.onConfirm,
+          onCancel: _this2.onCancel
         });
       });
     }
@@ -60441,6 +60503,7 @@ require.alias("apollo-cache/node_modules/apollo-utilities/lib/index.js", "apollo
 require.alias("apollo-client/apollo.umd.js", "apollo-client");
 require.alias("apollo-client/node_modules/apollo-utilities/lib/index.js", "apollo-client/node_modules/apollo-utilities");
 require.alias("apollo-link/lib/bundle.umd.js", "apollo-link");
+require.alias("apollo-link-context/lib/bundle.umd.js", "apollo-link-context");
 require.alias("apollo-link-dedup/lib/bundle.umd.js", "apollo-link-dedup");
 require.alias("apollo-link-http/lib/bundle.umd.js", "apollo-link-http");
 require.alias("apollo-utilities/lib/index.js", "apollo-utilities");

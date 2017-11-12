@@ -22,22 +22,29 @@ defmodule Api.Orders.Order do
     -> Insert order
     -> Add to History
     -> Notify next motoboy in queue
+    -> Spawn after create order
   """
   def create(_, %{context: %{current_customer: nil}}) do
     {:ok, %{error: "Algo deu errado, por favor feche e abra a app, e tente novamente"}}
   end
   def create(%{params: params}, %{context: %{current_customer: current_customer}}) do
-    params = Map.put(params, :customer_id, current_customer.id)
+    params = params
+    |> Map.put(:customer_id, current_customer.id)
+    |> Map.put(:state, "pending")
+    |> Map.put(:price, 1232) # TODO: fix this
 
     Core.Order.changeset(%Core.Order{}, params)
     |> Repo.insert
     |> case do
       {:ok, order} ->
-        motoboy = get_and_notify_next_motoboy_in_queue!(order)
-        Api.Orders.History.new_order(order.id, motoboy.id)
-        {:ok, order}
-      {:error, errors} ->
-        {:ok, %{error: errors}}
+        with {:ok, motoboy} <- get_and_notify_next_motoboy_in_queue!(order) do
+          Api.Orders.History.new_order(order.id, motoboy.id)
+          spawn fn -> after_create(order) end
+          {:ok, order}
+        else
+          {:error, error} -> {:ok, %{error: error}}
+        end
+      {:error, errors} -> {:ok, %{error: errors}}
     end
   end
 
@@ -58,10 +65,10 @@ defmodule Api.Orders.Order do
     Api.Orders.Motoboy.did_cancel_order(current_motoboy)
 
     order = get_order(order_id)
-    new_motoboy = get_and_notify_next_motoboy_in_queue!(order)
-    Api.Orders.History.order_new_motoboy(order.id, new_motoboy.id)
-
-    {:ok, order}
+    with {:ok, new_motoboy} <- get_and_notify_next_motoboy_in_queue!(order) do
+      Api.Orders.History.order_new_motoboy(order.id, new_motoboy.id)
+      {:ok, order}
+    end
   end
 
   @doc """
@@ -123,12 +130,18 @@ defmodule Api.Orders.Order do
   end
 
   defp get_and_notify_next_motoboy_in_queue!(order) do
-    motoboy = Api.Orders.Motoboy.get_next_in_queue_and_publish
-    Absinthe.Subscription.publish(Api.Endpoint, order, [motoboy_orders: motoboy.id])
-    motoboy
+    with {:ok, motoboy} <- Api.Orders.Motoboy.get_next_in_queue_and_publish do
+      Absinthe.Subscription.publish(Api.Endpoint, order, [motoboy_orders: motoboy.id])
+      {:ok, motoboy}
+    end
   end
 
   defp get_order(id) do
     Repo.get(Core.Order, id)
+  end
+
+  # Parallel
+  defp after_create(order) do
+    Api.Orders.Location.after_create_order(order)
   end
 end

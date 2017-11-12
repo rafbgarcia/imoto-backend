@@ -31,4 +31,20 @@ defmodule Api.Orders.Location do
     |> Enum.reject(&is_nil/1)
     |> Enum.join(", ")
   end
+
+  def after_create_order(order) do
+    order.stops
+    |> Enum.map(&Map.get(&1, :location))
+    |> Enum.each(fn location ->
+      Core.Location.changeset(location, %{
+        last_used_at: Timex.local,
+        customer_id: order.customer_id,
+        used_count: case location.used_count do
+          nil -> 1
+          count -> count + 1
+        end
+      })
+      |> Repo.update
+    end)
+  end
 end

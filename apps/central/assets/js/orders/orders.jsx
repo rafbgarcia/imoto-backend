@@ -11,12 +11,12 @@ export default class Orders extends React.Component {
   }
 
   componentDidMount() {
-    graphql.run(query())
-      .then((data) => {
-        const pendingOrders = data.orders.filter((order) => order.pending)
-        const confirmedOrders = data.orders.filter((order) => order.confirmed)
-        this.setState({ pendingOrders, confirmedOrders })
-      })
+    // graphql.run(query())
+    //   .then((data) => {
+    //     const pendingOrders = data.orders.filter((order) => order.pending)
+    //     const confirmedOrders = data.orders.filter((order) => order.confirmed)
+    //     this.setState({ pendingOrders, confirmedOrders })
+    //   })
   }
 
   moveOrderToConfirmedQueue(order) {

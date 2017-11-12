@@ -20,6 +20,5 @@ defmodule Core.Motoboy do
     |> cast(params, [:name, :became_available_at, :became_unavailable_at, :became_busy_at, :state, :auth_token])
     |> validate_inclusion(:state, ["available", "busy", "unavailable"])
     |> validate_required([:name])
-    |> unique_constraint(:login)
   end
 end

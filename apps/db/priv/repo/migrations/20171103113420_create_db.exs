@@ -8,11 +8,13 @@ defmodule Db.Repo.Migrations.CreateCentrals do
 
     create table(:centrals) do
       add :name, :string
+      add :auth_token, :string
       add :login, :string
       add :password, :string
       add :available, :boolean, default: false, null: false
       add :became_available_at, :utc_datetime
       add :became_unavailable_at, :utc_datetime
+      add :last_order_taken_at, :utc_datetime
       add :phone_number, :string
       timestamps()
     end

@@ -1,4 +1,4 @@
-unimoto = Db.Repo.insert!(Core.Central.changeset(%Core.Central{}, %{name: "Unimoto"}))
+unimoto = Db.Repo.insert!(Core.Central.changeset(%Core.Central{}, %{name: "Unimoto", auth_token: "unimoto-token"}))
 Db.Repo.insert!(%Core.Motoboy{name: "Anderson", central_id: unimoto.id, auth_token: "anderson-token"})
 Db.Repo.insert!(%Core.Motoboy{name: "João", central_id: unimoto.id, auth_token: "joao-token"})
 Db.Repo.insert!(%Core.Motoboy{name: "Pedro", central_id: unimoto.id, auth_token: "pedro-token"})

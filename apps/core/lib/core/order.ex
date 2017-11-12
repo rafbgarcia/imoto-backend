@@ -16,7 +16,10 @@ defmodule Core.Order do
 
   def changeset(changeset, params \\ %{}) do
     changeset
-    |> cast(params, [:price, :state, :confirmed_at, :finished_at, :canceled_at, :motoboy_id])
+    |> cast(params, [
+      :price, :state, :confirmed_at, :finished_at,
+      :canceled_at, :motoboy_id, :customer_id,
+    ])
     |> validate_required([:price, :state, :customer_id])
     |> validate_inclusion(:state, ["pending", "confirmed", "finished", "canceled"])
   end

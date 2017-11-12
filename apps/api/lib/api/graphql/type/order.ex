@@ -14,25 +14,29 @@ defmodule Api.Graphql.Type.Order do
 
   # Mutations
   input_object :order_params do
-    field :stops, list_of(:stop)
+    field :stops, list_of(:stop_input)
   end
-  input_object :stop do
+  input_object :stop_input do
     field :sequence, :integer, description: "Used to organize the steps"
     field :instructions, :string
-    field :location, :location
+    field :location, :location_input
   end
-  input_object :location do
-    field :place_id, :string, description: "Google's place_id for fetching its information"
-  #   field :street, :string
-  #   field :number, :string
-  #   field :neighborhood, :string
-  #   field :zipcode, :string
-  #   field :complement, :string
-  #   field :reference, :string
-  #   field :city, :string
-  #   field :uf, :string
-  #   field :lat, :string
-  #   field :lng, :string
+  input_object :location_input do
+    field :name, :string
+    field :street, :string
+    field :number, :string
+    field :neighborhood, :string
+    field :zipcode, :string
+    field :complement, :string
+    field :reference, :string
+    field :city, :string
+    field :country, :string
+    field :uf, :string
+    field :lat, :float
+    field :lng, :float
+    field :place_id, :string, description: "Google's"
+    field :formatted_address, :string, description: "Google's"
+    field :formatted_phone_number, :string, description: "Google's"
   end
 
   union :order_or_error do

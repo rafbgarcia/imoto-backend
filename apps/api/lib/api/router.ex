@@ -13,6 +13,7 @@ defmodule Api.Router do
 
   pipeline :central_api do
     plug :accepts, ["json"]
+    plug Api.Plug.CentralAuth
   end
 
   scope "/api/customer" do

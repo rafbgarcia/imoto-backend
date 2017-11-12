@@ -31,6 +31,14 @@ defmodule Api do
     end
   end
 
+  def mix do
+    quote do
+      alias Db.Repo
+      import Ecto.Query
+      alias Core.{Central, Motoboy, Customer, Location, Stop}
+    end
+  end
+
   # def controller do
   #   quote do
   #     use Phoenix.Controller, namespace: Api
