@@ -32,7 +32,7 @@ defmodule Api do
     end
   end
 
-  def mix do
+  def iex do
     quote do
       import Ecto
       import Ecto.Query

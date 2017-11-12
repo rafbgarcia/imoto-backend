@@ -58,7 +58,7 @@ defmodule Api.Orders.Order do
     |> Map.put(:price, 1232) # TODO: fix this
 
     Order.changeset(%Order{}, params)
-    |> Repo.insert(returning: true)
+    |> Repo.insert
     |> case do
       {:ok, order} ->
         with {:ok, motoboy} <- Api.Orders.Motoboy.get_next_in_queue_and_publish do
@@ -85,7 +85,7 @@ defmodule Api.Orders.Order do
       -> Publish the order to him
       -> Publish his new state
   """
-  def cancel(%{order_id: order_id}, %{context: %{current_motoboy: current_motoboy}}) do
+  def cancel(%{order_id: order_id, reason: _reason}, %{context: %{current_motoboy: current_motoboy}}) do
     with order <- get_order(order_id) do
       Api.Orders.History.order_canceled(order.id, current_motoboy.id)
 

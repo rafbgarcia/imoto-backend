@@ -80,8 +80,8 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       add :reference, :string
       add :city, :string
       add :uf, :string
-      add :lat, :string
-      add :lng, :string
+      add :lat, :decimal, precision: 14, scale: 11
+      add :lng, :decimal, precision: 14, scale: 11
       add :formatted_address, :string
       add :formatted_phone_number, :string
       add :google_place_id, :string

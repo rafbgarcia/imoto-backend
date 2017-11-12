@@ -13,8 +13,8 @@ defmodule Core.Location do
     field :reference, :string
     field :city, :string
     field :uf, :string
-    field :lat, :string
-    field :lng, :string
+    field :lat, :decimal
+    field :lng, :decimal
     field :google_place_id, :string
     field :formatted_address, :string
     field :formatted_phone_number, :string

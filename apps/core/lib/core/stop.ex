@@ -10,7 +10,8 @@ defmodule Core.Stop do
 
   def changeset(changeset, params \\ %{}) do
     changeset
-    |> cast(params, [:instructions])
+    |> cast(params, [:instructions, :sequence])
+    |> cast_assoc(:location)
     |> validate_required([:instructions])
   end
 end
