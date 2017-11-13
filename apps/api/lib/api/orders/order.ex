@@ -54,24 +54,26 @@ defmodule Api.Orders.Order do
   def create(%{params: params, customer_params: customer_params}, %{context: %{current_customer: current_customer}}) do
     Api.Orders.Customer.update(current_customer, customer_params)
 
-    params = params
-    |> Map.put(:customer_id, current_customer.id)
-    |> Map.put(:state, "pending")
-    |> Map.put(:price, 1232) # TODO: fix this
+    with {:ok, motoboy} <- Api.Orders.Motoboy.get_next_in_queue_and_publish do
+      params = params
+      |> Map.put(:customer_id, current_customer.id)
+      |> Map.put(:motoboy_id, motoboy.id)
+      |> Map.put(:state, "pending")
+      |> Map.put(:price, 1232) # TODO: fix this
 
-    Order.changeset(%Order{}, params)
-    |> Repo.insert
-    |> case do
-      {:ok, order} ->
-        with {:ok, motoboy} <- Api.Orders.Motoboy.get_next_in_queue_and_publish do
+      Order.changeset(%Order{}, params)
+      |> Repo.insert
+      |> case do
+        {:ok, order} ->
           Api.Orders.History.new_order(order.id, motoboy.id)
           Absinthe.Subscription.publish(Api.Endpoint, order, [motoboy_orders: motoboy.id])
           spawn fn -> after_create(order) end
           {:ok, order}
-        else
-          {:error, error} -> {:ok, %{error: error}}
-        end
-      {:error, errors} -> {:ok, %{error: errors}}
+        {:error, errors} ->
+          {:ok, %{error: errors}}
+      end
+    else
+      {:error, error} -> {:ok, %{error: error}}
     end
   end
 
@@ -92,16 +94,27 @@ defmodule Api.Orders.Order do
       Api.Orders.History.order_canceled(order.id, current_motoboy.id)
 
       with {:ok, new_motoboy} <- Api.Orders.Motoboy.get_next_of_same_central(current_motoboy) do
+        {:ok, order} = set_new_motoboy(order, new_motoboy)
         Api.Orders.History.order_new_motoboy(order.id, new_motoboy.id)
         Absinthe.Subscription.publish(Api.Endpoint, order, [motoboy_orders: new_motoboy.id])
       else
         {:error, _} ->
-          order |> Order.changeset(%{state: Order.no_motoboys}) |> Repo.update
+          set_no_motoboys(order)
       end
 
       Api.Orders.Motoboy.did_cancel_order(current_motoboy)
       {:ok, order}
     end
+  end
+  defp set_new_motoboy(order, motoboy) do
+    order
+    |> Order.changeset(%{motoboy_id: motoboy.id})
+    |> Repo.update
+  end
+  defp set_no_motoboys(order) do
+    order
+    |> Order.changeset(%{state: Order.no_motoboys})
+    |> Repo.update
   end
 
   @doc """
@@ -113,7 +126,7 @@ defmodule Api.Orders.Order do
   """
   def confirm(%{order_id: order_id}, %{context: %{current_motoboy: current_motoboy}}) do
     Repo.transaction(fn ->
-      order = confirm_order!(order_id, current_motoboy.id)
+      order = confirm_order!(order_id)
       Api.Orders.Motoboy.did_confirm_order(current_motoboy)
       Api.Orders.History.order_confirmed(order.id, current_motoboy.id)
       order
@@ -127,9 +140,9 @@ defmodule Api.Orders.Order do
     Ecto.NoResultsError -> {:error,  "Nenhum motoboy disponível"}
   end
 
-  defp confirm_order!(order_id, motoboy_id) do
+  defp confirm_order!(order_id) do
     get_order(order_id)
-    |> Order.changeset(%{state: Order.confirmed, motoboy_id: motoboy_id, confirmed_at: Timex.local})
+    |> Order.changeset(%{state: Order.confirmed, confirmed_at: Timex.local})
     |> Repo.update!
   end
 
