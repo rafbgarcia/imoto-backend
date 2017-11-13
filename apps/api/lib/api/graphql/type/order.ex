@@ -18,6 +18,10 @@ defmodule Api.Graphql.Type.Order do
 
 
   # Mutations
+  input_object :customer_params do
+    field :name, :string
+    field :phone_number, :string
+  end
   input_object :order_params do
     field :stops, list_of(:stop_input)
   end
@@ -55,6 +59,7 @@ defmodule Api.Graphql.Type.Order do
   object :orders_mutations do
     field :create_order, :order_or_error do
       arg :params, :order_params
+      arg :customer_params, :customer_params
       resolve &Api.Orders.Order.create/2
     end
 

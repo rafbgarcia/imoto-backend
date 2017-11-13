@@ -51,7 +51,9 @@ defmodule Api.Orders.Order do
   def create(_, %{context: %{current_customer: nil}}) do
     {:ok, %{error: "Algo deu errado, por favor feche e abra a app, e tente novamente"}}
   end
-  def create(%{params: params}, %{context: %{current_customer: current_customer}}) do
+  def create(%{params: params, customer_params: customer_params}, %{context: %{current_customer: current_customer}}) do
+    Api.Orders.Customer.update(current_customer, customer_params)
+
     params = params
     |> Map.put(:customer_id, current_customer.id)
     |> Map.put(:state, "pending")

@@ -1,6 +1,18 @@
 defmodule Api.Orders.Motoboy do
   use Api, :context
-  alias Core.{Motoboy, Central}
+  alias Core.{Motoboy, Central, Order}
+
+  def current_order(motoboy, _, _) do
+    {:ok, current_order(motoboy)}
+  end
+  defp current_order(motoboy) do
+    from(o in Order,
+      where: o.motoboy_id == ^motoboy.id,
+      where: o.state in [^Order.pending, ^Order.confirmed]
+    )
+    |> first
+    |> Repo.one
+  end
 
   def current(_args, %{context: %{current_motoboy: current_motoboy}}) do
     {:ok, current_motoboy}

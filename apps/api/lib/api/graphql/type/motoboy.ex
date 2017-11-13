@@ -24,6 +24,7 @@ defmodule Api.Graphql.Type.Motoboy do
     field :unavailable, :boolean, resolve: &Api.Orders.Motoboy.unavailable/3
     field :became_available_at, :datetime
     field :became_busy_at, :datetime
+    field :current_order, :order, resolve: &Api.Orders.Motoboy.current_order/3
 
     field :central, :central, resolve: assoc(:central)
   end
