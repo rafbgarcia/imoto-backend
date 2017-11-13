@@ -1,7 +1,18 @@
-import "phoenix_html"
+import React from 'react'
+import ReactDOM from 'react-dom'
+import { ApolloProvider } from 'react-apollo'
 
-// Local files can be imported directly using relative
-// paths "./socket" or full ones "web/static/js/socket".
+import Main from './main'
+import client from './graphql_client'
+import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
 
-// import socket from "./socket"
-import * as _ from "./orders"
+document.addEventListener('DOMContentLoaded', () => {
+  ReactDOM.render(
+    <ApolloProvider client={client}>
+      <MuiThemeProvider>
+        <Main />
+      </MuiThemeProvider>
+    </ApolloProvider>,
+    document.getElementById('js_app')
+  )
+})
