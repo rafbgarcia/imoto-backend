@@ -8,6 +8,11 @@ import MenuItem from 'material-ui/MenuItem';
 import OrdersContainer from './orders/container'
 import client from './graphql_client'
 
+import {
+  Route,
+  Link
+} from 'react-router-dom'
+
 export default class Main extends React.Component {
   state = {
     opened: false,
@@ -25,22 +30,18 @@ export default class Main extends React.Component {
         </IconButton>}
         />
 
-        <div className="row">
-          <div className="col-md-6">
-          </div>
-          <div className="col-md-3">
-          </div>
-        </div>
+        <Route path="/extranet/dashboard" component={OrdersContainer} />
 
         <Drawer
           docked={false}
           open={this.state.opened}
           onRequestChange={(opened) => this.setState({opened})}
         >
-
-          <MenuItem leftIcon={<FontIcon className="material-icons">dashboard</FontIcon>}>
-            Dashboard
-          </MenuItem>
+          <Link to="/extranet/dashboard">
+            <MenuItem leftIcon={<FontIcon className="material-icons">dashboard</FontIcon>}>
+                Dashboard
+            </MenuItem>
+          </Link>
           <MenuItem leftIcon={<FontIcon className="material-icons">power_settings_new</FontIcon>}>
             Sair
           </MenuItem>
