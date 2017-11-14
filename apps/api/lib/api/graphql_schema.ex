@@ -19,7 +19,7 @@ defmodule Api.GraphqlSchema do
         {:ok, topic: socket.context.current_motoboy.id}
       end
 
-      trigger :confirm_order, topic: fn order -> order.motoboy_id end
+      trigger :create_order, topic: fn order -> order.motoboy_id end
     end
   end
 

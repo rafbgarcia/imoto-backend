@@ -66,7 +66,6 @@ defmodule Api.Orders.Order do
       |> case do
         {:ok, order} ->
           Api.Orders.History.new_order(order.id, motoboy.id)
-          Absinthe.Subscription.publish(Api.Endpoint, order, [motoboy_orders: motoboy.id])
           spawn fn -> after_create(order) end
           {:ok, order}
         {:error, errors} ->
@@ -96,7 +95,6 @@ defmodule Api.Orders.Order do
       with {:ok, new_motoboy} <- Api.Orders.Motoboy.get_next_of_same_central(current_motoboy) do
         {:ok, order} = set_new_motoboy(order, new_motoboy)
         Api.Orders.History.order_new_motoboy(order.id, new_motoboy.id)
-        Absinthe.Subscription.publish(Api.Endpoint, order, [motoboy_orders: new_motoboy.id])
       else
         {:error, _} ->
           set_no_motoboys(order)
