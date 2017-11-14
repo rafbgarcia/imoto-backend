@@ -25,7 +25,7 @@ defmodule Api.Router do
   end
 
   scope "/api/motoboy" do
-    # pipe_through :motoboy_api
+    pipe_through :motoboy_api
     forward "/graphql", Absinthe.Plug,
       schema: Api.GraphqlSchema,
       socket: Api.Channels.OrderSocket,

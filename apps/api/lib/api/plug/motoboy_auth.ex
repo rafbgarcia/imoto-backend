@@ -28,7 +28,7 @@ defmodule Api.Plug.MotoboyAuth do
     {:ok, motoboy} <- authorize(token) do
       {:ok, %{current_motoboy: motoboy}}
     else
-      [] -> {:ok, %{current_motoboy: nil}}
+      [] -> {:error}
     end
   end
 

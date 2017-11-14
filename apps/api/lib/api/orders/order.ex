@@ -54,7 +54,7 @@ defmodule Api.Orders.Order do
   def create(%{params: params, customer_params: customer_params}, %{context: %{current_customer: current_customer}}) do
     Api.Orders.Customer.update(current_customer, customer_params)
 
-    with {:ok, motoboy} <- Api.Orders.Motoboy.get_next_in_queue_and_publish do
+    with {:ok, motoboy} <- Api.Orders.Motoboy.get_next_in_queue do
       params = params
       |> Map.put(:customer_id, current_customer.id)
       |> Map.put(:motoboy_id, motoboy.id)

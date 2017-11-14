@@ -1,7 +1,7 @@
 ##### Pedido 1
 angelo = Db.Repo.insert!(%Core.Customer{name: "Angelo da Silva", phone_number: "(84) 98141-4140"})
 
-order = Db.Repo.insert!(%Core.Order{price: 3430, customer_id: angelo.id})
+order = Db.Repo.insert!(%Core.Order{price: 3430, customer_id: angelo.id, motoboy_id: 1})
 
 stop1 = Db.Repo.insert!(%Core.Stop{instructions: "Pegar documento com Angelo", sequence: 0, order_id: order.id})
 Db.Repo.insert!(%Core.Location{
@@ -19,7 +19,7 @@ Db.Repo.insert!(%Core.Location{
 ##### Pedido 2
 carlos = Db.Repo.insert!(%Core.Customer{name: "Carlos Almeida", phone_number: "(84) 98812-3029"})
 
-order = Db.Repo.insert!(%Core.Order{price: 853, customer_id: carlos.id})
+order = Db.Repo.insert!(%Core.Order{price: 853, customer_id: carlos.id, motoboy_id: 1})
 
 stop1 = Db.Repo.insert!(%Core.Stop{instructions: "Pegar certidão de casamento", sequence: 0, order_id: order.id})
 Db.Repo.insert!(%Core.Location{
@@ -38,7 +38,7 @@ Db.Repo.insert!(%Core.Location{
 ##### Pedido 3
 sandro = Db.Repo.insert!(%Core.Customer{name: "Sandro Júnior", phone_number: "(84) 98002-2030"})
 
-order = Db.Repo.insert!(%Core.Order{price: 5000, customer_id: sandro.id})
+order = Db.Repo.insert!(%Core.Order{price: 5000, customer_id: sandro.id, motoboy_id: 1})
 
 stop1 = Db.Repo.insert!(%Core.Stop{instructions: "Pegar certidão de casamento e tirar cópia", sequence: 0, order_id: order.id})
 Db.Repo.insert!(%Core.Location{

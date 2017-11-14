@@ -1,34 +1,65 @@
 import React from 'react'
 import Timeago from 'js/timeago'
+import Paper from 'material-ui/Paper';
+import FontIcon from 'material-ui/FontIcon';
 
 export default class ConfirmedOrder extends React.Component {
+  stops(stops) {
+    return stops.map((stop, i) => <Stop key={i} stop={stop} />)
+  }
+
   render() {
     const {order} = this.props
 
     return (
-      <section className="card mb-3">
-        <div className="card-header d-flex align-items-center justify-content-between">
+      <Paper zDepth={1} className="mb-3 pt-2 pb-2 pl-3 pr-3">
+        <div className="text-muted d-flex align-items-center justify-content-between">
           <span>#{order.id}</span>
-          <span>pedido <Timeago date={order.insertedAt} /></span>
+          <span>confirmada <Timeago date={order.confirmedAt} /></span>
         </div>
 
-        <div className="card-body">
-          <div className="d-flex align-items-center justify-content-between">
-            <div>
-              <i className="fa fa-user mr-2"></i>
-              {order.customer.name}
-              <br />
-              <i className="fa fa-phone mr-2"></i>
-              {order.customer.phoneNumber}
+        <div className="mt-3 d-flex align-items-center justify-content-between">
+          <div>
+            <div className="mb-2 d-flex align-items-center">
+              <FontIcon className="material-icons mr-2">person</FontIcon>
+              <span>{order.customer.name}</span>
             </div>
-            <div>
-              <i className="fa fa-motorcycle mr-2"></i>
-              {order.motoboy.name}
-              <div className="text-muted">
-                confirmada <Timeago date={order.confirmedAt} />
-              </div>
+            <div className="d-flex align-items-center">
+              <FontIcon className="material-icons mr-2">phone</FontIcon>
+              <span>{order.customer.phoneNumber}</span>
             </div>
           </div>
+          <div>
+            <div className="mb-2 d-flex align-items-center">
+              <FontIcon className="material-icons mr-2">motorcycle</FontIcon>
+              <span>{order.motoboy.name}</span>
+            </div>
+            <div className="d-flex align-items-center">
+              <FontIcon className="material-icons mr-2">attach_money</FontIcon>
+              <span>{order.formattedPrice}</span>
+            </div>
+          </div>
+        </div>
+
+        {this.stops(order.stops)}
+      </Paper>
+    )
+  }
+}
+
+class Stop extends React.Component {
+  render() {
+    const {stop} = this.props
+    return (
+      <section className="mt-4 mb-2">
+        <div className="mb-2"><strong>{stop.sequence+1}ª parada - {stop.location.name}</strong></div>
+        <div className="mb-2 d-flex align-items-center">
+          <FontIcon className="material-icons mr-2">place</FontIcon>
+          {stop.location.line1}
+        </div>
+        <div className="d-flex align-items-center">
+          <FontIcon className="material-icons mr-2">list</FontIcon>
+          {stop.instructions}
         </div>
       </section>
     )

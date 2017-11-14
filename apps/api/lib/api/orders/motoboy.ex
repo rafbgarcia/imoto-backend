@@ -60,64 +60,51 @@ defmodule Api.Orders.Motoboy do
   end
 
   def did_confirm_order(motoboy) do
-    make_busy_and_publish(motoboy)
+    make_busy(motoboy)
   end
 
   def did_cancel_order(motoboy) do
-    make_available_and_publish(motoboy)
+    make_available(motoboy)
   end
 
   def did_finish_order(motoboy) do
-    make_available_and_publish(motoboy)
+    make_available(motoboy)
   end
 
-  defp make_busy_and_publish(motoboy) do
+  defp make_busy(motoboy) do
     motoboy
     |> Motoboy.changeset(%{state: Motoboy.busy, became_busy_at: Timex.local})
     |> Repo.update
-    |> case do
-      {:ok, motoboy} ->
-        Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_state: motoboy.id])
-        Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_updates: motoboy.central_id])
-        motoboy
-    end
   end
 
   @doc """
   Motoboy estava online e ficou offline
   """
-  def make_unavailable_and_publish(_args, %{context: %{current_motoboy: current_motoboy}}) do
-    current_motoboy
-    |> Motoboy.changeset(%{state: Motoboy.unavailable, became_unavailable_at: Timex.local})
-    |> Repo.update
-    |> case do
-      {:ok, motoboy} ->
-        Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_state: motoboy.id])
-        Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_updates: motoboy.central_id])
-        Api.Orders.History.motoboy_unavailable(motoboy.id)
-        {:ok, motoboy}
+  def make_unavailable(_args, %{context: %{current_motoboy: current_motoboy}}) do
+    with {:ok, motoboy} <- make_unavailable(current_motoboy) do
+      Api.Orders.History.motoboy_unavailable(motoboy.id)
+      {:ok, motoboy}
     end
+  end
+  defp make_unavailable(motoboy) do
+    motoboy
+    |> Motoboy.changeset(%{state: Motoboy.unavailable(), became_unavailable_at: Timex.local})
+    |> Repo.update
   end
 
   @doc """
   Motoboy was offline and became online.
   """
-  def make_available_and_publish(_args, %{context: %{current_motoboy: current_motoboy}}) do
-    with {:ok, motoboy} <- make_available_and_publish(current_motoboy) do
+  def make_available(_args, %{context: %{current_motoboy: current_motoboy}}) do
+    with {:ok, motoboy} <- make_available(current_motoboy) do
       Api.Orders.History.motoboy_available(motoboy.id)
       {:ok, motoboy}
     end
   end
-  defp make_available_and_publish(motoboy) do
+  defp make_available(motoboy) do
     motoboy
     |> Motoboy.changeset(%{state: Motoboy.available, became_available_at: Timex.local})
     |> Repo.update
-    |> case do
-      {:ok, motoboy} ->
-        Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_state: motoboy.id])
-        Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_updates: motoboy.central_id])
-        {:ok, motoboy}
-    end
   end
 
   @doc """
@@ -126,12 +113,6 @@ defmodule Api.Orders.Motoboy do
   otherwise it'll get the next motoboy for the next central in the queue.
   """
   def get_next_of_same_central(%{id: id, central_id: central_id} = _motoboy) do
-    with {:ok, motoboy} <- get_next_of_same_central(id, central_id) do
-      Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_state: motoboy.id])
-      {:ok, motoboy}
-    end
-  end
-  defp get_next_of_same_central(current_motoboy_id, central_id) do
     Repo.transaction(fn ->
       from(m in Motoboy,
         lock: "FOR UPDATE",
@@ -139,7 +120,7 @@ defmodule Api.Orders.Motoboy do
         preload: [central: c],
         where: m.central_id == ^central_id,
         where: m.state == ^Motoboy.available,
-        where: m.id != ^current_motoboy_id,
+        where: m.id != ^id,
         order_by: fragment(
           """
           CASE c1.id WHEN ? THEN 1 ELSE 2 END,
@@ -165,17 +146,10 @@ defmodule Api.Orders.Motoboy do
   to avoid him from being picked for the next order.
   Use pessimistic locking to avoid sending 2 orders to the same motoboy.
   Publish his new state.
+  Gets next motoboy for the next central.
+  If a central has no available motoboys, get a motoboy of the next one.
   """
-  def get_next_in_queue_and_publish do
-    with {:ok, motoboy} <- get_next_in_queue() do
-      Absinthe.Subscription.publish(Api.Endpoint, motoboy, [motoboy_state: motoboy.id])
-      {:ok, motoboy}
-    end
-  end
-
-  # Gets next motoboy for the next central.
-  # If a central has no available motoboys, get a motoboy of the next one.
-  defp get_next_in_queue do
+  def get_next_in_queue do
     Repo.transaction(fn ->
       from(m in Motoboy,
         lock: "FOR UPDATE",

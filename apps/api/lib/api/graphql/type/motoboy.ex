@@ -9,8 +9,8 @@ defmodule Api.Graphql.Type.Motoboy do
   end
 
   object :motoboys_mutations do
-    field :make_motoboy_available, :motoboy, resolve: &Api.Orders.Motoboy.make_available_and_publish/2
-    field :make_motoboy_unavailable, :motoboy, resolve: &Api.Orders.Motoboy.make_unavailable_and_publish/2
+    field :make_motoboy_available, :motoboy, resolve: &Api.Orders.Motoboy.make_available/2
+    field :make_motoboy_unavailable, :motoboy, resolve: &Api.Orders.Motoboy.make_unavailable/2
   end
 
   object :motoboy do
@@ -23,6 +23,7 @@ defmodule Api.Graphql.Type.Motoboy do
     field :available, :boolean, resolve: &Api.Orders.Motoboy.available/3
     field :unavailable, :boolean, resolve: &Api.Orders.Motoboy.unavailable/3
     field :became_available_at, :datetime
+    field :became_unavailable_at, :datetime
     field :became_busy_at, :datetime
     field :current_order, :order, resolve: &Api.Orders.Motoboy.current_order/3
 

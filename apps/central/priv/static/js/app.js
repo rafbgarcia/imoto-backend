@@ -6885,1524 +6885,6 @@ exports.warnOnceInDevelopment = warnOnceInDevelopment;
   })();
 });
 
-require.register("axios/index.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    module.exports = require('./lib/axios');
-  })();
-});
-
-require.register("axios/lib/adapters/xhr.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-var utils = require('./../utils');
-var settle = require('./../core/settle');
-var buildURL = require('./../helpers/buildURL');
-var parseHeaders = require('./../helpers/parseHeaders');
-var isURLSameOrigin = require('./../helpers/isURLSameOrigin');
-var createError = require('../core/createError');
-var btoa = (typeof window !== 'undefined' && window.btoa && window.btoa.bind(window)) || require('./../helpers/btoa');
-
-module.exports = function xhrAdapter(config) {
-  return new Promise(function dispatchXhrRequest(resolve, reject) {
-    var requestData = config.data;
-    var requestHeaders = config.headers;
-
-    if (utils.isFormData(requestData)) {
-      delete requestHeaders['Content-Type']; // Let the browser set it
-    }
-
-    var request = new XMLHttpRequest();
-    var loadEvent = 'onreadystatechange';
-    var xDomain = false;
-
-    // For IE 8/9 CORS support
-    // Only supports POST and GET calls and doesn't returns the response headers.
-    // DON'T do this for testing b/c XMLHttpRequest is mocked, not XDomainRequest.
-    if (!window.XMLHttpRequest &&
-        'development' !== 'test' &&
-        typeof window !== 'undefined' &&
-        window.XDomainRequest && !('withCredentials' in request) &&
-        !isURLSameOrigin(config.url)) {
-      request = new window.XDomainRequest();
-      loadEvent = 'onload';
-      xDomain = true;
-      request.onprogress = function handleProgress() {};
-      request.ontimeout = function handleTimeout() {};
-    }
-
-    // HTTP basic authentication
-    if (config.auth) {
-      var username = config.auth.username || '';
-      var password = config.auth.password || '';
-      requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
-    }
-
-    request.open(config.method.toUpperCase(), buildURL(config.url, config.params, config.paramsSerializer), true);
-
-    // Set the request timeout in MS
-    request.timeout = config.timeout;
-
-    // Listen for ready state
-    request[loadEvent] = function handleLoad() {
-      if (!request || (request.readyState !== 4 && !xDomain)) {
-        return;
-      }
-
-      // The request errored out and we didn't get a response, this will be
-      // handled by onerror instead
-      // With one exception: request that using file: protocol, most browsers
-      // will return status as 0 even though it's a successful request
-      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
-        return;
-      }
-
-      // Prepare the response
-      var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
-      var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
-      var response = {
-        data: responseData,
-        // IE sends 1223 instead of 204 (https://github.com/axios/axios/issues/201)
-        status: request.status === 1223 ? 204 : request.status,
-        statusText: request.status === 1223 ? 'No Content' : request.statusText,
-        headers: responseHeaders,
-        config: config,
-        request: request
-      };
-
-      settle(resolve, reject, response);
-
-      // Clean up request
-      request = null;
-    };
-
-    // Handle low level network errors
-    request.onerror = function handleError() {
-      // Real errors are hidden from us by the browser
-      // onerror should only fire if it's a network error
-      reject(createError('Network Error', config, null, request));
-
-      // Clean up request
-      request = null;
-    };
-
-    // Handle timeout
-    request.ontimeout = function handleTimeout() {
-      reject(createError('timeout of ' + config.timeout + 'ms exceeded', config, 'ECONNABORTED',
-        request));
-
-      // Clean up request
-      request = null;
-    };
-
-    // Add xsrf header
-    // This is only done if running in a standard browser environment.
-    // Specifically not if we're in a web worker, or react-native.
-    if (utils.isStandardBrowserEnv()) {
-      var cookies = require('./../helpers/cookies');
-
-      // Add xsrf header
-      var xsrfValue = (config.withCredentials || isURLSameOrigin(config.url)) && config.xsrfCookieName ?
-          cookies.read(config.xsrfCookieName) :
-          undefined;
-
-      if (xsrfValue) {
-        requestHeaders[config.xsrfHeaderName] = xsrfValue;
-      }
-    }
-
-    // Add headers to the request
-    if ('setRequestHeader' in request) {
-      utils.forEach(requestHeaders, function setRequestHeader(val, key) {
-        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
-          // Remove Content-Type if data is undefined
-          delete requestHeaders[key];
-        } else {
-          // Otherwise add header to the request
-          request.setRequestHeader(key, val);
-        }
-      });
-    }
-
-    // Add withCredentials to request if needed
-    if (config.withCredentials) {
-      request.withCredentials = true;
-    }
-
-    // Add responseType to request if needed
-    if (config.responseType) {
-      try {
-        request.responseType = config.responseType;
-      } catch (e) {
-        // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
-        // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
-        if (config.responseType !== 'json') {
-          throw e;
-        }
-      }
-    }
-
-    // Handle progress if needed
-    if (typeof config.onDownloadProgress === 'function') {
-      request.addEventListener('progress', config.onDownloadProgress);
-    }
-
-    // Not all browsers support upload events
-    if (typeof config.onUploadProgress === 'function' && request.upload) {
-      request.upload.addEventListener('progress', config.onUploadProgress);
-    }
-
-    if (config.cancelToken) {
-      // Handle cancellation
-      config.cancelToken.promise.then(function onCanceled(cancel) {
-        if (!request) {
-          return;
-        }
-
-        request.abort();
-        reject(cancel);
-        // Clean up request
-        request = null;
-      });
-    }
-
-    if (requestData === undefined) {
-      requestData = null;
-    }
-
-    // Send the request
-    request.send(requestData);
-  });
-};
-  })();
-});
-
-require.register("axios/lib/axios.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-var utils = require('./utils');
-var bind = require('./helpers/bind');
-var Axios = require('./core/Axios');
-var defaults = require('./defaults');
-
-/**
- * Create an instance of Axios
- *
- * @param {Object} defaultConfig The default config for the instance
- * @return {Axios} A new instance of Axios
- */
-function createInstance(defaultConfig) {
-  var context = new Axios(defaultConfig);
-  var instance = bind(Axios.prototype.request, context);
-
-  // Copy axios.prototype to instance
-  utils.extend(instance, Axios.prototype, context);
-
-  // Copy context to instance
-  utils.extend(instance, context);
-
-  return instance;
-}
-
-// Create the default instance to be exported
-var axios = createInstance(defaults);
-
-// Expose Axios class to allow class inheritance
-axios.Axios = Axios;
-
-// Factory for creating new instances
-axios.create = function create(instanceConfig) {
-  return createInstance(utils.merge(defaults, instanceConfig));
-};
-
-// Expose Cancel & CancelToken
-axios.Cancel = require('./cancel/Cancel');
-axios.CancelToken = require('./cancel/CancelToken');
-axios.isCancel = require('./cancel/isCancel');
-
-// Expose all/spread
-axios.all = function all(promises) {
-  return Promise.all(promises);
-};
-axios.spread = require('./helpers/spread');
-
-module.exports = axios;
-
-// Allow use of default import syntax in TypeScript
-module.exports.default = axios;
-  })();
-});
-
-require.register("axios/lib/cancel/Cancel.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-/**
- * A `Cancel` is an object that is thrown when an operation is canceled.
- *
- * @class
- * @param {string=} message The message.
- */
-function Cancel(message) {
-  this.message = message;
-}
-
-Cancel.prototype.toString = function toString() {
-  return 'Cancel' + (this.message ? ': ' + this.message : '');
-};
-
-Cancel.prototype.__CANCEL__ = true;
-
-module.exports = Cancel;
-  })();
-});
-
-require.register("axios/lib/cancel/CancelToken.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-var Cancel = require('./Cancel');
-
-/**
- * A `CancelToken` is an object that can be used to request cancellation of an operation.
- *
- * @class
- * @param {Function} executor The executor function.
- */
-function CancelToken(executor) {
-  if (typeof executor !== 'function') {
-    throw new TypeError('executor must be a function.');
-  }
-
-  var resolvePromise;
-  this.promise = new Promise(function promiseExecutor(resolve) {
-    resolvePromise = resolve;
-  });
-
-  var token = this;
-  executor(function cancel(message) {
-    if (token.reason) {
-      // Cancellation has already been requested
-      return;
-    }
-
-    token.reason = new Cancel(message);
-    resolvePromise(token.reason);
-  });
-}
-
-/**
- * Throws a `Cancel` if cancellation has been requested.
- */
-CancelToken.prototype.throwIfRequested = function throwIfRequested() {
-  if (this.reason) {
-    throw this.reason;
-  }
-};
-
-/**
- * Returns an object that contains a new `CancelToken` and a function that, when called,
- * cancels the `CancelToken`.
- */
-CancelToken.source = function source() {
-  var cancel;
-  var token = new CancelToken(function executor(c) {
-    cancel = c;
-  });
-  return {
-    token: token,
-    cancel: cancel
-  };
-};
-
-module.exports = CancelToken;
-  })();
-});
-
-require.register("axios/lib/cancel/isCancel.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-module.exports = function isCancel(value) {
-  return !!(value && value.__CANCEL__);
-};
-  })();
-});
-
-require.register("axios/lib/core/Axios.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-var defaults = require('./../defaults');
-var utils = require('./../utils');
-var InterceptorManager = require('./InterceptorManager');
-var dispatchRequest = require('./dispatchRequest');
-
-/**
- * Create a new instance of Axios
- *
- * @param {Object} instanceConfig The default config for the instance
- */
-function Axios(instanceConfig) {
-  this.defaults = instanceConfig;
-  this.interceptors = {
-    request: new InterceptorManager(),
-    response: new InterceptorManager()
-  };
-}
-
-/**
- * Dispatch a request
- *
- * @param {Object} config The config specific for this request (merged with this.defaults)
- */
-Axios.prototype.request = function request(config) {
-  /*eslint no-param-reassign:0*/
-  // Allow for axios('example/url'[, config]) a la fetch API
-  if (typeof config === 'string') {
-    config = utils.merge({
-      url: arguments[0]
-    }, arguments[1]);
-  }
-
-  config = utils.merge(defaults, this.defaults, { method: 'get' }, config);
-  config.method = config.method.toLowerCase();
-
-  // Hook up interceptors middleware
-  var chain = [dispatchRequest, undefined];
-  var promise = Promise.resolve(config);
-
-  this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
-    chain.unshift(interceptor.fulfilled, interceptor.rejected);
-  });
-
-  this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
-    chain.push(interceptor.fulfilled, interceptor.rejected);
-  });
-
-  while (chain.length) {
-    promise = promise.then(chain.shift(), chain.shift());
-  }
-
-  return promise;
-};
-
-// Provide aliases for supported request methods
-utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
-  /*eslint func-names:0*/
-  Axios.prototype[method] = function(url, config) {
-    return this.request(utils.merge(config || {}, {
-      method: method,
-      url: url
-    }));
-  };
-});
-
-utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
-  /*eslint func-names:0*/
-  Axios.prototype[method] = function(url, data, config) {
-    return this.request(utils.merge(config || {}, {
-      method: method,
-      url: url,
-      data: data
-    }));
-  };
-});
-
-module.exports = Axios;
-  })();
-});
-
-require.register("axios/lib/core/InterceptorManager.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-var utils = require('./../utils');
-
-function InterceptorManager() {
-  this.handlers = [];
-}
-
-/**
- * Add a new interceptor to the stack
- *
- * @param {Function} fulfilled The function to handle `then` for a `Promise`
- * @param {Function} rejected The function to handle `reject` for a `Promise`
- *
- * @return {Number} An ID used to remove interceptor later
- */
-InterceptorManager.prototype.use = function use(fulfilled, rejected) {
-  this.handlers.push({
-    fulfilled: fulfilled,
-    rejected: rejected
-  });
-  return this.handlers.length - 1;
-};
-
-/**
- * Remove an interceptor from the stack
- *
- * @param {Number} id The ID that was returned by `use`
- */
-InterceptorManager.prototype.eject = function eject(id) {
-  if (this.handlers[id]) {
-    this.handlers[id] = null;
-  }
-};
-
-/**
- * Iterate over all the registered interceptors
- *
- * This method is particularly useful for skipping over any
- * interceptors that may have become `null` calling `eject`.
- *
- * @param {Function} fn The function to call for each interceptor
- */
-InterceptorManager.prototype.forEach = function forEach(fn) {
-  utils.forEach(this.handlers, function forEachHandler(h) {
-    if (h !== null) {
-      fn(h);
-    }
-  });
-};
-
-module.exports = InterceptorManager;
-  })();
-});
-
-require.register("axios/lib/core/createError.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-var enhanceError = require('./enhanceError');
-
-/**
- * Create an Error with the specified message, config, error code, request and response.
- *
- * @param {string} message The error message.
- * @param {Object} config The config.
- * @param {string} [code] The error code (for example, 'ECONNABORTED').
- * @param {Object} [request] The request.
- * @param {Object} [response] The response.
- * @returns {Error} The created error.
- */
-module.exports = function createError(message, config, code, request, response) {
-  var error = new Error(message);
-  return enhanceError(error, config, code, request, response);
-};
-  })();
-});
-
-require.register("axios/lib/core/dispatchRequest.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-var utils = require('./../utils');
-var transformData = require('./transformData');
-var isCancel = require('../cancel/isCancel');
-var defaults = require('../defaults');
-var isAbsoluteURL = require('./../helpers/isAbsoluteURL');
-var combineURLs = require('./../helpers/combineURLs');
-
-/**
- * Throws a `Cancel` if cancellation has been requested.
- */
-function throwIfCancellationRequested(config) {
-  if (config.cancelToken) {
-    config.cancelToken.throwIfRequested();
-  }
-}
-
-/**
- * Dispatch a request to the server using the configured adapter.
- *
- * @param {object} config The config that is to be used for the request
- * @returns {Promise} The Promise to be fulfilled
- */
-module.exports = function dispatchRequest(config) {
-  throwIfCancellationRequested(config);
-
-  // Support baseURL config
-  if (config.baseURL && !isAbsoluteURL(config.url)) {
-    config.url = combineURLs(config.baseURL, config.url);
-  }
-
-  // Ensure headers exist
-  config.headers = config.headers || {};
-
-  // Transform request data
-  config.data = transformData(
-    config.data,
-    config.headers,
-    config.transformRequest
-  );
-
-  // Flatten headers
-  config.headers = utils.merge(
-    config.headers.common || {},
-    config.headers[config.method] || {},
-    config.headers || {}
-  );
-
-  utils.forEach(
-    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
-    function cleanHeaderConfig(method) {
-      delete config.headers[method];
-    }
-  );
-
-  var adapter = config.adapter || defaults.adapter;
-
-  return adapter(config).then(function onAdapterResolution(response) {
-    throwIfCancellationRequested(config);
-
-    // Transform response data
-    response.data = transformData(
-      response.data,
-      response.headers,
-      config.transformResponse
-    );
-
-    return response;
-  }, function onAdapterRejection(reason) {
-    if (!isCancel(reason)) {
-      throwIfCancellationRequested(config);
-
-      // Transform response data
-      if (reason && reason.response) {
-        reason.response.data = transformData(
-          reason.response.data,
-          reason.response.headers,
-          config.transformResponse
-        );
-      }
-    }
-
-    return Promise.reject(reason);
-  });
-};
-  })();
-});
-
-require.register("axios/lib/core/enhanceError.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-/**
- * Update an Error with the specified config, error code, and response.
- *
- * @param {Error} error The error to update.
- * @param {Object} config The config.
- * @param {string} [code] The error code (for example, 'ECONNABORTED').
- * @param {Object} [request] The request.
- * @param {Object} [response] The response.
- * @returns {Error} The error.
- */
-module.exports = function enhanceError(error, config, code, request, response) {
-  error.config = config;
-  if (code) {
-    error.code = code;
-  }
-  error.request = request;
-  error.response = response;
-  return error;
-};
-  })();
-});
-
-require.register("axios/lib/core/settle.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-var createError = require('./createError');
-
-/**
- * Resolve or reject a Promise based on response status.
- *
- * @param {Function} resolve A function that resolves the promise.
- * @param {Function} reject A function that rejects the promise.
- * @param {object} response The response.
- */
-module.exports = function settle(resolve, reject, response) {
-  var validateStatus = response.config.validateStatus;
-  // Note: status is not exposed by XDomainRequest
-  if (!response.status || !validateStatus || validateStatus(response.status)) {
-    resolve(response);
-  } else {
-    reject(createError(
-      'Request failed with status code ' + response.status,
-      response.config,
-      null,
-      response.request,
-      response
-    ));
-  }
-};
-  })();
-});
-
-require.register("axios/lib/core/transformData.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-var utils = require('./../utils');
-
-/**
- * Transform the data for a request or a response
- *
- * @param {Object|String} data The data to be transformed
- * @param {Array} headers The headers for the request or response
- * @param {Array|Function} fns A single function or Array of functions
- * @returns {*} The resulting transformed data
- */
-module.exports = function transformData(data, headers, fns) {
-  /*eslint no-param-reassign:0*/
-  utils.forEach(fns, function transform(fn) {
-    data = fn(data, headers);
-  });
-
-  return data;
-};
-  })();
-});
-
-require.register("axios/lib/defaults.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-var utils = require('./utils');
-var normalizeHeaderName = require('./helpers/normalizeHeaderName');
-
-var DEFAULT_CONTENT_TYPE = {
-  'Content-Type': 'application/x-www-form-urlencoded'
-};
-
-function setContentTypeIfUnset(headers, value) {
-  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
-    headers['Content-Type'] = value;
-  }
-}
-
-function getDefaultAdapter() {
-  var adapter;
-  if (typeof XMLHttpRequest !== 'undefined') {
-    // For browsers use XHR adapter
-    adapter = require('./adapters/xhr');
-  } else if (typeof process !== 'undefined') {
-    // For node use HTTP adapter
-    adapter = require('./adapters/http');
-  }
-  return adapter;
-}
-
-var defaults = {
-  adapter: getDefaultAdapter(),
-
-  transformRequest: [function transformRequest(data, headers) {
-    normalizeHeaderName(headers, 'Content-Type');
-    if (utils.isFormData(data) ||
-      utils.isArrayBuffer(data) ||
-      utils.isBuffer(data) ||
-      utils.isStream(data) ||
-      utils.isFile(data) ||
-      utils.isBlob(data)
-    ) {
-      return data;
-    }
-    if (utils.isArrayBufferView(data)) {
-      return data.buffer;
-    }
-    if (utils.isURLSearchParams(data)) {
-      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
-      return data.toString();
-    }
-    if (utils.isObject(data)) {
-      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
-      return JSON.stringify(data);
-    }
-    return data;
-  }],
-
-  transformResponse: [function transformResponse(data) {
-    /*eslint no-param-reassign:0*/
-    if (typeof data === 'string') {
-      try {
-        data = JSON.parse(data);
-      } catch (e) { /* Ignore */ }
-    }
-    return data;
-  }],
-
-  timeout: 0,
-
-  xsrfCookieName: 'XSRF-TOKEN',
-  xsrfHeaderName: 'X-XSRF-TOKEN',
-
-  maxContentLength: -1,
-
-  validateStatus: function validateStatus(status) {
-    return status >= 200 && status < 300;
-  }
-};
-
-defaults.headers = {
-  common: {
-    'Accept': 'application/json, text/plain, */*'
-  }
-};
-
-utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
-  defaults.headers[method] = {};
-});
-
-utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
-  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
-});
-
-module.exports = defaults;
-  })();
-});
-
-require.register("axios/lib/helpers/bind.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-module.exports = function bind(fn, thisArg) {
-  return function wrap() {
-    var args = new Array(arguments.length);
-    for (var i = 0; i < args.length; i++) {
-      args[i] = arguments[i];
-    }
-    return fn.apply(thisArg, args);
-  };
-};
-  })();
-});
-
-require.register("axios/lib/helpers/btoa.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-// btoa polyfill for IE<10 courtesy https://github.com/davidchambers/Base64.js
-
-var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-
-function E() {
-  this.message = 'String contains an invalid character';
-}
-E.prototype = new Error;
-E.prototype.code = 5;
-E.prototype.name = 'InvalidCharacterError';
-
-function btoa(input) {
-  var str = String(input);
-  var output = '';
-  for (
-    // initialize result and counter
-    var block, charCode, idx = 0, map = chars;
-    // if the next str index does not exist:
-    //   change the mapping table to "="
-    //   check if d has no fractional digits
-    str.charAt(idx | 0) || (map = '=', idx % 1);
-    // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
-    output += map.charAt(63 & block >> 8 - idx % 1 * 8)
-  ) {
-    charCode = str.charCodeAt(idx += 3 / 4);
-    if (charCode > 0xFF) {
-      throw new E();
-    }
-    block = block << 8 | charCode;
-  }
-  return output;
-}
-
-module.exports = btoa;
-  })();
-});
-
-require.register("axios/lib/helpers/buildURL.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-var utils = require('./../utils');
-
-function encode(val) {
-  return encodeURIComponent(val).
-    replace(/%40/gi, '@').
-    replace(/%3A/gi, ':').
-    replace(/%24/g, '$').
-    replace(/%2C/gi, ',').
-    replace(/%20/g, '+').
-    replace(/%5B/gi, '[').
-    replace(/%5D/gi, ']');
-}
-
-/**
- * Build a URL by appending params to the end
- *
- * @param {string} url The base of the url (e.g., http://www.google.com)
- * @param {object} [params] The params to be appended
- * @returns {string} The formatted url
- */
-module.exports = function buildURL(url, params, paramsSerializer) {
-  /*eslint no-param-reassign:0*/
-  if (!params) {
-    return url;
-  }
-
-  var serializedParams;
-  if (paramsSerializer) {
-    serializedParams = paramsSerializer(params);
-  } else if (utils.isURLSearchParams(params)) {
-    serializedParams = params.toString();
-  } else {
-    var parts = [];
-
-    utils.forEach(params, function serialize(val, key) {
-      if (val === null || typeof val === 'undefined') {
-        return;
-      }
-
-      if (utils.isArray(val)) {
-        key = key + '[]';
-      }
-
-      if (!utils.isArray(val)) {
-        val = [val];
-      }
-
-      utils.forEach(val, function parseValue(v) {
-        if (utils.isDate(v)) {
-          v = v.toISOString();
-        } else if (utils.isObject(v)) {
-          v = JSON.stringify(v);
-        }
-        parts.push(encode(key) + '=' + encode(v));
-      });
-    });
-
-    serializedParams = parts.join('&');
-  }
-
-  if (serializedParams) {
-    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
-  }
-
-  return url;
-};
-  })();
-});
-
-require.register("axios/lib/helpers/combineURLs.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-/**
- * Creates a new URL by combining the specified URLs
- *
- * @param {string} baseURL The base URL
- * @param {string} relativeURL The relative URL
- * @returns {string} The combined URL
- */
-module.exports = function combineURLs(baseURL, relativeURL) {
-  return relativeURL
-    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
-    : baseURL;
-};
-  })();
-});
-
-require.register("axios/lib/helpers/cookies.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-var utils = require('./../utils');
-
-module.exports = (
-  utils.isStandardBrowserEnv() ?
-
-  // Standard browser envs support document.cookie
-  (function standardBrowserEnv() {
-    return {
-      write: function write(name, value, expires, path, domain, secure) {
-        var cookie = [];
-        cookie.push(name + '=' + encodeURIComponent(value));
-
-        if (utils.isNumber(expires)) {
-          cookie.push('expires=' + new Date(expires).toGMTString());
-        }
-
-        if (utils.isString(path)) {
-          cookie.push('path=' + path);
-        }
-
-        if (utils.isString(domain)) {
-          cookie.push('domain=' + domain);
-        }
-
-        if (secure === true) {
-          cookie.push('secure');
-        }
-
-        document.cookie = cookie.join('; ');
-      },
-
-      read: function read(name) {
-        var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
-        return (match ? decodeURIComponent(match[3]) : null);
-      },
-
-      remove: function remove(name) {
-        this.write(name, '', Date.now() - 86400000);
-      }
-    };
-  })() :
-
-  // Non standard browser env (web workers, react-native) lack needed support.
-  (function nonStandardBrowserEnv() {
-    return {
-      write: function write() {},
-      read: function read() { return null; },
-      remove: function remove() {}
-    };
-  })()
-);
-  })();
-});
-
-require.register("axios/lib/helpers/isAbsoluteURL.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-/**
- * Determines whether the specified URL is absolute
- *
- * @param {string} url The URL to test
- * @returns {boolean} True if the specified URL is absolute, otherwise false
- */
-module.exports = function isAbsoluteURL(url) {
-  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
-  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
-  // by any combination of letters, digits, plus, period, or hyphen.
-  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
-};
-  })();
-});
-
-require.register("axios/lib/helpers/isURLSameOrigin.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-var utils = require('./../utils');
-
-module.exports = (
-  utils.isStandardBrowserEnv() ?
-
-  // Standard browser envs have full support of the APIs needed to test
-  // whether the request URL is of the same origin as current location.
-  (function standardBrowserEnv() {
-    var msie = /(msie|trident)/i.test(navigator.userAgent);
-    var urlParsingNode = document.createElement('a');
-    var originURL;
-
-    /**
-    * Parse a URL to discover it's components
-    *
-    * @param {String} url The URL to be parsed
-    * @returns {Object}
-    */
-    function resolveURL(url) {
-      var href = url;
-
-      if (msie) {
-        // IE needs attribute set twice to normalize properties
-        urlParsingNode.setAttribute('href', href);
-        href = urlParsingNode.href;
-      }
-
-      urlParsingNode.setAttribute('href', href);
-
-      // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
-      return {
-        href: urlParsingNode.href,
-        protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
-        host: urlParsingNode.host,
-        search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
-        hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
-        hostname: urlParsingNode.hostname,
-        port: urlParsingNode.port,
-        pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
-                  urlParsingNode.pathname :
-                  '/' + urlParsingNode.pathname
-      };
-    }
-
-    originURL = resolveURL(window.location.href);
-
-    /**
-    * Determine if a URL shares the same origin as the current location
-    *
-    * @param {String} requestURL The URL to test
-    * @returns {boolean} True if URL shares the same origin, otherwise false
-    */
-    return function isURLSameOrigin(requestURL) {
-      var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
-      return (parsed.protocol === originURL.protocol &&
-            parsed.host === originURL.host);
-    };
-  })() :
-
-  // Non standard browser envs (web workers, react-native) lack needed support.
-  (function nonStandardBrowserEnv() {
-    return function isURLSameOrigin() {
-      return true;
-    };
-  })()
-);
-  })();
-});
-
-require.register("axios/lib/helpers/normalizeHeaderName.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-var utils = require('../utils');
-
-module.exports = function normalizeHeaderName(headers, normalizedName) {
-  utils.forEach(headers, function processHeader(value, name) {
-    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
-      headers[normalizedName] = value;
-      delete headers[name];
-    }
-  });
-};
-  })();
-});
-
-require.register("axios/lib/helpers/parseHeaders.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-var utils = require('./../utils');
-
-// Headers whose duplicates are ignored by node
-// c.f. https://nodejs.org/api/http.html#http_message_headers
-var ignoreDuplicateOf = [
-  'age', 'authorization', 'content-length', 'content-type', 'etag',
-  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
-  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
-  'referer', 'retry-after', 'user-agent'
-];
-
-/**
- * Parse headers into an object
- *
- * ```
- * Date: Wed, 27 Aug 2014 08:58:49 GMT
- * Content-Type: application/json
- * Connection: keep-alive
- * Transfer-Encoding: chunked
- * ```
- *
- * @param {String} headers Headers needing to be parsed
- * @returns {Object} Headers parsed into an object
- */
-module.exports = function parseHeaders(headers) {
-  var parsed = {};
-  var key;
-  var val;
-  var i;
-
-  if (!headers) { return parsed; }
-
-  utils.forEach(headers.split('\n'), function parser(line) {
-    i = line.indexOf(':');
-    key = utils.trim(line.substr(0, i)).toLowerCase();
-    val = utils.trim(line.substr(i + 1));
-
-    if (key) {
-      if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
-        return;
-      }
-      if (key === 'set-cookie') {
-        parsed[key] = (parsed[key] ? parsed[key] : []).concat([val]);
-      } else {
-        parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
-      }
-    }
-  });
-
-  return parsed;
-};
-  })();
-});
-
-require.register("axios/lib/helpers/spread.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-/**
- * Syntactic sugar for invoking a function and expanding an array for arguments.
- *
- * Common use case would be to use `Function.prototype.apply`.
- *
- *  ```js
- *  function f(x, y, z) {}
- *  var args = [1, 2, 3];
- *  f.apply(null, args);
- *  ```
- *
- * With `spread` this example can be re-written.
- *
- *  ```js
- *  spread(function(x, y, z) {})([1, 2, 3]);
- *  ```
- *
- * @param {Function} callback
- * @returns {Function}
- */
-module.exports = function spread(callback) {
-  return function wrap(arr) {
-    return callback.apply(null, arr);
-  };
-};
-  })();
-});
-
-require.register("axios/lib/utils.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "axios");
-  (function() {
-    'use strict';
-
-var bind = require('./helpers/bind');
-var isBuffer = require('is-buffer');
-
-/*global toString:true*/
-
-// utils is a library of generic helper functions non-specific to axios
-
-var toString = Object.prototype.toString;
-
-/**
- * Determine if a value is an Array
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an Array, otherwise false
- */
-function isArray(val) {
-  return toString.call(val) === '[object Array]';
-}
-
-/**
- * Determine if a value is an ArrayBuffer
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an ArrayBuffer, otherwise false
- */
-function isArrayBuffer(val) {
-  return toString.call(val) === '[object ArrayBuffer]';
-}
-
-/**
- * Determine if a value is a FormData
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an FormData, otherwise false
- */
-function isFormData(val) {
-  return (typeof FormData !== 'undefined') && (val instanceof FormData);
-}
-
-/**
- * Determine if a value is a view on an ArrayBuffer
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
- */
-function isArrayBufferView(val) {
-  var result;
-  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
-    result = ArrayBuffer.isView(val);
-  } else {
-    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
-  }
-  return result;
-}
-
-/**
- * Determine if a value is a String
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a String, otherwise false
- */
-function isString(val) {
-  return typeof val === 'string';
-}
-
-/**
- * Determine if a value is a Number
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Number, otherwise false
- */
-function isNumber(val) {
-  return typeof val === 'number';
-}
-
-/**
- * Determine if a value is undefined
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if the value is undefined, otherwise false
- */
-function isUndefined(val) {
-  return typeof val === 'undefined';
-}
-
-/**
- * Determine if a value is an Object
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is an Object, otherwise false
- */
-function isObject(val) {
-  return val !== null && typeof val === 'object';
-}
-
-/**
- * Determine if a value is a Date
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Date, otherwise false
- */
-function isDate(val) {
-  return toString.call(val) === '[object Date]';
-}
-
-/**
- * Determine if a value is a File
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a File, otherwise false
- */
-function isFile(val) {
-  return toString.call(val) === '[object File]';
-}
-
-/**
- * Determine if a value is a Blob
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Blob, otherwise false
- */
-function isBlob(val) {
-  return toString.call(val) === '[object Blob]';
-}
-
-/**
- * Determine if a value is a Function
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Function, otherwise false
- */
-function isFunction(val) {
-  return toString.call(val) === '[object Function]';
-}
-
-/**
- * Determine if a value is a Stream
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a Stream, otherwise false
- */
-function isStream(val) {
-  return isObject(val) && isFunction(val.pipe);
-}
-
-/**
- * Determine if a value is a URLSearchParams object
- *
- * @param {Object} val The value to test
- * @returns {boolean} True if value is a URLSearchParams object, otherwise false
- */
-function isURLSearchParams(val) {
-  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
-}
-
-/**
- * Trim excess whitespace off the beginning and end of a string
- *
- * @param {String} str The String to trim
- * @returns {String} The String freed of excess whitespace
- */
-function trim(str) {
-  return str.replace(/^\s*/, '').replace(/\s*$/, '');
-}
-
-/**
- * Determine if we're running in a standard browser environment
- *
- * This allows axios to run in a web worker, and react-native.
- * Both environments support XMLHttpRequest, but not fully standard globals.
- *
- * web workers:
- *  typeof window -> undefined
- *  typeof document -> undefined
- *
- * react-native:
- *  navigator.product -> 'ReactNative'
- */
-function isStandardBrowserEnv() {
-  if (typeof navigator !== 'undefined' && navigator.product === 'ReactNative') {
-    return false;
-  }
-  return (
-    typeof window !== 'undefined' &&
-    typeof document !== 'undefined'
-  );
-}
-
-/**
- * Iterate over an Array or an Object invoking a function for each item.
- *
- * If `obj` is an Array callback will be called passing
- * the value, index, and complete array for each item.
- *
- * If 'obj' is an Object callback will be called passing
- * the value, key, and complete object for each property.
- *
- * @param {Object|Array} obj The object to iterate
- * @param {Function} fn The callback to invoke for each item
- */
-function forEach(obj, fn) {
-  // Don't bother if no value provided
-  if (obj === null || typeof obj === 'undefined') {
-    return;
-  }
-
-  // Force an array if not already something iterable
-  if (typeof obj !== 'object' && !isArray(obj)) {
-    /*eslint no-param-reassign:0*/
-    obj = [obj];
-  }
-
-  if (isArray(obj)) {
-    // Iterate over array values
-    for (var i = 0, l = obj.length; i < l; i++) {
-      fn.call(null, obj[i], i, obj);
-    }
-  } else {
-    // Iterate over object keys
-    for (var key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        fn.call(null, obj[key], key, obj);
-      }
-    }
-  }
-}
-
-/**
- * Accepts varargs expecting each argument to be an object, then
- * immutably merges the properties of each object and returns result.
- *
- * When multiple objects contain the same key the later object in
- * the arguments list will take precedence.
- *
- * Example:
- *
- * ```js
- * var result = merge({foo: 123}, {foo: 456});
- * console.log(result.foo); // outputs 456
- * ```
- *
- * @param {Object} obj1 Object to merge
- * @returns {Object} Result of all merge properties
- */
-function merge(/* obj1, obj2, obj3, ... */) {
-  var result = {};
-  function assignValue(val, key) {
-    if (typeof result[key] === 'object' && typeof val === 'object') {
-      result[key] = merge(result[key], val);
-    } else {
-      result[key] = val;
-    }
-  }
-
-  for (var i = 0, l = arguments.length; i < l; i++) {
-    forEach(arguments[i], assignValue);
-  }
-  return result;
-}
-
-/**
- * Extends object a by mutably adding to it the properties of object b.
- *
- * @param {Object} a The object to be extended
- * @param {Object} b The object to copy properties from
- * @param {Object} thisArg The object to bind function to
- * @return {Object} The resulting value of object a
- */
-function extend(a, b, thisArg) {
-  forEach(b, function assignValue(val, key) {
-    if (thisArg && typeof val === 'function') {
-      a[key] = bind(val, thisArg);
-    } else {
-      a[key] = val;
-    }
-  });
-  return a;
-}
-
-module.exports = {
-  isArray: isArray,
-  isArrayBuffer: isArrayBuffer,
-  isBuffer: isBuffer,
-  isFormData: isFormData,
-  isArrayBufferView: isArrayBufferView,
-  isString: isString,
-  isNumber: isNumber,
-  isObject: isObject,
-  isUndefined: isUndefined,
-  isDate: isDate,
-  isFile: isFile,
-  isBlob: isBlob,
-  isFunction: isFunction,
-  isStream: isStream,
-  isURLSearchParams: isURLSearchParams,
-  isStandardBrowserEnv: isStandardBrowserEnv,
-  forEach: forEach,
-  merge: merge,
-  extend: extend,
-  trim: trim
-};
-  })();
-});
-
 require.register("babel-runtime/core-js/array/from.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "babel-runtime");
   (function() {
@@ -20018,33 +18500,6 @@ module.exports = invariant;
   })();
 });
 
-require.register("is-buffer/index.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "is-buffer");
-  (function() {
-    /*!
- * Determine if an object is a Buffer
- *
- * @author   Feross Aboukhadijeh <https://feross.org>
- * @license  MIT
- */
-
-// The _isBuffer check is for Safari 5-7 support, because it's missing
-// Object.prototype.constructor. Remove this eventually
-module.exports = function (obj) {
-  return obj != null && (isBuffer(obj) || isSlowBuffer(obj) || !!obj._isBuffer)
-}
-
-function isBuffer (obj) {
-  return !!obj.constructor && typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj)
-}
-
-// For Node v0.10 support. Remove this eventually.
-function isSlowBuffer (obj) {
-  return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
-}
-  })();
-});
-
 require.register("isarray/index.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "isarray");
   (function() {
@@ -20205,381 +18660,6 @@ for (i in codes) names[codes[i]] = i
 for (var alias in aliases) {
   codes[alias] = aliases[alias]
 }
-  })();
-});
-
-require.register("ladda/dist/ladda.min.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {"spin.js":"ladda/js/spin"}, "ladda");
-  (function() {
-    /*!
- * Ladda 1.0.5 (2017-09-24, 16:55)
- * http://lab.hakim.se/ladda
- * MIT licensed
- *
- * Copyright (C) 2017 Hakim El Hattab, http://hakim.se
- */
-
-!function(t,e){"use strict";"object"==typeof exports?module.exports=e(require("spin.js")):"function"==typeof define&&define.amd?define(["spin"],e):t.Ladda=e(t.Spinner)}(this,function(t){"use strict";function e(t){if(void 0!==t){if(/ladda-button/i.test(t.className)||(t.className+=" ladda-button"),t.hasAttribute("data-style")||t.setAttribute("data-style","expand-right"),!t.querySelector(".ladda-label")){var e=document.createElement("span");e.className="ladda-label",r(t,e)}var a,u=t.querySelector(".ladda-spinner");u||((u=document.createElement("span")).className="ladda-spinner"),t.appendChild(u);var i,o={start:function(){return a||(a=n(t)),t.disabled=!0,t.setAttribute("data-loading",""),clearTimeout(i),a.spin(u),this.setProgress(0),this},startAfter:function(t){return clearTimeout(i),i=setTimeout(function(){o.start()},t),this},stop:function(){return o.isLoading()&&(t.disabled=!1,t.removeAttribute("data-loading")),clearTimeout(i),a&&(i=setTimeout(function(){a.stop()},1e3)),this},toggle:function(){return this.isLoading()?this.stop():this.start()},setProgress:function(e){e=Math.max(Math.min(e,1),0);var a=t.querySelector(".ladda-progress");0===e&&a&&a.parentNode?a.parentNode.removeChild(a):(a||((a=document.createElement("div")).className="ladda-progress",t.appendChild(a)),a.style.width=(e||0)*t.offsetWidth+"px")},enable:function(){return this.stop()},disable:function(){return this.stop(),t.disabled=!0,this},isLoading:function(){return t.hasAttribute("data-loading")},remove:function(){clearTimeout(i),t.disabled=!1,t.removeAttribute("data-loading"),a&&(a.stop(),a=null),d.splice(d.indexOf(o),1)}};return d.push(o),o}console.warn("Ladda button target must be defined.")}function a(t,e){for(;t.parentNode&&t.tagName!==e;)t=t.parentNode;return e===t.tagName?t:void 0}function u(t){var e=[];return["input","textarea","select"].forEach(function(a){for(var u=t.getElementsByTagName(a),n=0;n<u.length;n++)u[n].hasAttribute("required")&&e.push(u[n])}),e}function n(e){var a,u,n=e.offsetHeight;0===n&&(n=parseFloat(window.getComputedStyle(e).height)),n>32&&(n*=.8),e.hasAttribute("data-spinner-size")&&(n=parseInt(e.getAttribute("data-spinner-size"),10)),e.hasAttribute("data-spinner-color")&&(a=e.getAttribute("data-spinner-color")),e.hasAttribute("data-spinner-lines")&&(u=parseInt(e.getAttribute("data-spinner-lines"),10));var r=.2*n,i=.6*r,d=r<7?2:3;return new t({color:a||"#fff",lines:u||12,radius:r,length:i,width:d,zIndex:"auto",top:"auto",left:"auto",className:""})}function r(t,e){var a=document.createRange();a.selectNodeContents(t),a.surroundContents(e),t.appendChild(e)}function i(t,n){if("function"==typeof t.addEventListener){var r=e(t),i=-1;t.addEventListener("click",function(){var e=!0,d=a(t,"FORM");if(void 0!==d)if("function"==typeof d.checkValidity)e=d.checkValidity();else for(var o=u(d),s=0;s<o.length;s++){var F=o[s],l=F.getAttribute("type");if(""===F.value.replace(/^\s+|\s+$/g,"")&&(e=!1),"checkbox"!==l&&"radio"!==l||F.checked||(e=!1),"email"===l&&(e=/^[a-z0-9!#$%&'*+/=?^_`{|}~.-]+@[a-z0-9-]+(\.[a-z0-9-]+)*$/i.test(F.value)),"url"===l&&(e=/^([a-z]([a-z]|\d|\+|-|\.)*):(\/\/(((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?((\[(|(v[\da-f]{1,}\.(([a-z]|\d|-|\.|_|~)|[!\$&'\(\)\*\+,;=]|:)+))\])|((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=])*)(:\d*)?)(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*|(\/((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)|((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)|((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)){0})(\?((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/i.test(F.value)),!e)break}e&&(r.startAfter(1),"number"==typeof n.timeout&&(clearTimeout(i),i=setTimeout(r.stop,n.timeout)),"function"==typeof n.callback&&n.callback.apply(null,[r]))},!1)}}var d=[];return{bind:function(t,e){var a;if("string"==typeof t)a=document.querySelectorAll(t);else{if("object"!=typeof t)throw new Error("target must be string or object");a=[t]}e=e||{};for(var u=0;u<a.length;u++)i(a[u],e)},create:e,stopAll:function(){for(var t=0,e=d.length;t<e;t++)d[t].stop()}}});
-  })();
-});
-
-require.register("ladda/js/spin.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {"spin.js":"ladda/js/spin"}, "ladda");
-  (function() {
-    /**
- * Copyright (c) 2011-2014 Felix Gnass
- * Licensed under the MIT license
- */
-(function(root, factory) {
-
-  // CommonJS
-  if (typeof exports == 'object') {
-    module.exports = factory();
-  }
-  // AMD module
-  else if (typeof define == 'function' && define.amd) {
-    define(factory);
-  }
-  // Browser global
-  else {
-    root.Spinner = factory();
-  }
-
-}
-(this, function() {
-  "use strict";
-
-  var prefixes = ['webkit', 'Moz', 'ms', 'O'] /* Vendor prefixes */
-    , animations = {} /* Animation rules keyed by their name */
-    , useCssAnimations /* Whether to use CSS animations or setTimeout */
-
-  /**
-   * Utility function to create elements. If no tag name is given,
-   * a DIV is created. Optionally properties can be passed.
-   */
-  function createEl(tag, prop) {
-    var el = document.createElement(tag || 'div')
-      , n
-
-    for(n in prop) el[n] = prop[n]
-    return el
-  }
-
-  /**
-   * Appends children and returns the parent.
-   */
-  function ins(parent /* child1, child2, ...*/) {
-    for (var i=1, n=arguments.length; i<n; i++)
-      parent.appendChild(arguments[i])
-
-    return parent
-  }
-
-  /**
-   * Insert a new stylesheet to hold the @keyframe or VML rules.
-   */
-  var sheet = (function() {
-    var el = createEl('style', {type : 'text/css'})
-    ins(document.getElementsByTagName('head')[0], el)
-    return el.sheet || el.styleSheet
-  }())
-
-  /**
-   * Creates an opacity keyframe animation rule and returns its name.
-   * Since most mobile Webkits have timing issues with animation-delay,
-   * we create separate rules for each line/segment.
-   */
-  function addAnimation(alpha, trail, i, lines) {
-    var name = ['opacity', trail, ~~(alpha*100), i, lines].join('-')
-      , start = 0.01 + i/lines * 100
-      , z = Math.max(1 - (1-alpha) / trail * (100-start), alpha)
-      , prefix = useCssAnimations.substring(0, useCssAnimations.indexOf('Animation')).toLowerCase()
-      , pre = prefix && '-' + prefix + '-' || ''
-
-    if (!animations[name]) {
-      sheet.insertRule(
-        '@' + pre + 'keyframes ' + name + '{' +
-        '0%{opacity:' + z + '}' +
-        start + '%{opacity:' + alpha + '}' +
-        (start+0.01) + '%{opacity:1}' +
-        (start+trail) % 100 + '%{opacity:' + alpha + '}' +
-        '100%{opacity:' + z + '}' +
-        '}', sheet.cssRules.length)
-
-      animations[name] = 1
-    }
-
-    return name
-  }
-
-  /**
-   * Tries various vendor prefixes and returns the first supported property.
-   */
-  function vendor(el, prop) {
-    var s = el.style
-      , pp
-      , i
-
-    prop = prop.charAt(0).toUpperCase() + prop.slice(1)
-    for(i=0; i<prefixes.length; i++) {
-      pp = prefixes[i]+prop
-      if(s[pp] !== undefined) return pp
-    }
-    if(s[prop] !== undefined) return prop
-  }
-
-  /**
-   * Sets multiple style properties at once.
-   */
-  function css(el, prop) {
-    for (var n in prop)
-      el.style[vendor(el, n)||n] = prop[n]
-
-    return el
-  }
-
-  /**
-   * Fills in default values.
-   */
-  function merge(obj) {
-    for (var i=1; i < arguments.length; i++) {
-      var def = arguments[i]
-      for (var n in def)
-        if (obj[n] === undefined) obj[n] = def[n]
-    }
-    return obj
-  }
-
-  /**
-   * Returns the absolute page-offset of the given element.
-   */
-  function pos(el) {
-    var o = { x:el.offsetLeft, y:el.offsetTop }
-    while((el = el.offsetParent))
-      o.x+=el.offsetLeft, o.y+=el.offsetTop
-
-    return o
-  }
-
-  /**
-   * Returns the line color from the given string or array.
-   */
-  function getColor(color, idx) {
-    return typeof color == 'string' ? color : color[idx % color.length]
-  }
-
-  // Built-in defaults
-
-  var defaults = {
-    lines: 12,            // The number of lines to draw
-    length: 7,            // The length of each line
-    width: 5,             // The line thickness
-    radius: 10,           // The radius of the inner circle
-    rotate: 0,            // Rotation offset
-    corners: 1,           // Roundness (0..1)
-    color: '#000',        // #rgb or #rrggbb
-    direction: 1,         // 1: clockwise, -1: counterclockwise
-    speed: 1,             // Rounds per second
-    trail: 100,           // Afterglow percentage
-    opacity: 1/4,         // Opacity of the lines
-    fps: 20,              // Frames per second when using setTimeout()
-    zIndex: 2e9,          // Use a high z-index by default
-    className: 'spinner', // CSS class to assign to the element
-    top: '50%',           // center vertically
-    left: '50%',          // center horizontally
-    position: 'absolute'  // element position
-  }
-
-  /** The constructor */
-  function Spinner(o) {
-    this.opts = merge(o || {}, Spinner.defaults, defaults)
-  }
-
-  // Global defaults that override the built-ins:
-  Spinner.defaults = {}
-
-  merge(Spinner.prototype, {
-
-    /**
-     * Adds the spinner to the given target element. If this instance is already
-     * spinning, it is automatically removed from its previous target b calling
-     * stop() internally.
-     */
-    spin: function(target) {
-      this.stop()
-
-      var self = this
-        , o = self.opts
-        , el = self.el = css(createEl(0, {className: o.className}), {position: o.position, width: 0, zIndex: o.zIndex})
-        , mid = o.radius+o.length+o.width
-
-      css(el, {
-        left: o.left,
-        top: o.top
-      })
-        
-      if (target) {
-        target.insertBefore(el, target.firstChild||null)
-      }
-
-      el.setAttribute('role', 'progressbar')
-      self.lines(el, self.opts)
-
-      if (!useCssAnimations) {
-        // No CSS animation support, use setTimeout() instead
-        var i = 0
-          , start = (o.lines - 1) * (1 - o.direction) / 2
-          , alpha
-          , fps = o.fps
-          , f = fps/o.speed
-          , ostep = (1-o.opacity) / (f*o.trail / 100)
-          , astep = f/o.lines
-
-        ;(function anim() {
-          i++;
-          for (var j = 0; j < o.lines; j++) {
-            alpha = Math.max(1 - (i + (o.lines - j) * astep) % f * ostep, o.opacity)
-
-            self.opacity(el, j * o.direction + start, alpha, o)
-          }
-          self.timeout = self.el && setTimeout(anim, ~~(1000/fps))
-        })()
-      }
-      return self
-    },
-
-    /**
-     * Stops and removes the Spinner.
-     */
-    stop: function() {
-      var el = this.el
-      if (el) {
-        clearTimeout(this.timeout)
-        if (el.parentNode) el.parentNode.removeChild(el)
-        this.el = undefined
-      }
-      return this
-    },
-
-    /**
-     * Internal method that draws the individual lines. Will be overwritten
-     * in VML fallback mode below.
-     */
-    lines: function(el, o) {
-      var i = 0
-        , start = (o.lines - 1) * (1 - o.direction) / 2
-        , seg
-
-      function fill(color, shadow) {
-        return css(createEl(), {
-          position: 'absolute',
-          width: (o.length+o.width) + 'px',
-          height: o.width + 'px',
-          background: color,
-          boxShadow: shadow,
-          transformOrigin: 'left',
-          transform: 'rotate(' + ~~(360/o.lines*i+o.rotate) + 'deg) translate(' + o.radius+'px' +',0)',
-          borderRadius: (o.corners * o.width>>1) + 'px'
-        })
-      }
-
-      for (; i < o.lines; i++) {
-        seg = css(createEl(), {
-          position: 'absolute',
-          top: 1+~(o.width/2) + 'px',
-          transform: o.hwaccel ? 'translate3d(0,0,0)' : '',
-          opacity: o.opacity,
-          animation: useCssAnimations && addAnimation(o.opacity, o.trail, start + i * o.direction, o.lines) + ' ' + 1/o.speed + 's linear infinite'
-        })
-
-        if (o.shadow) ins(seg, css(fill('#000', '0 0 4px ' + '#000'), {top: 2+'px'}))
-        ins(el, ins(seg, fill(getColor(o.color, i), '0 0 1px rgba(0,0,0,.1)')))
-      }
-      return el
-    },
-
-    /**
-     * Internal method that adjusts the opacity of a single line.
-     * Will be overwritten in VML fallback mode below.
-     */
-    opacity: function(el, i, val) {
-      if (i < el.childNodes.length) el.childNodes[i].style.opacity = val
-    }
-
-  })
-
-
-  function initVML() {
-
-    /* Utility function to create a VML tag */
-    function vml(tag, attr) {
-      return createEl('<' + tag + ' xmlns="urn:schemas-microsoft.com:vml" class="spin-vml">', attr)
-    }
-
-    // No CSS transforms but VML support, add a CSS rule for VML elements:
-    sheet.addRule('.spin-vml', 'behavior:url(#default#VML)')
-
-    Spinner.prototype.lines = function(el, o) {
-      var r = o.length+o.width
-        , s = 2*r
-
-      function grp() {
-        return css(
-          vml('group', {
-            coordsize: s + ' ' + s,
-            coordorigin: -r + ' ' + -r
-          }),
-          { width: s, height: s }
-        )
-      }
-
-      var margin = -(o.width+o.length)*2 + 'px'
-        , g = css(grp(), {position: 'absolute', top: margin, left: margin})
-        , i
-
-      function seg(i, dx, filter) {
-        ins(g,
-          ins(css(grp(), {rotation: 360 / o.lines * i + 'deg', left: ~~dx}),
-            ins(css(vml('roundrect', {arcsize: o.corners}), {
-                width: r,
-                height: o.width,
-                left: o.radius,
-                top: -o.width>>1,
-                filter: filter
-              }),
-              vml('fill', {color: getColor(o.color, i), opacity: o.opacity}),
-              vml('stroke', {opacity: 0}) // transparent stroke to fix color bleeding upon opacity change
-            )
-          )
-        )
-      }
-
-      if (o.shadow)
-        for (i = 1; i <= o.lines; i++)
-          seg(i, -2, 'progid:DXImageTransform.Microsoft.Blur(pixelradius=2,makeshadow=1,shadowopacity=.3)')
-
-      for (i = 1; i <= o.lines; i++) seg(i)
-      return ins(el, g)
-    }
-
-    Spinner.prototype.opacity = function(el, i, val, o) {
-      var c = el.firstChild
-      o = o.shadow && o.lines || 0
-      if (c && i+o < c.childNodes.length) {
-        c = c.childNodes[i+o]; c = c && c.firstChild; c = c && c.firstChild
-        if (c) c.opacity = val
-      }
-    }
-  }
-
-  var probe = css(createEl('group'), {behavior: 'url(#default#VML)'})
-
-  if (!vendor(probe, 'transform') && probe.adj) initVML()
-  else useCssAnimations = vendor(probe, 'animation')
-
-  return Spinner
-
-}));
   })();
 });
 
@@ -24606,6 +22686,402 @@ var _AppBar2 = _interopRequireDefault(_AppBar);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _AppBar2.default;
+  })();
+});
+
+require.register("material-ui/CircularProgress/CircularProgress.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends2 = require('babel-runtime/helpers/extends');
+
+var _extends3 = _interopRequireDefault(_extends2);
+
+var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
+
+var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
+
+var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
+
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require('babel-runtime/helpers/createClass');
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _possibleConstructorReturn2 = require('babel-runtime/helpers/possibleConstructorReturn');
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _inherits2 = require('babel-runtime/helpers/inherits');
+
+var _inherits3 = _interopRequireDefault(_inherits2);
+
+var _simpleAssign = require('simple-assign');
+
+var _simpleAssign2 = _interopRequireDefault(_simpleAssign);
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+var _autoPrefix = require('../utils/autoPrefix');
+
+var _autoPrefix2 = _interopRequireDefault(_autoPrefix);
+
+var _transitions = require('../styles/transitions');
+
+var _transitions2 = _interopRequireDefault(_transitions);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function getRelativeValue(value, min, max) {
+  var clampedValue = Math.min(Math.max(min, value), max);
+  return clampedValue / (max - min);
+}
+
+function getArcLength(fraction, props) {
+  return fraction * Math.PI * (props.size - props.thickness);
+}
+
+function getStyles(props, context) {
+  var max = props.max,
+      min = props.min,
+      size = props.size,
+      value = props.value;
+  var palette = context.muiTheme.baseTheme.palette;
+
+
+  var styles = {
+    root: {
+      position: 'relative',
+      display: 'inline-block',
+      width: size,
+      height: size
+    },
+    wrapper: {
+      width: size,
+      height: size,
+      display: 'inline-block',
+      transition: _transitions2.default.create('transform', '20s', null, 'linear'),
+      transitionTimingFunction: 'linear'
+    },
+    svg: {
+      width: size,
+      height: size,
+      position: 'relative'
+    },
+    path: {
+      stroke: props.color || palette.primary1Color,
+      strokeLinecap: 'round',
+      transition: _transitions2.default.create('all', '1.5s', null, 'ease-in-out')
+    }
+  };
+
+  if (props.mode === 'determinate') {
+    var relVal = getRelativeValue(value, min, max);
+    styles.path.transition = _transitions2.default.create('all', '0.3s', null, 'linear');
+    styles.path.strokeDasharray = getArcLength(relVal, props) + ', ' + getArcLength(1, props);
+  }
+
+  return styles;
+}
+
+var CircularProgress = function (_Component) {
+  (0, _inherits3.default)(CircularProgress, _Component);
+
+  function CircularProgress() {
+    (0, _classCallCheck3.default)(this, CircularProgress);
+    return (0, _possibleConstructorReturn3.default)(this, (CircularProgress.__proto__ || (0, _getPrototypeOf2.default)(CircularProgress)).apply(this, arguments));
+  }
+
+  (0, _createClass3.default)(CircularProgress, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.scalePath(this.refs.path);
+      this.rotateWrapper(this.refs.wrapper);
+    }
+  }, {
+    key: 'componentWillUnmount',
+    value: function componentWillUnmount() {
+      clearTimeout(this.scalePathTimer);
+      clearTimeout(this.rotateWrapperTimer);
+    }
+  }, {
+    key: 'scalePath',
+    value: function scalePath(path) {
+      var _this2 = this;
+
+      var step = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 0;
+
+      if (this.props.mode !== 'indeterminate') return;
+
+      step %= 3;
+
+      if (step === 0) {
+        path.style.strokeDasharray = getArcLength(0, this.props) + ', ' + getArcLength(1, this.props);
+        path.style.strokeDashoffset = 0;
+        path.style.transitionDuration = '0ms';
+      } else if (step === 1) {
+        path.style.strokeDasharray = getArcLength(0.7, this.props) + ', ' + getArcLength(1, this.props);
+        path.style.strokeDashoffset = getArcLength(-0.3, this.props);
+        path.style.transitionDuration = '750ms';
+      } else {
+        path.style.strokeDasharray = getArcLength(0.7, this.props) + ', ' + getArcLength(1, this.props);
+        path.style.strokeDashoffset = getArcLength(-1, this.props);
+        path.style.transitionDuration = '850ms';
+      }
+
+      this.scalePathTimer = setTimeout(function () {
+        return _this2.scalePath(path, step + 1);
+      }, step ? 750 : 250);
+    }
+  }, {
+    key: 'rotateWrapper',
+    value: function rotateWrapper(wrapper) {
+      var _this3 = this;
+
+      if (this.props.mode !== 'indeterminate') return;
+
+      _autoPrefix2.default.set(wrapper.style, 'transform', 'rotate(0deg)');
+      _autoPrefix2.default.set(wrapper.style, 'transitionDuration', '0ms');
+
+      setTimeout(function () {
+        _autoPrefix2.default.set(wrapper.style, 'transform', 'rotate(1800deg)');
+        _autoPrefix2.default.set(wrapper.style, 'transitionDuration', '10s');
+        _autoPrefix2.default.set(wrapper.style, 'transitionTimingFunction', 'linear');
+      }, 50);
+
+      this.rotateWrapperTimer = setTimeout(function () {
+        return _this3.rotateWrapper(wrapper);
+      }, 10050);
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _props = this.props,
+          style = _props.style,
+          innerStyle = _props.innerStyle,
+          size = _props.size,
+          thickness = _props.thickness,
+          other = (0, _objectWithoutProperties3.default)(_props, ['style', 'innerStyle', 'size', 'thickness']);
+      var prepareStyles = this.context.muiTheme.prepareStyles;
+
+      var styles = getStyles(this.props, this.context);
+
+      return _react2.default.createElement(
+        'div',
+        (0, _extends3.default)({}, other, { style: prepareStyles((0, _simpleAssign2.default)(styles.root, style)) }),
+        _react2.default.createElement(
+          'div',
+          { ref: 'wrapper', style: prepareStyles((0, _simpleAssign2.default)(styles.wrapper, innerStyle)) },
+          _react2.default.createElement(
+            'svg',
+            {
+              viewBox: '0 0 ' + size + ' ' + size,
+              style: prepareStyles(styles.svg)
+            },
+            _react2.default.createElement('circle', {
+              ref: 'path',
+              style: prepareStyles(styles.path),
+              cx: size / 2,
+              cy: size / 2,
+              r: (size - thickness) / 2,
+              fill: 'none',
+              strokeWidth: thickness,
+              strokeMiterlimit: '20'
+            })
+          )
+        )
+      );
+    }
+  }]);
+  return CircularProgress;
+}(_react.Component);
+
+CircularProgress.defaultProps = {
+  mode: 'indeterminate',
+  value: 0,
+  min: 0,
+  max: 100,
+  size: 40,
+  thickness: 3.5
+};
+CircularProgress.contextTypes = {
+  muiTheme: _propTypes2.default.object.isRequired
+};
+CircularProgress.propTypes = 'development' !== "production" ? {
+  /**
+   * Override the progress's color.
+   */
+  color: _propTypes2.default.string,
+  /**
+   * Style for inner wrapper div.
+   */
+  innerStyle: _propTypes2.default.object,
+  /**
+   * The max value of progress, only works in determinate mode.
+   */
+  max: _propTypes2.default.number,
+  /**
+   * The min value of progress, only works in determinate mode.
+   */
+  min: _propTypes2.default.number,
+  /**
+   * The mode of show your progress, indeterminate
+   * for when there is no value for progress.
+   */
+  mode: _propTypes2.default.oneOf(['determinate', 'indeterminate']),
+  /**
+   * The diameter of the progress in pixels.
+   */
+  size: _propTypes2.default.number,
+  /**
+   * Override the inline-styles of the root element.
+   */
+  style: _propTypes2.default.object,
+  /**
+   * Stroke width in pixels.
+   */
+  thickness: _propTypes2.default.number,
+  /**
+   * The value of progress, only works in determinate mode.
+   */
+  value: _propTypes2.default.number
+} : {};
+exports.default = CircularProgress;
+  })();
+});
+
+require.register("material-ui/CircularProgress/index.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = undefined;
+
+var _CircularProgress = require('./CircularProgress');
+
+var _CircularProgress2 = _interopRequireDefault(_CircularProgress);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = _CircularProgress2.default;
+  })();
+});
+
+require.register("material-ui/Divider/Divider.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends2 = require('babel-runtime/helpers/extends');
+
+var _extends3 = _interopRequireDefault(_extends2);
+
+var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
+
+var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
+
+var _simpleAssign = require('simple-assign');
+
+var _simpleAssign2 = _interopRequireDefault(_simpleAssign);
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Divider = function Divider(props, context) {
+  var inset = props.inset,
+      style = props.style,
+      other = (0, _objectWithoutProperties3.default)(props, ['inset', 'style']);
+  var _context$muiTheme = context.muiTheme,
+      baseTheme = _context$muiTheme.baseTheme,
+      prepareStyles = _context$muiTheme.prepareStyles;
+
+
+  var styles = {
+    root: {
+      margin: 0,
+      marginTop: -1,
+      marginLeft: inset ? 72 : 0,
+      height: 1,
+      border: 'none',
+      backgroundColor: baseTheme.palette.borderColor
+    }
+  };
+
+  return _react2.default.createElement('hr', (0, _extends3.default)({}, other, { style: prepareStyles((0, _simpleAssign2.default)(styles.root, style)) }));
+};
+
+Divider.muiName = 'Divider';
+
+Divider.propTypes = 'development' !== "production" ? {
+  /**
+   * If true, the `Divider` will be indented.
+   */
+  inset: _propTypes2.default.bool,
+  /**
+   * Override the inline-styles of the root element.
+   */
+  style: _propTypes2.default.object
+} : {};
+
+Divider.defaultProps = {
+  inset: false
+};
+
+Divider.contextTypes = {
+  muiTheme: _propTypes2.default.object.isRequired
+};
+
+exports.default = Divider;
+  })();
+});
+
+require.register("material-ui/Divider/index.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = undefined;
+
+var _Divider = require('./Divider');
+
+var _Divider2 = _interopRequireDefault(_Divider);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = _Divider2.default;
   })();
 });
 
@@ -52737,227 +51213,6 @@ var passiveOption = exports.passiveOption = function () {
   })();
 });
 
-require.register("react-ladda/dist/LaddaButton.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "react-ladda");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = require('prop-types');
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _ladda = require('ladda');
-
-var _ladda2 = _interopRequireDefault(_ladda);
-
-var _constants = require('./constants');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var isUndefined = function isUndefined(value) {
-  return typeof value === 'undefined';
-};
-
-var OMITTED_PROPS = ['loading', 'progress'];
-
-var omit = function omit(data, keys) {
-  var result = {};
-  Object.keys(data).forEach(function (key) {
-    if (keys.indexOf(key) === -1) {
-      result[key] = data[key];
-    }
-  });
-
-  return result;
-};
-
-var LaddaButton = function (_Component) {
-  _inherits(LaddaButton, _Component);
-
-  function LaddaButton() {
-    var _ref;
-
-    var _temp, _this, _ret;
-
-    _classCallCheck(this, LaddaButton);
-
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = LaddaButton.__proto__ || Object.getPrototypeOf(LaddaButton)).call.apply(_ref, [this].concat(args))), _this), _this.setNode = function (node) {
-      _this.node = node;
-    }, _this.updateLaddaInstance = function (props) {
-      if (props.loading !== _this.props.loading) {
-        if (props.loading) {
-          _this.laddaInstance.start();
-        } else if (props.disabled) {
-          // .stop removes the attribute "disabled"
-          // .disable calls .stop then adds the attribute "disabled"
-          // see https://github.com/hakimel/Ladda/blob/master/js/ladda.js
-          _this.laddaInstance.disable();
-        } else {
-          _this.laddaInstance.stop();
-        }
-      }
-
-      if (props.progress !== _this.props.progress) {
-        _this.laddaInstance.setProgress(props.progress);
-      }
-    }, _temp), _possibleConstructorReturn(_this, _ret);
-  }
-
-  _createClass(LaddaButton, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      this.laddaInstance = _ladda2.default.create(this.node);
-
-      if (this.props.loading) {
-        this.laddaInstance.start();
-      }
-
-      if (!isUndefined(this.props.progress)) {
-        this.laddaInstance.setProgress(this.props.progress);
-      }
-    }
-  }, {
-    key: 'componentWillReceiveProps',
-    value: function componentWillReceiveProps(nextProps) {
-      this.updateLaddaInstance(nextProps);
-    }
-  }, {
-    key: 'componentWillUnmount',
-    value: function componentWillUnmount() {
-      this.laddaInstance.remove();
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      return _react2.default.createElement(
-        'button',
-        _extends({}, omit(this.props, OMITTED_PROPS), {
-          className: 'ladda-button ' + (this.props.className || ''),
-          ref: this.setNode,
-          disabled: this.props.disabled || this.props.loading
-        }),
-        _react2.default.createElement(
-          'span',
-          { className: 'ladda-label' },
-          this.props.children
-        )
-      );
-    }
-  }]);
-
-  return LaddaButton;
-}(_react.Component);
-
-LaddaButton.propTypes = {
-  children: _propTypes2.default.node,
-  className: _propTypes2.default.string,
-  progress: _propTypes2.default.number,
-  loading: _propTypes2.default.bool,
-  disabled: _propTypes2.default.bool,
-
-  // Ladda props
-  // eslint-disable-next-line react/no-unused-prop-types
-  'data-color': _propTypes2.default.string,
-  // eslint-disable-next-line react/no-unused-prop-types
-  'data-size': _propTypes2.default.oneOf(_constants.SIZES),
-  // eslint-disable-next-line react/no-unused-prop-types
-  'data-style': _propTypes2.default.oneOf(_constants.STYLES),
-  // eslint-disable-next-line react/no-unused-prop-types
-  'data-spinner-size': _propTypes2.default.number,
-  // eslint-disable-next-line react/no-unused-prop-types
-  'data-spinner-color': _propTypes2.default.string,
-  // eslint-disable-next-line react/no-unused-prop-types
-  'data-spinner-lines': _propTypes2.default.number
-};
-exports.default = LaddaButton;
-  })();
-});
-
-require.register("react-ladda/dist/constants.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "react-ladda");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var XS = exports.XS = 'xs';
-var S = exports.S = 's';
-var L = exports.L = 'l';
-var XL = exports.XL = 'xl';
-
-var SIZES = exports.SIZES = [XS, S, L, XL];
-
-var CONTRACT = exports.CONTRACT = 'contract';
-var CONTRACT_OVERLAY = exports.CONTRACT_OVERLAY = 'contract-overlay';
-var EXPAND_LEFT = exports.EXPAND_LEFT = 'expand-left';
-var EXPAND_RIGHT = exports.EXPAND_RIGHT = 'expand-right';
-var EXPAND_UP = exports.EXPAND_UP = 'expand-up';
-var EXPAND_DOWN = exports.EXPAND_DOWN = 'expand-down';
-var SLIDE_LEFT = exports.SLIDE_LEFT = 'slide-left';
-var SLIDE_RIGHT = exports.SLIDE_RIGHT = 'slide-right';
-var SLIDE_UP = exports.SLIDE_UP = 'slide-up';
-var SLIDE_DOWN = exports.SLIDE_DOWN = 'slide-down';
-var ZOOM_IN = exports.ZOOM_IN = 'zoom-in';
-var ZOOM_OUT = exports.ZOOM_OUT = 'zoom-out';
-
-var STYLES = exports.STYLES = [CONTRACT, CONTRACT_OVERLAY, EXPAND_LEFT, EXPAND_RIGHT, EXPAND_UP, EXPAND_DOWN, SLIDE_LEFT, SLIDE_RIGHT, SLIDE_UP, SLIDE_DOWN, ZOOM_IN, ZOOM_OUT];
-  })();
-});
-
-require.register("react-ladda/dist/index.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "react-ladda");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _constants = require('./constants');
-
-Object.keys(_constants).forEach(function (key) {
-  if (key === "default" || key === "__esModule") return;
-  Object.defineProperty(exports, key, {
-    enumerable: true,
-    get: function get() {
-      return _constants[key];
-    }
-  });
-});
-
-var _LaddaButton = require('./LaddaButton');
-
-var _LaddaButton2 = _interopRequireDefault(_LaddaButton);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = _LaddaButton2.default;
-  })();
-});
-
 require.register("react-router-dom/BrowserRouter.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {"transform":["loose-envify"]}, "react-router-dom");
   (function() {
@@ -58500,7 +56755,19 @@ var _MuiThemeProvider = require('material-ui/styles/MuiThemeProvider');
 
 var _MuiThemeProvider2 = _interopRequireDefault(_MuiThemeProvider);
 
+var _getMuiTheme = require('material-ui/styles/getMuiTheme');
+
+var _getMuiTheme2 = _interopRequireDefault(_getMuiTheme);
+
+var _colors = require('material-ui/styles/colors');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var muiTheme = (0, _getMuiTheme2.default)({
+  palette: {
+    textColor: _colors.grey900
+  }
+});
 
 document.addEventListener('DOMContentLoaded', function () {
   _reactDom2.default.render(_react2.default.createElement(
@@ -58511,43 +56778,12 @@ document.addEventListener('DOMContentLoaded', function () {
       { client: _graphql_client2.default },
       _react2.default.createElement(
         _MuiThemeProvider2.default,
-        null,
+        { muiTheme: muiTheme },
         _react2.default.createElement(_main2.default, null)
       )
     )
   ), document.getElementById('js_app'));
 });
-
-});
-
-require.register("js/graphql.js", function(exports, require, module) {
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _axios = require('axios');
-
-var _axios2 = _interopRequireDefault(_axios);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var endpoint = "http://localhost:4001/api/central/graphql?query=";
-
-var graphql = {
-  run: function run(query) {
-    return _axios2.default.post('' + endpoint + prepare(query)).then(function (res) {
-      return res.data.data;
-    });
-  }
-};
-
-function prepare(query) {
-  return query.replace(/\s+/g, ' ');
-}
-
-exports.default = graphql;
 
 });
 
@@ -58602,10 +56838,6 @@ var _react2 = _interopRequireDefault(_react);
 var _AppBar = require('material-ui/AppBar');
 
 var _AppBar2 = _interopRequireDefault(_AppBar);
-
-var _IconButton = require('material-ui/IconButton');
-
-var _IconButton2 = _interopRequireDefault(_IconButton);
 
 var _FontIcon = require('material-ui/FontIcon');
 
@@ -58676,18 +56908,13 @@ var Main = function (_React$Component) {
         null,
         _react2.default.createElement(_AppBar2.default, {
           title: 'Central',
-          onLeftIconButtonTouchTap: this.handleToggle,
-          iconElementRight: _react2.default.createElement(
-            _IconButton2.default,
-            null,
-            _react2.default.createElement(
-              _FontIcon2.default,
-              { className: 'material-icons' },
-              'settings'
-            )
-          )
+          onLeftIconButtonTouchTap: this.handleToggle
         }),
-        _react2.default.createElement(_reactRouterDom.Route, { path: '/extranet/dashboard', component: _container2.default }),
+        _react2.default.createElement(
+          'main',
+          { className: 'p-4' },
+          _react2.default.createElement(_reactRouterDom.Route, { path: '/extranet/dashboard', component: _container2.default })
+        ),
         _react2.default.createElement(
           _Drawer2.default,
           {
@@ -58748,6 +56975,14 @@ var _timeago = require('js/timeago');
 
 var _timeago2 = _interopRequireDefault(_timeago);
 
+var _Paper = require('material-ui/Paper');
+
+var _Paper2 = _interopRequireDefault(_Paper);
+
+var _FontIcon = require('material-ui/FontIcon');
+
+var _FontIcon2 = _interopRequireDefault(_FontIcon);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -58766,17 +57001,24 @@ var ConfirmedOrder = function (_React$Component) {
   }
 
   _createClass(ConfirmedOrder, [{
+    key: 'stops',
+    value: function stops(_stops) {
+      return _stops.map(function (stop, i) {
+        return _react2.default.createElement(Stop, { key: i, stop: stop });
+      });
+    }
+  }, {
     key: 'render',
     value: function render() {
       var order = this.props.order;
 
 
       return _react2.default.createElement(
-        'section',
-        { className: 'card mb-3' },
+        _Paper2.default,
+        { zDepth: 1, className: 'mb-3 pt-2 pb-2 pl-3 pr-3' },
         _react2.default.createElement(
           'div',
-          { className: 'card-header d-flex align-items-center justify-content-between' },
+          { className: 'text-muted d-flex align-items-center justify-content-between' },
           _react2.default.createElement(
             'span',
             null,
@@ -58786,39 +57028,79 @@ var ConfirmedOrder = function (_React$Component) {
           _react2.default.createElement(
             'span',
             null,
-            'pedido ',
-            _react2.default.createElement(_timeago2.default, { date: order.insertedAt })
+            'confirmada ',
+            _react2.default.createElement(_timeago2.default, { date: order.confirmedAt })
           )
         ),
         _react2.default.createElement(
           'div',
-          { className: 'card-body' },
+          { className: 'mt-3 d-flex align-items-center justify-content-between' },
           _react2.default.createElement(
             'div',
-            { className: 'd-flex align-items-center justify-content-between' },
+            null,
             _react2.default.createElement(
               'div',
-              null,
-              _react2.default.createElement('i', { className: 'fa fa-user mr-2' }),
-              order.customer.name,
-              _react2.default.createElement('br', null),
-              _react2.default.createElement('i', { className: 'fa fa-phone mr-2' }),
-              order.customer.phoneNumber
+              { className: 'mb-2 d-flex align-items-center' },
+              _react2.default.createElement(
+                _FontIcon2.default,
+                { className: 'material-icons mr-2' },
+                'person'
+              ),
+              _react2.default.createElement(
+                'span',
+                null,
+                order.customer.name
+              )
             ),
             _react2.default.createElement(
               'div',
-              null,
-              _react2.default.createElement('i', { className: 'fa fa-motorcycle mr-2' }),
-              order.motoboy.name,
+              { className: 'd-flex align-items-center' },
               _react2.default.createElement(
-                'div',
-                { className: 'text-muted' },
-                'confirmada ',
-                _react2.default.createElement(_timeago2.default, { date: order.confirmedAt })
+                _FontIcon2.default,
+                { className: 'material-icons mr-2' },
+                'phone'
+              ),
+              _react2.default.createElement(
+                'span',
+                null,
+                order.customer.phoneNumber
+              )
+            )
+          ),
+          _react2.default.createElement(
+            'div',
+            null,
+            _react2.default.createElement(
+              'div',
+              { className: 'mb-2 d-flex align-items-center' },
+              _react2.default.createElement(
+                _FontIcon2.default,
+                { className: 'material-icons mr-2' },
+                'motorcycle'
+              ),
+              _react2.default.createElement(
+                'span',
+                null,
+                order.motoboy.name
+              )
+            ),
+            _react2.default.createElement(
+              'div',
+              { className: 'd-flex align-items-center' },
+              _react2.default.createElement(
+                _FontIcon2.default,
+                { className: 'material-icons mr-2' },
+                'attach_money'
+              ),
+              _react2.default.createElement(
+                'span',
+                null,
+                order.formattedPrice
               )
             )
           )
-        )
+        ),
+        this.stops(order.stops)
       );
     }
   }]);
@@ -58827,6 +57109,61 @@ var ConfirmedOrder = function (_React$Component) {
 }(_react2.default.Component);
 
 exports.default = ConfirmedOrder;
+
+var Stop = function (_React$Component2) {
+  _inherits(Stop, _React$Component2);
+
+  function Stop() {
+    _classCallCheck(this, Stop);
+
+    return _possibleConstructorReturn(this, (Stop.__proto__ || Object.getPrototypeOf(Stop)).apply(this, arguments));
+  }
+
+  _createClass(Stop, [{
+    key: 'render',
+    value: function render() {
+      var stop = this.props.stop;
+
+      return _react2.default.createElement(
+        'section',
+        { className: 'mt-4 mb-2' },
+        _react2.default.createElement(
+          'div',
+          { className: 'mb-2' },
+          _react2.default.createElement(
+            'strong',
+            null,
+            stop.sequence + 1,
+            '\xAA parada - ',
+            stop.location.name
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'mb-2 d-flex align-items-center' },
+          _react2.default.createElement(
+            _FontIcon2.default,
+            { className: 'material-icons mr-2' },
+            'place'
+          ),
+          stop.location.line1
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'd-flex align-items-center' },
+          _react2.default.createElement(
+            _FontIcon2.default,
+            { className: 'material-icons mr-2' },
+            'list'
+          ),
+          stop.instructions
+        )
+      );
+    }
+  }]);
+
+  return Stop;
+}(_react2.default.Component);
 
 });
 
@@ -58839,13 +57176,11 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _templateObject = _taggedTemplateLiteral(['\n  query getOrdersAndMotoboys {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      noMotoboy\n      finished\n      insertedAt\n      confirmedAt\n      finishedAt\n      stops {\n        sequence\n        instructions\n        location {\n          name\n          reference\n          line1\n        }\n      }\n      customer {\n        id\n        name\n        phoneNumber\n      }\n      motoboy {\n        id\n        name\n      }\n    }\n\n    motoboys {\n      id\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameUnavailableAt\n      becameBusyAt\n    }\n  }\n'], ['\n  query getOrdersAndMotoboys {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      noMotoboy\n      finished\n      insertedAt\n      confirmedAt\n      finishedAt\n      stops {\n        sequence\n        instructions\n        location {\n          name\n          reference\n          line1\n        }\n      }\n      customer {\n        id\n        name\n        phoneNumber\n      }\n      motoboy {\n        id\n        name\n      }\n    }\n\n    motoboys {\n      id\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameUnavailableAt\n      becameBusyAt\n    }\n  }\n']);
+
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
-
-var _axios = require('axios');
-
-var _axios2 = _interopRequireDefault(_axios);
 
 var _orders = require('./orders');
 
@@ -58855,7 +57190,15 @@ var _motoboys = require('./motoboys');
 
 var _motoboys2 = _interopRequireDefault(_motoboys);
 
+var _graphqlTag = require('graphql-tag');
+
+var _graphqlTag2 = _interopRequireDefault(_graphqlTag);
+
+var _reactApollo = require('react-apollo');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -58873,20 +57216,29 @@ var OrdersContainer = function (_React$Component) {
   }
 
   _createClass(OrdersContainer, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.props.data.startPolling(1000);
+    }
+  }, {
     key: 'render',
     value: function render() {
+      var _props$data = this.props.data,
+          orders = _props$data.orders,
+          motoboys = _props$data.motoboys;
+
       return _react2.default.createElement(
         'div',
         { className: 'row' },
         _react2.default.createElement(
           'div',
-          { className: 'col-sm-10' },
-          _react2.default.createElement(_orders2.default, null)
+          { className: 'col-sm-3' },
+          _react2.default.createElement(_motoboys2.default, { motoboys: motoboys })
         ),
         _react2.default.createElement(
           'div',
-          { className: 'col-sm-2' },
-          _react2.default.createElement(_motoboys2.default, null)
+          { className: 'col-sm-9' },
+          _react2.default.createElement(_orders2.default, { orders: orders })
         )
       );
     }
@@ -58895,7 +57247,137 @@ var OrdersContainer = function (_React$Component) {
   return OrdersContainer;
 }(_react2.default.Component);
 
-exports.default = OrdersContainer;
+exports.default = (0, _reactApollo.graphql)((0, _graphqlTag2.default)(_templateObject))(function (props) {
+  return _react2.default.createElement(OrdersContainer, props);
+});
+
+});
+
+require.register("js/orders/finished_order.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _timeago = require('js/timeago');
+
+var _timeago2 = _interopRequireDefault(_timeago);
+
+var _Paper = require('material-ui/Paper');
+
+var _Paper2 = _interopRequireDefault(_Paper);
+
+var _FontIcon = require('material-ui/FontIcon');
+
+var _FontIcon2 = _interopRequireDefault(_FontIcon);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var FinishedOrder = function (_React$Component) {
+  _inherits(FinishedOrder, _React$Component);
+
+  function FinishedOrder() {
+    _classCallCheck(this, FinishedOrder);
+
+    return _possibleConstructorReturn(this, (FinishedOrder.__proto__ || Object.getPrototypeOf(FinishedOrder)).apply(this, arguments));
+  }
+
+  _createClass(FinishedOrder, [{
+    key: 'render',
+    value: function render() {
+      var order = this.props.order;
+
+
+      return _react2.default.createElement(
+        _Paper2.default,
+        { zDepth: 1, className: 'mb-3 pt-2 pb-2 pl-3 pr-3' },
+        _react2.default.createElement(
+          'div',
+          { className: 'text-muted' },
+          _react2.default.createElement(
+            'span',
+            null,
+            '#',
+            order.id
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'mt-3' },
+          _react2.default.createElement(
+            'div',
+            { className: 'mb-2 d-flex align-items-center' },
+            _react2.default.createElement(
+              _FontIcon2.default,
+              { className: 'material-icons mr-2' },
+              'person'
+            ),
+            _react2.default.createElement(
+              'span',
+              null,
+              order.customer.name
+            )
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'mb-2 d-flex align-items-center' },
+            _react2.default.createElement(
+              _FontIcon2.default,
+              { className: 'material-icons mr-2' },
+              'phone'
+            ),
+            _react2.default.createElement(
+              'span',
+              null,
+              order.customer.phoneNumber
+            )
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'mb-2 d-flex align-items-center' },
+            _react2.default.createElement(
+              _FontIcon2.default,
+              { className: 'material-icons mr-2' },
+              'motorcycle'
+            ),
+            _react2.default.createElement(
+              'span',
+              null,
+              order.motoboy.name
+            )
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'text-muted' },
+            _react2.default.createElement(
+              'small',
+              null,
+              'Finalizada ',
+              _react2.default.createElement(_timeago2.default, { date: order.finishedAt })
+            )
+          )
+        )
+      );
+    }
+  }]);
+
+  return FinishedOrder;
+}(_react2.default.Component);
+
+exports.default = FinishedOrder;
 
 });
 
@@ -58908,25 +57390,25 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _templateObject = _taggedTemplateLiteral(['\n  fragment Fields on Motoboy {\n    id\n    name\n    available\n    busy\n    unavailable\n    becameAvailableAt\n    becameBusyAt\n  }\n'], ['\n  fragment Fields on Motoboy {\n    id\n    name\n    available\n    busy\n    unavailable\n    becameAvailableAt\n    becameBusyAt\n  }\n']),
-    _templateObject2 = _taggedTemplateLiteral(['\n  query getMotoboys {\n    motoboys { ...Fields }\n  }\n  ', '\n'], ['\n  query getMotoboys {\n    motoboys { ...Fields }\n  }\n  ', '\n']),
-    _templateObject3 = _taggedTemplateLiteral(['\n  subscription motoboyUpdates {\n    motoboy: motoboyUpdates { ...Fields }\n  }\n  ', '\n'], ['\n  subscription motoboyUpdates {\n    motoboy: motoboyUpdates { ...Fields }\n  }\n  ', '\n']);
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactApollo = require('react-apollo');
-
-var _graphqlTag = require('graphql-tag');
-
-var _graphqlTag2 = _interopRequireDefault(_graphqlTag);
-
 var _timeago = require('js/timeago');
 
 var _timeago2 = _interopRequireDefault(_timeago);
+
+var _FontIcon = require('material-ui/FontIcon');
+
+var _FontIcon2 = _interopRequireDefault(_FontIcon);
+
+var _Subheader = require('material-ui/Subheader');
+
+var _Subheader2 = _interopRequireDefault(_Subheader);
+
+var _Divider = require('material-ui/Divider');
+
+var _Divider2 = _interopRequireDefault(_Divider);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -58935,45 +57417,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
-
-var MOTOBOY_FIELDS = (0, _graphqlTag2.default)(_templateObject);
-var MOTOBOYS_QUERY = (0, _graphqlTag2.default)(_templateObject2, MOTOBOY_FIELDS);
-var MOTOBOY_UPDATES_SUBSCRIPTION = (0, _graphqlTag2.default)(_templateObject3, MOTOBOY_FIELDS);
-
-exports.default = (0, _reactApollo.graphql)(MOTOBOYS_QUERY, {
-  props: function props(_props) {
-    return _extends({}, _props, {
-      subscribeToMotoboyUpdates: function subscribeToMotoboyUpdates(params) {
-        return _props.data.subscribeToMore({
-          document: MOTOBOY_UPDATES_SUBSCRIPTION,
-          variables: {},
-          updateQuery: function updateQuery(_ref, _ref2) {
-            var motoboys = _ref.motoboys;
-            var motoboy = _ref2.subscriptionData.motoboy;
-
-            console.log('1');
-            if (!motoboys) return;
-
-            if (!motoboy) {
-              return motoboys;
-            }
-
-            return motoboys.map(function (aMotoboy) {
-              if (motoboy.id === aMotoboy.id) {
-                return _extends({}, aMotoboy, motoboy);
-              }
-              return aMotoboy;
-            });
-          }
-        });
-      }
-    });
-  }
-})(function (props) {
-  return _react2.default.createElement(Motoboys, props);
-});
 
 var Motoboys = function (_React$Component) {
   _inherits(Motoboys, _React$Component);
@@ -58985,24 +57428,16 @@ var Motoboys = function (_React$Component) {
   }
 
   _createClass(Motoboys, [{
-    key: 'componentWillMount',
-    value: function componentWillMount() {
-      this.props.subscribeToMotoboyUpdates();
-    }
-  }, {
     key: 'render',
     value: function render() {
-      var _props$data = this.props.data,
-          loading = _props$data.loading,
-          error = _props$data.error,
-          motoboys = _props$data.motoboys;
+      var motoboys = this.props.motoboys;
 
-      if (loading) return null;
+      if (!motoboys) return null;
       return _react2.default.createElement(
         'div',
-        null,
+        { className: 'card' },
         _react2.default.createElement(
-          'h4',
+          _Subheader2.default,
           null,
           'Motoboys'
         ),
@@ -59014,18 +57449,33 @@ var Motoboys = function (_React$Component) {
   return Motoboys;
 }(_react2.default.Component);
 
+exports.default = Motoboys;
+
+
 function Motoboy(motoboy, index) {
   var iconClass = getIconClass(motoboy);
   var dateToShow = getDateToShow(motoboy);
 
   return _react2.default.createElement(
     'div',
-    { key: index, className: 'card mb-2' },
+    { key: index },
     _react2.default.createElement(
       'div',
-      { className: 'card-body p-2' },
-      _react2.default.createElement('i', { className: 'fa fa-circle ' + iconClass + ' mr-2' }),
-      motoboy.name,
+      { className: 'p-2 pl-3' },
+      _react2.default.createElement(
+        'div',
+        { className: 'd-flex align-items-center' },
+        _react2.default.createElement(
+          _FontIcon2.default,
+          { className: iconClass + ' mr-2 material-icons', style: { fontSize: 15 } },
+          'fiber_manual_record'
+        ),
+        _react2.default.createElement(
+          'span',
+          null,
+          motoboy.name
+        )
+      ),
       _react2.default.createElement(
         'div',
         null,
@@ -59035,13 +57485,14 @@ function Motoboy(motoboy, index) {
           dateToShow
         )
       )
-    )
+    ),
+    _react2.default.createElement(_Divider2.default, null)
   );
 }
 
-function getIconClass(_ref3) {
-  var available = _ref3.available,
-      busy = _ref3.busy;
+function getIconClass(_ref) {
+  var available = _ref.available,
+      busy = _ref.busy;
 
   if (available) {
     return "text-success";
@@ -59052,11 +57503,11 @@ function getIconClass(_ref3) {
   }
 }
 
-function getDateToShow(_ref4) {
-  var available = _ref4.available,
-      busy = _ref4.busy,
-      becameBusyAt = _ref4.becameBusyAt,
-      becameAvailableAt = _ref4.becameAvailableAt;
+function getDateToShow(_ref2) {
+  var available = _ref2.available,
+      busy = _ref2.busy,
+      becameBusyAt = _ref2.becameBusyAt,
+      becameAvailableAt = _ref2.becameAvailableAt;
 
   if (available) {
     return _react2.default.createElement(
@@ -59090,10 +57541,6 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
-var _graphql = require('js/graphql');
-
-var _graphql2 = _interopRequireDefault(_graphql);
-
 var _pending_order = require('./pending_order');
 
 var _pending_order2 = _interopRequireDefault(_pending_order);
@@ -59101,6 +57548,18 @@ var _pending_order2 = _interopRequireDefault(_pending_order);
 var _confirmed_order = require('./confirmed_order');
 
 var _confirmed_order2 = _interopRequireDefault(_confirmed_order);
+
+var _finished_order = require('./finished_order');
+
+var _finished_order2 = _interopRequireDefault(_finished_order);
+
+var _Subheader = require('material-ui/Subheader');
+
+var _Subheader2 = _interopRequireDefault(_Subheader);
+
+var _Divider = require('material-ui/Divider');
+
+var _Divider2 = _interopRequireDefault(_Divider);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -59114,147 +57573,93 @@ var Orders = function (_React$Component) {
   _inherits(Orders, _React$Component);
 
   function Orders() {
-    var _ref;
-
-    var _temp, _this, _ret;
-
     _classCallCheck(this, Orders);
 
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = Orders.__proto__ || Object.getPrototypeOf(Orders)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
-      enumerable: true,
-      writable: true,
-      value: {
-        pendingOrders: [],
-        confirmedOrders: [],
-        showMotoboys: false
-      }
-    }), Object.defineProperty(_this, 'onConfirm', {
-      enumerable: true,
-      writable: true,
-      value: function value(order, cb) {
-        // this.moveOrderToConfirmedQueue(order)
-
-        _graphql2.default.run(confirmOrderMutation(order.id)).then(function (data) {
-          cb();
-          if (data.order.error) {
-            alert(data.order.error);
-          } else {
-            var _this$state = _this.state,
-                pendingOrders = _this$state.pendingOrders,
-                confirmedOrders = _this$state.confirmedOrders;
-
-            var newPendingOrders = pendingOrders.filter(function (aOrder) {
-              return aOrder.id != data.order.id;
-            });
-            confirmedOrders.push(data.order);
-            _this.setState({ pendingOrders: newPendingOrders });
-          }
-        });
-      }
-    }), Object.defineProperty(_this, 'onCancel', {
-      enumerable: true,
-      writable: true,
-      value: function value(order, cb) {
-        _graphql2.default.run(cancelOrderMutation(order.id)).then(function (data) {
-          cb();
-
-          if (data.order.error) {
-            alert(data.order.error);
-          } else {
-            var pendingOrders = _this.state.pendingOrders;
-
-            _this.setState({ pendingOrders: pendingOrders.filter(function (aOrder) {
-                return aOrder.id != order.id;
-              }) });
-          }
-        });
-      }
-    }), _temp), _possibleConstructorReturn(_this, _ret);
+    return _possibleConstructorReturn(this, (Orders.__proto__ || Object.getPrototypeOf(Orders)).apply(this, arguments));
   }
 
   _createClass(Orders, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      // graphql.run(query())
-      //   .then((data) => {
-      //     const pendingOrders = data.orders.filter((order) => order.pending)
-      //     const confirmedOrders = data.orders.filter((order) => order.confirmed)
-      //     this.setState({ pendingOrders, confirmedOrders })
-      //   })
-    }
-  }, {
-    key: 'moveOrderToConfirmedQueue',
-    value: function moveOrderToConfirmedQueue(order) {
-      var _state = this.state,
-          pendingOrders = _state.pendingOrders,
-          confirmedOrders = _state.confirmedOrders;
-
-
-      order.pending = false;
-      order.confirmed = true;
-
-      var newPendingOrders = pendingOrders.filter(function (aOrder) {
-        return aOrder.id != order.id;
-      });
-      confirmedOrders.push(order);
-
-      this.setState({ pendingOrders: newPendingOrders });
-    }
-  }, {
     key: 'pending',
-    value: function pending() {
-      var _this2 = this;
-
-      var pendingOrders = this.state.pendingOrders;
-
+    value: function pending(orders) {
+      var pendingOrders = orders.filter(function (order) {
+        return order.pending;
+      });
 
       return pendingOrders.map(function (order, i) {
-        return _react2.default.createElement(_pending_order2.default, {
-          key: i,
-          order: order,
-          onConfirm: _this2.onConfirm,
-          onCancel: _this2.onCancel
-        });
+        return _react2.default.createElement(_pending_order2.default, { key: i, order: order });
       });
     }
   }, {
     key: 'confirmed',
-    value: function confirmed() {
-      var confirmedOrders = this.state.confirmedOrders;
-
+    value: function confirmed(orders) {
+      var confirmedOrders = orders.filter(function (order) {
+        return order.confirmed;
+      });
       return confirmedOrders.map(function (order, i) {
         return _react2.default.createElement(_confirmed_order2.default, { key: i, order: order });
       });
     }
   }, {
+    key: 'finished',
+    value: function finished(orders) {
+      var finishedOrders = orders.filter(function (order) {
+        return order.finished;
+      });
+      return finishedOrders.map(function (order, i) {
+        return _react2.default.createElement(_finished_order2.default, { key: i, order: order });
+      });
+    }
+  }, {
     key: 'render',
     value: function render() {
+      var orders = this.props.orders;
+
+      if (!orders) return null;
+
       return _react2.default.createElement(
         'div',
         { className: 'row' },
         _react2.default.createElement(
           'div',
-          { className: 'col-sm-6' },
+          { className: 'col-sm-4' },
           _react2.default.createElement(
-            'h4',
+            'div',
             null,
-            'Novos Pedidos'
-          ),
-          this.pending()
+            _react2.default.createElement(
+              _Subheader2.default,
+              null,
+              'Aguardando motoboy'
+            ),
+            this.pending(orders)
+          )
         ),
         _react2.default.createElement(
           'div',
-          { className: 'col-sm-6' },
+          { className: 'col-sm-5' },
           _react2.default.createElement(
-            'h4',
+            'div',
             null,
-            'Pedidos em entrega'
-          ),
-          this.confirmed()
+            _react2.default.createElement(
+              _Subheader2.default,
+              null,
+              'Em entrega'
+            ),
+            this.confirmed(orders)
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'col-sm-3' },
+          _react2.default.createElement(
+            'div',
+            null,
+            _react2.default.createElement(
+              _Subheader2.default,
+              null,
+              'Entregues'
+            ),
+            this.finished(orders)
+          )
         )
       );
     }
@@ -59265,22 +57670,9 @@ var Orders = function (_React$Component) {
 
 exports.default = Orders;
 
-
-function query() {
-  return 'query getOrders {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      insertedAt\n      confirmedAt\n      stops {\n        sequence\n        instructions\n        location { reference, line1 }\n      }\n      customer { name, phoneNumber }\n      motoboy { name }\n    }\n  }';
-}
-
-function confirmOrderMutation(orderId) {
-  return 'mutation confirmOrder {\n    order: confirmOrder(orderId: ' + orderId + ') {\n      ... on Order {\n        id\n        formattedPrice\n        pending\n        confirmed\n        insertedAt\n        confirmedAt\n        stops {\n          sequence\n          instructions\n          location { reference, line1 }\n        }\n        customer { name, phoneNumber }\n        motoboy { name }\n      }\n\n      ... on Error {\n        error\n      }\n    }\n  }';
-}
-
-function cancelOrderMutation(orderId) {
-  return 'mutation cancelOrder {\n    order: cancelOrder(orderId: ' + orderId + ') {\n      ... on Error {\n        error\n      }\n    }\n  }';
-}
-
 });
 
-;require.register("js/orders/pending_order.jsx", function(exports, require, module) {
+require.register("js/orders/pending_order.jsx", function(exports, require, module) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -59297,9 +57689,17 @@ var _timeago = require('js/timeago');
 
 var _timeago2 = _interopRequireDefault(_timeago);
 
-var _reactLadda = require('react-ladda');
+var _Paper = require('material-ui/Paper');
 
-var _reactLadda2 = _interopRequireDefault(_reactLadda);
+var _Paper2 = _interopRequireDefault(_Paper);
+
+var _FontIcon = require('material-ui/FontIcon');
+
+var _FontIcon2 = _interopRequireDefault(_FontIcon);
+
+var _CircularProgress = require('material-ui/CircularProgress');
+
+var _CircularProgress2 = _interopRequireDefault(_CircularProgress);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -59313,65 +57713,23 @@ var PendingOrder = function (_React$Component) {
   _inherits(PendingOrder, _React$Component);
 
   function PendingOrder() {
-    var _ref;
-
-    var _temp, _this, _ret;
-
     _classCallCheck(this, PendingOrder);
 
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = PendingOrder.__proto__ || Object.getPrototypeOf(PendingOrder)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
-      enumerable: true,
-      writable: true,
-      value: { loading: false }
-    }), Object.defineProperty(_this, 'onConfirm', {
-      enumerable: true,
-      writable: true,
-      value: function value() {
-        var _this$props = _this.props,
-            order = _this$props.order,
-            onConfirm = _this$props.onConfirm;
-
-
-        _this.setState({ loading: true });
-        onConfirm(order, function () {
-          return _this.setState({ loading: false });
-        });
-      }
-    }), Object.defineProperty(_this, 'onCancel', {
-      enumerable: true,
-      writable: true,
-      value: function value() {
-        var _this$props2 = _this.props,
-            order = _this$props2.order,
-            onCancel = _this$props2.onCancel;
-
-
-        _this.setState({ loading: true });
-        onCancel(order, function () {
-          return _this.setState({ loading: false });
-        });
-      }
-    }), _temp), _possibleConstructorReturn(_this, _ret);
+    return _possibleConstructorReturn(this, (PendingOrder.__proto__ || Object.getPrototypeOf(PendingOrder)).apply(this, arguments));
   }
 
   _createClass(PendingOrder, [{
     key: 'render',
     value: function render() {
-      var _this2 = this;
-
       var order = this.props.order;
 
 
       return _react2.default.createElement(
-        'section',
-        { className: 'card border-info mb-3' },
+        _Paper2.default,
+        { zDepth: 1, className: 'mb-3 pt-2 pb-2 pl-3 pr-3' },
         _react2.default.createElement(
           'div',
-          { className: 'card-header bg-info text-white d-flex align-items-center justify-content-between' },
+          { className: 'text-muted d-flex align-items-center justify-content-between' },
           _react2.default.createElement(
             'span',
             null,
@@ -59387,79 +57745,83 @@ var PendingOrder = function (_React$Component) {
         ),
         _react2.default.createElement(
           'div',
-          { className: 'card-body' },
+          { className: 'mt-3 d-flex align-items-start justify-content-between' },
           _react2.default.createElement(
             'div',
-            { className: 'd-flex align-items-center justify-content-between' },
+            null,
             _react2.default.createElement(
               'div',
-              null,
-              _react2.default.createElement('i', { className: 'fa fa-user mr-2' }),
-              order.customer.name,
-              _react2.default.createElement('br', null),
-              _react2.default.createElement('i', { className: 'fa fa-phone mr-2' }),
-              order.customer.phoneNumber
-            )
-          ),
-          this.stops(order.stops),
-          _react2.default.createElement(
-            'div',
-            { className: 'mt-4' },
-            _react2.default.createElement(
-              'strong',
-              null,
-              'Total:'
-            ),
-            ' ',
-            order.formattedPrice
-          ),
-          _react2.default.createElement(
-            'div',
-            { className: 'mt-4 d-flex align-items-center justify-content-between' },
-            _react2.default.createElement(
-              _reactLadda2.default,
-              {
-                loading: this.state.loading,
-                onClick: function onClick(e) {
-                  return _this2.onCancel();
-                },
-                'data-size': _reactLadda.S,
-                'data-style': _reactLadda.EXPAND_RIGHT,
-                'data-spinner-color': '#666',
-                'data-spinner-size': 25,
-                'data-spinner-lines': 12,
-                className: 'btn btn-outline-danger'
-              },
-              _react2.default.createElement('i', { className: 'fa fa-times mr-2' }),
-              'Cancelar'
+              { className: 'mb-2 d-flex align-items-center' },
+              _react2.default.createElement(
+                _FontIcon2.default,
+                { className: 'material-icons mr-2' },
+                'person'
+              ),
+              _react2.default.createElement(
+                'span',
+                null,
+                order.customer.name
+              )
             ),
             _react2.default.createElement(
-              _reactLadda2.default,
-              {
-                loading: this.state.loading,
-                onClick: function onClick(e) {
-                  return _this2.onConfirm();
-                },
-                'data-size': _reactLadda.S,
-                'data-style': _reactLadda.EXPAND_RIGHT,
-                'data-spinner-color': '#666',
-                'data-spinner-size': 25,
-                'data-spinner-lines': 12,
-                className: 'btn btn-outline-info'
-              },
-              _react2.default.createElement('i', { className: 'fa fa-check mr-2' }),
-              'Confirmar'
+              'div',
+              { className: 'mb-2 d-flex align-items-center' },
+              _react2.default.createElement(
+                _FontIcon2.default,
+                { className: 'material-icons mr-2' },
+                'phone'
+              ),
+              _react2.default.createElement(
+                'span',
+                null,
+                order.customer.phoneNumber
+              )
             )
+          ),
+          _react2.default.createElement(
+            'div',
+            null,
+            _react2.default.createElement(
+              'div',
+              { className: 'mb-2 d-flex align-items-center' },
+              _react2.default.createElement(
+                _FontIcon2.default,
+                { className: 'material-icons mr-2' },
+                'motorcycle'
+              ),
+              _react2.default.createElement(
+                'span',
+                null,
+                order.motoboy.name
+              )
+            ),
+            _react2.default.createElement(
+              'div',
+              { className: 'd-flex align-items-center' },
+              _react2.default.createElement(
+                _FontIcon2.default,
+                { className: 'material-icons mr-2' },
+                'attach_money'
+              ),
+              _react2.default.createElement(
+                'span',
+                null,
+                order.formattedPrice
+              )
+            )
+          )
+        ),
+        _react2.default.createElement(
+          'div',
+          { className: 'mt-3 mb-2 d-flex align-items-center justify-content-center' },
+          _react2.default.createElement(_CircularProgress2.default, { size: 20 }),
+          _react2.default.createElement(
+            'span',
+            { className: 'ml-2 text-muted' },
+            'Aguardando confirma\xE7\xE3o...'
           )
         )
       );
-    }
-  }, {
-    key: 'stops',
-    value: function stops(_stops) {
-      return _stops.map(function (stop, i) {
-        return _react2.default.createElement(Stop, { key: i, stop: stop });
-      });
     }
   }]);
 
@@ -59467,51 +57829,6 @@ var PendingOrder = function (_React$Component) {
 }(_react2.default.Component);
 
 exports.default = PendingOrder;
-
-var Stop = function (_React$Component2) {
-  _inherits(Stop, _React$Component2);
-
-  function Stop() {
-    _classCallCheck(this, Stop);
-
-    return _possibleConstructorReturn(this, (Stop.__proto__ || Object.getPrototypeOf(Stop)).apply(this, arguments));
-  }
-
-  _createClass(Stop, [{
-    key: 'render',
-    value: function render() {
-      var stop = this.props.stop;
-
-      return _react2.default.createElement(
-        'section',
-        { className: 'mt-4 mb-2' },
-        _react2.default.createElement(
-          'div',
-          null,
-          _react2.default.createElement(
-            'strong',
-            null,
-            stop.sequence + 1,
-            '\xAA parada'
-          )
-        ),
-        _react2.default.createElement(
-          'div',
-          null,
-          _react2.default.createElement('i', { className: 'fa fa-map-marker mr-2' }),
-          stop.location.line1
-        ),
-        _react2.default.createElement(
-          'div',
-          null,
-          stop.instructions
-        )
-      );
-    }
-  }]);
-
-  return Stop;
-}(_react2.default.Component);
 
 });
 
@@ -59586,19 +57903,15 @@ require.alias("apollo-link-context/lib/bundle.umd.js", "apollo-link-context");
 require.alias("apollo-link-dedup/lib/bundle.umd.js", "apollo-link-dedup");
 require.alias("apollo-link-http/lib/bundle.umd.js", "apollo-link-http");
 require.alias("apollo-utilities/lib/index.js", "apollo-utilities");
-require.alias("axios/lib/adapters/xhr.js", "axios/lib/adapters/http");
-require.alias("axios/lib/adapters/xhr.js", "axios/lib/adapters/http.js");
 require.alias("bowser/src/bowser.js", "bowser");
 require.alias("buffer/index.js", "buffer");
 require.alias("graphql-anywhere/lib/index.js", "graphql-anywhere");
 require.alias("graphql-anywhere/node_modules/apollo-utilities/lib/index.js", "graphql-anywhere/node_modules/apollo-utilities");
 require.alias("graphql-tag/lib/graphql-tag.umd.js", "graphql-tag");
 require.alias("invariant/browser.js", "invariant");
-require.alias("ladda/dist/ladda.min.js", "ladda");
 require.alias("process/browser.js", "process");
 require.alias("react-apollo/react-apollo.browser.umd.js", "react-apollo");
 require.alias("react-event-listener/lib/index.js", "react-event-listener");
-require.alias("react-ladda/dist/index.js", "react-ladda");
 require.alias("react-timeago/lib/index.js", "react-timeago");
 require.alias("resolve-pathname/cjs/index.js", "resolve-pathname");
 require.alias("value-equal/cjs/index.js", "value-equal");

@@ -27,7 +27,7 @@ defmodule Core.Motoboy do
       :name, :auth_token, :phone_number, :state,
       :became_available_at, :became_unavailable_at, :became_busy_at
     ])
-    |> validate_inclusion(:state, [available(), busy(), unavailable()])
+    |> validate_inclusion(:state, [busy(), available(), unavailable(), confirming_order()])
     |> validate_required([:name])
   end
 end

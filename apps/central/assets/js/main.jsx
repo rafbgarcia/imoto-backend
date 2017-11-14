@@ -1,6 +1,5 @@
 import React from 'react'
 import AppBar from 'material-ui/AppBar'
-import IconButton from 'material-ui/IconButton';
 import FontIcon from 'material-ui/FontIcon';
 import Drawer from 'material-ui/Drawer';
 import MenuItem from 'material-ui/MenuItem';
@@ -25,12 +24,11 @@ export default class Main extends React.Component {
         <AppBar
           title="Central"
           onLeftIconButtonTouchTap={this.handleToggle}
-          iconElementRight={<IconButton>
-            <FontIcon className="material-icons">settings</FontIcon>
-        </IconButton>}
         />
 
-        <Route path="/extranet/dashboard" component={OrdersContainer} />
+        <main className="p-4">
+          <Route path="/extranet/dashboard" component={OrdersContainer} />
+        </main>
 
         <Drawer
           docked={false}

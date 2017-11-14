@@ -14,24 +14,12 @@ defmodule Api.GraphqlSchema do
   end
 
   subscription do
-    field :motoboy_state, :motoboy do
-      config fn _args, socket ->
-        {:ok, topic: socket.context.current_motoboy.id}
-      end
-    end
-
     field :motoboy_orders, :order_or_error do
       config fn _args, socket ->
         {:ok, topic: socket.context.current_motoboy.id}
       end
 
       trigger :confirm_order, topic: fn order -> order.motoboy_id end
-    end
-
-    field :motoboy_updates, :motoboy do
-      config fn _args, socket ->
-        {:ok, topic: socket.context.current_central.id}
-      end
     end
   end
 

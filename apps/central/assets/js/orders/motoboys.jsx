@@ -1,72 +1,16 @@
 import React from 'react'
-import { graphql } from 'react-apollo'
-import gql from 'graphql-tag'
 import Timeago from 'js/timeago'
+import FontIcon from 'material-ui/FontIcon';
+import Subheader from 'material-ui/Subheader';
+import Divider from 'material-ui/Divider';
 
-const MOTOBOY_FIELDS = gql`
-  fragment Fields on Motoboy {
-    id
-    name
-    available
-    busy
-    unavailable
-    becameAvailableAt
-    becameBusyAt
-  }
-`
-const MOTOBOYS_QUERY = gql`
-  query getMotoboys {
-    motoboys { ...Fields }
-  }
-  ${MOTOBOY_FIELDS}
-`
-const MOTOBOY_UPDATES_SUBSCRIPTION = gql`
-  subscription motoboyUpdates {
-    motoboy: motoboyUpdates { ...Fields }
-  }
-  ${MOTOBOY_FIELDS}
-`
-
-export default graphql(MOTOBOYS_QUERY, {
-  props: (props) => {
-    return {
-      ...props,
-      subscribeToMotoboyUpdates: params => {
-        return props.data.subscribeToMore({
-          document: MOTOBOY_UPDATES_SUBSCRIPTION,
-          variables: {},
-          updateQuery: ({motoboys}, {subscriptionData: { motoboy }}) => {
-            console.log('1')
-            if (!motoboys) return
-
-            if (!motoboy) {
-              return motoboys
-            }
-
-            return motoboys.map((aMotoboy) => {
-              if (motoboy.id === aMotoboy.id) {
-                return {...aMotoboy, ...motoboy}
-              }
-              return aMotoboy
-            })
-          }
-        })
-      }
-    }
-  },
-})((props) => <Motoboys {...props} />)
-
-class Motoboys extends React.Component {
-  componentWillMount() {
-    this.props.subscribeToMotoboyUpdates()
-  }
-
+export default class Motoboys extends React.Component {
   render() {
-    const {data: {loading, error, motoboys}} = this.props
-    if (loading) return null
+    const {motoboys} = this.props
+    if (!motoboys) return null
     return (
-      <div>
-        <h4>Motoboys</h4>
+      <div className="card">
+        <Subheader>Motoboys</Subheader>
         {motoboys.map(Motoboy)}
       </div>
     )
@@ -78,12 +22,15 @@ function Motoboy(motoboy, index) {
   const dateToShow = getDateToShow(motoboy)
 
   return (
-    <div key={index} className="card mb-2">
-      <div className="card-body p-2">
-        <i className={`fa fa-circle ${iconClass} mr-2`}></i>
-        {motoboy.name}
+    <div key={index}>
+      <div className="p-2 pl-3">
+        <div className="d-flex align-items-center">
+          <FontIcon className={`${iconClass} mr-2 material-icons`} style={{fontSize: 15}}>fiber_manual_record</FontIcon>
+          <span>{motoboy.name}</span>
+        </div>
         <div><small className="text-muted">{dateToShow}</small></div>
       </div>
+      <Divider />
     </div>
   )
 }
