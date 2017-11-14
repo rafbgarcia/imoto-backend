@@ -112,7 +112,7 @@ defmodule Api.Orders.Motoboy do
   In this scenario we want to get a motoboy of the same central, if there's any available,
   otherwise it'll get the next motoboy for the next central in the queue.
   """
-  def get_next_of_same_central(%{id: id, central_id: central_id} = _motoboy) do
+  def get_next_for_canceled_order(%{id: id, central_id: central_id} = _motoboy) do
     Repo.transaction(fn ->
       from(m in Motoboy,
         lock: "FOR UPDATE",

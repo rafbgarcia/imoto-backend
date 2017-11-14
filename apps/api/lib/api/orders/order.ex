@@ -92,26 +92,32 @@ defmodule Api.Orders.Order do
     with order <- get_order(order_id) do
       Api.Orders.History.order_canceled(order.id, current_motoboy.id)
 
-      with {:ok, new_motoboy} <- Api.Orders.Motoboy.get_next_of_same_central(current_motoboy) do
-        {:ok, order} = set_new_motoboy(order, new_motoboy)
+      with {:ok, new_motoboy} <- Api.Orders.Motoboy.get_next_for_canceled_order(current_motoboy) do
         Api.Orders.History.order_new_motoboy(order.id, new_motoboy.id)
+        Api.Orders.Motoboy.did_cancel_order(current_motoboy)
+        with {:ok, order} <- set_new_motoboy(order, new_motoboy) do
+          {:ok, order}
+        end
       else
         {:error, _} ->
-          set_no_motoboys(order)
+          Api.Orders.Motoboy.did_cancel_order(current_motoboy)
+          with {:ok, order} <- set_no_motoboys(order) do
+            {:ok, order}
+          end
       end
-
-      Api.Orders.Motoboy.did_cancel_order(current_motoboy)
-      {:ok, order}
     end
   end
+
   defp set_new_motoboy(order, motoboy) do
     order
     |> Order.changeset(%{motoboy_id: motoboy.id})
     |> Repo.update
   end
+
+  # Ideally, this should rarely happen
   defp set_no_motoboys(order) do
     order
-    |> Order.changeset(%{state: Order.no_motoboys})
+    |> Order.changeset(%{state: Order.no_motoboys, motoboy_id: nil})
     |> Repo.update
   end
 
