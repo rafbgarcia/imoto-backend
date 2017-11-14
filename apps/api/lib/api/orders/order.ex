@@ -94,15 +94,15 @@ defmodule Api.Orders.Order do
 
       with {:ok, new_motoboy} <- Api.Orders.Motoboy.get_next_for_canceled_order(current_motoboy) do
         Api.Orders.History.order_new_motoboy(order.id, new_motoboy.id)
-        Api.Orders.Motoboy.did_cancel_order(current_motoboy)
+        {:ok, current_motoboy} = Api.Orders.Motoboy.did_cancel_order(current_motoboy)
         with {:ok, order} <- set_new_motoboy(order, new_motoboy) do
-          {:ok, order}
+          {:ok, current_motoboy}
         end
       else
         {:error, _} ->
-          Api.Orders.Motoboy.did_cancel_order(current_motoboy)
+          {:ok, current_motoboy} = Api.Orders.Motoboy.did_cancel_order(current_motoboy)
           with {:ok, order} <- set_no_motoboys(order) do
-            {:ok, order}
+            {:ok, current_motoboy}
           end
       end
     end

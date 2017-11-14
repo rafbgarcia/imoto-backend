@@ -20,7 +20,7 @@ defmodule Api.GraphqlSchema do
       end
 
       trigger :create_order, topic: fn order -> order.motoboy_id end
-      trigger :cancel_order, topic: fn order -> order.motoboy_id end
+      trigger :cancel_order, topic: fn motoboy -> motoboy.id end
     end
   end
 

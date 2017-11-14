@@ -68,7 +68,7 @@ defmodule Api.Graphql.Type.Order do
       resolve &Api.Orders.Order.confirm/2
     end
 
-    field :cancel_order, :order_or_error do
+    field :cancel_order, :motoboy do
       arg :order_id, non_null(:id)
       arg :reason, :string
       resolve &Api.Orders.Order.cancel/2
