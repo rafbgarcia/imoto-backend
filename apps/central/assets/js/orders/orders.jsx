@@ -48,27 +48,16 @@ export default class Orders extends React.Component {
     return (
       <div className="row">
         <div className="col-sm-4">
-          <div>
-            <Subheader>Aguardando motoboy</Subheader>
-            {this.pending(orders)}
-          </div>
+          <Subheader>Aguardando motoboy</Subheader>
+          {this.pending(orders)}
         </div>
         <div className="col-sm-5">
-          <div>
-            <Subheader>Em entrega</Subheader>
-            {this.confirmed(orders)}
-          </div>
+          <Subheader>Em entrega</Subheader>
+          {this.confirmed(orders)}
         </div>
         <div className="col-sm-3">
-          <ResponsiveContainer height={200}>
-            <PieChart>
-              <Pie data={data} fill="#8884d8">
-                { data.map((entry, index) => <Cell key={index} fill={COLORS[index % COLORS.length]}/>) }
-              </Pie>
-              <Legend />
-              <Tooltip/>
-            </PieChart>
-          </ResponsiveContainer>
+          <Subheader>Finalizadas</Subheader>
+          {this.finished(orders)}
         </div>
       </div>
     )

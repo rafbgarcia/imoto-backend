@@ -99404,6 +99404,10 @@ var _FontIcon = require('material-ui/FontIcon');
 
 var _FontIcon2 = _interopRequireDefault(_FontIcon);
 
+var _IconButton = require('material-ui/IconButton');
+
+var _IconButton2 = _interopRequireDefault(_IconButton);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -99416,33 +99420,62 @@ var FinishedOrder = function (_React$Component) {
   _inherits(FinishedOrder, _React$Component);
 
   function FinishedOrder() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
     _classCallCheck(this, FinishedOrder);
 
-    return _possibleConstructorReturn(this, (FinishedOrder.__proto__ || Object.getPrototypeOf(FinishedOrder)).apply(this, arguments));
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = FinishedOrder.__proto__ || Object.getPrototypeOf(FinishedOrder)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
+      enumerable: true,
+      writable: true,
+      value: {
+        show: false
+      }
+    }), _temp), _possibleConstructorReturn(_this, _ret);
   }
 
   _createClass(FinishedOrder, [{
     key: 'render',
     value: function render() {
-      var order = this.props.order;
+      var _this2 = this;
 
+      var order = this.props.order;
+      var show = this.state.show;
+
+      var hidden = show ? "" : "d-none";
 
       return _react2.default.createElement(
         _Paper2.default,
         { zDepth: 1, className: 'mb-3 pt-2 pb-2 pl-3 pr-3' },
         _react2.default.createElement(
           'div',
-          { className: 'text-muted' },
+          { className: 'text-muted d-flex align-items-center justify-content-between' },
           _react2.default.createElement(
             'span',
             null,
             '#',
             order.id
+          ),
+          _react2.default.createElement(
+            _IconButton2.default,
+            {
+              iconClassName: 'material-icons',
+              tooltip: 'Mostrar detalhes',
+              onClick: function onClick() {
+                return _this2.setState({ show: !show });
+              }
+            },
+            'keyboard_arrow_down'
           )
         ),
         _react2.default.createElement(
           'div',
-          { className: 'mt-3' },
+          { className: 'mt-3 ' + hidden },
           _react2.default.createElement(
             'div',
             { className: 'mb-2 d-flex align-items-center' },
@@ -99949,50 +99982,31 @@ var Orders = function (_React$Component) {
           'div',
           { className: 'col-sm-4' },
           _react2.default.createElement(
-            'div',
+            _Subheader2.default,
             null,
-            _react2.default.createElement(
-              _Subheader2.default,
-              null,
-              'Aguardando motoboy'
-            ),
-            this.pending(orders)
-          )
+            'Aguardando motoboy'
+          ),
+          this.pending(orders)
         ),
         _react2.default.createElement(
           'div',
           { className: 'col-sm-5' },
           _react2.default.createElement(
-            'div',
+            _Subheader2.default,
             null,
-            _react2.default.createElement(
-              _Subheader2.default,
-              null,
-              'Em entrega'
-            ),
-            this.confirmed(orders)
-          )
+            'Em entrega'
+          ),
+          this.confirmed(orders)
         ),
         _react2.default.createElement(
           'div',
           { className: 'col-sm-3' },
           _react2.default.createElement(
-            _recharts.ResponsiveContainer,
-            { height: 200 },
-            _react2.default.createElement(
-              _recharts.PieChart,
-              null,
-              _react2.default.createElement(
-                _recharts.Pie,
-                { data: data, fill: '#8884d8' },
-                data.map(function (entry, index) {
-                  return _react2.default.createElement(_recharts.Cell, { key: index, fill: COLORS[index % COLORS.length] });
-                })
-              ),
-              _react2.default.createElement(_recharts.Legend, null),
-              _react2.default.createElement(_recharts.Tooltip, null)
-            )
-          )
+            _Subheader2.default,
+            null,
+            'Finalizadas'
+          ),
+          this.finished(orders)
         )
       );
     }
