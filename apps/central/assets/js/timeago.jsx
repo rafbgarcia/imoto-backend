@@ -1,12 +1,9 @@
 import React from 'react'
-import TimeAgo from 'react-timeago'
-import brStrings from 'react-timeago/lib/language-strings/pt-br'
-import buildFormatter from 'react-timeago/lib/formatters/buildFormatter'
-
-const formatter = buildFormatter(brStrings)
+import {FormattedRelative} from 'react-intl'
 
 export default class Timeago extends React.Component {
   render() {
-    return <TimeAgo formatter={formatter} {...this.props} />
+    const {date} = this.props
+    return <FormattedRelative value={date} />
   }
 }

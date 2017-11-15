@@ -2,6 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { ApolloProvider } from 'react-apollo'
 import { BrowserRouter } from 'react-router-dom'
+import { IntlProvider, addLocaleData } from 'react-intl'
+import ptBR from 'react-intl/locale-data/pt'
+addLocaleData(ptBR)
 
 import Main from './main'
 import client from './graphql_client'
@@ -20,7 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
     <BrowserRouter>
       <ApolloProvider client={client}>
         <MuiThemeProvider muiTheme={muiTheme}>
-          <Main />
+          <IntlProvider locale="pt">
+            <Main />
+          </IntlProvider>
         </MuiThemeProvider>
       </ApolloProvider>
     </BrowserRouter>,

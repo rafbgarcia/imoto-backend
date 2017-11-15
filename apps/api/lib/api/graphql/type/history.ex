@@ -11,7 +11,7 @@ defmodule Api.Graphql.Type.History do
 
   object :history do
     field :id, :id
-    field :event, :string
+    field :scope, :string
     field :text, :string
     field :order_id, :id
     field :motoboy_id, :string

@@ -92,7 +92,7 @@ defmodule Db.Repo.Migrations.CreateCentrals do
     create table(:history) do
       add :order_id, references(:orders)
       add :motoboy_id, references(:motoboys)
-      add :event, :string
+      add :scope, :string
       add :text, :string
       timestamps()
     end

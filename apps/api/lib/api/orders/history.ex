@@ -5,7 +5,10 @@ defmodule Api.Orders.History do
   def all_of_motoboy(%{motoboy_id: motoboy_id}, _) do
     from(h in History,
       where: h.motoboy_id == ^motoboy_id,
-      order_by: [asc: :inserted_at]
+      where: h.scope in ["motoboy", "motoboy_order"],
+      where: h.inserted_at >= ^Timex.beginning_of_day(Timex.local),
+      where: h.inserted_at <= ^Timex.end_of_day(Timex.local),
+      order_by: [asc: :inserted_at],
     )
     |> Repo.all
     |> case do
@@ -14,37 +17,42 @@ defmodule Api.Orders.History do
   end
 
   @doc """
-  A order disso é:
+  A ordem disso é:
   Pedido é feito
     :confirmado -> :finalizado
     :cancelado <-> :novo_motoboy -> :confirmado -> :finalizado
   """
 
   def new_order(order_id, motoboy_id) do
-    Repo.insert(%Core.History{event: "novo_pedido", text: "Pedido enviado", order_id: order_id, motoboy_id: motoboy_id})
+    Repo.insert(%Core.History{scope: "motoboy_order", text: "Recebeu pedido", order_id: order_id, motoboy_id: motoboy_id})
+    Repo.insert(%Core.History{scope: "order", text: "Pedido enviado", order_id: order_id, motoboy_id: motoboy_id})
   end
 
   def order_confirmed(order_id, motoboy_id) do
-    Repo.insert(%Core.History{event: "pedido_confirmado", text: "Pedido confirmado", order_id: order_id, motoboy_id: motoboy_id})
+    Repo.insert(%Core.History{scope: "motoboy_order", text: "Confirmou pedido", order_id: order_id, motoboy_id: motoboy_id})
+    Repo.insert(%Core.History{scope: "order", text: "Pedido confirmado", order_id: order_id, motoboy_id: motoboy_id})
   end
 
   def order_canceled(order_id, motoboy_id) do
-    Repo.insert(%Core.History{event: "pedido_cancelado", text: "Pedido cancelado", order_id: order_id, motoboy_id: motoboy_id})
+    Repo.insert(%Core.History{scope: "motoboy_order", text: "Cancelou pedido", order_id: order_id, motoboy_id: motoboy_id})
+    Repo.insert(%Core.History{scope: "order", text: "Pedido cancelado", order_id: order_id, motoboy_id: motoboy_id})
   end
 
   def order_new_motoboy(order_id, motoboy_id) do
-    Repo.insert(%Core.History{event: "pedido_novo_motoboy", text: "Pedido enviado a outro motoboy", order_id: order_id, motoboy_id: motoboy_id})
+    Repo.insert(%Core.History{scope: "order", text: "Pedido enviado a outro motoboy", order_id: order_id, motoboy_id: motoboy_id})
+    Repo.insert(%Core.History{scope: "motoboy_order", text: "Recebeu pedido", order_id: order_id, motoboy_id: motoboy_id})
   end
 
   def order_finished(order_id, motoboy_id) do
-    Repo.insert(%Core.History{event: "pedido_finalizado", text: "Pedido finalizado", order_id: order_id, motoboy_id: motoboy_id})
+    Repo.insert(%Core.History{scope: "order", text: "Pedido finalizado", order_id: order_id, motoboy_id: motoboy_id})
+    Repo.insert(%Core.History{scope: "motoboy_order", text: "Finalizou pedido", order_id: order_id, motoboy_id: motoboy_id})
   end
 
   def motoboy_available(motoboy_id) do
-    Repo.insert(%Core.History{event: "motoboy_online", text: "O motoboy ficou online", motoboy_id: motoboy_id})
+    Repo.insert(%Core.History{scope: "motoboy", text: "Ficou online", motoboy_id: motoboy_id})
   end
 
   def motoboy_unavailable(motoboy_id) do
-    Repo.insert(%Core.History{event: "motoboy_offline", text: "O motoboy ficou offline", motoboy_id: motoboy_id})
+    Repo.insert(%Core.History{scope: "motoboy", text: "Ficou offline", motoboy_id: motoboy_id})
   end
 end
