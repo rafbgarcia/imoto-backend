@@ -2,8 +2,9 @@ import React from 'react'
 import PendingOrder from './pending_order'
 import ConfirmedOrder from './confirmed_order'
 import FinishedOrder from './finished_order'
-import Subheader from 'material-ui/Subheader';
-import Divider from 'material-ui/Divider';
+import Subheader from 'material-ui/Subheader'
+import Divider from 'material-ui/Divider'
+import {ResponsiveContainer, PieChart, Pie, Legend, Tooltip, Cell} from 'recharts'
 
 export default class Orders extends React.Component {
   pending(orders) {
@@ -21,8 +22,14 @@ export default class Orders extends React.Component {
     )
   }
 
-  countFinished(orders) {
-    return orders.filter((order) => order.finished).length
+  finishedAndCanceledData(orders) {
+    const finished = orders.filter((order) => order.finished).length
+    const noMotoboy = orders.filter((order) => order.noMotoboy).length
+
+    return [
+      {name: 'Finalizadas', value: finished},
+      {name: 'Sem motoboy', value: noMotoboy},
+    ]
   }
 
   finished(orders) {
@@ -35,6 +42,8 @@ export default class Orders extends React.Component {
   render() {
     const {orders} = this.props
     if (!orders) return null
+    const data = this.finishedAndCanceledData(orders)
+    const COLORS = ['#00C49F', '#FFBB28']
 
     return (
       <div className="row">
@@ -51,10 +60,15 @@ export default class Orders extends React.Component {
           </div>
         </div>
         <div className="col-sm-3">
-          <div>
-            <Subheader>Entregues</Subheader>
-            {this.countFinished(orders)}
-          </div>
+          <ResponsiveContainer height={200}>
+            <PieChart>
+              <Pie data={data} fill="#8884d8">
+                { data.map((entry, index) => <Cell key={index} fill={COLORS[index % COLORS.length]}/>) }
+              </Pie>
+              <Legend />
+              <Tooltip/>
+            </PieChart>
+          </ResponsiveContainer>
         </div>
       </div>
     )
