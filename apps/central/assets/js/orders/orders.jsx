@@ -21,6 +21,10 @@ export default class Orders extends React.Component {
     )
   }
 
+  countFinished(orders) {
+    return orders.filter((order) => order.finished).length
+  }
+
   finished(orders) {
     const finishedOrders = orders.filter((order) => order.finished)
     return finishedOrders.map((order, i) =>
@@ -49,7 +53,7 @@ export default class Orders extends React.Component {
         <div className="col-sm-3">
           <div>
             <Subheader>Entregues</Subheader>
-            {this.finished(orders)}
+            {this.countFinished(orders)}
           </div>
         </div>
       </div>

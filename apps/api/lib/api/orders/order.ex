@@ -3,8 +3,17 @@ defmodule Api.Orders.Order do
 
   alias Core.Order
 
-  def all(_args, _ctx) do
-    {:ok, Order |> Repo.all}
+  def for_central(_args, %{context: %{current_central: current_central}}) do
+    from(
+      o in assoc(current_central, :orders),
+      where: o.inserted_at >= ^Timex.beginning_of_day(Timex.local),
+      where: o.inserted_at <= ^Timex.end_of_day(Timex.local),
+      order_by: o.inserted_at,
+    )
+    |> Repo.all
+    |> case do
+      results -> {:ok, results}
+    end
   end
 
   def get(%{id: id}, %{context: %{current_customer: current_customer}}) do
@@ -95,13 +104,13 @@ defmodule Api.Orders.Order do
       with {:ok, new_motoboy} <- Api.Orders.Motoboy.get_next_for_canceled_order(current_motoboy) do
         Api.Orders.History.order_new_motoboy(order.id, new_motoboy.id)
         {:ok, current_motoboy} = Api.Orders.Motoboy.did_cancel_order(current_motoboy)
-        with {:ok, order} <- set_new_motoboy(order, new_motoboy) do
+        with {:ok, _} <- set_new_motoboy(order, new_motoboy) do
           {:ok, current_motoboy}
         end
       else
         {:error, _} ->
           {:ok, current_motoboy} = Api.Orders.Motoboy.did_cancel_order(current_motoboy)
-          with {:ok, order} <- set_no_motoboys(order) do
+          with {:ok, _} <- set_no_motoboys(order) do
             {:ok, current_motoboy}
           end
       end

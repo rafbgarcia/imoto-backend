@@ -11,8 +11,7 @@ defmodule Api.Graphql.Type.Order do
 
     @desc "Get orders"
     field :orders, list_of(:order) do
-      # TODO: can't be all here, must be orders per Central since last opened
-      resolve &Api.Orders.Order.all/2
+      resolve &Api.Orders.Order.for_central/2
     end
   end
 

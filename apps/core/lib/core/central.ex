@@ -3,6 +3,7 @@ defmodule Core.Central do
 
   schema "centrals" do
     has_many :motoboys, Core.Motoboy
+    has_many :orders, through: [:motoboys, :orders]
     field :name, :string
     field :auth_token, :string
     field :login, :string

@@ -8,6 +8,7 @@ defmodule Core.Motoboy do
 
   schema "motoboys" do
     belongs_to :central, Core.Central
+    has_many :orders, Core.Order
     field :name, :string
     field :state, :string
     field :login, :string

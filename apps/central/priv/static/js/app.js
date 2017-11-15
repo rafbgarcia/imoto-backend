@@ -65677,6 +65677,13 @@ var Orders = function (_React$Component) {
       });
     }
   }, {
+    key: 'countFinished',
+    value: function countFinished(orders) {
+      return orders.filter(function (order) {
+        return order.finished;
+      }).length;
+    }
+  }, {
     key: 'finished',
     value: function finished(orders) {
       var finishedOrders = orders.filter(function (order) {
@@ -65735,7 +65742,7 @@ var Orders = function (_React$Component) {
               null,
               'Entregues'
             ),
-            this.finished(orders)
+            this.countFinished(orders)
           )
         )
       );
