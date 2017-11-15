@@ -1,5 +1,17 @@
 defmodule Api.Orders.History do
   use Api, :context
+  alias Core.History
+
+  def all_of_motoboy(%{motoboy_id: motoboy_id}, _) do
+    from(h in History,
+      where: h.motoboy_id == ^motoboy_id,
+      order_by: [asc: :inserted_at]
+    )
+    |> Repo.all
+    |> case do
+      results -> {:ok, results}
+    end
+  end
 
   @doc """
   A order disso é:

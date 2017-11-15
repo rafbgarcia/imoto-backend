@@ -6,7 +6,7 @@ import { graphql } from 'react-apollo'
 
 class OrdersContainer extends React.Component{
   componentDidMount() {
-    this.props.data.startPolling(1000)
+    this.props.data.startPolling(10000)
   }
 
   render() {

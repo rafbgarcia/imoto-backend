@@ -9,4 +9,5 @@ defmodule Api.Graphql.Types do
   import_types Api.Graphql.Type.Stop
   import_types Api.Graphql.Type.Location
   import_types Api.Graphql.Type.Central
+  import_types Api.Graphql.Type.History
 end
