@@ -99344,7 +99344,7 @@ var OrdersContainer = function (_React$Component) {
   _createClass(OrdersContainer, [{
     key: 'componentDidMount',
     value: function componentDidMount() {
-      this.props.data.startPolling(10000);
+      this.props.data.startPolling(1000);
     }
   }, {
     key: 'render',
