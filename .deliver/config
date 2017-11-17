@@ -42,7 +42,7 @@ pre_erlang_clean_compile() {
     ./node_modules/brunch/bin/brunch b -p
   "
 
-  status "Running phx.digest and ecto.migrate"
+  status "Running phx.digest"
   __sync_remote "
     cd $BUILD_AT
     APP='$APP' MIX_ENV='$TARGET_MIX_ENV' $MIX_CMD phx.digest
