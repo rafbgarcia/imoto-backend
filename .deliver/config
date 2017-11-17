@@ -34,26 +34,26 @@ pre_erlang_clean_compile() {
     [ -f ~/.profile ] && source ~/.profile
     set -e
 
-    cd '$BUILD_AT'
-    mkdir -p priv/static # required by the phoenix.digest task
-
     cd $BUILD_AT/apps/central/assets
+    pwd
     npm install
   "
 
-  status "Building production assets"
-  __sync_remote "
-    [ -f ~/.profile ] && source ~/.profile
-    set -e
-    cd $BUILD_AT/apps/central/assets
-    ./node_modules/brunch/bin/brunch b -p
-  "
+  # status "Building production assets"
+  # __sync_remote "
+  #   [ -f ~/.profile ] && source ~/.profile
+  #   set -e
+  #   cd $BUILD_AT/apps/central/assets
+  #   brunch build --production
+  # "
 
   status "Running phx.digest"
   __sync_remote "
     [ -f ~/.profile ] && source ~/.profile
     set -e
+
     cd $BUILD_AT
+    mkdir -p priv/static # required by the phx.digest task
     APP='$APP' MIX_ENV='$TARGET_MIX_ENV' $MIX_CMD phx.digest
   "
 
