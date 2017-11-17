@@ -50,10 +50,7 @@ exports.config = {
     babel: {
       // Do not use ES6 compiler in vendor code
       ignore: [/vendor/],
-      presets: [
-        'latest',
-        'react'
-      ],
+      presets: ['env', 'react'],
       plugins: [
         ['transform-class-properties', {spec: true}],
         ["transform-object-rest-spread"]
