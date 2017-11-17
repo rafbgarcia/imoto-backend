@@ -29,22 +29,27 @@ pre_erlang_get_and_update_deps() {
 }
 
 pre_erlang_clean_compile() {
-  status "Building assets, running phx.digest and ecto.migrate"
-  __sync_remote " # runs the commands on the build host
+  status "Building assets"
+  __sync_remote "
     [ -f ~/.profile ] && source ~/.profile
     set -e # fail if any command fails (recommended)
-    cd '$BUILD_AT' # enter the build directory on the build host (required)
 
-    # prepare something
+    cd '$BUILD_AT' # enter the build directory on the build host (required)
     mkdir -p priv/static # required by the phoenix.digest task
+
     cd $BUILD_AT/apps/central/assets
     npm install
     ./node_modules/brunch/bin/brunch b -p
+  "
 
-    # run your custom task
+  status "Running phx.digest and ecto.migrate"
+  __sync_remote "
     cd $BUILD_AT
     APP='$APP' MIX_ENV='$TARGET_MIX_ENV' $MIX_CMD phx.digest
+  "
 
+  status "Running migrations"
+  __sync_remote "
     cd $BUILD_AT/apps/db
     APP='$APP' MIX_ENV='$TARGET_MIX_ENV' $MIX_CMD ecto.create
     APP='$APP' MIX_ENV='$TARGET_MIX_ENV' $MIX_CMD ecto.migrate
