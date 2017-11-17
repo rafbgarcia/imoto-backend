@@ -37,7 +37,7 @@ pre_erlang_clean_compile() {
 
     # prepare something
     mkdir -p priv/static # required by the phoenix.digest task
-    cd $BUILD_AT/apps/$APP
+    cd $BUILD_AT/apps/central/assets
     npm install
     ./node_modules/brunch/bin/brunch b -p
 
