@@ -15,8 +15,8 @@ use Mix.Config
 # which you typically run after static files are built.
 config :api, Api.Endpoint,
   load_from_system_env: true,
-  http: [port: {:system, "PORT"}],
-  url: [host: "api.pegaladelivery.com.br", port: {:system, "PORT"}],
+  http: [port: 4001],
+  url: [host: "api.pegaladelivery.com.br", port: 4001],
   cache_static_manifest: "priv/static/cache_manifest.json",
   server: true,
   root: ".",
