@@ -29,23 +29,30 @@ pre_erlang_get_and_update_deps() {
 }
 
 pre_erlang_clean_compile() {
-  status "Building assets"
+  status "npm install"
   __sync_remote "
     [ -f ~/.profile ] && source ~/.profile
-    set -e # fail if any command fails (recommended)
+    set -e
 
-    cd '$BUILD_AT' # enter the build directory on the build host (required)
+    cd '$BUILD_AT'
     mkdir -p priv/static # required by the phoenix.digest task
 
     cd $BUILD_AT/apps/central/assets
     npm install
+  "
+
+  status "Building production assets"
+  __sync_remote "
+    [ -f ~/.profile ] && source ~/.profile
+    set -e
+    cd $BUILD_AT/apps/central/assets
     ./node_modules/brunch/bin/brunch b -p
   "
 
   status "Running phx.digest"
   __sync_remote "
     [ -f ~/.profile ] && source ~/.profile
-    set -e # fail if any command fails (recommended)
+    set -e
     cd $BUILD_AT
     APP='$APP' MIX_ENV='$TARGET_MIX_ENV' $MIX_CMD phx.digest
   "
@@ -53,7 +60,7 @@ pre_erlang_clean_compile() {
   status "Running migrations"
   __sync_remote "
     [ -f ~/.profile ] && source ~/.profile
-    set -e # fail if any command fails (recommended)
+    set -e
     cd $BUILD_AT/apps/db
     APP='$APP' MIX_ENV='$TARGET_MIX_ENV' $MIX_CMD ecto.migrate
   "
