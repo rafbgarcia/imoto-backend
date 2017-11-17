@@ -11,7 +11,9 @@ const authLink = setContext((_, { headers }) => {
     }
   }
 });
-const httpLink = authLink.concat(new HttpLink({ uri: 'http://localhost:4001/api/central/graphql' }))
+const httpLink = authLink.concat(new HttpLink({
+  uri: 'http://104.131.89.232:4001/api/central/graphql'
+}))
 
 export default new ApolloClient({
   link: httpLink,

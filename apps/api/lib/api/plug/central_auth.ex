@@ -38,7 +38,7 @@ defmodule Api.Plug.CentralAuth do
     |> first
     |> Repo.one
     |> case do
-      nil -> {:ok, nil}
+      nil -> {:error}
       central -> {:ok, central}
     end
   end

@@ -96068,7 +96068,9 @@ var authLink = (0, _apolloLinkContext.setContext)(function (_, _ref) {
     })
   };
 });
-var httpLink = authLink.concat(new _apolloLinkHttp.HttpLink({ uri: 'http://localhost:4001/api/central/graphql' }));
+var httpLink = authLink.concat(new _apolloLinkHttp.HttpLink({
+  uri: 'http://104.131.89.232:4001/api/central/graphql'
+}));
 
 exports.default = new _apolloClient.ApolloClient({
   link: httpLink,
