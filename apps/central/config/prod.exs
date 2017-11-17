@@ -16,7 +16,7 @@ use Mix.Config
 config :central, Central.Endpoint,
   load_from_system_env: false,
   http: [port: 4000],
-  url: [host: "central.pegaladelivery.com.br", port: 4000],
+  url: [host: "104.131.89.232", port: 4000],
   cache_static_manifest: "priv/static/cache_manifest.json",
   server: true,
   root: ".",

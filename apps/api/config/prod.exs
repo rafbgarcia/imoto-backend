@@ -16,7 +16,7 @@ use Mix.Config
 config :api, Api.Endpoint,
   load_from_system_env: false,
   http: [port: 4001],
-  url: [host: "api.pegaladelivery.com.br", port: 4001],
+  url: [host: "104.131.89.232", port: 4001],
   server: true,
   root: ".",
   code_reloader: false,
