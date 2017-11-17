@@ -44,12 +44,16 @@ pre_erlang_clean_compile() {
 
   status "Running phx.digest"
   __sync_remote "
+    [ -f ~/.profile ] && source ~/.profile
+    set -e # fail if any command fails (recommended)
     cd $BUILD_AT
     APP='$APP' MIX_ENV='$TARGET_MIX_ENV' $MIX_CMD phx.digest
   "
 
   status "Running migrations"
   __sync_remote "
+    [ -f ~/.profile ] && source ~/.profile
+    set -e # fail if any command fails (recommended)
     cd $BUILD_AT/apps/db
     APP='$APP' MIX_ENV='$TARGET_MIX_ENV' $MIX_CMD ecto.migrate
   "
