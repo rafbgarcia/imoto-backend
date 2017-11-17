@@ -16,6 +16,6 @@ defmodule Central.Router do
   scope "/extranet", Central do
     pipe_through :browser
 
-    get "*path", CentralController, :orders
+    get "/*path", CentralController, :orders
   end
 end
