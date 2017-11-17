@@ -46,7 +46,7 @@ end
 # will be used by default
 
 release :pegala do
-  set version: "0.1.0"
+  set version: current_version(:pegala)
   set applications: [
     :runtime_tools,
     api: :permanent,
