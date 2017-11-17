@@ -16,6 +16,8 @@ defmodule Api.Router do
     plug Api.Plug.CentralAuth
   end
 
+  get "/loaderio-ccfc38fc49ce0360c1f93b82d8ecf647/", Api.Controllers.LoaderController, :challenge
+
   scope "/api/customer" do
     pipe_through :customer_api
     post "/graphql", Absinthe.Plug.GraphiQL,

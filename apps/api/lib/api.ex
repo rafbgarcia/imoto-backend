@@ -41,14 +41,14 @@ defmodule Api do
     end
   end
 
-  # def controller do
-  #   quote do
-  #     use Phoenix.Controller, namespace: Api
-  #     import Plug.Conn
-  #     import Api.Router.Helpers
-  #     import Api.Gettext
-  #   end
-  # end
+  def controller do
+    quote do
+      use Phoenix.Controller, namespace: Api
+      import Plug.Conn
+      import Api.Router.Helpers
+      import Api.Gettext
+    end
+  end
 
   def view do
     quote do

@@ -36,7 +36,7 @@ defmodule Api.Orders.Location do
   def after_create_order(order) do
     Repo.all(assoc(order, :locations))
     |> Enum.each(fn location ->
-      Core.Location.changeset(location, %{
+      Location.changeset(location, %{
         last_used_at: Timex.local,
         customer_id: order.customer_id,
         used_count: case location.used_count do
