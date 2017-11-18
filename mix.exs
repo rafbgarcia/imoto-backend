@@ -9,6 +9,12 @@ defmodule MyApp.Umbrella.Mixfile do
     ]
   end
 
+  def aplication do
+    [
+      applications: [:edeliver]
+    ]
+  end
+
   # Dependencies can be Hex packages:
   #
   #   {:mydep, "~> 0.3.0"}
