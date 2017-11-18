@@ -20,6 +20,7 @@ config :api, Api.Endpoint,
   server: true,
   root: ".",
   code_reloader: false,
+  check_origin: false,
   version: Application.spec(:api, :vsn)
 
 # ## SSL Support
