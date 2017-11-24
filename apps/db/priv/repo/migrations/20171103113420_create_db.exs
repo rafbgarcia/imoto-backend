@@ -8,14 +8,10 @@ defmodule Db.Repo.Migrations.CreateCentrals do
 
     create table(:centrals) do
       add :name, :string
-      add :auth_token, :string
-      add :login, :string
-      add :password, :string
-      add :available, :boolean, default: false, null: false
-      add :became_available_at, :utc_datetime
-      add :became_unavailable_at, :utc_datetime
-      add :last_order_taken_at, :utc_datetime
       add :phone_number, :string
+      add :password, :string
+      add :active, :boolean, default: true, null: false
+      add :last_order_taken_at, :utc_datetime
       timestamps()
     end
 
@@ -24,35 +20,22 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       add :central_id, references(:centrals)
       add :state, :string, default: "unavailable"
       add :phone_number, :string
-      add :login, :string
       add :password, :string
-      add :auth_token, :string
       add :became_unavailable_at, :utc_datetime
       add :became_available_at, :utc_datetime
       add :became_busy_at, :utc_datetime
+      add :active, :boolean, default: true, null: false
       timestamps()
     end
 
 
     ##################
-    ### Customers
-    ##################
-
-    create table(:customers) do
-      add :name, :string
-      add :phone_number, :string
-      add :auth_token, :string
-      timestamps()
-    end
-
-
-    ##################
-    ### Orders
+    ### Central Orders
     ##################
 
     create table(:orders) do
       add :motoboy_id, references(:motoboys)
-      add :customer_id, references(:customers)
+      add :company_id, references(:customers)
       add :price, :integer
       add :state, :string, default: "pending"
       add :confirmed_at, :utc_datetime
@@ -94,6 +77,36 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       add :motoboy_id, references(:motoboys)
       add :scope, :string
       add :text, :string
+      timestamps()
+    end
+
+
+    ##################
+    ### Company
+    ##################
+
+    create table(:companies) do
+      add :name, :string
+      add :phone_number, :string
+      add :password, :string
+      timestamps()
+    end
+
+    create table(:companies_centrals) do
+      add :central_id, references(:centrals)
+      add :company_id, references(:companies)
+      timestamps()
+    end
+
+
+    ##################
+    ### Customers
+    ##################
+
+    create table(:customers) do
+      add :name, :string
+      add :phone_number, :string
+      add :auth_token, :string
       timestamps()
     end
 

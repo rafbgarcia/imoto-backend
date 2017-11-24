@@ -12,7 +12,8 @@ config :api,
 
 # Configures the endpoint
 config :api, Api.Endpoint,
-  url: [host: "localhost"],
+  http: [port: 4001],
+  url: [host: "localhost", port: 4001],
   secret_key_base: "/oA9uwTAyIVn99X5VKrReqdAuZzM5XfVCSGjdVo8mU02SJ16i2Ihx4IDxk5IS2VC",
   render_errors: [view: Api.ErrorView, accepts: ~w(json)],
   pubsub: [name: Api.PubSub,

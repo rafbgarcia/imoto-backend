@@ -15,8 +15,7 @@ use Mix.Config
 # which you typically run after static files are built.
 config :central, Central.Endpoint,
   load_from_system_env: false,
-  http: [port: 4000],
-  url: [host: "104.131.89.232", port: 4000],
+  url: [host: "central.imotodelivery.com"],
   cache_static_manifest: "priv/static/cache_manifest.json",
   server: true,
   root: ".",

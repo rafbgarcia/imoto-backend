@@ -7,7 +7,10 @@ import ptBR from 'react-intl/locale-data/pt'
 addLocaleData(ptBR)
 
 import Main from './main'
+import Login from './main'
+
 import client from './graphql_client'
+
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
 import {grey900} from 'material-ui/styles/colors';
@@ -18,13 +21,16 @@ const muiTheme = getMuiTheme({
   },
 })
 
+
 document.addEventListener('DOMContentLoaded', () => {
+  const page = Auth.loggedIn() ? <Main /> : <Login />
+
   ReactDOM.render(
     <ApolloProvider client={client}>
       <MuiThemeProvider muiTheme={muiTheme}>
         <IntlProvider locale="pt">
           <BrowserRouter>
-            <Main />
+            {page}
           </BrowserRouter>
         </IntlProvider>
       </MuiThemeProvider>

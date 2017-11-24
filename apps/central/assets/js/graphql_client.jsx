@@ -7,7 +7,7 @@ const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      authorization: "unimoto-token",
+      authorization: `Bearer ${token}`,
     }
   }
 });

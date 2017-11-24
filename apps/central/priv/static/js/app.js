@@ -96022,6 +96022,8 @@ var muiTheme = (0, _getMuiTheme2.default)({
 });
 
 document.addEventListener('DOMContentLoaded', function () {
+  var page = Auth.loggedIn() ? _react2.default.createElement(_main2.default, null) : _react2.default.createElement(_main2.default, null);
+
   _reactDom2.default.render(_react2.default.createElement(
     _reactApollo.ApolloProvider,
     { client: _graphql_client2.default },
@@ -96034,12 +96036,36 @@ document.addEventListener('DOMContentLoaded', function () {
         _react2.default.createElement(
           _reactRouterDom.BrowserRouter,
           null,
-          _react2.default.createElement(_main2.default, null)
+          page
         )
       )
     )
   ), document.getElementById('js_app'));
 });
+});
+
+;require.register("js/auth.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Auth = function Auth() {};
+
+Auth.loggedIn = false;
+Auth.login = function (cb) {
+
+  localStorage.setItem('authToken', token);
+};
+
+exports.default = Auth;
 });
 
 ;require.register("js/graphql_client.jsx", function(exports, require, module) {
@@ -96064,7 +96090,7 @@ var authLink = (0, _apolloLinkContext.setContext)(function (_, _ref) {
 
   return {
     headers: _extends({}, headers, {
-      authorization: "unimoto-token"
+      authorization: 'Bearer ' + token
     })
   };
 });
@@ -96076,6 +96102,61 @@ exports.default = new _apolloClient.ApolloClient({
   link: httpLink,
   cache: new _apolloCacheInmemory.InMemoryCache()
 });
+});
+
+;require.register("js/login.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _FontIcon = require('material-ui/FontIcon');
+
+var _FontIcon2 = _interopRequireDefault(_FontIcon);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Main = function (_React$Component) {
+  _inherits(Main, _React$Component);
+
+  function Main() {
+    _classCallCheck(this, Main);
+
+    return _possibleConstructorReturn(this, (Main.__proto__ || Object.getPrototypeOf(Main)).apply(this, arguments));
+  }
+
+  _createClass(Main, [{
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement(
+          'h3',
+          null,
+          'Fa\xE7a Login'
+        )
+      );
+    }
+  }]);
+
+  return Main;
+}(_react2.default.Component);
+
+exports.default = Main;
 });
 
 ;require.register("js/main.jsx", function(exports, require, module) {
@@ -96151,6 +96232,12 @@ var Main = function (_React$Component) {
       value: function value() {
         return _this.setState({ opened: !_this.state.opened });
       }
+    }), Object.defineProperty(_this, 'onClickMenuItem', {
+      enumerable: true,
+      writable: true,
+      value: function value() {
+        return _this.setState({ opened: false });
+      }
     }), _temp), _possibleConstructorReturn(_this, _ret);
   }
 
@@ -96158,10 +96245,6 @@ var Main = function (_React$Component) {
     key: 'render',
     value: function render() {
       var _this2 = this;
-
-      var onClickMenuItem = function onClickMenuItem() {
-        return _this2.setState({ opened: false });
-      };
 
       return _react2.default.createElement(
         'div',
@@ -96189,7 +96272,7 @@ var Main = function (_React$Component) {
             { to: '/dashboard' },
             _react2.default.createElement(
               _MenuItem2.default,
-              { onClick: onClickMenuItem, leftIcon: _react2.default.createElement(
+              { onClick: this.onClickMenuItem, leftIcon: _react2.default.createElement(
                   _FontIcon2.default,
                   { className: 'material-icons' },
                   'dashboard'
@@ -96202,7 +96285,7 @@ var Main = function (_React$Component) {
             { to: '/' },
             _react2.default.createElement(
               _MenuItem2.default,
-              { onClick: onClickMenuItem, leftIcon: _react2.default.createElement(
+              { onClick: this.onClickMenuItem, leftIcon: _react2.default.createElement(
                   _FontIcon2.default,
                   { className: 'material-icons' },
                   'power_settings_new'

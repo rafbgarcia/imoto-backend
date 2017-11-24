@@ -12,7 +12,8 @@ config :central,
 
 # Configures the endpoint
 config :central, Central.Endpoint,
-  url: [host: "localhost"],
+  http: [port: 4002],
+  url: [host: "localhost", port: 4002],
   secret_key_base: "GQFhV0/lD+y9UczhPe3Yt0I0DB8XeFNgffhVqWvtzwqQj7l3DyRvCej4JlAIQ7eL",
   render_errors: [view: Central.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Central.PubSub,

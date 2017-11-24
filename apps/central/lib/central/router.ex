@@ -9,13 +9,9 @@ defmodule Central.Router do
     plug :put_secure_browser_headers
   end
 
-  pipeline :api do
-    plug :accepts, ["json"]
-  end
-
-  scope "/", Central do
+  scope "/" do
     pipe_through :browser
 
-    get "/*path", CentralController, :orders
+    get "/*path", Central.CentralController, :orders
   end
 end
