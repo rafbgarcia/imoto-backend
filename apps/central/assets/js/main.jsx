@@ -19,6 +19,8 @@ export default class Main extends React.Component {
   handleToggle = () => this.setState({opened: !this.state.opened})
 
   render() {
+    const onClickMenuItem = () => this.setState({opened: false})
+
     return (
       <div>
         <AppBar
@@ -27,7 +29,7 @@ export default class Main extends React.Component {
         />
 
         <main className="p-4">
-          <Route path="/extranet/dashboard" component={OrdersContainer} />
+          <Route path="/dashboard" component={OrdersContainer} />
         </main>
 
         <Drawer
@@ -35,14 +37,16 @@ export default class Main extends React.Component {
           open={this.state.opened}
           onRequestChange={(opened) => this.setState({opened})}
         >
-          <Link to="/extranet/dashboard">
-            <MenuItem leftIcon={<FontIcon className="material-icons">dashboard</FontIcon>}>
-                Dashboard
+          <Link to="/dashboard">
+            <MenuItem onClick={onClickMenuItem} leftIcon={<FontIcon className="material-icons">dashboard</FontIcon>}>
+              Dashboard
             </MenuItem>
           </Link>
-          <MenuItem leftIcon={<FontIcon className="material-icons">power_settings_new</FontIcon>}>
-            Sair
-          </MenuItem>
+          <Link to="/">
+            <MenuItem onClick={onClickMenuItem} leftIcon={<FontIcon className="material-icons">power_settings_new</FontIcon>}>
+              Sair
+            </MenuItem>
+          </Link>
         </Drawer>
       </div>
     )

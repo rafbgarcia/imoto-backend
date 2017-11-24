@@ -96023,17 +96023,17 @@ var muiTheme = (0, _getMuiTheme2.default)({
 
 document.addEventListener('DOMContentLoaded', function () {
   _reactDom2.default.render(_react2.default.createElement(
-    _reactRouterDom.BrowserRouter,
-    null,
+    _reactApollo.ApolloProvider,
+    { client: _graphql_client2.default },
     _react2.default.createElement(
-      _reactApollo.ApolloProvider,
-      { client: _graphql_client2.default },
+      _MuiThemeProvider2.default,
+      { muiTheme: muiTheme },
       _react2.default.createElement(
-        _MuiThemeProvider2.default,
-        { muiTheme: muiTheme },
+        _reactIntl.IntlProvider,
+        { locale: 'pt' },
         _react2.default.createElement(
-          _reactIntl.IntlProvider,
-          { locale: 'pt' },
+          _reactRouterDom.BrowserRouter,
+          null,
           _react2.default.createElement(_main2.default, null)
         )
       )
@@ -96159,6 +96159,10 @@ var Main = function (_React$Component) {
     value: function render() {
       var _this2 = this;
 
+      var onClickMenuItem = function onClickMenuItem() {
+        return _this2.setState({ opened: false });
+      };
+
       return _react2.default.createElement(
         'div',
         null,
@@ -96169,7 +96173,7 @@ var Main = function (_React$Component) {
         _react2.default.createElement(
           'main',
           { className: 'p-4' },
-          _react2.default.createElement(_reactRouterDom.Route, { path: '/extranet/dashboard', component: _container2.default })
+          _react2.default.createElement(_reactRouterDom.Route, { path: '/dashboard', component: _container2.default })
         ),
         _react2.default.createElement(
           _Drawer2.default,
@@ -96182,10 +96186,10 @@ var Main = function (_React$Component) {
           },
           _react2.default.createElement(
             _reactRouterDom.Link,
-            { to: '/extranet/dashboard' },
+            { to: '/dashboard' },
             _react2.default.createElement(
               _MenuItem2.default,
-              { leftIcon: _react2.default.createElement(
+              { onClick: onClickMenuItem, leftIcon: _react2.default.createElement(
                   _FontIcon2.default,
                   { className: 'material-icons' },
                   'dashboard'
@@ -96194,13 +96198,17 @@ var Main = function (_React$Component) {
             )
           ),
           _react2.default.createElement(
-            _MenuItem2.default,
-            { leftIcon: _react2.default.createElement(
-                _FontIcon2.default,
-                { className: 'material-icons' },
-                'power_settings_new'
-              ) },
-            'Sair'
+            _reactRouterDom.Link,
+            { to: '/' },
+            _react2.default.createElement(
+              _MenuItem2.default,
+              { onClick: onClickMenuItem, leftIcon: _react2.default.createElement(
+                  _FontIcon2.default,
+                  { className: 'material-icons' },
+                  'power_settings_new'
+                ) },
+              'Sair'
+            )
           )
         )
       );
@@ -96472,7 +96480,7 @@ var OrdersContainer = function (_React$Component) {
   _createClass(OrdersContainer, [{
     key: 'componentDidMount',
     value: function componentDidMount() {
-      this.props.data.startPolling(1000);
+      this.props.data.startPolling(30000);
     }
   }, {
     key: 'render',

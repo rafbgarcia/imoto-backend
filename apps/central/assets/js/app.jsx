@@ -20,15 +20,15 @@ const muiTheme = getMuiTheme({
 
 document.addEventListener('DOMContentLoaded', () => {
   ReactDOM.render(
-    <BrowserRouter>
-      <ApolloProvider client={client}>
-        <MuiThemeProvider muiTheme={muiTheme}>
-          <IntlProvider locale="pt">
+    <ApolloProvider client={client}>
+      <MuiThemeProvider muiTheme={muiTheme}>
+        <IntlProvider locale="pt">
+          <BrowserRouter>
             <Main />
-          </IntlProvider>
-        </MuiThemeProvider>
-      </ApolloProvider>
-    </BrowserRouter>,
+          </BrowserRouter>
+        </IntlProvider>
+      </MuiThemeProvider>
+    </ApolloProvider>,
     document.getElementById('js_app')
   )
 })

@@ -13,7 +13,7 @@ defmodule Central.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/extranet", Central do
+  scope "/", Central do
     pipe_through :browser
 
     get "/*path", CentralController, :orders
