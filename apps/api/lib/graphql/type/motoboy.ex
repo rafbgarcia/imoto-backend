@@ -3,7 +3,6 @@ defmodule Graphql.Type.Motoboy do
 
   object :motoboys_queries do
     # TODO: scope this query by Central
-    field :motoboys, list_of(:motoboy), resolve: &Api.Orders.Motoboy.all/2
     field :current_motoboy, :motoboy, resolve: &Api.Orders.Motoboy.current/2
   end
 

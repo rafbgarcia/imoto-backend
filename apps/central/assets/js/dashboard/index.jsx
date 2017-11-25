@@ -3,8 +3,9 @@ import Orders from './orders'
 import Motoboys from './motoboys'
 import gql from 'graphql-tag'
 import { graphql } from 'react-apollo'
+import Grid from 'material-ui/Grid'
 
-class OrdersContainer extends React.Component{
+class Dashboard extends React.Component{
   componentDidMount() {
     this.props.data.startPolling(30000)
   }
@@ -12,14 +13,14 @@ class OrdersContainer extends React.Component{
   render() {
     const {orders, motoboys} = this.props.data
     return (
-      <div className="row">
-        <div className="col-sm-3">
+      <Grid container spacing={0}>
+        <Grid item sm={3}>
           <Motoboys motoboys={motoboys} />
-        </div>
-        <div className="col-sm-9">
+        </Grid>
+        <Grid item sm={9}>
           <Orders orders={orders} />
-        </div>
-      </div>
+        </Grid>
+      </Grid>
     )
   }
 }
@@ -67,4 +68,4 @@ export default graphql(gql`
       becameBusyAt
     }
   }
-`)((props) => <OrdersContainer {...props} />)
+`)((props) => <Dashboard {...props} />)

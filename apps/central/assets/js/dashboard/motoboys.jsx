@@ -30,10 +30,8 @@ export default class Motoboys extends React.Component {
 
     return (
       <div className="card">
-        <List>
-          <ListSubheader>Motoboys</ListSubheader>
-          {motoboysList}
-        </List>
+        <ListSubheader>Motoboys</ListSubheader>
+        {motoboysList}
 
         {
           clickedMotoboy && <MotoboyDetails

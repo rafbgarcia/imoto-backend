@@ -16,7 +16,7 @@ defmodule Api.Guardian do
     id = claims["sub"]
 
     resource = case claims["resource_type"] do
-      :central -> Repo.get(Central, id)
+      "central" -> Repo.get(Central, id)
     end
 
     {:ok, resource}

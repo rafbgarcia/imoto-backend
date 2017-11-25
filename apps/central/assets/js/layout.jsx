@@ -12,14 +12,14 @@ import Drawer from 'material-ui/Drawer'
 import { MenuItem } from 'material-ui/Menu'
 
 import Auth from './auth'
-import OrdersContainer from './orders/container'
+import Dashboard from './dashboard/index'
 
 import {
   Route,
   Link
 } from 'react-router-dom'
 
-export default class Dashboard extends React.Component {
+export default class Layout extends React.Component {
   state = {
     opened: false,
   }
@@ -49,14 +49,14 @@ export default class Dashboard extends React.Component {
         </AppBar>
 
         <main className="p-4">
-          <Route path="/dashboard" component={OrdersContainer} />
+          <Route path="/" component={Dashboard} />
         </main>
 
         <Drawer
           open={this.state.opened}
           onRequestClose={this.closeDrawer}
         >
-          <Link to="/dashboard">
+          <Link to="/">
             <MenuItem onClick={this.closeDrawer}>
               Dashboard
             </MenuItem>

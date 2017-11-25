@@ -1,4 +1,4 @@
-defmodule Graphql.Type.Order do
+defmodule Graphql.Type.OrderOrError do
   use Api, :graphql_schema
 
   # Queries
@@ -6,11 +6,6 @@ defmodule Graphql.Type.Order do
     field :order, :order_or_error do
       arg :id, non_null(:id)
       resolve &Api.Orders.Order.get/2
-    end
-
-    @desc "Get orders"
-    field :orders, list_of(:order) do
-      resolve &Api.Orders.Order.for_central/2
     end
   end
 
@@ -44,14 +39,6 @@ defmodule Graphql.Type.Order do
     field :place_id, :string, description: "Google's"
     field :formatted_address, :string, description: "Google's"
     field :formatted_phone_number, :string, description: "Google's"
-  end
-
-  union :order_or_error do
-    types [:error, :order]
-    resolve_type fn
-      %Core.Order{}, _ -> :order
-      %{error: _}, _ -> :error
-    end
   end
 
   object :orders_mutations do

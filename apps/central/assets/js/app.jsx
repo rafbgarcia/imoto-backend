@@ -6,7 +6,7 @@ import { IntlProvider, addLocaleData } from 'react-intl'
 import ptBR from 'react-intl/locale-data/pt'
 addLocaleData(ptBR)
 
-import Dashboard from './dashboard'
+import Layout from './layout'
 import Login from './login'
 import Auth from './auth'
 
@@ -18,7 +18,7 @@ const theme = createMuiTheme({})
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  const page = Auth.loggedIn ? <Dashboard /> : <Login />
+  const page = Auth.loggedIn ? <Layout /> : <Login />
 
   ReactDOM.render(
     <ApolloProvider client={client}>

@@ -67556,9 +67556,9 @@ var _pt = require('react-intl/locale-data/pt');
 
 var _pt2 = _interopRequireDefault(_pt);
 
-var _dashboard = require('./dashboard');
+var _layout = require('./layout');
 
-var _dashboard2 = _interopRequireDefault(_dashboard);
+var _layout2 = _interopRequireDefault(_layout);
 
 var _login = require('./login');
 
@@ -67581,7 +67581,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var theme = (0, _styles.createMuiTheme)({});
 
 document.addEventListener('DOMContentLoaded', function () {
-  var page = _auth2.default.loggedIn ? _react2.default.createElement(_dashboard2.default, null) : _react2.default.createElement(_login2.default, null);
+  var page = _auth2.default.loggedIn ? _react2.default.createElement(_layout2.default, null) : _react2.default.createElement(_login2.default, null);
 
   _reactDom2.default.render(_react2.default.createElement(
     _reactApollo.ApolloProvider,
@@ -67665,344 +67665,7 @@ Auth.logout = function (cb) {
 exports.default = Auth;
 });
 
-;require.register("js/dashboard.jsx", function(exports, require, module) {
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _AppBar = require('material-ui/AppBar');
-
-var _AppBar2 = _interopRequireDefault(_AppBar);
-
-var _Toolbar = require('material-ui/Toolbar');
-
-var _Toolbar2 = _interopRequireDefault(_Toolbar);
-
-var _Typography = require('material-ui/Typography');
-
-var _Typography2 = _interopRequireDefault(_Typography);
-
-var _Button = require('material-ui/Button');
-
-var _Button2 = _interopRequireDefault(_Button);
-
-var _IconButton = require('material-ui/IconButton');
-
-var _IconButton2 = _interopRequireDefault(_IconButton);
-
-var _Menu = require('material-ui-icons/Menu');
-
-var _Menu2 = _interopRequireDefault(_Menu);
-
-var _Drawer = require('material-ui/Drawer');
-
-var _Drawer2 = _interopRequireDefault(_Drawer);
-
-var _Menu3 = require('material-ui/Menu');
-
-var _auth = require('./auth');
-
-var _auth2 = _interopRequireDefault(_auth);
-
-var _container = require('./orders/container');
-
-var _container2 = _interopRequireDefault(_container);
-
-var _reactRouterDom = require('react-router-dom');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-// import AppBar from 'material-ui/AppBar'
-// import FontIcon from 'material-ui/FontIcon'
-
-
-var Dashboard = function (_React$Component) {
-  _inherits(Dashboard, _React$Component);
-
-  function Dashboard() {
-    var _ref;
-
-    var _temp, _this, _ret;
-
-    _classCallCheck(this, Dashboard);
-
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = Dashboard.__proto__ || Object.getPrototypeOf(Dashboard)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
-      enumerable: true,
-      writable: true,
-      value: {
-        opened: false
-      }
-    }), Object.defineProperty(_this, 'openDrawer', {
-      enumerable: true,
-      writable: true,
-      value: function value() {
-        return _this.setState({ opened: true });
-      }
-    }), Object.defineProperty(_this, 'closeDrawer', {
-      enumerable: true,
-      writable: true,
-      value: function value() {
-        return _this.setState({ opened: false });
-      }
-    }), Object.defineProperty(_this, 'logout', {
-      enumerable: true,
-      writable: true,
-      value: function value() {
-        _this.closeDrawer();
-        _auth2.default.logout(function () {
-          window.location.href = "/";
-        });
-      }
-    }), _temp), _possibleConstructorReturn(_this, _ret);
-  }
-
-  _createClass(Dashboard, [{
-    key: 'render',
-    value: function render() {
-      return _react2.default.createElement(
-        'div',
-        null,
-        _react2.default.createElement(
-          _AppBar2.default,
-          { position: 'static' },
-          _react2.default.createElement(
-            _Toolbar2.default,
-            null,
-            _react2.default.createElement(
-              _IconButton2.default,
-              { onClick: this.openDrawer, color: 'contrast', 'aria-label': 'Menu' },
-              _react2.default.createElement(_Menu2.default, null)
-            ),
-            _react2.default.createElement(
-              _Typography2.default,
-              { type: 'title', color: 'inherit' },
-              '__CentralName__'
-            )
-          )
-        ),
-        _react2.default.createElement(
-          'main',
-          { className: 'p-4' },
-          _react2.default.createElement(_reactRouterDom.Route, { path: '/dashboard', component: _container2.default })
-        ),
-        _react2.default.createElement(
-          _Drawer2.default,
-          {
-            open: this.state.opened,
-            onRequestClose: this.closeDrawer
-          },
-          _react2.default.createElement(
-            _reactRouterDom.Link,
-            { to: '/dashboard' },
-            _react2.default.createElement(
-              _Menu3.MenuItem,
-              { onClick: this.closeDrawer },
-              'Dashboard'
-            )
-          ),
-          _react2.default.createElement(
-            _reactRouterDom.Link,
-            { to: '/' },
-            _react2.default.createElement(
-              _Menu3.MenuItem,
-              { onClick: this.logout },
-              'Sair'
-            )
-          )
-        )
-      );
-    }
-  }]);
-
-  return Dashboard;
-}(_react2.default.Component);
-
-exports.default = Dashboard;
-});
-
-;require.register("js/graphql_client.jsx", function(exports, require, module) {
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
-var _apolloClient = require('apollo-client');
-
-var _apolloLinkHttp = require('apollo-link-http');
-
-var _apolloCacheInmemory = require('apollo-cache-inmemory');
-
-var _apolloLinkContext = require('apollo-link-context');
-
-var _auth = require('./auth');
-
-var _auth2 = _interopRequireDefault(_auth);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var authLink = (0, _apolloLinkContext.setContext)(function (_, _ref) {
-  var headers = _ref.headers;
-
-  return {
-    headers: _extends({}, headers, {
-      authorization: _auth2.default.loggedIn ? 'Bearer ' + _auth2.default.token : ""
-    })
-  };
-});
-var httpLink = authLink.concat(new _apolloLinkHttp.HttpLink({
-  uri: 'http://localhost:4001/central'
-}));
-
-exports.default = new _apolloClient.ApolloClient({
-  link: httpLink,
-  cache: new _apolloCacheInmemory.InMemoryCache()
-});
-});
-
-;require.register("js/login.jsx", function(exports, require, module) {
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _TextField = require('material-ui/TextField');
-
-var _TextField2 = _interopRequireDefault(_TextField);
-
-var _Button = require('material-ui/Button');
-
-var _Button2 = _interopRequireDefault(_Button);
-
-var _auth = require('./auth');
-
-var _auth2 = _interopRequireDefault(_auth);
-
-var _Grid = require('material-ui/Grid');
-
-var _Grid2 = _interopRequireDefault(_Grid);
-
-var _Typography = require('material-ui/Typography');
-
-var _Typography2 = _interopRequireDefault(_Typography);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Login = function (_React$Component) {
-  _inherits(Login, _React$Component);
-
-  function Login() {
-    var _ref;
-
-    var _temp, _this, _ret;
-
-    _classCallCheck(this, Login);
-
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = Login.__proto__ || Object.getPrototypeOf(Login)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
-      enumerable: true,
-      writable: true,
-      value: {
-        login: "",
-        password: ""
-      }
-    }), Object.defineProperty(_this, 'didClickLoginButton', {
-      enumerable: true,
-      writable: true,
-      value: function value() {
-        _auth2.default.login(_this.state.login, _this.state.password, function () {
-          window.location.reload();
-        });
-      }
-    }), _temp), _possibleConstructorReturn(_this, _ret);
-  }
-
-  _createClass(Login, [{
-    key: 'render',
-    value: function render() {
-      var _this2 = this;
-
-      return _react2.default.createElement(
-        _Grid2.default,
-        { container: true, alignItems: 'center', justify: 'center', spacing: 0 },
-        _react2.default.createElement(
-          _Grid2.default,
-          { item: true, xs: 10, sm: 6, md: 4 },
-          _react2.default.createElement(
-            _Typography2.default,
-            { type: 'display1' },
-            'Fa\xE7a Login'
-          ),
-          _react2.default.createElement(_TextField2.default, {
-            label: 'Login',
-            onChange: function onChange(evt) {
-              return _this2.setState({ login: evt.target.value });
-            },
-            margin: 'normal',
-            fullWidth: true
-          }),
-          _react2.default.createElement(_TextField2.default, {
-            label: 'Senha',
-            onChange: function onChange(evt) {
-              return _this2.setState({ password: evt.target.value });
-            },
-            margin: 'normal',
-            type: 'password',
-            fullWidth: true
-          }),
-          _react2.default.createElement(
-            _Button2.default,
-            { raised: true, color: 'primary', onClick: this.didClickLoginButton },
-            'Acessar'
-          )
-        )
-      );
-    }
-  }]);
-
-  return Login;
-}(_react2.default.Component);
-
-exports.default = Login;
-});
-
-;require.register("js/orders/confirmed_order.jsx", function(exports, require, module) {
+;require.register("js/dashboard/confirmed_order.jsx", function(exports, require, module) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -68206,92 +67869,7 @@ var Stop = function (_React$Component2) {
 }(_react2.default.Component);
 });
 
-;require.register("js/orders/container.jsx", function(exports, require, module) {
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _templateObject = _taggedTemplateLiteral(['\n  query getOrdersAndMotoboys {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      noMotoboy\n      finished\n      insertedAt\n      confirmedAt\n      finishedAt\n      stops {\n        sequence\n        instructions\n        location {\n          name\n          reference\n          line1\n        }\n      }\n      customer {\n        id\n        name\n        phoneNumber\n      }\n      motoboy {\n        id\n        name\n      }\n    }\n\n    motoboys {\n      id\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameUnavailableAt\n      becameBusyAt\n    }\n  }\n'], ['\n  query getOrdersAndMotoboys {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      noMotoboy\n      finished\n      insertedAt\n      confirmedAt\n      finishedAt\n      stops {\n        sequence\n        instructions\n        location {\n          name\n          reference\n          line1\n        }\n      }\n      customer {\n        id\n        name\n        phoneNumber\n      }\n      motoboy {\n        id\n        name\n      }\n    }\n\n    motoboys {\n      id\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameUnavailableAt\n      becameBusyAt\n    }\n  }\n']);
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _orders = require('./orders');
-
-var _orders2 = _interopRequireDefault(_orders);
-
-var _motoboys = require('./motoboys');
-
-var _motoboys2 = _interopRequireDefault(_motoboys);
-
-var _graphqlTag = require('graphql-tag');
-
-var _graphqlTag2 = _interopRequireDefault(_graphqlTag);
-
-var _reactApollo = require('react-apollo');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var OrdersContainer = function (_React$Component) {
-  _inherits(OrdersContainer, _React$Component);
-
-  function OrdersContainer() {
-    _classCallCheck(this, OrdersContainer);
-
-    return _possibleConstructorReturn(this, (OrdersContainer.__proto__ || Object.getPrototypeOf(OrdersContainer)).apply(this, arguments));
-  }
-
-  _createClass(OrdersContainer, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      this.props.data.startPolling(30000);
-    }
-  }, {
-    key: 'render',
-    value: function render() {
-      var _props$data = this.props.data,
-          orders = _props$data.orders,
-          motoboys = _props$data.motoboys;
-
-      return _react2.default.createElement(
-        'div',
-        { className: 'row' },
-        _react2.default.createElement(
-          'div',
-          { className: 'col-sm-3' },
-          _react2.default.createElement(_motoboys2.default, { motoboys: motoboys })
-        ),
-        _react2.default.createElement(
-          'div',
-          { className: 'col-sm-9' },
-          _react2.default.createElement(_orders2.default, { orders: orders })
-        )
-      );
-    }
-  }]);
-
-  return OrdersContainer;
-}(_react2.default.Component);
-
-exports.default = (0, _reactApollo.graphql)((0, _graphqlTag2.default)(_templateObject))(function (props) {
-  return _react2.default.createElement(OrdersContainer, props);
-});
-});
-
-;require.register("js/orders/finished_order.jsx", function(exports, require, module) {
+;require.register("js/dashboard/finished_order.jsx", function(exports, require, module) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -68447,7 +68025,96 @@ var FinishedOrder = function (_React$Component) {
 exports.default = FinishedOrder;
 });
 
-;require.register("js/orders/motoboy_details.jsx", function(exports, require, module) {
+;require.register("js/dashboard/index.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _templateObject = _taggedTemplateLiteral(['\n  query getOrdersAndMotoboys {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      noMotoboy\n      finished\n      insertedAt\n      confirmedAt\n      finishedAt\n      stops {\n        sequence\n        instructions\n        location {\n          name\n          reference\n          line1\n        }\n      }\n      customer {\n        id\n        name\n        phoneNumber\n      }\n      motoboy {\n        id\n        name\n      }\n    }\n\n    motoboys {\n      id\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameUnavailableAt\n      becameBusyAt\n    }\n  }\n'], ['\n  query getOrdersAndMotoboys {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      noMotoboy\n      finished\n      insertedAt\n      confirmedAt\n      finishedAt\n      stops {\n        sequence\n        instructions\n        location {\n          name\n          reference\n          line1\n        }\n      }\n      customer {\n        id\n        name\n        phoneNumber\n      }\n      motoboy {\n        id\n        name\n      }\n    }\n\n    motoboys {\n      id\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameUnavailableAt\n      becameBusyAt\n    }\n  }\n']);
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _orders = require('./orders');
+
+var _orders2 = _interopRequireDefault(_orders);
+
+var _motoboys = require('./motoboys');
+
+var _motoboys2 = _interopRequireDefault(_motoboys);
+
+var _graphqlTag = require('graphql-tag');
+
+var _graphqlTag2 = _interopRequireDefault(_graphqlTag);
+
+var _reactApollo = require('react-apollo');
+
+var _Grid = require('material-ui/Grid');
+
+var _Grid2 = _interopRequireDefault(_Grid);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Dashboard = function (_React$Component) {
+  _inherits(Dashboard, _React$Component);
+
+  function Dashboard() {
+    _classCallCheck(this, Dashboard);
+
+    return _possibleConstructorReturn(this, (Dashboard.__proto__ || Object.getPrototypeOf(Dashboard)).apply(this, arguments));
+  }
+
+  _createClass(Dashboard, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.props.data.startPolling(30000);
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _props$data = this.props.data,
+          orders = _props$data.orders,
+          motoboys = _props$data.motoboys;
+
+      return _react2.default.createElement(
+        _Grid2.default,
+        { container: true, spacing: 0 },
+        _react2.default.createElement(
+          _Grid2.default,
+          { item: true, sm: 3 },
+          _react2.default.createElement(_motoboys2.default, { motoboys: motoboys })
+        ),
+        _react2.default.createElement(
+          _Grid2.default,
+          { item: true, sm: 9 },
+          _react2.default.createElement(_orders2.default, { orders: orders })
+        )
+      );
+    }
+  }]);
+
+  return Dashboard;
+}(_react2.default.Component);
+
+exports.default = (0, _reactApollo.graphql)((0, _graphqlTag2.default)(_templateObject))(function (props) {
+  return _react2.default.createElement(Dashboard, props);
+});
+});
+
+;require.register("js/dashboard/motoboy_details.jsx", function(exports, require, module) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -68582,7 +68249,7 @@ exports.default = (0, _reactApollo.graphql)((0, _graphqlTag2.default)(_templateO
 })(MotoboyDetails);
 });
 
-;require.register("js/orders/motoboys.jsx", function(exports, require, module) {
+;require.register("js/dashboard/motoboys.jsx", function(exports, require, module) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -68687,15 +68354,11 @@ var Motoboys = function (_React$Component) {
         'div',
         { className: 'card' },
         _react2.default.createElement(
-          _List.List,
+          _ListSubheader2.default,
           null,
-          _react2.default.createElement(
-            _ListSubheader2.default,
-            null,
-            'Motoboys'
-          ),
-          motoboysList
+          'Motoboys'
         ),
+        motoboysList,
         clickedMotoboy && _react2.default.createElement(_motoboy_details2.default, {
           open: open,
           motoboy: clickedMotoboy,
@@ -68770,7 +68433,7 @@ function getDateToShow(_ref3) {
 }
 });
 
-;require.register("js/orders/orders.jsx", function(exports, require, module) {
+;require.register("js/dashboard/orders.jsx", function(exports, require, module) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -68802,6 +68465,10 @@ var _ListSubheader2 = _interopRequireDefault(_ListSubheader);
 var _Divider = require('material-ui/Divider');
 
 var _Divider2 = _interopRequireDefault(_Divider);
+
+var _Grid = require('material-ui/Grid');
+
+var _Grid2 = _interopRequireDefault(_Grid);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -68873,11 +68540,11 @@ var Orders = function (_React$Component) {
       var COLORS = ['#00C49F', '#FFBB28'];
 
       return _react2.default.createElement(
-        'div',
-        { className: 'row' },
+        _Grid2.default,
+        { container: true, spacing: 0 },
         _react2.default.createElement(
-          'div',
-          { className: 'col-sm-4' },
+          _Grid2.default,
+          { item: true, sm: 4 },
           _react2.default.createElement(
             _ListSubheader2.default,
             null,
@@ -68886,8 +68553,8 @@ var Orders = function (_React$Component) {
           this.pending(orders)
         ),
         _react2.default.createElement(
-          'div',
-          { className: 'col-sm-5' },
+          _Grid2.default,
+          { item: true, sm: 5 },
           _react2.default.createElement(
             _ListSubheader2.default,
             null,
@@ -68896,8 +68563,8 @@ var Orders = function (_React$Component) {
           this.confirmed(orders)
         ),
         _react2.default.createElement(
-          'div',
-          { className: 'col-sm-3' },
+          _Grid2.default,
+          { item: true, sm: 3 },
           _react2.default.createElement(
             _ListSubheader2.default,
             null,
@@ -68915,7 +68582,7 @@ var Orders = function (_React$Component) {
 exports.default = Orders;
 });
 
-;require.register("js/orders/pending_order.jsx", function(exports, require, module) {
+;require.register("js/dashboard/pending_order.jsx", function(exports, require, module) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -69066,6 +68733,343 @@ var PendingOrder = function (_React$Component) {
 }(_react2.default.Component);
 
 exports.default = PendingOrder;
+});
+
+;require.register("js/graphql_client.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _apolloClient = require('apollo-client');
+
+var _apolloLinkHttp = require('apollo-link-http');
+
+var _apolloCacheInmemory = require('apollo-cache-inmemory');
+
+var _apolloLinkContext = require('apollo-link-context');
+
+var _auth = require('./auth');
+
+var _auth2 = _interopRequireDefault(_auth);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var authLink = (0, _apolloLinkContext.setContext)(function (_, _ref) {
+  var headers = _ref.headers;
+
+  return {
+    headers: _extends({}, headers, {
+      authorization: _auth2.default.loggedIn ? 'Bearer ' + _auth2.default.token : ""
+    })
+  };
+});
+var httpLink = authLink.concat(new _apolloLinkHttp.HttpLink({
+  uri: 'http://localhost:4001/central'
+}));
+
+exports.default = new _apolloClient.ApolloClient({
+  link: httpLink,
+  cache: new _apolloCacheInmemory.InMemoryCache()
+});
+});
+
+;require.register("js/layout.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _AppBar = require('material-ui/AppBar');
+
+var _AppBar2 = _interopRequireDefault(_AppBar);
+
+var _Toolbar = require('material-ui/Toolbar');
+
+var _Toolbar2 = _interopRequireDefault(_Toolbar);
+
+var _Typography = require('material-ui/Typography');
+
+var _Typography2 = _interopRequireDefault(_Typography);
+
+var _Button = require('material-ui/Button');
+
+var _Button2 = _interopRequireDefault(_Button);
+
+var _IconButton = require('material-ui/IconButton');
+
+var _IconButton2 = _interopRequireDefault(_IconButton);
+
+var _Menu = require('material-ui-icons/Menu');
+
+var _Menu2 = _interopRequireDefault(_Menu);
+
+var _Drawer = require('material-ui/Drawer');
+
+var _Drawer2 = _interopRequireDefault(_Drawer);
+
+var _Menu3 = require('material-ui/Menu');
+
+var _auth = require('./auth');
+
+var _auth2 = _interopRequireDefault(_auth);
+
+var _index = require('./dashboard/index');
+
+var _index2 = _interopRequireDefault(_index);
+
+var _reactRouterDom = require('react-router-dom');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+// import AppBar from 'material-ui/AppBar'
+// import FontIcon from 'material-ui/FontIcon'
+
+
+var Layout = function (_React$Component) {
+  _inherits(Layout, _React$Component);
+
+  function Layout() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
+    _classCallCheck(this, Layout);
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = Layout.__proto__ || Object.getPrototypeOf(Layout)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
+      enumerable: true,
+      writable: true,
+      value: {
+        opened: false
+      }
+    }), Object.defineProperty(_this, 'openDrawer', {
+      enumerable: true,
+      writable: true,
+      value: function value() {
+        return _this.setState({ opened: true });
+      }
+    }), Object.defineProperty(_this, 'closeDrawer', {
+      enumerable: true,
+      writable: true,
+      value: function value() {
+        return _this.setState({ opened: false });
+      }
+    }), Object.defineProperty(_this, 'logout', {
+      enumerable: true,
+      writable: true,
+      value: function value() {
+        _this.closeDrawer();
+        _auth2.default.logout(function () {
+          window.location.href = "/";
+        });
+      }
+    }), _temp), _possibleConstructorReturn(_this, _ret);
+  }
+
+  _createClass(Layout, [{
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement(
+          _AppBar2.default,
+          { position: 'static' },
+          _react2.default.createElement(
+            _Toolbar2.default,
+            null,
+            _react2.default.createElement(
+              _IconButton2.default,
+              { onClick: this.openDrawer, color: 'contrast', 'aria-label': 'Menu' },
+              _react2.default.createElement(_Menu2.default, null)
+            ),
+            _react2.default.createElement(
+              _Typography2.default,
+              { type: 'title', color: 'inherit' },
+              '__CentralName__'
+            )
+          )
+        ),
+        _react2.default.createElement(
+          'main',
+          { className: 'p-4' },
+          _react2.default.createElement(_reactRouterDom.Route, { path: '/', component: _index2.default })
+        ),
+        _react2.default.createElement(
+          _Drawer2.default,
+          {
+            open: this.state.opened,
+            onRequestClose: this.closeDrawer
+          },
+          _react2.default.createElement(
+            _reactRouterDom.Link,
+            { to: '/' },
+            _react2.default.createElement(
+              _Menu3.MenuItem,
+              { onClick: this.closeDrawer },
+              'Dashboard'
+            )
+          ),
+          _react2.default.createElement(
+            _reactRouterDom.Link,
+            { to: '/' },
+            _react2.default.createElement(
+              _Menu3.MenuItem,
+              { onClick: this.logout },
+              'Sair'
+            )
+          )
+        )
+      );
+    }
+  }]);
+
+  return Layout;
+}(_react2.default.Component);
+
+exports.default = Layout;
+});
+
+;require.register("js/login.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _TextField = require('material-ui/TextField');
+
+var _TextField2 = _interopRequireDefault(_TextField);
+
+var _Button = require('material-ui/Button');
+
+var _Button2 = _interopRequireDefault(_Button);
+
+var _auth = require('./auth');
+
+var _auth2 = _interopRequireDefault(_auth);
+
+var _Grid = require('material-ui/Grid');
+
+var _Grid2 = _interopRequireDefault(_Grid);
+
+var _Typography = require('material-ui/Typography');
+
+var _Typography2 = _interopRequireDefault(_Typography);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Login = function (_React$Component) {
+  _inherits(Login, _React$Component);
+
+  function Login() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
+    _classCallCheck(this, Login);
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = Login.__proto__ || Object.getPrototypeOf(Login)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
+      enumerable: true,
+      writable: true,
+      value: {
+        login: "",
+        password: ""
+      }
+    }), Object.defineProperty(_this, 'didClickLoginButton', {
+      enumerable: true,
+      writable: true,
+      value: function value() {
+        _auth2.default.login(_this.state.login, _this.state.password, function () {
+          window.location.reload();
+        });
+      }
+    }), _temp), _possibleConstructorReturn(_this, _ret);
+  }
+
+  _createClass(Login, [{
+    key: 'render',
+    value: function render() {
+      var _this2 = this;
+
+      return _react2.default.createElement(
+        _Grid2.default,
+        { container: true, alignItems: 'center', justify: 'center', spacing: 0 },
+        _react2.default.createElement(
+          _Grid2.default,
+          { item: true, xs: 10, sm: 6, md: 4 },
+          _react2.default.createElement(
+            _Typography2.default,
+            { type: 'display1' },
+            'Fa\xE7a Login'
+          ),
+          _react2.default.createElement(_TextField2.default, {
+            label: 'Login',
+            onChange: function onChange(evt) {
+              return _this2.setState({ login: evt.target.value });
+            },
+            margin: 'normal',
+            fullWidth: true
+          }),
+          _react2.default.createElement(_TextField2.default, {
+            label: 'Senha',
+            onChange: function onChange(evt) {
+              return _this2.setState({ password: evt.target.value });
+            },
+            margin: 'normal',
+            type: 'password',
+            fullWidth: true
+          }),
+          _react2.default.createElement(
+            _Button2.default,
+            { raised: true, color: 'primary', onClick: this.didClickLoginButton },
+            'Acessar'
+          )
+        )
+      );
+    }
+  }]);
+
+  return Login;
+}(_react2.default.Component);
+
+exports.default = Login;
 });
 
 ;require.register("js/timeago.jsx", function(exports, require, module) {
@@ -69220,7 +69224,7 @@ require.alias("warning/browser.js", "warning");process = require('process');requ
         });
     }
   };
-  var port = ar.port || 9486;
+  var port = ar.port || 9485;
   var host = br.server || window.location.hostname || 'localhost';
 
   var connect = function(){
