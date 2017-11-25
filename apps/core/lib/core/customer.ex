@@ -3,10 +3,9 @@ defmodule Core.Customer do
 
   schema "customers" do
     has_many :locations, Core.Location
+    belongs_to :company, Core.Company
     field :name, :string
     field :phone_number, :string
-    field :auth_token, :string
-
     timestamps()
   end
 

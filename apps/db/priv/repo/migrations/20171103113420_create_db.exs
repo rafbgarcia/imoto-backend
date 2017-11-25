@@ -53,9 +53,9 @@ defmodule Db.Repo.Migrations.CreateCentrals do
     ##################
 
     create table(:customers) do
+      add :company_id, references(:companies)
       add :name, :string
       add :phone_number, :string
-      add :auth_token, :string
       timestamps()
     end
 
@@ -65,7 +65,8 @@ defmodule Db.Repo.Migrations.CreateCentrals do
 
     create table(:orders) do
       add :motoboy_id, references(:motoboys)
-      add :company_id, references(:customers)
+      add :company_id, references(:companies)
+      add :customer_id, references(:customers)
       add :price, :integer
       add :state, :string, default: "pending"
       add :confirmed_at, :utc_datetime
@@ -84,6 +85,7 @@ defmodule Db.Repo.Migrations.CreateCentrals do
     create table(:locations) do
       add :stop_id, references(:stops)
       add :customer_id, references(:customers)
+      add :company_id, references(:companies)
       add :name, :string
       add :street, :string
       add :number, :string
