@@ -97804,7 +97804,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _templateObject = _taggedTemplateLiteral(['\n  mutation login($login: String!, $password: String!) {\n    session: login(login: $login, password: $password) {\n      token\n    }\n  }\n'], ['\n  mutation login($login: String!, $password: String!) {\n    session: login(login: $login, password: $password) {\n      token\n    }\n  }\n']);
+var _templateObject = _taggedTemplateLiteral(['\n  mutation login($login: String!, $password: String!) {\n    session: login(login: $login, password: $password) {\n      token\n    }\n  }\n'], ['\n  mutation login($login: String!, $password: String!) {\n    session: login(login: $login, password: $password) {\n      token\n    }\n  }\n']),
+    _templateObject2 = _taggedTemplateLiteral(['\n  mutation logout($token: String!) {\n    session: logout(token: $token) {\n      token\n    }\n  }\n'], ['\n  mutation logout($token: String!) {\n    session: logout(token: $token) {\n      token\n    }\n  }\n']);
 
 var _react = require('react');
 
@@ -97825,6 +97826,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
 var loginMutation = (0, _graphqlTag2.default)(_templateObject);
+var logoutMutation = (0, _graphqlTag2.default)(_templateObject2);
 
 var Auth = {};
 Auth.token = localStorage.getItem('authToken');
@@ -97834,6 +97836,18 @@ Auth.login = function (login, password, cb) {
   _graphql_client2.default.mutate({
     mutation: loginMutation,
     variables: { login: login, password: password }
+  }).then(function (res) {
+    localStorage.setItem('authToken', res.data.session.token);
+    cb();
+  }).catch(function (res) {
+    alert(res.graphQLErrors[0].message);
+  });
+};
+
+Auth.logout = function (cb) {
+  _graphql_client2.default.mutate({
+    mutation: logoutMutation,
+    variables: { token: Auth.token }
   }).then(function (res) {
     localStorage.setItem('authToken', res.data.session.token);
     cb();
@@ -98021,6 +98035,10 @@ var _MenuItem = require('material-ui/MenuItem');
 
 var _MenuItem2 = _interopRequireDefault(_MenuItem);
 
+var _auth = require('./auth');
+
+var _auth2 = _interopRequireDefault(_auth);
+
 var _container = require('./orders/container');
 
 var _container2 = _interopRequireDefault(_container);
@@ -98061,11 +98079,20 @@ var Main = function (_React$Component) {
       value: function value() {
         return _this.setState({ opened: !_this.state.opened });
       }
-    }), Object.defineProperty(_this, 'onClickMenuItem', {
+    }), Object.defineProperty(_this, 'closeDrawer', {
       enumerable: true,
       writable: true,
       value: function value() {
         return _this.setState({ opened: false });
+      }
+    }), Object.defineProperty(_this, 'logout', {
+      enumerable: true,
+      writable: true,
+      value: function value() {
+        _this.closeDrawer();
+        _auth2.default.logout(function () {
+          window.location.href = "/";
+        });
       }
     }), _temp), _possibleConstructorReturn(_this, _ret);
   }
@@ -98101,7 +98128,7 @@ var Main = function (_React$Component) {
             { to: '/dashboard' },
             _react2.default.createElement(
               _MenuItem2.default,
-              { onClick: this.onClickMenuItem, leftIcon: _react2.default.createElement(
+              { onClick: this.closeDrawer, leftIcon: _react2.default.createElement(
                   _FontIcon2.default,
                   { className: 'material-icons' },
                   'dashboard'
@@ -98114,7 +98141,7 @@ var Main = function (_React$Component) {
             { to: '/' },
             _react2.default.createElement(
               _MenuItem2.default,
-              { onClick: this.onClickMenuItem, leftIcon: _react2.default.createElement(
+              { onClick: this.logout, leftIcon: _react2.default.createElement(
                   _FontIcon2.default,
                   { className: 'material-icons' },
                   'power_settings_new'

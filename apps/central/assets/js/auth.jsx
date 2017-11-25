@@ -10,6 +10,13 @@ const loginMutation = gql`
     }
   }
 `
+const logoutMutation = gql`
+  mutation logout($token: String!) {
+    session: logout(token: $token) {
+      token
+    }
+  }
+`
 
 const Auth = {}
 Auth.token = localStorage.getItem('authToken')
@@ -19,6 +26,18 @@ Auth.login = (login, password, cb) => {
   apolloClient.mutate({
     mutation: loginMutation,
     variables: { login, password }
+  }).then((res) => {
+    localStorage.setItem('authToken', res.data.session.token)
+    cb()
+  }).catch((res) => {
+    alert(res.graphQLErrors[0].message)
+  })
+}
+
+Auth.logout = (cb) => {
+  apolloClient.mutate({
+    mutation: logoutMutation,
+    variables: { token: Auth.token }
   }).then((res) => {
     localStorage.setItem('authToken', res.data.session.token)
     cb()

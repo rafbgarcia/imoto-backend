@@ -2,9 +2,9 @@ defmodule Central.Resolve.Login do
   alias Core.Central
   alias Db.Repo
 
-  def login(params, _info) do
+  def login(params, _ctx) do
     with {:ok, central} <- authenticate(params),
-    {:ok, jwt, _ } <- Api.Guardian.encode_and_sign(central) do
+    {:ok, jwt, _ } <- Api.Guardian.encode_and_sign(central, %{resource_type: :central}) do
       {:ok, %{token: jwt}}
     end
   end
@@ -21,5 +21,4 @@ defmodule Central.Resolve.Login do
   defp check_password(central, given_password) do
     Comeonin.Argon2.checkpw(given_password, central.password_hash)
   end
-
 end

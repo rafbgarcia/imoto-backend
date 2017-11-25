@@ -5,7 +5,7 @@ defmodule Central.AuthPlug do
   def init(opts), do: opts
 
   def call(conn, _) do
-    case Guardian.Plug.current_resource(conn) do
+    case Api.Guardian.Plug.current_resource(conn) do
       nil -> conn
       central -> put_private(conn, :absinthe, %{context: %{current_central: central}})
     end

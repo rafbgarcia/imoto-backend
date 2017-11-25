@@ -4,6 +4,7 @@ import FontIcon from 'material-ui/FontIcon'
 import Drawer from 'material-ui/Drawer'
 import MenuItem from 'material-ui/MenuItem'
 
+import Auth from './auth'
 import OrdersContainer from './orders/container'
 
 import {
@@ -18,7 +19,14 @@ export default class Main extends React.Component {
 
   handleToggle = () => this.setState({opened: !this.state.opened})
 
-  onClickMenuItem = () => this.setState({opened: false})
+  closeDrawer = () => this.setState({opened: false})
+
+  logout = () => {
+    this.closeDrawer()
+    Auth.logout(() => {
+      window.location.href = "/"
+    })
+  }
 
   render() {
     return (
@@ -38,12 +46,12 @@ export default class Main extends React.Component {
           onRequestChange={(opened) => this.setState({opened})}
         >
           <Link to="/dashboard">
-            <MenuItem onClick={this.onClickMenuItem} leftIcon={<FontIcon className="material-icons">dashboard</FontIcon>}>
+            <MenuItem onClick={this.closeDrawer} leftIcon={<FontIcon className="material-icons">dashboard</FontIcon>}>
               Dashboard
             </MenuItem>
           </Link>
           <Link to="/">
-            <MenuItem onClick={this.onClickMenuItem} leftIcon={<FontIcon className="material-icons">power_settings_new</FontIcon>}>
+            <MenuItem onClick={this.logout} leftIcon={<FontIcon className="material-icons">power_settings_new</FontIcon>}>
               Sair
             </MenuItem>
           </Link>
