@@ -11,7 +11,7 @@ defmodule Core.Order do
     has_many :stops, Core.Stop
     has_many :locations, through: [:stops, :location]
     belongs_to :motoboy, Core.Motoboy
-    belongs_to :customer, Core.Customer
+    # belongs_to :company, Core.Company
     field :price, Money.Ecto.Type
     field :state, :string
     field :confirmed_at, Timex.Ecto.DateTime

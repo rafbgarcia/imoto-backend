@@ -1,0 +1,14 @@
+defmodule Graphql.Types do
+  use Absinthe.Schema.Notation
+
+  import_types Graphql.Field.Datetime
+  import_types Graphql.Type.Error
+
+  import_types Graphql.Type.Order
+  import_types Graphql.Type.Motoboy
+  import_types Graphql.Type.Customer
+  import_types Graphql.Type.Stop
+  import_types Graphql.Type.Location
+  import_types Graphql.Type.Central
+  import_types Graphql.Type.History
+end

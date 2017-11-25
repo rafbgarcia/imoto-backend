@@ -1,11 +1,10 @@
 import React from 'react'
 import AppBar from 'material-ui/AppBar'
-import FontIcon from 'material-ui/FontIcon';
-import Drawer from 'material-ui/Drawer';
-import MenuItem from 'material-ui/MenuItem';
+import FontIcon from 'material-ui/FontIcon'
+import Drawer from 'material-ui/Drawer'
+import MenuItem from 'material-ui/MenuItem'
 
 import OrdersContainer from './orders/container'
-import client from './graphql_client'
 
 import {
   Route,

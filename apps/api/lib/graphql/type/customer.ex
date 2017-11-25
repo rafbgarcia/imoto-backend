@@ -1,4 +1,4 @@
-defmodule Api.Graphql.Type.Customer do
+defmodule Graphql.Type.Customer do
   use Api, :graphql_schema
 
   object :customer_queries do

@@ -1,4 +1,4 @@
-defmodule Api.Graphql.Type.Location do
+defmodule Graphql.Type.Location do
   use Api, :graphql_schema
 
   object :location do

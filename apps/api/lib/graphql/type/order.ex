@@ -1,6 +1,5 @@
-defmodule Api.Graphql.Type.Order do
+defmodule Graphql.Type.Order do
   use Api, :graphql_schema
-  import_types Api.Graphql.Field.Datetime
 
   # Queries
   object :orders_queries do

@@ -60,6 +60,9 @@ defmodule Api.Mixfile do
       {:timex, "~> 3.1"},
       {:timex_ecto, "~> 3.2.1"},
       {:money, "~> 1.2.1"},
+      {:comeonin, "~> 4.0"},
+      {:argon2_elixir, "~> 1.2"},
+      {:guardian, "~> 1.0.0"},
     ]
   end
 

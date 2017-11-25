@@ -1,4 +1,4 @@
-defmodule Api.Graphql.Type.Error do
+defmodule Graphql.Type.Error do
   use Api, :graphql_schema
 
   object :error do

@@ -2,17 +2,18 @@ import { ApolloClient } from 'apollo-client'
 import { HttpLink } from 'apollo-link-http'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import { setContext } from 'apollo-link-context';
+import Auth from './auth'
 
 const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      authorization: `Bearer ${token}`,
+      authorization: Auth.loggedIn ? `Bearer ${Auth.token}` : "",
     }
   }
 });
 const httpLink = authLink.concat(new HttpLink({
-  uri: 'http://104.131.89.232:4001/api/central/graphql'
+  uri: 'http://localhost:4001/central'
 }))
 
 export default new ApolloClient({

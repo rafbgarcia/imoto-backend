@@ -27,6 +27,10 @@ config :logger, :console,
 config :api, :generators,
   context_app: false
 
+config :api, Api.Guardian,
+  issuer: "api",
+  secret_key: "SL6xJHKeZRRr/2YOJpLW2KvWTjh3h0IZ4UPUjPqGXX9J3fXrfSUxhgw2zXeoaXvt"
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{Mix.env}.exs"

@@ -1,6 +1,5 @@
-defmodule Api.Graphql.Type.History do
+defmodule Graphql.Type.History do
   use Api, :graphql_schema
-  import_types Api.Graphql.Field.Datetime
 
   object :history_queries do
     field :motoboy_history, list_of(:history) do

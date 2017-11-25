@@ -1,4 +1,4 @@
-defmodule Api.Graphql.Type.Stop do
+defmodule Graphql.Type.Stop do
   use Api, :graphql_schema
 
   object :stop do

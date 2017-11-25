@@ -1,6 +1,5 @@
-defmodule Api.Graphql.Type.Motoboy do
+defmodule Graphql.Type.Motoboy do
   use Api, :graphql_schema
-  import_types Api.Graphql.Field.Datetime
 
   object :motoboys_queries do
     # TODO: scope this query by Central

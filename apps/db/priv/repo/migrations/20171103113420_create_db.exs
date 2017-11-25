@@ -9,7 +9,8 @@ defmodule Db.Repo.Migrations.CreateCentrals do
     create table(:centrals) do
       add :name, :string
       add :phone_number, :string
-      add :password, :string
+      add :login, :string
+      add :password_hash, :string
       add :active, :boolean, default: true, null: false
       add :last_order_taken_at, :utc_datetime
       timestamps()
@@ -20,7 +21,7 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       add :central_id, references(:centrals)
       add :state, :string, default: "unavailable"
       add :phone_number, :string
-      add :password, :string
+      add :token, :string
       add :became_unavailable_at, :utc_datetime
       add :became_available_at, :utc_datetime
       add :became_busy_at, :utc_datetime
@@ -28,6 +29,35 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       timestamps()
     end
 
+    ##################
+    ### Company
+    ##################
+
+    create table(:companies) do
+      add :name, :string
+      add :login, :string
+      add :password_hash, :string
+      add :phone_number, :string
+      timestamps()
+    end
+
+    create table(:companies_centrals) do
+      add :central_id, references(:centrals)
+      add :company_id, references(:companies)
+      timestamps()
+    end
+
+
+    ##################
+    ### Customers
+    ##################
+
+    create table(:customers) do
+      add :name, :string
+      add :phone_number, :string
+      add :auth_token, :string
+      timestamps()
+    end
 
     ##################
     ### Central Orders
@@ -79,37 +109,6 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       add :text, :string
       timestamps()
     end
-
-
-    ##################
-    ### Company
-    ##################
-
-    create table(:companies) do
-      add :name, :string
-      add :phone_number, :string
-      add :password, :string
-      timestamps()
-    end
-
-    create table(:companies_centrals) do
-      add :central_id, references(:centrals)
-      add :company_id, references(:companies)
-      timestamps()
-    end
-
-
-    ##################
-    ### Customers
-    ##################
-
-    create table(:customers) do
-      add :name, :string
-      add :phone_number, :string
-      add :auth_token, :string
-      timestamps()
-    end
-
 
     ##################
     ###  Address

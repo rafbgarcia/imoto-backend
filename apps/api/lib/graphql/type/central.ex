@@ -1,4 +1,4 @@
-defmodule Api.Graphql.Type.Central do
+defmodule Graphql.Type.Central do
   use Api, :graphql_schema
 
   object :central do
