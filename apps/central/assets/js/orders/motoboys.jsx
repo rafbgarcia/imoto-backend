@@ -1,10 +1,10 @@
 import React from 'react'
 import Timeago from 'js/timeago'
-import FontIcon from 'material-ui/FontIcon';
-import Subheader from 'material-ui/Subheader';
-import Divider from 'material-ui/Divider';
-import {List, ListItem} from 'material-ui/List';
-import MotoboyDetails from './motoboy_details';
+import ListSubheader from 'material-ui/List/ListSubheader'
+import Divider from 'material-ui/Divider'
+import {List, ListItem} from 'material-ui/List'
+import MotoboyDetails from './motoboy_details'
+import FiberManualRecordIcon from 'material-ui-icons/FiberManualRecord'
 
 export default class Motoboys extends React.Component {
   state = {
@@ -31,7 +31,7 @@ export default class Motoboys extends React.Component {
     return (
       <div className="card">
         <List>
-          <Subheader>Motoboys</Subheader>
+          <ListSubheader>Motoboys</ListSubheader>
           {motoboysList}
         </List>
 
@@ -56,7 +56,7 @@ function Motoboy(motoboy, index, onClick) {
       key={index}
       primaryText={
         <div className="d-flex align-items-center">
-          <FontIcon className={`${iconClass} mr-2 material-icons`} style={{fontSize: 15}}>fiber_manual_record</FontIcon>
+          <FiberManualRecordIcon className={`${iconClass} mr-2`} style={{fontSize: 15}} />
           <span>{motoboy.name}</span>
         </div>
       }

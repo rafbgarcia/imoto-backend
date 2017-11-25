@@ -1,7 +1,9 @@
 import React from 'react'
 import TextField from 'material-ui/TextField'
-import RaisedButton from 'material-ui/RaisedButton'
+import Button from 'material-ui/Button'
 import Auth from './auth'
+import Grid from 'material-ui/Grid'
+import Typography from 'material-ui/Typography'
 
 export default class Login extends React.Component {
   state = {
@@ -17,17 +19,28 @@ export default class Login extends React.Component {
 
   render() {
     return (
-      <div className="col-md-4 offset-md-4 offset-sm-3 col-sm-6">
-        <div>
-          <h3>Faça Login</h3>
+      <Grid container alignItems="center" justify="center" spacing={0}>
+        <Grid item xs={10} sm={6} md={4}>
+          <Typography type="display1">Faça Login</Typography>
 
-          <form>
-            <TextField floatingLabelText="Login" onChange={(_evt, value) => this.setState({login: value})} fullWidth />
-            <TextField floatingLabelText="Senha" onChange={(_evt, value) => this.setState({password: value})} type="password" fullWidth />
-            <RaisedButton onClick={() => this.didClickLoginButton()} label="Acessar" primary />
-          </form>
-        </div>
-      </div>
+          <TextField
+            label="Login"
+            onChange={(evt) => this.setState({login: evt.target.value})}
+            margin="normal"
+            fullWidth
+          />
+          <TextField
+            label="Senha"
+            onChange={(evt) => this.setState({password: evt.target.value})}
+            margin="normal"
+            type="password"
+            fullWidth
+          />
+          <Button raised color="primary" onClick={this.didClickLoginButton}>
+            Acessar
+          </Button>
+        </Grid>
+      </Grid>
     )
   }
 }

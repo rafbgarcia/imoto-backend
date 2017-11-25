@@ -1,8 +1,11 @@
 import React from 'react'
 import Timeago from 'js/timeago'
-import Paper from 'material-ui/Paper';
-import FontIcon from 'material-ui/FontIcon';
-import CircularProgress from 'material-ui/CircularProgress';
+import Paper from 'material-ui/Paper'
+import PersonIcon from 'material-ui-icons/Person'
+import PhoneIcon from 'material-ui-icons/Phone'
+import MotorcycleIcon from 'material-ui-icons/Motorcycle'
+import AttachMoneyIcon from 'material-ui-icons/AttachMoney'
+import { CircularProgress } from 'material-ui/Progress'
 
 export default class PendingOrder extends React.Component {
   render() {
@@ -18,21 +21,21 @@ export default class PendingOrder extends React.Component {
         <div className="mt-3 d-flex align-items-start justify-content-between">
           <div>
             <div className="mb-2 d-flex align-items-center">
-              <FontIcon className="material-icons mr-2">person</FontIcon>
+              <PersonIcon />
               <span>{order.customer.name}</span>
             </div>
             <div className="mb-2 d-flex align-items-center">
-              <FontIcon className="material-icons mr-2">phone</FontIcon>
+              <PhoneIcon />
               <span>{order.customer.phoneNumber}</span>
             </div>
           </div>
           <div>
             <div className="mb-2 d-flex align-items-center">
-              <FontIcon className="material-icons mr-2">motorcycle</FontIcon>
+              <MotorcycleIcon />
               <span>{order.motoboy.name}</span>
             </div>
             <div className="d-flex align-items-center">
-              <FontIcon className="material-icons mr-2">attach_money</FontIcon>
+              <AttachMoneyIcon />
               <span>{order.formattedPrice}</span>
             </div>
           </div>

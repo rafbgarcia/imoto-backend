@@ -6,29 +6,23 @@ import { IntlProvider, addLocaleData } from 'react-intl'
 import ptBR from 'react-intl/locale-data/pt'
 addLocaleData(ptBR)
 
-import Main from './main'
+import Dashboard from './dashboard'
 import Login from './login'
 import Auth from './auth'
 
 import client from './graphql_client'
 
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
-import getMuiTheme from 'material-ui/styles/getMuiTheme'
-import {grey900} from 'material-ui/styles/colors';
+import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles'
 
-const muiTheme = getMuiTheme({
-  palette: {
-    textColor: grey900,
-  },
-})
+const theme = createMuiTheme({})
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  const page = Auth.loggedIn ? <Main /> : <Login />
+  const page = Auth.loggedIn ? <Dashboard /> : <Login />
 
   ReactDOM.render(
     <ApolloProvider client={client}>
-      <MuiThemeProvider muiTheme={muiTheme}>
+      <MuiThemeProvider theme={theme}>
         <IntlProvider locale="pt">
           <BrowserRouter>
             {page}

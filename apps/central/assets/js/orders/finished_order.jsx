@@ -1,7 +1,9 @@
 import React from 'react'
 import Timeago from 'js/timeago'
 import Paper from 'material-ui/Paper'
-import FontIcon from 'material-ui/FontIcon'
+import PersonIcon from 'material-ui-icons/Person'
+import PhoneIcon from 'material-ui-icons/Phone'
+import MotorcycleIcon from 'material-ui-icons/Motorcycle'
 import IconButton from 'material-ui/IconButton'
 
 export default class FinishedOrder extends React.Component {
@@ -30,15 +32,15 @@ export default class FinishedOrder extends React.Component {
 
         <div className={`mt-3 ${hidden}`}>
           <div className="mb-2 d-flex align-items-center">
-            <FontIcon className="material-icons mr-2">person</FontIcon>
+            <PersonIcon />
             <span>{order.customer.name}</span>
           </div>
           <div className="mb-2 d-flex align-items-center">
-            <FontIcon className="material-icons mr-2">phone</FontIcon>
+            <PhoneIcon />
             <span>{order.customer.phoneNumber}</span>
           </div>
           <div className="mb-2 d-flex align-items-center">
-            <FontIcon className="material-icons mr-2">motorcycle</FontIcon>
+            <MotorcycleIcon />
             <span>{order.motoboy.name}</span>
           </div>
           <div className="text-muted">

@@ -2,9 +2,8 @@ import React from 'react'
 import PendingOrder from './pending_order'
 import ConfirmedOrder from './confirmed_order'
 import FinishedOrder from './finished_order'
-import Subheader from 'material-ui/Subheader'
+import ListSubheader from 'material-ui/List/ListSubheader'
 import Divider from 'material-ui/Divider'
-import {ResponsiveContainer, PieChart, Pie, Legend, Tooltip, Cell} from 'recharts'
 
 export default class Orders extends React.Component {
   pending(orders) {
@@ -48,15 +47,15 @@ export default class Orders extends React.Component {
     return (
       <div className="row">
         <div className="col-sm-4">
-          <Subheader>Aguardando motoboy</Subheader>
+          <ListSubheader>Aguardando motoboy</ListSubheader>
           {this.pending(orders)}
         </div>
         <div className="col-sm-5">
-          <Subheader>Em entrega</Subheader>
+          <ListSubheader>Em entrega</ListSubheader>
           {this.confirmed(orders)}
         </div>
         <div className="col-sm-3">
-          <Subheader>Finalizadas</Subheader>
+          <ListSubheader>Finalizadas</ListSubheader>
           {this.finished(orders)}
         </div>
       </div>
