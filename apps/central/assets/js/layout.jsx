@@ -28,10 +28,11 @@ export default class Layout extends React.Component {
 
   logout = () => {
     this.closeDrawer()
-    Auth.logout(() => {
-      Central.logout()
+
+    Auth.logout(Central.current().token, () => {
       window.location.href = "/"
     })
+    Central.logout()
   }
 
   render() {

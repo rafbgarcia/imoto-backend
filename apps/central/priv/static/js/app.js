@@ -67639,10 +67639,10 @@ var login = function login(_login, password, cb) {
   });
 };
 
-var logout = function logout(cb) {
+var logout = function logout(token, cb) {
   _graphql_client2.default.mutate({
     mutation: logoutMutation,
-    variables: { token: Auth.currentCentral.token }
+    variables: { token: token }
   }).then(function (res) {
     cb(res.data.central);
   }).catch(function (res) {
@@ -68908,10 +68908,11 @@ var Layout = function (_React$Component) {
       writable: true,
       value: function value() {
         _this.closeDrawer();
-        _auth2.default.logout(function () {
-          _central2.default.logout();
+
+        _auth2.default.logout(_central2.default.current().token, function () {
           window.location.href = "/";
         });
+        _central2.default.logout();
       }
     }), _temp), _possibleConstructorReturn(_this, _ret);
   }

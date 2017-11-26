@@ -2,13 +2,13 @@ import { ApolloClient } from 'apollo-client'
 import { HttpLink } from 'apollo-link-http'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import { setContext } from 'apollo-link-context';
-import Auth from './auth'
+import Company from './company'
 
 const authLink = setContext((_, { headers }) => {
   return {
     headers: {
       ...headers,
-      authorization: Auth.loggedIn ? `Bearer ${Auth.token}` : "",
+      authorization: Company.loggedIn() ? `Bearer ${Company.current().token}` : "",
     }
   }
 });

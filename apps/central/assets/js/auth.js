@@ -30,10 +30,10 @@ const login = (login, password, cb) => {
   })
 }
 
-const logout = (cb) => {
+const logout = (token, cb) => {
   apolloClient.mutate({
     mutation: logoutMutation,
-    variables: { token: Auth.currentCentral.token }
+    variables: { token }
   }).then((res) => {
     cb(res.data.central)
   }).catch((res) => {

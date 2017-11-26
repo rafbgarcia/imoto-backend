@@ -9,6 +9,7 @@ import MenuIcon from 'material-ui-icons/Menu';
 import Drawer from 'material-ui/Drawer'
 import { MenuItem } from 'material-ui/Menu'
 
+import Company from './company'
 import Auth from './auth'
 import Dashboard from 'js/dashboard/index'
 
@@ -27,9 +28,11 @@ export default class Layout extends React.Component {
 
   logout = () => {
     this.closeDrawer()
-    Auth.logout(() => {
+
+    Auth.logout(Company.current().token, () => {
       window.location.href = "/"
     })
+    Company.logout()
   }
 
   render() {
@@ -41,7 +44,7 @@ export default class Layout extends React.Component {
               <MenuIcon />
             </IconButton>
             <Typography type="title" color="inherit">
-              __CompanyName__
+              {Company.current().name}
             </Typography>
           </Toolbar>
         </AppBar>
