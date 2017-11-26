@@ -14,8 +14,12 @@ class Dashboard extends React.Component{
   }
 
   needInitialSetup() {
-    return Company.current().locations.length === 0 ||
+    return !Company.current().location ||
       Company.current().centrals.length === 0
+  }
+
+  makeOrder() {
+
   }
 
   render() {
@@ -28,7 +32,7 @@ class Dashboard extends React.Component{
         <Grid container spacing={0}>
           <Grid item sm={3}>
             <ListSubheader>Chame um motoboy</ListSubheader>
-            <Button raised color="primary">Chamar motoboy agora</Button>
+            <Button onClick={this.makeOrder} raised color="primary">Chamar motoboy agora</Button>
           </Grid>
           <Grid item sm={5}>
             <ListSubheader>Pedidos enviados</ListSubheader>

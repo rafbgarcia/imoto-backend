@@ -25,7 +25,7 @@ defmodule Core.Motoboy do
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, [
-      :name, :token, :phone_number, :state,
+      :name, :login_token, :phone_number, :state,
       :became_available_at, :became_unavailable_at, :became_busy_at,
     ])
     |> validate_inclusion(:state, [busy(), available(), unavailable(), confirming_order()])

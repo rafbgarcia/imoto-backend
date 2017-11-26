@@ -1,18 +1,35 @@
+Db.Repo.delete_all(Core.Central)
+Db.Repo.delete_all(Core.Company)
+Db.Repo.delete_all(Core.Motoboy)
+Db.Repo.delete_all(Core.Location)
+
 %{password_hash: pw} = Comeonin.Argon2.add_hash("admin")
 
-unimoto = Db.Repo.insert!(%Core.Central{
+unimoto = Db.Repo.insert!(Core.Central.changeset(%Core.Central{}, %{
   name: "Unimoto",
   login: "unimoto",
   password_hash: pw,
-})
+}))
 
-Db.Repo.insert!(%Core.Company{
+Db.Repo.insert!(Core.Company.changeset(%Core.Company{}, %{
   name: "CooperFarma",
   login: "cooperfarma",
+  phone_number: "(45) 3523-1771",
   password_hash: pw,
-})
+  centrals: [unimoto],
+  location: %{
+    name: "Empresa",
+    street: "Av Brasil",
+    number: "1215",
+    zipcode: "85851-000",
+    neighborhood: "Centro",
+    city: "Foz do Iguaçu",
+    uf: "PR",
+  },
+}))
 
-# Db.Repo.insert!(%Core.Motoboy{name: "Anderson", central_id: unimoto.id, login: "anderson-token"})
+
+Db.Repo.insert!(%Core.Motoboy{name: "Anderson", central_id: unimoto.id, phone_number: "(45) 98888-4444"})
 # Db.Repo.insert!(%Core.Motoboy{name: "João", central_id: unimoto.id, login: "joao-token"})
 # Db.Repo.insert!(%Core.Motoboy{name: "Pedro", central_id: unimoto.id, login: "pedro-token"})
 # Db.Repo.insert!(%Core.Motoboy{name: "Paulo Andrade", central_id: unimoto.id})
