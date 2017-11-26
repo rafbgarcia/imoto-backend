@@ -20,7 +20,7 @@ defmodule Api.Router do
   end
   scope "/api/motoboy" do
     pipe_through :motoboy_api
-    forward "/graphql", Absinthe.Plug,
+    post "/graphql", Absinthe.Plug,
       schema: Api.GraphqlSchema,
       socket: Api.Channels.OrderSocket,
       interface: :simple
@@ -32,6 +32,15 @@ defmodule Api.Router do
   end
   scope "/central" do
     pipe_through :central_api
-    forward "/", Absinthe.Plug.GraphiQL, schema: Central.GraphqlSchema
+    post "/", Absinthe.Plug.GraphiQL, schema: Central.GraphqlSchema
+  end
+
+  pipeline :company_api do
+    plug :accepts, ["json"]
+    plug Company.AuthPlug
+  end
+  scope "/company" do
+    pipe_through :company_api
+    post "/", Absinthe.Plug.GraphiQL, schema: Company.GraphqlSchema
   end
 end

@@ -3,8 +3,9 @@ defmodule Graphql.Types do
 
   import_types Graphql.Field.Datetime
   import_types Graphql.Type.OrderOrError
+  import_types Graphql.Type.Session
   import_types Graphql.Type.Error
-
+  import_types Graphql.Type.Company
   import_types Graphql.Type.Order
   import_types Graphql.Type.Motoboy
   import_types Graphql.Type.Customer

@@ -11,12 +11,13 @@ defmodule Core.Motoboy do
     has_many :orders, Core.Order
     field :name, :string
     field :state, :string
-    field :token, :string
+    field :login_token, :string
     field :phone_number, :string
     field :became_available_at, Timex.Ecto.DateTime
     field :became_unavailable_at, Timex.Ecto.DateTime
     field :became_busy_at, Timex.Ecto.DateTime
     field :active, :boolean
+    field :token, :string, virtual: true
 
     timestamps()
   end
@@ -29,5 +30,6 @@ defmodule Core.Motoboy do
     ])
     |> validate_inclusion(:state, [busy(), available(), unavailable(), confirming_order()])
     |> validate_required([:name])
+    |> unique_constraint(:phone_number)
   end
 end

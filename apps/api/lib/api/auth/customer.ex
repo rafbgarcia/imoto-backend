@@ -17,6 +17,6 @@ defmodule Api.Auth.Customer do
   end
 
   defp new_customer do
-    Repo.insert!(%Customer{auth_token: Helpers.random_string(64)})
+    Repo.insert!(%Customer{})
   end
 end

@@ -1,21 +1,35 @@
-// Brunch automatically concatenates all files in your
-// watched paths. Those paths can be configured at
-// config.paths.watched in "brunch-config.js".
-//
-// However, those files will only be executed if
-// explicitly imported. The only exception are files
-// in vendor, which are never wrapped in imports and
-// therefore are always executed.
+import React from 'react'
+import ReactDOM from 'react-dom'
+import { ApolloProvider } from 'react-apollo'
+import { BrowserRouter } from 'react-router-dom'
+import { IntlProvider, addLocaleData } from 'react-intl'
+import ptBR from 'react-intl/locale-data/pt'
+addLocaleData(ptBR)
 
-// Import dependencies
-//
-// If you no longer want to use a dependency, remember
-// to also remove its path from "config.paths.watched".
-import "phoenix_html"
+import Layout from './layout'
+import Login from './login'
+import Auth from './auth'
 
-// Import local files
-//
-// Local files can be imported directly using relative
-// paths "./socket" or full ones "web/static/js/socket".
+import client from './graphql_client'
 
-// import socket from "./socket"
+import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles'
+
+const theme = createMuiTheme({})
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const page = Auth.loggedIn ? <Layout /> : <Login />
+
+  ReactDOM.render(
+    <ApolloProvider client={client}>
+      <MuiThemeProvider theme={theme}>
+        <IntlProvider locale="pt">
+          <BrowserRouter>
+            {page}
+          </BrowserRouter>
+        </IntlProvider>
+      </MuiThemeProvider>
+    </ApolloProvider>,
+    document.getElementById('js_app')
+  )
+})

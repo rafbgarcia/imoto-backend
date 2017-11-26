@@ -4,7 +4,6 @@ import Button from 'material-ui/Button'
 import Auth from './auth'
 import Grid from 'material-ui/Grid'
 import Typography from 'material-ui/Typography'
-import Central from 'js/central'
 
 export default class Login extends React.Component {
   state = {
@@ -13,8 +12,7 @@ export default class Login extends React.Component {
   }
 
   didClickLoginButton = () => {
-    Auth.login(this.state.login, this.state.password, (central) => {
-      Central.login(central)
+    Auth.login(this.state.login, this.state.password, () => {
       window.location.reload()
     })
   }

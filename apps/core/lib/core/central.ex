@@ -10,6 +10,7 @@ defmodule Core.Central do
     field :phone_number, :string
     field :active, :boolean
     field :last_order_taken_at, Timex.Ecto.DateTime
+    field :token, :string, virtual: true
 
     timestamps()
   end

@@ -26,7 +26,7 @@ defmodule Core.Order do
     changeset
     |> cast(params, [
       :price, :state, :confirmed_at, :finished_at,
-      :canceled_at, :motoboy_id, :customer_id
+      :canceled_at, :motoboy_id, :customer_id, :company_id
     ])
     |> cast_assoc(:stops)
     |> validate_required([:state])

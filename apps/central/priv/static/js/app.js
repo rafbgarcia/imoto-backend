@@ -67564,9 +67564,9 @@ var _login = require('./login');
 
 var _login2 = _interopRequireDefault(_login);
 
-var _auth = require('./auth');
+var _central = require('./central');
 
-var _auth2 = _interopRequireDefault(_auth);
+var _central2 = _interopRequireDefault(_central);
 
 var _graphql_client = require('./graphql_client');
 
@@ -67581,7 +67581,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var theme = (0, _styles.createMuiTheme)({});
 
 document.addEventListener('DOMContentLoaded', function () {
-  var page = _auth2.default.loggedIn ? _react2.default.createElement(_layout2.default, null) : _react2.default.createElement(_login2.default, null);
+  var page = _central2.default.loggedIn() ? _react2.default.createElement(_layout2.default, null) : _react2.default.createElement(_login2.default, null);
 
   _reactDom2.default.render(_react2.default.createElement(
     _reactApollo.ApolloProvider,
@@ -67603,25 +67603,19 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 });
 
-;require.register("js/auth.jsx", function(exports, require, module) {
+;require.register("js/auth.js", function(exports, require, module) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _templateObject = _taggedTemplateLiteral(['\n  mutation login($login: String!, $password: String!) {\n    session: login(login: $login, password: $password) {\n      token\n    }\n  }\n'], ['\n  mutation login($login: String!, $password: String!) {\n    session: login(login: $login, password: $password) {\n      token\n    }\n  }\n']),
-    _templateObject2 = _taggedTemplateLiteral(['\n  mutation logout($token: String!) {\n    session: logout(token: $token) {\n      token\n    }\n  }\n'], ['\n  mutation logout($token: String!) {\n    session: logout(token: $token) {\n      token\n    }\n  }\n']);
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
+var _templateObject = _taggedTemplateLiteral(['\n  mutation login($login: String!, $password: String!) {\n    central: login(login: $login, password: $password) {\n      id\n      name\n      phoneNumber\n      token\n    }\n  }\n'], ['\n  mutation login($login: String!, $password: String!) {\n    central: login(login: $login, password: $password) {\n      id\n      name\n      phoneNumber\n      token\n    }\n  }\n']),
+    _templateObject2 = _taggedTemplateLiteral(['\n  mutation logout($token: String!) {\n    central: logout(token: $token) {\n      token\n    }\n  }\n'], ['\n  mutation logout($token: String!) {\n    central: logout(token: $token) {\n      token\n    }\n  }\n']);
 
 var _graphqlTag = require('graphql-tag');
 
 var _graphqlTag2 = _interopRequireDefault(_graphqlTag);
-
-var _reactApollo = require('react-apollo');
 
 var _graphql_client = require('./graphql_client');
 
@@ -67634,35 +67628,70 @@ function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defi
 var loginMutation = (0, _graphqlTag2.default)(_templateObject);
 var logoutMutation = (0, _graphqlTag2.default)(_templateObject2);
 
-var Auth = {};
-Auth.token = localStorage.getItem('authToken');
-Auth.loggedIn = (Auth.token || "").length > 0;
-
-Auth.login = function (login, password, cb) {
+var login = function login(_login, password, cb) {
   _graphql_client2.default.mutate({
     mutation: loginMutation,
-    variables: { login: login, password: password }
+    variables: { login: _login, password: password }
   }).then(function (res) {
-    localStorage.setItem('authToken', res.data.session.token);
-    cb();
+    cb(res.data.central);
   }).catch(function (res) {
     alert(res.graphQLErrors[0].message);
   });
 };
 
-Auth.logout = function (cb) {
+var logout = function logout(cb) {
   _graphql_client2.default.mutate({
     mutation: logoutMutation,
-    variables: { token: Auth.token }
+    variables: { token: Auth.currentCentral.token }
   }).then(function (res) {
-    localStorage.setItem('authToken', res.data.session.token);
-    cb();
+    cb(res.data.central);
   }).catch(function (res) {
     alert(res.graphQLErrors[0].message);
   });
 };
 
-exports.default = Auth;
+exports.default = {
+  login: login,
+  logout: logout
+};
+});
+
+;require.register("js/central.js", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var setCurrentCentral = function setCurrentCentral(central) {
+  localStorage.central = JSON.stringify(central);
+};
+
+var getCurrentCentral = function getCurrentCentral() {
+  if (localStorage.central) {
+    return JSON.parse(localStorage.central);
+  }
+  return {};
+};
+
+var logout = function logout() {
+  setCurrentCentral({});
+};
+
+var login = function login(central) {
+  setCurrentCentral(central);
+};
+
+var loggedIn = function loggedIn() {
+  return !!getCurrentCentral().token;
+};
+
+exports.default = {
+  current: getCurrentCentral,
+  loggedIn: loggedIn,
+  login: login,
+  logout: logout,
+  setCurrentCentral: setCurrentCentral
+};
 });
 
 ;require.register("js/dashboard/confirmed_order.jsx", function(exports, require, module) {
@@ -68735,7 +68764,7 @@ var PendingOrder = function (_React$Component) {
 exports.default = PendingOrder;
 });
 
-;require.register("js/graphql_client.jsx", function(exports, require, module) {
+;require.register("js/graphql_client.js", function(exports, require, module) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -68752,9 +68781,9 @@ var _apolloCacheInmemory = require('apollo-cache-inmemory');
 
 var _apolloLinkContext = require('apollo-link-context');
 
-var _auth = require('./auth');
+var _central = require('./central');
 
-var _auth2 = _interopRequireDefault(_auth);
+var _central2 = _interopRequireDefault(_central);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -68763,7 +68792,7 @@ var authLink = (0, _apolloLinkContext.setContext)(function (_, _ref) {
 
   return {
     headers: _extends({}, headers, {
-      authorization: _auth2.default.loggedIn ? 'Bearer ' + _auth2.default.token : ""
+      authorization: _central2.default.loggedIn() ? 'Bearer ' + _central2.default.current().token : ""
     })
   };
 });
@@ -68820,6 +68849,10 @@ var _Drawer2 = _interopRequireDefault(_Drawer);
 
 var _Menu3 = require('material-ui/Menu');
 
+var _central = require('./central');
+
+var _central2 = _interopRequireDefault(_central);
+
 var _auth = require('./auth');
 
 var _auth2 = _interopRequireDefault(_auth);
@@ -68837,10 +68870,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-// import AppBar from 'material-ui/AppBar'
-// import FontIcon from 'material-ui/FontIcon'
-
 
 var Layout = function (_React$Component) {
   _inherits(Layout, _React$Component);
@@ -68880,6 +68909,7 @@ var Layout = function (_React$Component) {
       value: function value() {
         _this.closeDrawer();
         _auth2.default.logout(function () {
+          _central2.default.logout();
           window.location.href = "/";
         });
       }
@@ -68906,7 +68936,7 @@ var Layout = function (_React$Component) {
             _react2.default.createElement(
               _Typography2.default,
               { type: 'title', color: 'inherit' },
-              '__CentralName__'
+              _central2.default.current().name
             )
           )
         ),
@@ -68983,6 +69013,10 @@ var _Typography = require('material-ui/Typography');
 
 var _Typography2 = _interopRequireDefault(_Typography);
 
+var _central = require('js/central');
+
+var _central2 = _interopRequireDefault(_central);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -69016,7 +69050,8 @@ var Login = function (_React$Component) {
       enumerable: true,
       writable: true,
       value: function value() {
-        _auth2.default.login(_this.state.login, _this.state.password, function () {
+        _auth2.default.login(_this.state.login, _this.state.password, function (central) {
+          _central2.default.login(central);
           window.location.reload();
         });
       }

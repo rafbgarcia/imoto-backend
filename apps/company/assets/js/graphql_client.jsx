@@ -13,7 +13,7 @@ const authLink = setContext((_, { headers }) => {
   }
 });
 const httpLink = authLink.concat(new HttpLink({
-  uri: 'http://localhost:4001/central'
+  uri: 'http://localhost:4001/company'
 }))
 
 export default new ApolloClient({

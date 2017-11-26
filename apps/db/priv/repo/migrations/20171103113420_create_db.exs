@@ -9,25 +9,27 @@ defmodule Db.Repo.Migrations.CreateCentrals do
     create table(:centrals) do
       add :name, :string
       add :phone_number, :string
-      add :login, :string
+      add :login, :string, unique: true
       add :password_hash, :string
       add :active, :boolean, default: true, null: false
       add :last_order_taken_at, :utc_datetime
       timestamps()
     end
+    create index(:centrals, [:login], unique: true)
 
     create table(:motoboys) do
       add :name, :string
       add :central_id, references(:centrals)
       add :state, :string, default: "unavailable"
       add :phone_number, :string
-      add :token, :string
+      add :login_token, :string
       add :became_unavailable_at, :utc_datetime
       add :became_available_at, :utc_datetime
       add :became_busy_at, :utc_datetime
       add :active, :boolean, default: true, null: false
       timestamps()
     end
+    create index(:motoboys, [:phone_number], unique: true)
 
     ##################
     ### Company
@@ -40,6 +42,7 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       add :phone_number, :string
       timestamps()
     end
+    create index(:companies, [:login], unique: true)
 
     create table(:companies_centrals) do
       add :central_id, references(:centrals)

@@ -8,7 +8,7 @@ addLocaleData(ptBR)
 
 import Layout from './layout'
 import Login from './login'
-import Auth from './auth'
+import Central from './central'
 
 import client from './graphql_client'
 
@@ -18,7 +18,7 @@ const theme = createMuiTheme({})
 
 
 document.addEventListener('DOMContentLoaded', () => {
-  const page = Auth.loggedIn ? <Layout /> : <Login />
+  const page = Central.loggedIn() ? <Layout /> : <Login />
 
   ReactDOM.render(
     <ApolloProvider client={client}>

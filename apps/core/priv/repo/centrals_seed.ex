@@ -1,10 +1,16 @@
 %{password_hash: pw} = Comeonin.Argon2.add_hash("admin")
 
-unimoto = Db.Repo.insert!(Core.Central.changeset(%Core.Central{}, %{
+unimoto = Db.Repo.insert!(%Core.Central{
   name: "Unimoto",
   login: "unimoto",
   password_hash: pw,
-}))
+})
+
+Db.Repo.insert!(%Core.Company{
+  name: "CooperFarma",
+  login: "cooperfarma",
+  password_hash: pw,
+})
 
 # Db.Repo.insert!(%Core.Motoboy{name: "Anderson", central_id: unimoto.id, login: "anderson-token"})
 # Db.Repo.insert!(%Core.Motoboy{name: "João", central_id: unimoto.id, login: "joao-token"})

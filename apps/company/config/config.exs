@@ -12,7 +12,8 @@ config :company,
 
 # Configures the endpoint
 config :company, Company.Endpoint,
-  url: [host: "localhost"],
+  http: [port: 4003],
+  url: [host: "localhost", port: 4003],
   secret_key_base: "Y+OjsmR0LHXXlJiYQg7GpJ+WDjcIBh/SeCOLaJnDzDdESWJYx5byw6TfKwKGmI5r",
   render_errors: [view: Company.ErrorView, accepts: ~w(html json)],
   pubsub: [name: Company.PubSub,

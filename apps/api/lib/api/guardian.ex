@@ -2,7 +2,7 @@ defmodule Api.Guardian do
   use Guardian, otp_app: :api
 
   alias Db.Repo
-  alias Core.Central
+  alias Core.{Central, Company}
 
   def subject_for_token(resource, _claims) do
     subject = to_string(resource.id)
@@ -17,6 +17,7 @@ defmodule Api.Guardian do
 
     resource = case claims["resource_type"] do
       "central" -> Repo.get(Central, id)
+      "company" -> Repo.get(Company, id)
     end
 
     {:ok, resource}

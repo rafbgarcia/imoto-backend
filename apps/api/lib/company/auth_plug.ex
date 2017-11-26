@@ -1,4 +1,4 @@
-defmodule Central.AuthPlug do
+defmodule Company.AuthPlug do
   @behaviour Plug
   import Plug.Conn
 
@@ -9,7 +9,7 @@ defmodule Central.AuthPlug do
     |> current_resource
     |> case do
       nil -> conn
-      resource -> put_private(conn, :absinthe, %{context: %{current_central: resource}})
+      resource -> put_private(conn, :absinthe, %{context: %{current_company: resource}})
     end
   end
 

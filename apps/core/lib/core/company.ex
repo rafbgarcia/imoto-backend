@@ -1,4 +1,4 @@
-defmodule Core.Customer do
+defmodule Core.Company do
   use Core, :schema
 
   schema "companies" do
@@ -11,7 +11,7 @@ defmodule Core.Customer do
     field :name, :string
     field :phone_number, :string
     field :login, :string
-    field :password_hash, :string
+    field :token, :string, virtual: true
 
     timestamps()
   end
@@ -19,6 +19,6 @@ defmodule Core.Customer do
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, [:phone_number, :name, :password_hash, :login])
-    |> validate_required([:phone_number])
+    |> unique_constraint(:login)
   end
 end
