@@ -8,6 +8,8 @@ const loginMutation = gql`
       name
       phoneNumber
       token
+      locations { line1 }
+      centrals { id name phoneNumber}
     }
   }
 `

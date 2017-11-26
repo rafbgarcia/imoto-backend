@@ -57,9 +57,24 @@ export default class Layout extends React.Component {
           open={this.state.opened}
           onRequestClose={this.closeDrawer}
         >
-          <Link to="/">
+          <Link to="/" style={{width: 250}}>
             <MenuItem onClick={this.closeDrawer}>
               Dashboard
+            </MenuItem>
+          </Link>
+          <Link to="/pedidos">
+            <MenuItem onClick={this.closeDrawer}>
+              Pedidos
+            </MenuItem>
+          </Link>
+          <Link to="/centrais">
+            <MenuItem onClick={this.closeDrawer}>
+              Centrais
+            </MenuItem>
+          </Link>
+          <Link to="/enderecos">
+            <MenuItem onClick={this.closeDrawer}>
+              Endereços
             </MenuItem>
           </Link>
           <Link to="/">

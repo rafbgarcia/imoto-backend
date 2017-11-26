@@ -5,7 +5,7 @@ defmodule Core.Company do
     has_many :locations, Core.Location
     has_many :orders, Core.Order
     has_many :customers, Core.Customer
-    many_to_many :centrals, Core.Central, join_through: "centrals_companies"
+    many_to_many :centrals, Core.Central, join_through: "companies_centrals"
 
     field :password_hash, :string
     field :name, :string
