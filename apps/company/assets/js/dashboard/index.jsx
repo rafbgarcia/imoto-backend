@@ -11,6 +11,7 @@ import IconButton from 'material-ui/IconButton'
 import Company from 'js/company'
 import InitialSetup from './initial_setup'
 import OrderInProgress from './order_in_progress'
+import FinishedOrder from './finished_order'
 
 class Dashboard extends React.Component {
   state = {
@@ -95,7 +96,7 @@ class Dashboard extends React.Component {
           </div>
           <div className="col-sm-4">
             <ListSubheader>Finalizados</ListSubheader>
-            {!loading && finishedOrders.map(FinishedOrder)}
+            {!loading && finishedOrders.map((order, i) => <FinishedOrder key={i} order={order} />)}
           </div>
         </section>
 
@@ -120,12 +121,6 @@ class Dashboard extends React.Component {
       </div>
     )
   }
-}
-
-const FinishedOrder = (a, i) => {
-  return (
-    <div key={i}>Finished</div>
-  )
 }
 
 export default graphql(gql`

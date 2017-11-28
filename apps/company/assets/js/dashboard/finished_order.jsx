@@ -6,6 +6,7 @@ import PhoneIcon from 'material-ui-icons/Phone'
 import MotorcycleIcon from 'material-ui-icons/Motorcycle'
 import KeyboardArrowDownIcon from 'material-ui-icons/KeyboardArrowDown'
 import IconButton from 'material-ui/IconButton'
+import HomeIcon from 'material-ui-icons/Home'
 
 export default class FinishedOrder extends React.Component {
   state = {
@@ -32,16 +33,12 @@ export default class FinishedOrder extends React.Component {
 
         <div className={`mt-3 ${hidden}`}>
           <div className="mb-2 d-flex align-items-center">
-            <PersonIcon />
-            <span className="ml-2">{order.company.name}</span>
-          </div>
-          <div className="mb-2 d-flex align-items-center">
-            <PhoneIcon />
-            <span className="ml-2">{order.company.phoneNumber}</span>
-          </div>
-          <div className="mb-2 d-flex align-items-center">
             <MotorcycleIcon />
             <span className="ml-2">{order.motoboy.name}</span>
+          </div>
+          <div className="mb-2 d-flex align-items-center">
+            <HomeIcon />
+            <span className="ml-2">{order.motoboy.central.name}</span>
           </div>
           <div className="text-muted">
             <small>Finalizada <Timeago date={order.finishedAt} /></small>

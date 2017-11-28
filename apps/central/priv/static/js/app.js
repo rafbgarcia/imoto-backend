@@ -24401,6 +24401,48 @@ exports.default = FiberManualRecord;
   })();
 });
 
+require.register("material-ui-icons/KeyboardArrowDown.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui-icons");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _pure = require('recompose/pure');
+
+var _pure2 = _interopRequireDefault(_pure);
+
+var _SvgIcon = require('material-ui/SvgIcon');
+
+var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SvgIconCustom = global.__MUI_SvgIcon__ || _SvgIcon2.default;
+
+var _ref = _react2.default.createElement('path', { d: 'M7.41 7.84L12 12.42l4.59-4.58L18 9.25l-6 6-6-6z' });
+
+var KeyboardArrowDown = function KeyboardArrowDown(props) {
+  return _react2.default.createElement(
+    SvgIconCustom,
+    props,
+    _ref
+  );
+};
+
+KeyboardArrowDown = (0, _pure2.default)(KeyboardArrowDown);
+KeyboardArrowDown.muiName = 'SvgIcon';
+
+exports.default = KeyboardArrowDown;
+  })();
+});
+
 require.register("material-ui-icons/List.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "material-ui-icons");
   (function() {
@@ -68703,6 +68745,10 @@ var _Motorcycle = require('material-ui-icons/Motorcycle');
 
 var _Motorcycle2 = _interopRequireDefault(_Motorcycle);
 
+var _KeyboardArrowDown = require('material-ui-icons/KeyboardArrowDown');
+
+var _KeyboardArrowDown2 = _interopRequireDefault(_KeyboardArrowDown);
+
 var _IconButton = require('material-ui/IconButton');
 
 var _IconButton2 = _interopRequireDefault(_IconButton);
@@ -68763,13 +68809,12 @@ var FinishedOrder = function (_React$Component) {
           _react2.default.createElement(
             _IconButton2.default,
             {
-              iconClassName: 'material-icons',
               tooltip: 'Mostrar detalhes',
               onClick: function onClick() {
                 return _this2.setState({ show: !show });
               }
             },
-            'keyboard_arrow_down'
+            _react2.default.createElement(_KeyboardArrowDown2.default, null)
           )
         ),
         _react2.default.createElement(
@@ -68781,7 +68826,7 @@ var FinishedOrder = function (_React$Component) {
             _react2.default.createElement(_Person2.default, null),
             _react2.default.createElement(
               'span',
-              null,
+              { className: 'ml-2' },
               order.company.name
             )
           ),
@@ -68791,7 +68836,7 @@ var FinishedOrder = function (_React$Component) {
             _react2.default.createElement(_Phone2.default, null),
             _react2.default.createElement(
               'span',
-              null,
+              { className: 'ml-2' },
               order.company.phoneNumber
             )
           ),
@@ -68801,7 +68846,7 @@ var FinishedOrder = function (_React$Component) {
             _react2.default.createElement(_Motorcycle2.default, null),
             _react2.default.createElement(
               'span',
-              null,
+              { className: 'ml-2' },
               order.motoboy.name
             )
           ),
