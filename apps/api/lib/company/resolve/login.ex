@@ -2,7 +2,7 @@ defmodule Company.Resolve.Login do
   alias Core.Company
   alias Db.Repo
 
-  def login(params, _ctx) do
+  def handle(params, _ctx) do
     with {:ok, company} <- authenticate(params),
     {:ok, jwt, _ } <- Api.Guardian.encode_and_sign(company, %{resource_type: :company}) do
       {:ok, Map.put(company, :token, jwt)}

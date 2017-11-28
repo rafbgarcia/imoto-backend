@@ -18,9 +18,9 @@ defmodule Api.Router do
     plug :accepts, ["json"]
     plug Api.Plug.MotoboyAuth
   end
-  scope "/api/motoboy" do
+  scope "/motoboy" do
     pipe_through :motoboy_api
-    post "/graphql", Absinthe.Plug,
+    post "/", Absinthe.Plug,
       schema: Api.GraphqlSchema,
       socket: Api.Channels.OrderSocket,
       interface: :simple

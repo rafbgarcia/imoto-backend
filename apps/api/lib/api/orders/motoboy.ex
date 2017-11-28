@@ -149,26 +149,26 @@ defmodule Api.Orders.Motoboy do
   Gets next motoboy for the next central.
   If a central has no available motoboys, get a motoboy of the next one.
   """
-  def get_next_in_queue do
-    Repo.transaction(fn ->
-      from(m in Motoboy,
-        lock: "FOR UPDATE",
-        join: c in assoc(m, :central),
-        preload: [central: c],
-        where: m.state == ^Motoboy.available,
-        order_by: [asc: m.became_available_at, asc: c.last_order_taken_at]
-      )
-      |> first
-      |> Repo.one
-      |> case do
-        nil ->
-          Repo.rollback("Nenhum motoboy disponível")
-        motoboy ->
-          motoboy.central |> Central.changeset(%{last_order_taken_at: Timex.local}) |> Repo.update!
-          motoboy |> Motoboy.changeset(%{state: Motoboy.busy}) |> Repo.update!
-      end
-    end)
-  end
+  # def get_next_in_queue do
+  #   Repo.transaction(fn ->
+  #     from(m in Motoboy,
+  #       lock: "FOR UPDATE",
+  #       join: c in assoc(m, :central),
+  #       preload: [central: c],
+  #       where: m.state == ^Motoboy.available,
+  #       order_by: [asc: m.became_available_at, asc: c.last_order_taken_at]
+  #     )
+  #     |> first
+  #     |> Repo.one
+  #     |> case do
+  #       nil ->
+  #         Repo.rollback("Nenhum motoboy disponível")
+  #       motoboy ->
+  #         motoboy.central |> Central.changeset(%{last_order_taken_at: Timex.local}) |> Repo.update!
+  #         motoboy |> Motoboy.changeset(%{state: Motoboy.busy}) |> Repo.update!
+  #     end
+  #   end)
+  # end
 
   def get(id) do
     Motoboy |> Repo.get(id)

@@ -1,7 +1,7 @@
-defmodule Company.Resolve.Order do
+defmodule Company.Resolve.AllOrders do
   use Api, :context
 
-  def all(_args, %{context: %{current_company: company}}) do
+  def handle(_args, %{context: %{current_company: company}}) do
     from(
       o in assoc(company, :orders),
       where: o.inserted_at >= ^Timex.beginning_of_day(Timex.local),

@@ -8,7 +8,11 @@ const loginMutation = gql`
       name
       phoneNumber
       token
-      location { line1 }
+      location {
+        line1
+        name street number neighborhood
+        zipcode city uf complement reference
+      }
       centrals { id name phoneNumber}
     }
   }

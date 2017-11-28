@@ -45,9 +45,8 @@ defmodule Db.Repo.Migrations.CreateCentrals do
     create index(:companies, [:login], unique: true)
 
     create table(:companies_centrals) do
-      add :central_id, references(:centrals)
-      add :company_id, references(:companies)
-      timestamps()
+      add :central_id, references(:centrals, on_delete: :delete_all)
+      add :company_id, references(:companies, on_delete: :delete_all)
     end
 
 
@@ -56,7 +55,7 @@ defmodule Db.Repo.Migrations.CreateCentrals do
     ##################
 
     create table(:customers) do
-      add :company_id, references(:companies)
+      add :company_id, references(:companies, on_delete: :delete_all)
       add :name, :string
       add :phone_number, :string
       timestamps()
@@ -67,9 +66,9 @@ defmodule Db.Repo.Migrations.CreateCentrals do
     ##################
 
     create table(:orders) do
-      add :motoboy_id, references(:motoboys)
-      add :company_id, references(:companies)
-      add :customer_id, references(:customers)
+      add :motoboy_id, references(:motoboys, on_delete: :nilify_all)
+      add :company_id, references(:companies, on_delete: :nilify_all)
+      add :customer_id, references(:customers, on_delete: :nilify_all)
       add :price, :integer
       add :state, :string, default: "pending"
       add :confirmed_at, :utc_datetime
@@ -80,15 +79,15 @@ defmodule Db.Repo.Migrations.CreateCentrals do
     end
 
     create table(:stops) do
-      add :order_id, references(:orders)
+      add :order_id, references(:orders, on_delete: :delete_all)
       add :sequence, :integer, limit: 2
       add :instructions, :text
     end
 
     create table(:locations) do
-      add :stop_id, references(:stops)
-      add :customer_id, references(:customers)
-      add :company_id, references(:companies)
+      add :stop_id, references(:stops, on_delete: :delete_all)
+      add :customer_id, references(:customers, on_delete: :nilify_all)
+      add :company_id, references(:companies, on_delete: :nilify_all)
       add :name, :string
       add :street, :string
       add :number, :string
@@ -108,8 +107,8 @@ defmodule Db.Repo.Migrations.CreateCentrals do
     end
 
     create table(:history) do
-      add :order_id, references(:orders)
-      add :motoboy_id, references(:motoboys)
+      add :order_id, references(:orders, on_delete: :nilify_all)
+      add :motoboy_id, references(:motoboys, on_delete: :nilify_all)
       add :scope, :string
       add :text, :string
       timestamps()
@@ -119,27 +118,27 @@ defmodule Db.Repo.Migrations.CreateCentrals do
     ###  Address
     ##################
 
-    create table(:addresses) do
-      add :zipcode, :string
-      add :uf, :string
-      add :city, :string
-      add :neighborhood, :string
-      add :street, :string
-      add :lat, :string
-      add :lng, :string
-      add :ibge_cod_uf, :string
-      add :ibge_cod_cidade, :string
-      add :area_cidade_km2, :string
-      add :ddd, :string
-    end
+    # create table(:addresses) do
+    #   add :zipcode, :string
+    #   add :uf, :string
+    #   add :city, :string
+    #   add :neighborhood, :string
+    #   add :street, :string
+    #   add :lat, :string
+    #   add :lng, :string
+    #   add :ibge_cod_uf, :string
+    #   add :ibge_cod_cidade, :string
+    #   add :area_cidade_km2, :string
+    #   add :ddd, :string
+    # end
 
-    create table(:cities) do
-      add :name, :string
-    end
+    # create table(:cities) do
+    #   add :name, :string
+    # end
 
-    create table(:neighborhoods) do
-      add :city_id, references(:cities)
-      add :name, :string
-    end
+    # create table(:neighborhoods) do
+    #   add :city_id, references(:cities)
+    #   add :name, :string
+    # end
   end
 end

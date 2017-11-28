@@ -50,40 +50,6 @@ defmodule Api.Orders.Order do
     {:ok, Money.to_string(order.price)}
   end
 
-  @doc """
-  onCreateOrder
-    -> Insert order
-    -> Add to History
-    -> Notify next motoboy in queue
-    -> Spawn after create order
-  """
-  def create(_, %{context: %{current_customer: nil}}) do
-    {:ok, %{error: "Algo deu errado, por favor feche e abra a app, e tente novamente"}}
-  end
-  def create(%{params: params, customer_params: customer_params}, %{context: %{current_customer: current_customer}}) do
-    Api.Orders.Customer.update(current_customer, customer_params)
-
-    with {:ok, motoboy} <- Api.Orders.Motoboy.get_next_in_queue do
-      params = params
-      |> Map.put(:customer_id, current_customer.id)
-      |> Map.put(:motoboy_id, motoboy.id)
-      |> Map.put(:state, "pending")
-      |> Map.put(:price, 1232) # TODO: fix this
-
-      Order.changeset(%Order{}, params)
-      |> Repo.insert
-      |> case do
-        {:ok, order} ->
-          Api.Orders.History.new_order(order.id, motoboy.id)
-          spawn fn -> after_create(order) end
-          {:ok, order}
-        {:error, errors} ->
-          {:ok, %{error: errors}}
-      end
-    else
-      {:error, error} -> {:ok, %{error: error}}
-    end
-  end
 
   @doc """
   onCancelOrder

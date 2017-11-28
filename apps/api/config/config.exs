@@ -29,7 +29,8 @@ config :api, :generators,
 
 config :api, Api.Guardian,
   issuer: "api",
-  secret_key: "SL6xJHKeZRRr/2YOJpLW2KvWTjh3h0IZ4UPUjPqGXX9J3fXrfSUxhgw2zXeoaXvt"
+  secret_key: "XoA9uwTAyCvn99X5VKrR40dAuZzM5XfVCn12dVo8mU02SJ16i2Ihx4IDxk5IS2VC",
+  token_module: Guardian.Token.Jwt
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

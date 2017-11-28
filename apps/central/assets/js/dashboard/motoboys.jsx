@@ -2,19 +2,18 @@ import React from 'react'
 import Timeago from 'js/timeago'
 import ListSubheader from 'material-ui/List/ListSubheader'
 import Divider from 'material-ui/Divider'
-import {List, ListItem} from 'material-ui/List'
+import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List'
 import MotoboyDetails from './motoboy_details'
 import FiberManualRecordIcon from 'material-ui-icons/FiberManualRecord'
+import { red, green, orange } from 'material-ui/colors'
 
 export default class Motoboys extends React.Component {
   state = {
     open: false,
     clickedMotoboy: null,
   }
-  openInfo = (motoboy) => this.setState({
-    open: true,
-    clickedMotoboy: motoboy,
-  })
+
+  openInfo = (motoboy) => this.setState({open: true, clickedMotoboy: motoboy})
   closeInfo = () => this.setState({open: false})
 
   render() {
@@ -46,32 +45,35 @@ export default class Motoboys extends React.Component {
 }
 
 function Motoboy(motoboy, index, onClick) {
-  const iconClass = getIconClass(motoboy)
+  const iconColor = getIconColor(motoboy)
   let dateToShow = getDateToShow(motoboy)
 
   return (
-    <ListItem
-      key={index}
-      primaryText={
-        <div className="d-flex align-items-center">
-          <FiberManualRecordIcon className={`${iconClass} mr-2`} style={{fontSize: 15}} />
-          <span>{motoboy.name}</span>
-        </div>
-      }
-      secondaryText={dateToShow}
-      onClick={onClick}
-      style={{fontSize: "0.875rem", lineHeight: 1.5, padding: 0, margin: 0}}
-    />
+    <ListItem button key={index}>
+      <ListItemIcon>
+        <FiberManualRecordIcon style={{color: iconColor, width: 20}} className="mr-2" />
+      </ListItemIcon>
+      <ListItemText
+        primary={
+          <div className="d-flex align-items-center">
+            <span>{motoboy.name}</span>
+          </div>
+        }
+        secondary={dateToShow}
+        onClick={onClick}
+        style={{lineHeight: 1.5, padding: 0, margin: 0}}
+      />
+    </ListItem>
   )
 }
 
-function getIconClass({available, busy}) {
+function getIconColor({available, busy}) {
   if (available) {
-    return "text-success"
+    return green[500]
   } else if (busy) {
-    return "text-warning"
+    return orange[500]
   } else {
-    return "text-danger"
+    return red[500]
   }
 }
 

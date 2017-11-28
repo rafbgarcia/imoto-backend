@@ -1,7 +1,7 @@
-Db.Repo.delete_all(Core.Central)
-Db.Repo.delete_all(Core.Company)
-Db.Repo.delete_all(Core.Motoboy)
 Db.Repo.delete_all(Core.Location)
+Db.Repo.delete_all(Core.Motoboy)
+Db.Repo.delete_all(Core.Company)
+Db.Repo.delete_all(Core.Central)
 
 %{password_hash: pw} = Comeonin.Argon2.add_hash("admin")
 
@@ -16,7 +16,7 @@ Db.Repo.insert!(Core.Company.changeset(%Core.Company{}, %{
   login: "cooperfarma",
   phone_number: "(45) 3523-1771",
   password_hash: pw,
-  centrals: [unimoto],
+  centrals_ids: [unimoto.id],
   location: %{
     name: "Empresa",
     street: "Av Brasil",

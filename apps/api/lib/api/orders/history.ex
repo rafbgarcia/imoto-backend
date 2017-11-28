@@ -23,11 +23,6 @@ defmodule Api.Orders.History do
     :cancelado <-> :novo_motoboy -> :confirmado -> :finalizado
   """
 
-  def new_order(order_id, motoboy_id) do
-    Repo.insert(%Core.History{scope: "motoboy_order", text: "Recebeu pedido", order_id: order_id, motoboy_id: motoboy_id})
-    Repo.insert(%Core.History{scope: "order", text: "Pedido enviado", order_id: order_id, motoboy_id: motoboy_id})
-  end
-
   def order_confirmed(order_id, motoboy_id) do
     Repo.insert(%Core.History{scope: "motoboy_order", text: "Confirmou pedido", order_id: order_id, motoboy_id: motoboy_id})
     Repo.insert(%Core.History{scope: "order", text: "Pedido confirmado", order_id: order_id, motoboy_id: motoboy_id})

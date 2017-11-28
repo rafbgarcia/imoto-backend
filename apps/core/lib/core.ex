@@ -6,6 +6,7 @@ defmodule Core do
                     autogenerate: {Timex.Ecto.DateTime, :autogenerate, []}]
 
       import Ecto.Changeset
+      import Ecto.Query
     end
   end
 

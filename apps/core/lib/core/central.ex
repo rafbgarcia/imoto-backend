@@ -4,6 +4,8 @@ defmodule Core.Central do
   schema "centrals" do
     has_many :motoboys, Core.Motoboy
     has_many :orders, through: [:motoboys, :orders]
+    many_to_many :companies, Core.Company, join_through: "companies_centrals"
+
     field :name, :string
     field :login, :string
     field :password_hash, :string

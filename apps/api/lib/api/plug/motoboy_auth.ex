@@ -34,7 +34,7 @@ defmodule Api.Plug.MotoboyAuth do
 
   defp authorize(token) do
     Motoboy
-    |> where(auth_token: ^token)
+    # |> where(auth_token: ^token)
     |> first
     |> Repo.one
     |> case do
