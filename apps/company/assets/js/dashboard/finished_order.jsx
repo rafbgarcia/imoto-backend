@@ -21,7 +21,7 @@ export default class FinishedOrder extends React.Component {
     return (
       <Paper elevation={1} className="mb-3 pt-2 pb-2 pl-3 pr-3">
         <div className="text-muted d-flex align-items-center justify-content-between">
-          <span>#{order.id}</span>
+          <small>#{order.id}</small>
 
           <IconButton
             tooltip="Mostrar detalhes"

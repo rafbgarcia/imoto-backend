@@ -5,11 +5,11 @@ import HomeIcon from 'material-ui-icons/Home'
 import { CircularProgress } from 'material-ui/Progress'
 import Timeago from 'js/timeago'
 
-const OrderInProgress = (order) => (
-  <Paper key={order.id} elevation={1} className="mb-3 pt-2 pb-2 pl-3 pr-3">
+const OrderInProgress = (order, i) => (
+  <Paper key={i} elevation={1} className="mb-3 pt-2 pb-2 pl-3 pr-3">
     <div className="text-muted d-flex align-items-center justify-content-between">
-      <span>#{order.id}</span>
-      <span><Timeago date={order.insertedAt} /></span>
+      <small>#{order.id}</small>
+      <small><Timeago date={order.insertedAt} /></small>
     </div>
 
     {order.pending ? <Loading /> : MotoboyInfo(order.motoboy)}
@@ -17,7 +17,7 @@ const OrderInProgress = (order) => (
 )
 
 const Loading = () => (
-  <div className="mt-3 mb-2 d-flex justify-content-center">
+  <div className="mt-4 mb-2 d-flex justify-content-center">
     <CircularProgress size={20} />
     <span className="ml-2 text-muted">Aguardando confirmação...</span>
   </div>
