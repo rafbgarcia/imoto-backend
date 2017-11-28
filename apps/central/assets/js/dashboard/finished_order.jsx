@@ -17,7 +17,7 @@ export default class FinishedOrder extends React.Component {
     const hidden = show ? "" : "d-none"
 
     return (
-      <Paper zDepth={1} className="mb-3 pt-2 pb-2 pl-3 pr-3">
+      <Paper elevation={1} className="mb-3 pt-2 pb-2 pl-3 pr-3">
         <div className="text-muted d-flex align-items-center justify-content-between">
           <span>#{order.id}</span>
 
@@ -33,11 +33,11 @@ export default class FinishedOrder extends React.Component {
         <div className={`mt-3 ${hidden}`}>
           <div className="mb-2 d-flex align-items-center">
             <PersonIcon />
-            <span>{order.customer.name}</span>
+            <span>{order.company.name}</span>
           </div>
           <div className="mb-2 d-flex align-items-center">
             <PhoneIcon />
-            <span>{order.customer.phoneNumber}</span>
+            <span>{order.company.phoneNumber}</span>
           </div>
           <div className="mb-2 d-flex align-items-center">
             <MotorcycleIcon />

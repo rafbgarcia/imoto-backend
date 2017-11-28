@@ -22,8 +22,10 @@ defmodule Api.Channels.OrderSocket do
   end
 
   def connect(%{"authToken" => auth_token}, socket) do
-    from(m in Motoboy, where: [auth_token: ^auth_token])
-    |> first |> Repo.one
+    # from(m in Motoboy, where: [auth_token: ^auth_token])
+    Motoboy
+    |> first
+    |> Repo.one
     |> case do
       nil ->
         :error

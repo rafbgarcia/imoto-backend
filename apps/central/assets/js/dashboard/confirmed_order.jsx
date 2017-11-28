@@ -4,6 +4,8 @@ import Paper from 'material-ui/Paper';
 import PersonIcon from 'material-ui-icons/Person';
 import PhoneIcon from 'material-ui-icons/Phone';
 import MotorcycleIcon from 'material-ui-icons/Motorcycle';
+import PlaceIcon from 'material-ui-icons/Place';
+import ListIcon from 'material-ui-icons/List';
 import AttachMoneyIcon from 'material-ui-icons/AttachMoney';
 
 export default class ConfirmedOrder extends React.Component {
@@ -15,7 +17,7 @@ export default class ConfirmedOrder extends React.Component {
     const {order} = this.props
 
     return (
-      <Paper zDepth={1} className="mb-3 pt-2 pb-2 pl-3 pr-3">
+      <Paper elevation={1} className="mb-3 pt-2 pb-2 pl-3 pr-3">
         <div className="text-muted d-flex align-items-center justify-content-between">
           <span>#{order.id}</span>
           <span>confirmada <Timeago date={order.confirmedAt} /></span>
@@ -25,11 +27,11 @@ export default class ConfirmedOrder extends React.Component {
           <div>
             <div className="mb-2 d-flex align-items-center">
               <PersonIcon />
-              <span>{order.customer.name}</span>
+              <span>{order.company.name}</span>
             </div>
             <div className="d-flex align-items-center">
               <PhoneIcon />
-              <span>{order.customer.phoneNumber}</span>
+              <span>{order.company.phoneNumber}</span>
             </div>
           </div>
           <div>
@@ -57,11 +59,11 @@ class Stop extends React.Component {
       <section className="mt-4 mb-2">
         <div className="mb-2"><strong>{stop.sequence+1}ª parada - {stop.location.name}</strong></div>
         <div className="mb-2 d-flex align-items-center">
-          <FontIcon className="material-icons mr-2">place</FontIcon>
+          <PlaceIcon className="mr-2" />
           {stop.location.line1}
         </div>
         <div className="d-flex align-items-center">
-          <FontIcon className="material-icons mr-2">list</FontIcon>
+          <ListIcon className="mr-2" />
           {stop.instructions}
         </div>
       </section>

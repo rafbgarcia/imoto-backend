@@ -4,7 +4,6 @@ import ConfirmedOrder from './confirmed_order'
 import FinishedOrder from './finished_order'
 import ListSubheader from 'material-ui/List/ListSubheader'
 import Divider from 'material-ui/Divider'
-import Grid from 'material-ui/Grid'
 
 export default class Orders extends React.Component {
   pending(orders) {
@@ -46,20 +45,20 @@ export default class Orders extends React.Component {
     const COLORS = ['#00C49F', '#FFBB28']
 
     return (
-      <Grid container spacing={0}>
-        <Grid item sm={4}>
+      <div className="row">
+        <div className="col-sm-4">
           <ListSubheader>Aguardando motoboy</ListSubheader>
           {this.pending(orders)}
-        </Grid>
-        <Grid item sm={5}>
+        </div>
+        <div className="col-sm-5">
           <ListSubheader>Em entrega</ListSubheader>
           {this.confirmed(orders)}
-        </Grid>
-        <Grid item sm={3}>
+        </div>
+        <div className="col-sm-3">
           <ListSubheader>Finalizadas</ListSubheader>
           {this.finished(orders)}
-        </Grid>
-      </Grid>
+        </div>
+      </div>
     )
   }
 }

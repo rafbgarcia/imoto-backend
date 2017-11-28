@@ -3,7 +3,6 @@ import Orders from './orders'
 import Motoboys from './motoboys'
 import gql from 'graphql-tag'
 import { graphql } from 'react-apollo'
-import Grid from 'material-ui/Grid'
 
 class Dashboard extends React.Component{
   componentDidMount() {
@@ -13,14 +12,14 @@ class Dashboard extends React.Component{
   render() {
     const {orders, motoboys} = this.props.data
     return (
-      <Grid container spacing={0}>
-        <Grid item sm={3}>
+      <div className="row">
+        <div className="col-sm-3">
           <Motoboys motoboys={motoboys} />
-        </Grid>
-        <Grid item sm={9}>
+        </div>
+        <div className="col-sm-9">
           <Orders orders={orders} />
-        </Grid>
-      </Grid>
+        </div>
+      </div>
     )
   }
 }
@@ -47,10 +46,9 @@ export default graphql(gql`
         }
       }
       customer {
-        id
-        name
-        phoneNumber
+        id name phoneNumber
       }
+      company { id name phoneNumber}
       motoboy {
         id
         name

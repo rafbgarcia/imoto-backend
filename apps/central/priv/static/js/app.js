@@ -24401,6 +24401,48 @@ exports.default = FiberManualRecord;
   })();
 });
 
+require.register("material-ui-icons/List.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui-icons");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _pure = require('recompose/pure');
+
+var _pure2 = _interopRequireDefault(_pure);
+
+var _SvgIcon = require('material-ui/SvgIcon');
+
+var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SvgIconCustom = global.__MUI_SvgIcon__ || _SvgIcon2.default;
+
+var _ref = _react2.default.createElement('path', { d: 'M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z' });
+
+var List = function List(props) {
+  return _react2.default.createElement(
+    SvgIconCustom,
+    props,
+    _ref
+  );
+};
+
+List = (0, _pure2.default)(List);
+List.muiName = 'SvgIcon';
+
+exports.default = List;
+  })();
+});
+
 require.register("material-ui-icons/Menu.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "material-ui-icons");
   (function() {
@@ -24566,6 +24608,48 @@ Phone = (0, _pure2.default)(Phone);
 Phone.muiName = 'SvgIcon';
 
 exports.default = Phone;
+  })();
+});
+
+require.register("material-ui-icons/Place.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui-icons");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _pure = require('recompose/pure');
+
+var _pure2 = _interopRequireDefault(_pure);
+
+var _SvgIcon = require('material-ui/SvgIcon');
+
+var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SvgIconCustom = global.__MUI_SvgIcon__ || _SvgIcon2.default;
+
+var _ref = _react2.default.createElement('path', { d: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z' });
+
+var Place = function Place(props) {
+  return _react2.default.createElement(
+    SvgIconCustom,
+    props,
+    _ref
+  );
+};
+
+Place = (0, _pure2.default)(Place);
+Place.muiName = 'SvgIcon';
+
+exports.default = Place;
   })();
 });
 
@@ -68415,6 +68499,14 @@ var _Motorcycle = require('material-ui-icons/Motorcycle');
 
 var _Motorcycle2 = _interopRequireDefault(_Motorcycle);
 
+var _Place = require('material-ui-icons/Place');
+
+var _Place2 = _interopRequireDefault(_Place);
+
+var _List = require('material-ui-icons/List');
+
+var _List2 = _interopRequireDefault(_List);
+
 var _AttachMoney = require('material-ui-icons/AttachMoney');
 
 var _AttachMoney2 = _interopRequireDefault(_AttachMoney);
@@ -68451,7 +68543,7 @@ var ConfirmedOrder = function (_React$Component) {
 
       return _react2.default.createElement(
         _Paper2.default,
-        { zDepth: 1, className: 'mb-3 pt-2 pb-2 pl-3 pr-3' },
+        { elevation: 1, className: 'mb-3 pt-2 pb-2 pl-3 pr-3' },
         _react2.default.createElement(
           'div',
           { className: 'text-muted d-flex align-items-center justify-content-between' },
@@ -68481,7 +68573,7 @@ var ConfirmedOrder = function (_React$Component) {
               _react2.default.createElement(
                 'span',
                 null,
-                order.customer.name
+                order.company.name
               )
             ),
             _react2.default.createElement(
@@ -68491,7 +68583,7 @@ var ConfirmedOrder = function (_React$Component) {
               _react2.default.createElement(
                 'span',
                 null,
-                order.customer.phoneNumber
+                order.company.phoneNumber
               )
             )
           ),
@@ -68561,21 +68653,13 @@ var Stop = function (_React$Component2) {
         _react2.default.createElement(
           'div',
           { className: 'mb-2 d-flex align-items-center' },
-          _react2.default.createElement(
-            FontIcon,
-            { className: 'material-icons mr-2' },
-            'place'
-          ),
+          _react2.default.createElement(_Place2.default, { className: 'mr-2' }),
           stop.location.line1
         ),
         _react2.default.createElement(
           'div',
           { className: 'd-flex align-items-center' },
-          _react2.default.createElement(
-            FontIcon,
-            { className: 'material-icons mr-2' },
-            'list'
-          ),
+          _react2.default.createElement(_List2.default, { className: 'mr-2' }),
           stop.instructions
         )
       );
@@ -68666,7 +68750,7 @@ var FinishedOrder = function (_React$Component) {
 
       return _react2.default.createElement(
         _Paper2.default,
-        { zDepth: 1, className: 'mb-3 pt-2 pb-2 pl-3 pr-3' },
+        { elevation: 1, className: 'mb-3 pt-2 pb-2 pl-3 pr-3' },
         _react2.default.createElement(
           'div',
           { className: 'text-muted d-flex align-items-center justify-content-between' },
@@ -68698,7 +68782,7 @@ var FinishedOrder = function (_React$Component) {
             _react2.default.createElement(
               'span',
               null,
-              order.customer.name
+              order.company.name
             )
           ),
           _react2.default.createElement(
@@ -68708,7 +68792,7 @@ var FinishedOrder = function (_React$Component) {
             _react2.default.createElement(
               'span',
               null,
-              order.customer.phoneNumber
+              order.company.phoneNumber
             )
           ),
           _react2.default.createElement(
@@ -68751,7 +68835,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(['\n  query getOrdersAndMotoboys {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      noMotoboy\n      finished\n      insertedAt\n      confirmedAt\n      finishedAt\n      stops {\n        sequence\n        instructions\n        location {\n          name\n          reference\n          line1\n        }\n      }\n      customer {\n        id\n        name\n        phoneNumber\n      }\n      motoboy {\n        id\n        name\n      }\n    }\n\n    motoboys {\n      id\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameUnavailableAt\n      becameBusyAt\n    }\n  }\n'], ['\n  query getOrdersAndMotoboys {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      noMotoboy\n      finished\n      insertedAt\n      confirmedAt\n      finishedAt\n      stops {\n        sequence\n        instructions\n        location {\n          name\n          reference\n          line1\n        }\n      }\n      customer {\n        id\n        name\n        phoneNumber\n      }\n      motoboy {\n        id\n        name\n      }\n    }\n\n    motoboys {\n      id\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameUnavailableAt\n      becameBusyAt\n    }\n  }\n']);
+var _templateObject = _taggedTemplateLiteral(['\n  query getOrdersAndMotoboys {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      noMotoboy\n      finished\n      insertedAt\n      confirmedAt\n      finishedAt\n      stops {\n        sequence\n        instructions\n        location {\n          name\n          reference\n          line1\n        }\n      }\n      customer {\n        id name phoneNumber\n      }\n      company { id name phoneNumber}\n      motoboy {\n        id\n        name\n      }\n    }\n\n    motoboys {\n      id\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameUnavailableAt\n      becameBusyAt\n    }\n  }\n'], ['\n  query getOrdersAndMotoboys {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      noMotoboy\n      finished\n      insertedAt\n      confirmedAt\n      finishedAt\n      stops {\n        sequence\n        instructions\n        location {\n          name\n          reference\n          line1\n        }\n      }\n      customer {\n        id name phoneNumber\n      }\n      company { id name phoneNumber}\n      motoboy {\n        id\n        name\n      }\n    }\n\n    motoboys {\n      id\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameUnavailableAt\n      becameBusyAt\n    }\n  }\n']);
 
 var _react = require('react');
 
@@ -68770,10 +68854,6 @@ var _graphqlTag = require('graphql-tag');
 var _graphqlTag2 = _interopRequireDefault(_graphqlTag);
 
 var _reactApollo = require('react-apollo');
-
-var _Grid = require('material-ui/Grid');
-
-var _Grid2 = _interopRequireDefault(_Grid);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -68807,16 +68887,16 @@ var Dashboard = function (_React$Component) {
           motoboys = _props$data.motoboys;
 
       return _react2.default.createElement(
-        _Grid2.default,
-        { container: true, spacing: 0 },
+        'div',
+        { className: 'row' },
         _react2.default.createElement(
-          _Grid2.default,
-          { item: true, sm: 3 },
+          'div',
+          { className: 'col-sm-3' },
           _react2.default.createElement(_motoboys2.default, { motoboys: motoboys })
         ),
         _react2.default.createElement(
-          _Grid2.default,
-          { item: true, sm: 9 },
+          'div',
+          { className: 'col-sm-9' },
           _react2.default.createElement(_orders2.default, { orders: orders })
         )
       );
@@ -69191,10 +69271,6 @@ var _Divider = require('material-ui/Divider');
 
 var _Divider2 = _interopRequireDefault(_Divider);
 
-var _Grid = require('material-ui/Grid');
-
-var _Grid2 = _interopRequireDefault(_Grid);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -69265,11 +69341,11 @@ var Orders = function (_React$Component) {
       var COLORS = ['#00C49F', '#FFBB28'];
 
       return _react2.default.createElement(
-        _Grid2.default,
-        { container: true, spacing: 0 },
+        'div',
+        { className: 'row' },
         _react2.default.createElement(
-          _Grid2.default,
-          { item: true, sm: 4 },
+          'div',
+          { className: 'col-sm-4' },
           _react2.default.createElement(
             _ListSubheader2.default,
             null,
@@ -69278,8 +69354,8 @@ var Orders = function (_React$Component) {
           this.pending(orders)
         ),
         _react2.default.createElement(
-          _Grid2.default,
-          { item: true, sm: 5 },
+          'div',
+          { className: 'col-sm-5' },
           _react2.default.createElement(
             _ListSubheader2.default,
             null,
@@ -69288,8 +69364,8 @@ var Orders = function (_React$Component) {
           this.confirmed(orders)
         ),
         _react2.default.createElement(
-          _Grid2.default,
-          { item: true, sm: 3 },
+          'div',
+          { className: 'col-sm-3' },
           _react2.default.createElement(
             _ListSubheader2.default,
             null,
@@ -69371,7 +69447,7 @@ var PendingOrder = function (_React$Component) {
 
       return _react2.default.createElement(
         _Paper2.default,
-        { zDepth: 1, className: 'mb-3 pt-2 pb-2 pl-3 pr-3' },
+        { elevation: 1, className: 'mb-3 pt-2 pb-2 pl-3 pr-3' },
         _react2.default.createElement(
           'div',
           { className: 'text-muted d-flex align-items-center justify-content-between' },
@@ -69401,7 +69477,7 @@ var PendingOrder = function (_React$Component) {
               _react2.default.createElement(
                 'span',
                 null,
-                order.customer.name
+                order.company.name
               )
             ),
             _react2.default.createElement(
@@ -69411,7 +69487,7 @@ var PendingOrder = function (_React$Component) {
               _react2.default.createElement(
                 'span',
                 null,
-                order.customer.phoneNumber
+                order.company.phoneNumber
               )
             )
           ),

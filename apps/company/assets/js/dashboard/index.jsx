@@ -2,7 +2,6 @@ import React from 'react'
 import gql from 'graphql-tag'
 import apolloClient from 'js/graphql_client'
 import { graphql } from 'react-apollo'
-import Grid from 'material-ui/Grid'
 import Button from 'material-ui/Button'
 import ListSubheader from 'material-ui/List/ListSubheader'
 import Snackbar from 'material-ui/Snackbar'
@@ -85,20 +84,20 @@ class Dashboard extends React.Component {
       <div style={{padding: "2rem"}}>
         {this.needInitialSetup() && <InitialSetup />}
 
-        <Grid container spacing={0}>
-          <Grid item sm={3}>
+        <section className="row">
+          <div className="col-sm-3">
             <ListSubheader>Chame um motoboy</ListSubheader>
             <Button onClick={() => this.makeOrder()} raised color="primary">Chamar motoboy agora</Button>
-          </Grid>
-          <Grid item sm={5}>
+          </div>
+          <div className="col-sm-5">
             <ListSubheader>Pedidos enviados</ListSubheader>
             {!loading && ordersInProgress.map(OrderInProgress)}
-          </Grid>
-          <Grid item sm={4}>
+          </div>
+          <div className="col-sm-4">
             <ListSubheader>Finalizados</ListSubheader>
             {!loading && finishedOrders.map(FinishedOrder)}
-          </Grid>
-        </Grid>
+          </div>
+        </section>
 
         <Snackbar
           anchorOrigin={{vertical: 'top', horizontal: 'right'}}
@@ -153,7 +152,8 @@ export default graphql(gql`
       motoboy {
         id
         name
-        central { name }
+        phoneNumber
+        central { name phoneNumber }
       }
     }
   }
