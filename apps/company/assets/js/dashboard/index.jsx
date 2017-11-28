@@ -11,13 +11,12 @@ import IconButton from 'material-ui/IconButton'
 
 import Company from 'js/company'
 import InitialSetup from './initial_setup'
+import OrderInProgress from './order_in_progress'
 
-class Dashboard extends React.Component{
+class Dashboard extends React.Component {
   state = {
     errorMessage: null,
     showSnackbar: false,
-    ordersInProgress: [],
-    finishedOrders: [],
   }
 
   needInitialSetup() {
@@ -33,7 +32,7 @@ class Dashboard extends React.Component{
     return {
       stops: [{
         sequence: 0,
-        instructions: "Ir na empresa",
+        instructions: "Ir até a empresa e falar com o responsável",
         location: {name, street, number, neighborhood, zipcode, city, uf, complement, reference},
       }]
     }
@@ -52,9 +51,9 @@ class Dashboard extends React.Component{
     `
     apolloClient.mutate({
       mutation: MUTATION,
-      variables: {orderParams: this.orderParams()}
+      variables: {orderParams: this.orderParams()},
     })
-    .then((res) => this.pendingOrders.push(res.data.order))
+    .then((res) => this.setState({hasPendingOrder: true}))
     .catch((res) => {
       this.setState({
         showSnackbar: true,
@@ -63,13 +62,24 @@ class Dashboard extends React.Component{
     })
   }
 
+  startStopPolling(pendingOrders, confirmedOrders) {
+    if (pendingOrders.length > 0) {
+      this.props.data.startPolling(3000)
+    } else if (confirmedOrders.length > 0) {
+      this.props.data.startPolling(60000)
+    } else {
+      this.props.data.stopPolling()
+    }
+  }
+
   render() {
+    const {loading} = this.props.data
     const orders = this.props.data.orders || []
-    this.setState({
-      ordersInProgress: orders.filter((order) => !order.finished),
-      finishedOrders: orders.filter((order) => order.finished),
-    })
-    const {ordersInProgress, finishedOrders} = this.state
+    const pendingOrders = orders.filter((order) => order.pending)
+    const confirmedOrders = orders.filter((order) => order.confirmed)
+    const finishedOrders = orders.filter((order) => order.finished)
+    this.startStopPolling(pendingOrders, finishedOrders)
+    const ordersInProgress = pendingOrders.concat(confirmedOrders)
 
     return (
       <div style={{padding: "2rem"}}>
@@ -82,11 +92,11 @@ class Dashboard extends React.Component{
           </Grid>
           <Grid item sm={5}>
             <ListSubheader>Pedidos enviados</ListSubheader>
-            {ordersInProgress.map(OrderInProgress)}
+            {!loading && ordersInProgress.map(OrderInProgress)}
           </Grid>
           <Grid item sm={4}>
             <ListSubheader>Finalizados</ListSubheader>
-            {finishedOrders.map(FinishedOrder)}
+            {!loading && finishedOrders.map(FinishedOrder)}
           </Grid>
         </Grid>
 
@@ -113,15 +123,9 @@ class Dashboard extends React.Component{
   }
 }
 
-const OrderInProgress = () => {
+const FinishedOrder = (a, i) => {
   return (
-    <div>In progress</div>
-  )
-}
-
-const FinishedOrder = () => {
-  return (
-    <div>Finished</div>
+    <div key={i}>Finished</div>
   )
 }
 
@@ -149,6 +153,7 @@ export default graphql(gql`
       motoboy {
         id
         name
+        central { name }
       }
     }
   }
