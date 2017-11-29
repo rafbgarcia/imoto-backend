@@ -11,7 +11,7 @@ import { MenuItem } from 'material-ui/Menu'
 
 import Company from './company'
 import Auth from './auth'
-import Dashboard from 'js/dashboard/index'
+import DashboardPage from 'js/dashboard_page'
 
 import {
   Route,
@@ -50,7 +50,7 @@ export default class Layout extends React.Component {
         </AppBar>
 
         <main className="p-4">
-          <Route path="/" component={Dashboard} />
+          <Route path="/" component={DashboardPage} />
         </main>
 
         <Drawer

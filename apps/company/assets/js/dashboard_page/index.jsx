@@ -13,7 +13,7 @@ import InitialSetup from './initial_setup'
 import OrderInProgress from './order_in_progress'
 import FinishedOrder from './finished_order'
 
-class Dashboard extends React.Component {
+class DashboardPage extends React.Component {
   state = {
     errorMessage: null,
     showSnackbar: false,
@@ -174,4 +174,4 @@ export default graphql(gql`
       }
     }
   }
-`)((props) => <Dashboard {...props} />)
+`)((props) => <DashboardPage {...props} />)

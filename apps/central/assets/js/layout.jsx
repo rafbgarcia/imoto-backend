@@ -11,7 +11,8 @@ import { MenuItem } from 'material-ui/Menu'
 
 import Central from './central'
 import Auth from './auth'
-import Dashboard from './dashboard/index'
+import DashboardPage from './dashboard_page'
+import MotoboysPage from './motoboys_page'
 
 import {
   Route,
@@ -50,17 +51,20 @@ export default class Layout extends React.Component {
         </AppBar>
 
         <main className="p-4">
-          <Route path="/" component={Dashboard} />
+          <Route path="/" exact={true} component={DashboardPage} />
+          <Route path="/motoboys" exact={true} component={MotoboysPage} />
         </main>
 
         <Drawer
           open={this.state.opened}
           onRequestClose={this.closeDrawer}
+          style={{width: 250}}
         >
           <Link to="/">
-            <MenuItem onClick={this.closeDrawer}>
-              Dashboard
-            </MenuItem>
+            <MenuItem onClick={this.closeDrawer}>Dashboard</MenuItem>
+          </Link>
+          <Link to="/motoboys">
+            <MenuItem onClick={this.closeDrawer}>Motoboys</MenuItem>
           </Link>
           <Link to="/">
             <MenuItem onClick={this.logout}>

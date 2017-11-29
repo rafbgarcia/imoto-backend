@@ -17,12 +17,13 @@ defmodule Graphql.Type.Motoboy do
     field :name, :string
     field :auth_token, :string
     field :phone_number, :string
-    field :busy, :boolean, resolve: &Api.Orders.Motoboy.busy/3
-    field :available, :boolean, resolve: &Api.Orders.Motoboy.available/3
-    field :unavailable, :boolean, resolve: &Api.Orders.Motoboy.unavailable/3
     field :became_available_at, :datetime
     field :became_unavailable_at, :datetime
     field :became_busy_at, :datetime
+    field :active, :boolean
+    field :busy, :boolean, resolve: &Api.Orders.Motoboy.busy/3
+    field :available, :boolean, resolve: &Api.Orders.Motoboy.available/3
+    field :unavailable, :boolean, resolve: &Api.Orders.Motoboy.unavailable/3
     field :current_order, :order, resolve: &Api.Orders.Motoboy.current_order/3
 
     field :central, :central, resolve: assoc(:central)

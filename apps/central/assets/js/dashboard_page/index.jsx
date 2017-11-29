@@ -4,7 +4,7 @@ import Motoboys from './motoboys'
 import gql from 'graphql-tag'
 import { graphql } from 'react-apollo'
 
-class Dashboard extends React.Component{
+class DashboardPage extends React.Component{
   componentDidMount() {
     this.props.data.startPolling(30000)
   }
@@ -66,4 +66,4 @@ export default graphql(gql`
       becameBusyAt
     }
   }
-`)((props) => <Dashboard {...props} />)
+`)((props) => <DashboardPage {...props} />)
