@@ -43091,6 +43091,48 @@ module.exports = toNumber;
   })();
 });
 
+require.register("material-ui-icons/Add.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui-icons");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _pure = require('recompose/pure');
+
+var _pure2 = _interopRequireDefault(_pure);
+
+var _SvgIcon = require('material-ui/SvgIcon');
+
+var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SvgIconCustom = global.__MUI_SvgIcon__ || _SvgIcon2.default;
+
+var _ref = _react2.default.createElement('path', { d: 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z' });
+
+var Add = function Add(props) {
+  return _react2.default.createElement(
+    SvgIconCustom,
+    props,
+    _ref
+  );
+};
+
+Add = (0, _pure2.default)(Add);
+Add.muiName = 'SvgIcon';
+
+exports.default = Add;
+  })();
+});
+
 require.register("material-ui-icons/AttachMoney.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "material-ui-icons");
   (function() {
@@ -43130,6 +43172,132 @@ AttachMoney = (0, _pure2.default)(AttachMoney);
 AttachMoney.muiName = 'SvgIcon';
 
 exports.default = AttachMoney;
+  })();
+});
+
+require.register("material-ui-icons/Close.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui-icons");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _pure = require('recompose/pure');
+
+var _pure2 = _interopRequireDefault(_pure);
+
+var _SvgIcon = require('material-ui/SvgIcon');
+
+var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SvgIconCustom = global.__MUI_SvgIcon__ || _SvgIcon2.default;
+
+var _ref = _react2.default.createElement('path', { d: 'M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z' });
+
+var Close = function Close(props) {
+  return _react2.default.createElement(
+    SvgIconCustom,
+    props,
+    _ref
+  );
+};
+
+Close = (0, _pure2.default)(Close);
+Close.muiName = 'SvgIcon';
+
+exports.default = Close;
+  })();
+});
+
+require.register("material-ui-icons/Done.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui-icons");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _pure = require('recompose/pure');
+
+var _pure2 = _interopRequireDefault(_pure);
+
+var _SvgIcon = require('material-ui/SvgIcon');
+
+var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SvgIconCustom = global.__MUI_SvgIcon__ || _SvgIcon2.default;
+
+var _ref = _react2.default.createElement('path', { d: 'M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z' });
+
+var Done = function Done(props) {
+  return _react2.default.createElement(
+    SvgIconCustom,
+    props,
+    _ref
+  );
+};
+
+Done = (0, _pure2.default)(Done);
+Done.muiName = 'SvgIcon';
+
+exports.default = Done;
+  })();
+});
+
+require.register("material-ui-icons/Edit.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui-icons");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _pure = require('recompose/pure');
+
+var _pure2 = _interopRequireDefault(_pure);
+
+var _SvgIcon = require('material-ui/SvgIcon');
+
+var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var SvgIconCustom = global.__MUI_SvgIcon__ || _SvgIcon2.default;
+
+var _ref = _react2.default.createElement('path', { d: 'M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z' });
+
+var Edit = function Edit(props) {
+  return _react2.default.createElement(
+    SvgIconCustom,
+    props,
+    _ref
+  );
+};
+
+Edit = (0, _pure2.default)(Edit);
+Edit.muiName = 'SvgIcon';
+
+exports.default = Edit;
   })();
 });
 
@@ -54785,6 +54953,684 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   })();
 });
 
+require.register("material-ui/Snackbar/Snackbar.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.styles = undefined;
+
+var _extends2 = require('babel-runtime/helpers/extends');
+
+var _extends3 = _interopRequireDefault(_extends2);
+
+var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
+
+var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
+
+var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
+
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require('babel-runtime/helpers/createClass');
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _possibleConstructorReturn2 = require('babel-runtime/helpers/possibleConstructorReturn');
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _inherits2 = require('babel-runtime/helpers/inherits');
+
+var _inherits3 = _interopRequireDefault(_inherits2);
+
+var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
+
+var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _classnames = require('classnames');
+
+var _classnames2 = _interopRequireDefault(_classnames);
+
+var _reactEventListener = require('react-event-listener');
+
+var _reactEventListener2 = _interopRequireDefault(_reactEventListener);
+
+var _withStyles = require('../styles/withStyles');
+
+var _withStyles2 = _interopRequireDefault(_withStyles);
+
+var _transitions = require('../styles/transitions');
+
+var _ClickAwayListener = require('../utils/ClickAwayListener');
+
+var _ClickAwayListener2 = _interopRequireDefault(_ClickAwayListener);
+
+var _helpers = require('../utils/helpers');
+
+var _Slide = require('../transitions/Slide');
+
+var _Slide2 = _interopRequireDefault(_Slide);
+
+var _SnackbarContent = require('./SnackbarContent');
+
+var _SnackbarContent2 = _interopRequireDefault(_SnackbarContent);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
+
+var babelPluginFlowReactPropTypes_proptype_Element = require('react').babelPluginFlowReactPropTypes_proptype_Element || require('prop-types').any;
+
+var babelPluginFlowReactPropTypes_proptype_ComponentType = require('prop-types').func;
+
+var babelPluginFlowReactPropTypes_proptype_TransitionCallback = require('../internal/transition').babelPluginFlowReactPropTypes_proptype_TransitionCallback || require('prop-types').any;
+
+var babelPluginFlowReactPropTypes_proptype_TransitionDuration = require('../internal/transition').babelPluginFlowReactPropTypes_proptype_TransitionDuration || require('prop-types').any;
+
+var styles = exports.styles = function styles(theme) {
+  var gutter = theme.spacing.unit * 3;
+  var top = { top: 0 };
+  var bottom = { bottom: 0 };
+  var right = { justifyContent: 'flex-end' };
+  var left = { justifyContent: 'flex-start' };
+  var topSpace = { top: gutter };
+  var bottomSpace = { bottom: gutter };
+  var rightSpace = { right: gutter };
+  var leftSpace = { left: gutter };
+  var center = {
+    left: '50%',
+    right: 'auto',
+    transform: 'translateX(-50%)'
+  };
+
+  return {
+    root: {
+      zIndex: theme.zIndex.snackbar,
+      position: 'fixed',
+      display: 'flex',
+      left: 0,
+      right: 0,
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+    anchorTopCenter: (0, _defineProperty3.default)({
+      extend: [top]
+    }, theme.breakpoints.up('md'), {
+      extend: [center]
+    }),
+    anchorBottomCenter: (0, _defineProperty3.default)({
+      extend: [bottom]
+    }, theme.breakpoints.up('md'), {
+      extend: [center]
+    }),
+    anchorTopRight: (0, _defineProperty3.default)({
+      extend: [top, right]
+    }, theme.breakpoints.up('md'), {
+      left: 'auto',
+      extend: [topSpace, rightSpace]
+    }),
+    anchorBottomRight: (0, _defineProperty3.default)({
+      extend: [bottom, right]
+    }, theme.breakpoints.up('md'), {
+      left: 'auto',
+      extend: [bottomSpace, rightSpace]
+    }),
+    anchorTopLeft: (0, _defineProperty3.default)({
+      extend: [top, left]
+    }, theme.breakpoints.up('md'), {
+      right: 'auto',
+      extend: [topSpace, leftSpace]
+    }),
+    anchorBottomLeft: (0, _defineProperty3.default)({
+      extend: [bottom, left]
+    }, theme.breakpoints.up('md'), {
+      right: 'auto',
+      extend: [bottomSpace, leftSpace]
+    })
+  };
+};
+
+var babelPluginFlowReactPropTypes_proptype_Origin = {
+  horizontal: require('prop-types').oneOfType([require('prop-types').oneOf(['left']), require('prop-types').oneOf(['center']), require('prop-types').oneOf(['right']), require('prop-types').number]),
+  vertical: require('prop-types').oneOfType([require('prop-types').oneOf(['top']), require('prop-types').oneOf(['center']), require('prop-types').oneOf(['bottom']), require('prop-types').number])
+};
+var babelPluginFlowReactPropTypes_proptype_Props = {
+  /**
+   * The action to display.
+   */
+  action: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
+
+  /**
+   * The anchor of the `Snackbar`.
+   */
+  anchorOrigin: require('prop-types').shape({
+    horizontal: require('prop-types').oneOfType([require('prop-types').oneOf(['left']), require('prop-types').oneOf(['center']), require('prop-types').oneOf(['right']), require('prop-types').number]),
+    vertical: require('prop-types').oneOfType([require('prop-types').oneOf(['top']), require('prop-types').oneOf(['center']), require('prop-types').oneOf(['bottom']), require('prop-types').number])
+  }),
+
+  /**
+   * The number of milliseconds to wait before automatically dismissing.
+   * This behavior is disabled by default with the `null` value.
+   */
+  autoHideDuration: require('prop-types').number,
+
+  /**
+   * The number of milliseconds to wait before dismissing after user interaction.
+   * If `autoHideDuration` property isn't specified, it does nothing.
+   * If `autoHideDuration` property is specified but `resumeHideDuration` isn't,
+   * we default to `autoHideDuration / 2` ms.
+   */
+  resumeHideDuration: require('prop-types').number,
+
+  /**
+   * If you wish the take control over the children of the component you can use that property.
+   * When using it, no `SnackbarContent` component will be rendered.
+   */
+  children: typeof babelPluginFlowReactPropTypes_proptype_Element === 'function' ? babelPluginFlowReactPropTypes_proptype_Element : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Element),
+
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: require('prop-types').object,
+
+  /**
+   * @ignore
+   */
+  className: require('prop-types').string,
+
+  /**
+   * When displaying multiple consecutive Snackbars from a parent rendering a single
+   * <Snackbar/>, add the key property to ensure independent treatment of each message.
+   * e.g. <Snackbar key={message} />, otherwise, the message may update-in-place and
+   * features such as autoHideDuration may be canceled.
+   */
+  key: function key(props, propName, componentName) {
+    if (!Object.prototype.hasOwnProperty.call(props, propName)) {
+      throw new Error('Prop `' + propName + '` has type \'any\', but was not provided to `' + componentName + '`. Pass undefined or any other value.');
+    }
+  },
+
+  /**
+   * The message to display.
+   */
+  message: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
+
+  /**
+   * Callback fired before the transition is entering.
+   */
+  onEnter: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
+
+  /**
+   * Callback fired when the transition is entering.
+   */
+  onEntering: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
+
+  /**
+   * Callback fired when the transition has entered.
+   */
+  onEntered: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
+
+  /**
+   * Callback fired before the transition is exiting.
+   */
+  onExit: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
+
+  /**
+   * Callback fired when the transition is exiting.
+   */
+  onExiting: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
+
+  /**
+   * Callback fired when the transition has exited.
+   */
+  onExited: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
+
+  /**
+   * @ignore
+   */
+  onMouseEnter: require('prop-types').func,
+
+  /**
+   * @ignore
+   */
+  onMouseLeave: require('prop-types').func,
+
+  /**
+   * Callback fired when the component requests to be closed.
+   *
+   * Typically `onRequestClose` is used to set state in the parent component,
+   * which is used to control the `Snackbar` `open` prop.
+   *
+   * The `reason` parameter can optionally be used to control the response to `onRequestClose`,
+   * for example ignoring `clickaway`.
+   *
+   * @param {object} event The event source of the callback
+   * @param {string} reason Can be:`"timeout"` (`autoHideDuration` expired) or: `"clickaway"`
+   */
+  onRequestClose: require('prop-types').func,
+
+  /**
+   * If true, `Snackbar` is open.
+   */
+  open: require('prop-types').bool.isRequired,
+
+  /**
+   * Properties applied to the `SnackbarContent` element.
+   */
+  SnackbarContentProps: require('prop-types').object,
+
+  /**
+   * Transition component.
+   */
+  transition: typeof babelPluginFlowReactPropTypes_proptype_ComponentType === 'function' ? babelPluginFlowReactPropTypes_proptype_ComponentType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ComponentType),
+
+  /**
+   * The duration for the transition, in milliseconds.
+   * You may specify a single timeout for all transitions, or individually with an object.
+   */
+  transitionDuration: typeof babelPluginFlowReactPropTypes_proptype_TransitionDuration === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionDuration : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionDuration)
+};
+
+var Snackbar = function (_React$Component) {
+  (0, _inherits3.default)(Snackbar, _React$Component);
+
+  function Snackbar() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
+    (0, _classCallCheck3.default)(this, Snackbar);
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = Snackbar.__proto__ || (0, _getPrototypeOf2.default)(Snackbar)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
+      // Used to only render active snackbars.
+      exited: false
+    }, _this.timerAutoHide = null, _this.handleMouseEnter = function (event) {
+      if (_this.props.onMouseEnter) {
+        _this.props.onMouseEnter(event);
+      }
+      _this.handlePause();
+    }, _this.handleMouseLeave = function (event) {
+      if (_this.props.onMouseLeave) {
+        _this.props.onMouseLeave(event);
+      }
+      _this.handleResume();
+    }, _this.handleClickAway = function (event) {
+      if (_this.props.onRequestClose) {
+        _this.props.onRequestClose(event, 'clickaway');
+      }
+    }, _this.handlePause = function () {
+      clearTimeout(_this.timerAutoHide);
+    }, _this.handleResume = function () {
+      if (_this.props.autoHideDuration != null) {
+        if (_this.props.resumeHideDuration !== undefined) {
+          _this.setAutoHideTimer(_this.props.resumeHideDuration);
+          return;
+        }
+        _this.setAutoHideTimer((_this.props.autoHideDuration || 0) * 0.5);
+      }
+    }, _this.handleTransitionExited = function () {
+      _this.setState({ exited: true });
+    }, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
+  }
+
+  (0, _createClass3.default)(Snackbar, [{
+    key: 'componentWillMount',
+    value: function componentWillMount() {
+      if (!this.props.open) {
+        this.setState({ exited: true });
+      }
+    }
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      if (this.props.open) {
+        this.setAutoHideTimer();
+      }
+    }
+  }, {
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(nextProps) {
+      if (nextProps.open && this.state.exited) {
+        this.setState({ exited: false });
+      }
+    }
+  }, {
+    key: 'componentDidUpdate',
+    value: function componentDidUpdate(prevProps) {
+      if (prevProps.open !== this.props.open) {
+        if (this.props.open) {
+          this.setAutoHideTimer();
+        } else {
+          clearTimeout(this.timerAutoHide);
+        }
+      }
+    }
+  }, {
+    key: 'componentWillUnmount',
+    value: function componentWillUnmount() {
+      clearTimeout(this.timerAutoHide);
+    }
+
+    // Timer that controls delay before snackbar auto hides
+
+  }, {
+    key: 'setAutoHideTimer',
+    value: function setAutoHideTimer() {
+      var _this2 = this;
+
+      var autoHideDuration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+
+      if (!this.props.onRequestClose || this.props.autoHideDuration == null) {
+        return;
+      }
+
+      clearTimeout(this.timerAutoHide);
+      this.timerAutoHide = setTimeout(function () {
+        if (!_this2.props.onRequestClose || _this2.props.autoHideDuration == null) {
+          return;
+        }
+
+        _this2.props.onRequestClose(null, 'timeout');
+      }, autoHideDuration || this.props.autoHideDuration || 0);
+    }
+
+    // Pause the timer when the user is interacting with the Snackbar
+    // or when the user hide the window.
+
+
+    // Restart the timer when the user is no longer interacting with the Snackbar
+    // or when the window is shown back.
+
+  }, {
+    key: 'render',
+    value: function render() {
+      var _props = this.props,
+          action = _props.action,
+          _props$anchorOrigin = _props.anchorOrigin,
+          vertical = _props$anchorOrigin.vertical,
+          horizontal = _props$anchorOrigin.horizontal,
+          autoHideDuration = _props.autoHideDuration,
+          resumeHideDuration = _props.resumeHideDuration,
+          children = _props.children,
+          classes = _props.classes,
+          className = _props.className,
+          transitionDuration = _props.transitionDuration,
+          message = _props.message,
+          onEnter = _props.onEnter,
+          onEntering = _props.onEntering,
+          onEntered = _props.onEntered,
+          onExit = _props.onExit,
+          onExiting = _props.onExiting,
+          onExited = _props.onExited,
+          onMouseEnter = _props.onMouseEnter,
+          onMouseLeave = _props.onMouseLeave,
+          onRequestClose = _props.onRequestClose,
+          open = _props.open,
+          SnackbarContentProps = _props.SnackbarContentProps,
+          TransitionProp = _props.transition,
+          other = (0, _objectWithoutProperties3.default)(_props, ['action', 'anchorOrigin', 'autoHideDuration', 'resumeHideDuration', 'children', 'classes', 'className', 'transitionDuration', 'message', 'onEnter', 'onEntering', 'onEntered', 'onExit', 'onExiting', 'onExited', 'onMouseEnter', 'onMouseLeave', 'onRequestClose', 'open', 'SnackbarContentProps', 'transition']);
+
+
+      if (!open && this.state.exited) {
+        return null;
+      }
+
+      var transitionProps = {
+        in: open,
+        appear: true,
+        timeout: transitionDuration,
+        onEnter: onEnter,
+        onEntering: onEntering,
+        onEntered: onEntered,
+        onExit: onExit,
+        onExiting: onExiting,
+        onExited: (0, _helpers.createChainedFunction)(this.handleTransitionExited, onExited)
+      };
+      var transitionContent = children || _react2.default.createElement(_SnackbarContent2.default, (0, _extends3.default)({ message: message, action: action }, SnackbarContentProps));
+
+      var transition = void 0;
+      if (TransitionProp) {
+        transition = _react2.default.createElement(
+          TransitionProp,
+          transitionProps,
+          transitionContent
+        );
+      } else {
+        transition = _react2.default.createElement(
+          _Slide2.default,
+          (0, _extends3.default)({ direction: vertical === 'top' ? 'down' : 'up' }, transitionProps),
+          transitionContent
+        );
+      }
+
+      return _react2.default.createElement(
+        _reactEventListener2.default,
+        { target: 'window', onFocus: this.handleResume, onBlur: this.handlePause },
+        _react2.default.createElement(
+          _ClickAwayListener2.default,
+          { onClickAway: this.handleClickAway },
+          _react2.default.createElement(
+            'div',
+            (0, _extends3.default)({
+              className: (0, _classnames2.default)(classes.root, classes['anchor' + (0, _helpers.capitalizeFirstLetter)(vertical) + (0, _helpers.capitalizeFirstLetter)(horizontal)], className),
+              onMouseEnter: this.handleMouseEnter,
+              onMouseLeave: this.handleMouseLeave
+            }, other),
+            transition
+          )
+        )
+      );
+    }
+  }]);
+  return Snackbar;
+}(_react2.default.Component);
+
+Snackbar.defaultProps = {
+  anchorOrigin: { vertical: 'bottom', horizontal: 'center' },
+  transitionDuration: {
+    enter: _transitions.duration.enteringScreen,
+    exit: _transitions.duration.leavingScreen
+  }
+};
+exports.default = (0, _withStyles2.default)(styles, { flip: false, name: 'MuiSnackbar' })(Snackbar);
+  })();
+});
+
+require.register("material-ui/Snackbar/SnackbarContent.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.styles = undefined;
+
+var _extends2 = require('babel-runtime/helpers/extends');
+
+var _extends3 = _interopRequireDefault(_extends2);
+
+var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
+
+var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
+
+var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
+
+var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+
+var _ref;
+// @inheritedComponent Paper
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _classnames = require('classnames');
+
+var _classnames2 = _interopRequireDefault(_classnames);
+
+var _withStyles = require('../styles/withStyles');
+
+var _withStyles2 = _interopRequireDefault(_withStyles);
+
+var _Paper = require('../Paper');
+
+var _Paper2 = _interopRequireDefault(_Paper);
+
+var _Typography = require('../Typography');
+
+var _Typography2 = _interopRequireDefault(_Typography);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
+
+var styles = exports.styles = function styles(theme) {
+  var _root;
+
+  var type = theme.palette.type === 'light' ? 'dark' : 'light';
+  var backgroundColor = theme.palette.shades[type].background.default;
+
+  return {
+    root: (_root = {
+      pointerEvents: 'initial',
+      color: theme.palette.getContrastText(backgroundColor),
+      backgroundColor: backgroundColor,
+      display: 'flex',
+      alignItems: 'center',
+      flexWrap: 'wrap',
+      padding: '6px ' + theme.spacing.unit * 3 + 'px'
+    }, (0, _defineProperty3.default)(_root, theme.breakpoints.up('md'), {
+      minWidth: 288,
+      maxWidth: 568,
+      borderRadius: 2
+    }), (0, _defineProperty3.default)(_root, theme.breakpoints.down('md'), {
+      flexGrow: 1
+    }), _root),
+    message: {
+      padding: theme.spacing.unit + 'px 0'
+    },
+    action: {
+      display: 'flex',
+      alignItems: 'center',
+      marginLeft: 'auto',
+      paddingLeft: theme.spacing.unit * 3,
+      marginRight: -theme.spacing.unit
+    }
+  };
+};
+
+var babelPluginFlowReactPropTypes_proptype_Props = {
+  /**
+   * The action to display.
+   */
+  action: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
+
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: require('prop-types').object,
+
+  /**
+   * @ignore
+   */
+  className: require('prop-types').string,
+
+  /**
+   * The message to display.
+   */
+  message: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired
+};
+
+
+function SnackbarContent(props) {
+  var action = props.action,
+      classes = props.classes,
+      className = props.className,
+      message = props.message,
+      other = (0, _objectWithoutProperties3.default)(props, ['action', 'classes', 'className', 'message']);
+
+
+  return _react2.default.createElement(
+    _Paper2.default,
+    (0, _extends3.default)({
+      component: _Typography2.default,
+      headlineMapping: {
+        body1: 'div'
+      },
+      role: 'alertdialog',
+      square: true,
+      elevation: 6,
+      className: (0, _classnames2.default)(classes.root, className)
+    }, other),
+    _react2.default.createElement(
+      'div',
+      { className: classes.message },
+      message
+    ),
+    action ? _react2.default.createElement(
+      'div',
+      { className: classes.action },
+      action
+    ) : null
+  );
+}
+
+SnackbarContent.propTypes = 'development' !== "production" ? (_ref = {
+  classes: require('prop-types').object.isRequired,
+  action: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
+}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'message', typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired), _ref) : {};
+exports.default = (0, _withStyles2.default)(styles, { name: 'MuiSnackbarContent' })(SnackbarContent);
+  })();
+});
+
+require.register("material-ui/Snackbar/index.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _Snackbar = require('./Snackbar');
+
+Object.defineProperty(exports, 'default', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_Snackbar).default;
+  }
+});
+
+var _SnackbarContent = require('./SnackbarContent');
+
+Object.defineProperty(exports, 'SnackbarContent', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_SnackbarContent).default;
+  }
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+  })();
+});
+
 require.register("material-ui/SvgIcon/SvgIcon.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "material-ui");
   (function() {
@@ -61912,6 +62758,130 @@ Slide.defaultProps = {
   }
 };
 exports.default = (0, _withTheme2.default)()(Slide);
+  })();
+});
+
+require.register("material-ui/utils/ClickAwayListener.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
+
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require('babel-runtime/helpers/createClass');
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _possibleConstructorReturn2 = require('babel-runtime/helpers/possibleConstructorReturn');
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _inherits2 = require('babel-runtime/helpers/inherits');
+
+var _inherits3 = _interopRequireDefault(_inherits2);
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactDom = require('react-dom');
+
+var _reactEventListener = require('react-event-listener');
+
+var _reactEventListener2 = _interopRequireDefault(_reactEventListener);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
+
+var isDescendant = function isDescendant(el, target) {
+  if (target !== null && target.parentNode) {
+    return el === target || isDescendant(el, target.parentNode);
+  }
+  return false;
+};
+
+var babelPluginFlowReactPropTypes_proptype_Props = {
+  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired,
+  onClickAway: require('prop-types').func.isRequired
+};
+
+/**
+ * Listen for click events that are triggered outside of the component children.
+ */
+var ClickAwayListener = function (_React$Component) {
+  (0, _inherits3.default)(ClickAwayListener, _React$Component);
+
+  function ClickAwayListener() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
+    (0, _classCallCheck3.default)(this, ClickAwayListener);
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = ClickAwayListener.__proto__ || (0, _getPrototypeOf2.default)(ClickAwayListener)).call.apply(_ref, [this].concat(args))), _this), _this.mounted = false, _this.handleClickAway = function (event) {
+      // Ignore events that have been `event.preventDefault()` marked.
+      if (event.defaultPrevented) {
+        return;
+      }
+
+      // IE11 support, which trigger the handleClickAway even after the unbind
+      if (_this.mounted) {
+        var el = (0, _reactDom.findDOMNode)(_this);
+
+        if (event.target instanceof HTMLElement && document.documentElement && document.documentElement.contains(event.target) && !isDescendant(el, event.target)) {
+          _this.props.onClickAway(event);
+        }
+      }
+    }, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
+  }
+
+  (0, _createClass3.default)(ClickAwayListener, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.mounted = true;
+    }
+  }, {
+    key: 'componentWillUnmount',
+    value: function componentWillUnmount() {
+      this.mounted = false;
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(
+        _reactEventListener2.default,
+        {
+          target: 'document',
+          onMouseup: this.handleClickAway,
+          onTouchend: this.handleClickAway
+        },
+        this.props.children
+      );
+    }
+  }]);
+  return ClickAwayListener;
+}(_react2.default.Component);
+
+ClickAwayListener.propTypes = 'development' !== "production" ? {
+  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired,
+  onClickAway: require('prop-types').func.isRequired
+} : {};
+exports.default = ClickAwayListener;
   })();
 });
 
@@ -89397,7 +90367,9 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(['\n      query getMotoboys {\n        motoboys {\n          id\n          name\n          phoneNumber\n          active\n        }\n      }\n    '], ['\n      query getMotoboys {\n        motoboys {\n          id\n          name\n          phoneNumber\n          active\n        }\n      }\n    ']);
+var _templateObject = _taggedTemplateLiteral(['mutation createMotoboy($motoboyParams: MotoboyParams) {\n        motoboy: createMotoboy(motoboyParams: $motoboyParams) {\n          id name phoneNumber active\n        }\n      }'], ['mutation createMotoboy($motoboyParams: MotoboyParams) {\n        motoboy: createMotoboy(motoboyParams: $motoboyParams) {\n          id name phoneNumber active\n        }\n      }']),
+    _templateObject2 = _taggedTemplateLiteral([''], ['']),
+    _templateObject3 = _taggedTemplateLiteral(['\n      query getMotoboys {\n        motoboys {\n          id\n          name\n          phoneNumber\n          active\n        }\n      }\n    '], ['\n      query getMotoboys {\n        motoboys {\n          id\n          name\n          phoneNumber\n          active\n        }\n      }\n    ']);
 
 var _react = require('react');
 
@@ -89439,6 +90411,26 @@ var _Button = require('material-ui/Button');
 
 var _Button2 = _interopRequireDefault(_Button);
 
+var _Done = require('material-ui-icons/Done');
+
+var _Done2 = _interopRequireDefault(_Done);
+
+var _Add = require('material-ui-icons/Add');
+
+var _Add2 = _interopRequireDefault(_Add);
+
+var _Edit = require('material-ui-icons/Edit');
+
+var _Edit2 = _interopRequireDefault(_Edit);
+
+var _Typography = require('material-ui/Typography');
+
+var _Typography2 = _interopRequireDefault(_Typography);
+
+var _snack = require('js/snack');
+
+var _snack2 = _interopRequireDefault(_snack);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
@@ -89468,7 +90460,70 @@ var MotoboysPage = function (_React$Component) {
       writable: true,
       value: {
         editMode: false,
-        motoboys: []
+        showForm: false,
+        motoboysBeforeEditMode: [],
+        motoboys: [],
+        newMotoboy: { name: "", phoneNumber: "" },
+        showSnack: false,
+        errorMessages: []
+      }
+    }), Object.defineProperty(_this, 'enterEditMode', {
+      enumerable: true,
+      writable: true,
+      value: function value() {
+        var otherParams = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        _this.setState(_extends({
+          motoboysBeforeEditMode: _this.state.motoboys,
+          editMode: true
+        }, otherParams));
+      }
+    }), Object.defineProperty(_this, 'toggleEditMode', {
+      enumerable: true,
+      writable: true,
+      value: function value() {
+        _this.state.editMode ? _this.cancelEditMode() : _this.enterEditMode();
+      }
+    }), Object.defineProperty(_this, 'createMotoboy', {
+      enumerable: true,
+      writable: true,
+      value: function value(motoboy) {
+        _graphql_client2.default.mutate({
+          mutation: (0, _graphqlTag2.default)(_templateObject),
+          variables: { motoboyParams: motoboy }
+        }).then(function (_ref2) {
+          var motoboy = _ref2.data.motoboy;
+
+          _this.setState({
+            motoboys: _this.state.motoboys.concat(motoboy),
+            newMotoboy: { name: "", phoneNumber: "" }
+          });
+        }).catch(function (res) {
+          return _this.setState({
+            showSnack: true,
+            errorMessages: res.graphQLErrors.map(function (error) {
+              return error.message;
+            })
+          });
+        });
+
+        _this.setState({ editMode: false });
+      }
+    }), Object.defineProperty(_this, 'saveMotoboys', {
+      enumerable: true,
+      writable: true,
+      value: function value() {
+        _graphql_client2.default.mutate({
+          mutation: (0, _graphqlTag2.default)(_templateObject2),
+          variables: {}
+        }).then(function (_ref3) {
+          var motoboys = _ref3.data.motoboys;
+          return _this.setState({ motoboys: motoboys });
+        }).catch(function (res) {
+          return _this.setState({ motoboys: _this.state.motoboysBeforeEditMode });
+        });
+
+        _this.setState({ editMode: false });
       }
     }), _temp), _possibleConstructorReturn(_this, _ret);
   }
@@ -89478,10 +90533,9 @@ var MotoboysPage = function (_React$Component) {
     value: function componentWillMount() {
       var _this2 = this;
 
-      _graphql_client2.default.query({ query: (0, _graphqlTag2.default)(_templateObject) }).then(function (_ref2) {
-        var motoboys = _ref2.data.motoboys;
-
-        _this2.setState({ motoboys: motoboys });
+      _graphql_client2.default.query({ query: (0, _graphqlTag2.default)(_templateObject3) }).then(function (_ref4) {
+        var motoboys = _ref4.data.motoboys;
+        return _this2.setState({ motoboys: motoboys });
       });
     }
   }, {
@@ -89493,117 +90547,190 @@ var MotoboysPage = function (_React$Component) {
       this.setState({ motoboys: motoboys });
     }
   }, {
+    key: 'handleNewMotoboyChange',
+    value: function handleNewMotoboyChange() {
+      var changes = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      var data = _extends({}, this.state.newMotoboy, changes);
+      this.setState({ newMotoboy: data });
+    }
+  }, {
+    key: 'cancelEditMode',
+    value: function cancelEditMode() {
+      this.setState({
+        motoboys: this.state.motoboysBeforeEditMode,
+        editMode: false
+      });
+    }
+  }, {
     key: 'render',
     value: function render() {
       var _this3 = this;
 
-      var editMode = this.state.editMode;
+      var _state = this.state,
+          editMode = _state.editMode,
+          newMotoboy = _state.newMotoboy,
+          showForm = _state.showForm,
+          errorMessages = _state.errorMessages,
+          showSnack = _state.showSnack;
 
-      var motoboys = _lodash2.default.cloneDeep(this.state.motoboys);
+
+      var motoboys = _lodash2.default.sortBy(_lodash2.default.cloneDeep(this.state.motoboys), 'name');
 
       return _react2.default.createElement(
         'div',
-        { style: { maxWidth: 800, margin: "auto" } },
+        { className: 'row' },
         _react2.default.createElement(
           'div',
-          { className: 'd-flex align-items-center justify-content-end mb-3' },
+          { className: 'col-sm-4' },
           _react2.default.createElement(
-            _Button2.default,
-            { raised: true, color: 'default', onClick: function onClick() {
-                return _this3.setState({ editMode: !editMode });
-              } },
-            editMode ? "Cancelar" : "Editar motoboys"
+            _Typography2.default,
+            { type: 'headline', style: { marginBottom: 24 } },
+            'Adicionar motoboys'
           ),
-          editMode && _react2.default.createElement(
-            _Button2.default,
-            { raised: true, color: 'primary', onClick: function onClick() {
-                return _this3.setState({ editMode: !editMode });
-              }, className: 'ml-3' },
-            'Salvar motoboys'
+          _react2.default.createElement(
+            _Paper2.default,
+            { className: 'p-3 mb-4' },
+            _react2.default.createElement(_TextField2.default, {
+              label: 'Nome do motoboy',
+              onChange: function onChange(evt) {
+                return _this3.handleNewMotoboyChange({ name: evt.target.value });
+              },
+              value: newMotoboy.name,
+              fullWidth: true
+            }),
+            _react2.default.createElement(_TextField2.default, {
+              label: 'Telefone',
+              onChange: function onChange(evt) {
+                return _this3.handleNewMotoboyChange({ phoneNumber: evt.target.value });
+              },
+              value: newMotoboy.phoneNumber,
+              className: 'mt-4 mb-4',
+              fullWidth: true
+            }),
+            _react2.default.createElement(
+              _Button2.default,
+              { raised: true, onClick: function onClick() {
+                  return _this3.createMotoboy(newMotoboy);
+                } },
+              _react2.default.createElement(_Add2.default, { className: 'mr-2' }),
+              'Salvar'
+            )
           )
         ),
         _react2.default.createElement(
-          _Paper2.default,
-          null,
+          'div',
+          { className: 'col-sm-8' },
           _react2.default.createElement(
-            _Table2.default,
+            'div',
+            { className: 'd-flex align-items-center justify-content-start mb-3' },
+            _react2.default.createElement(
+              _Button2.default,
+              { raised: true, onClick: function onClick() {
+                  return _this3.toggleEditMode();
+                } },
+              !editMode && _react2.default.createElement(_Edit2.default, { className: 'mr-2' }),
+              editMode ? "Cancelar" : "Editar motoboys"
+            ),
+            editMode && _react2.default.createElement(
+              _Button2.default,
+              { raised: true, color: 'primary', onClick: function onClick() {
+                  return _this3.saveMotoboys();
+                }, className: 'ml-3' },
+              _react2.default.createElement(_Done2.default, { className: 'mr-2' }),
+              'Salvar'
+            )
+          ),
+          _react2.default.createElement(
+            _Paper2.default,
             null,
             _react2.default.createElement(
-              _Table.TableHead,
+              _Table2.default,
               null,
               _react2.default.createElement(
-                _Table.TableRow,
+                _Table.TableHead,
                 null,
                 _react2.default.createElement(
-                  _Table.TableCell,
-                  { style: { width: "35%" } },
-                  'Motoboy'
-                ),
-                _react2.default.createElement(
-                  _Table.TableCell,
-                  { style: { width: "35%" } },
-                  'Telefone'
-                ),
-                _react2.default.createElement(
-                  _Table.TableCell,
-                  null,
-                  'Trabalhando para a ',
-                  _central2.default.current().name,
-                  '?'
-                )
-              )
-            ),
-            _react2.default.createElement(
-              _Table.TableBody,
-              null,
-              motoboys.map(function (motoboy, i) {
-                return _react2.default.createElement(
                   _Table.TableRow,
-                  { key: i },
+                  null,
                   _react2.default.createElement(
                     _Table.TableCell,
-                    null,
-                    editMode ? _react2.default.createElement(_TextField2.default, {
-                      label: false,
-                      placeholder: 'Nome do motoboy',
-                      onChange: function onChange(evt) {
-                        return _this3.handleChange(motoboys, i, { name: evt.target.value });
-                      },
-                      value: motoboy.name,
-                      margin: 'normal',
-                      fullWidth: true
-                    }) : motoboy.name
+                    { style: { width: "35%" } },
+                    'Motoboy'
+                  ),
+                  _react2.default.createElement(
+                    _Table.TableCell,
+                    { style: { width: "35%" } },
+                    'Telefone'
                   ),
                   _react2.default.createElement(
                     _Table.TableCell,
                     null,
-                    editMode ? _react2.default.createElement(_TextField2.default, {
-                      label: false,
-                      placeholder: 'Telefone',
-                      onChange: function onChange(evt) {
-                        return _this3.handleChange(motoboys, i, { phoneNumber: evt.target.value });
-                      },
-                      value: motoboy.phoneNumber,
-                      margin: 'normal',
-                      fullWidth: true
-                    }) : motoboy.phoneNumber
-                  ),
-                  _react2.default.createElement(
-                    _Table.TableCell,
-                    null,
-                    editMode ? _react2.default.createElement(_Switch2.default, {
-                      checked: motoboy.active,
-                      onChange: function onChange() {
-                        return _this3.handleChange(motoboys, i, { active: !motoboy.active });
-                      },
-                      'aria-label': 'Ativo?'
-                    }) : motoboy.active ? "Sim" : "Não"
+                    'Trabalhando para a ',
+                    _central2.default.current().name,
+                    '?'
                   )
-                );
-              })
+                )
+              ),
+              _react2.default.createElement(
+                _Table.TableBody,
+                null,
+                motoboys.map(function (motoboy, i) {
+                  return _react2.default.createElement(
+                    _Table.TableRow,
+                    { key: i },
+                    _react2.default.createElement(
+                      _Table.TableCell,
+                      null,
+                      editMode ? _react2.default.createElement(_TextField2.default, {
+                        label: false,
+                        placeholder: 'Nome do motoboy',
+                        onChange: function onChange(evt) {
+                          return _this3.handleChange(motoboys, i, { name: evt.target.value });
+                        },
+                        value: motoboy.name,
+                        margin: 'normal',
+                        fullWidth: true
+                      }) : motoboy.name
+                    ),
+                    _react2.default.createElement(
+                      _Table.TableCell,
+                      null,
+                      editMode ? _react2.default.createElement(_TextField2.default, {
+                        label: false,
+                        placeholder: 'Telefone',
+                        onChange: function onChange(evt) {
+                          return _this3.handleChange(motoboys, i, { phoneNumber: evt.target.value });
+                        },
+                        value: motoboy.phoneNumber,
+                        margin: 'normal',
+                        fullWidth: true
+                      }) : motoboy.phoneNumber
+                    ),
+                    _react2.default.createElement(
+                      _Table.TableCell,
+                      null,
+                      editMode ? _react2.default.createElement(_Switch2.default, {
+                        checked: motoboy.active,
+                        onChange: function onChange() {
+                          return _this3.handleChange(motoboys, i, { active: !motoboy.active });
+                        },
+                        'aria-label': 'Ativo?'
+                      }) : motoboy.active ? "Sim" : "Não"
+                    )
+                  );
+                })
+              )
             )
           )
-        )
+        ),
+        _react2.default.createElement(_snack2.default, {
+          show: showSnack,
+          messages: errorMessages,
+          onClose: function onClose() {
+            return _this3.setState({ showSnack: false });
+          }
+        })
       );
     }
   }]);
@@ -89612,6 +90739,92 @@ var MotoboysPage = function (_React$Component) {
 }(_react2.default.Component);
 
 exports.default = MotoboysPage;
+});
+
+;require.register("js/snack.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _Snackbar = require('material-ui/Snackbar');
+
+var _Snackbar2 = _interopRequireDefault(_Snackbar);
+
+var _Close = require('material-ui-icons/Close');
+
+var _Close2 = _interopRequireDefault(_Close);
+
+var _IconButton = require('material-ui/IconButton');
+
+var _IconButton2 = _interopRequireDefault(_IconButton);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Snack = function (_React$Component) {
+  _inherits(Snack, _React$Component);
+
+  function Snack() {
+    _classCallCheck(this, Snack);
+
+    return _possibleConstructorReturn(this, (Snack.__proto__ || Object.getPrototypeOf(Snack)).apply(this, arguments));
+  }
+
+  _createClass(Snack, [{
+    key: 'render',
+    value: function render() {
+      var _props = this.props,
+          show = _props.show,
+          messages = _props.messages,
+          onClose = _props.onClose;
+
+
+      return _react2.default.createElement(_Snackbar2.default, {
+        anchorOrigin: { vertical: 'top', horizontal: 'right' },
+        open: show,
+        autoHideDuration: 5000,
+        onRequestClose: function onRequestClose() {
+          return onClose();
+        },
+        SnackbarContentProps: { 'aria-describedby': 'message-id' },
+        message: messages.map(Err),
+        action: [_react2.default.createElement(
+          _IconButton2.default,
+          { key: 'close', color: 'inherit', onClick: function onClick() {
+              return onClose();
+            } },
+          _react2.default.createElement(_Close2.default, null)
+        )]
+      });
+    }
+  }]);
+
+  return Snack;
+}(_react2.default.Component);
+
+exports.default = Snack;
+
+
+var Err = function Err(error, i) {
+  return _react2.default.createElement(
+    'div',
+    { className: 'mb-2', key: i },
+    error
+  );
+};
 });
 
 ;require.register("js/timeago.jsx", function(exports, require, module) {

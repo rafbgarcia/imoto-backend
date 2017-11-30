@@ -1,8 +1,8 @@
 defmodule Central.Resolve.Login do
+  use Api, :resolver
   alias Core.Central
-  alias Db.Repo
 
-  def login(params, _ctx) do
+  def handle(params, _ctx) do
     with {:ok, central} <- authenticate(params),
     {:ok, jwt, _ } <- Api.Guardian.encode_and_sign(central, %{resource_type: :central}) do
       {:ok, Map.put(central, :token, jwt)}

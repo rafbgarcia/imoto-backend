@@ -24,6 +24,15 @@ defmodule Api do
     end
   end
 
+  def resolver do
+    quote do
+      alias Db.Repo
+      import Ecto.Query
+      import Ecto
+    end
+  end
+
+  # @deprecated Use :resolver
   def context do
     quote do
       alias Db.Repo

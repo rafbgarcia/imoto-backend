@@ -25,11 +25,11 @@ defmodule Core.Motoboy do
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, [
-      :name, :login_token, :phone_number, :state,
+      :name, :login_token, :phone_number, :state, :central_id,
       :became_available_at, :became_unavailable_at, :became_busy_at,
     ])
     |> validate_inclusion(:state, [busy(), available(), unavailable(), confirming_order()])
-    |> validate_required([:name])
+    |> validate_required([:name, :phone_number])
     |> unique_constraint(:phone_number)
   end
 end
