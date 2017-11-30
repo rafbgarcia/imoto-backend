@@ -12,9 +12,12 @@ import DoneIcon from 'material-ui-icons/Done'
 import AddIcon from 'material-ui-icons/Add'
 import EditIcon from 'material-ui-icons/Edit'
 import Typography from 'material-ui/Typography'
-import Snack from 'js/snack'
+import { withStyles } from 'material-ui/styles';
 
-export default class MotoboysPage extends React.Component{
+import Snack from 'js/snack'
+import PhoneField from 'js/shared/phone_field'
+
+class MotoboysPage extends React.Component{
   state = {
     editMode: false,
     showForm: false,
@@ -39,12 +42,12 @@ export default class MotoboysPage extends React.Component{
     .then(({data: {motoboys}}) => this.setState({motoboys}))
   }
 
-  handleChange(motoboys, index, changes = {}) {
+  updateMotoboys(motoboys, index, changes = {}) {
     motoboys[index] = {...motoboys[index], ...changes}
     this.setState({motoboys})
   }
 
-  handleNewMotoboyChange(changes = {}) {
+  updateNewMotoboy(changes = {}) {
     const data = {...this.state.newMotoboy, ...changes}
     this.setState({newMotoboy: data})
   }
@@ -56,15 +59,14 @@ export default class MotoboysPage extends React.Component{
     })
   }
 
-  enterEditMode = (otherParams = {}) => {
+  enterEditMode() {
     this.setState({
       motoboysBeforeEditMode: this.state.motoboys,
       editMode: true,
-      ...otherParams,
     })
   }
 
-  toggleEditMode = () => {
+  toggleEditMode() {
     this.state.editMode ? this.cancelEditMode() : this.enterEditMode()
   }
 
@@ -103,9 +105,10 @@ export default class MotoboysPage extends React.Component{
   }
 
   render() {
+    const {classes} = this.props
     const {
       editMode, newMotoboy, showForm,
-      errorMessages, showSnack,
+      errorMessages, showSnack
     } = this.state
 
     const motoboys = _.sortBy(_.cloneDeep(this.state.motoboys), 'name')
@@ -118,13 +121,13 @@ export default class MotoboysPage extends React.Component{
           <Paper className="p-3 mb-4">
             <TextField
               label="Nome do motoboy"
-              onChange={(evt) => this.handleNewMotoboyChange({name: evt.target.value})}
+              onChange={(evt) => this.updateNewMotoboy({name: evt.target.value})}
               value={newMotoboy.name}
               fullWidth
             />
-            <TextField
+            <PhoneField
               label="Telefone"
-              onChange={(evt) => this.handleNewMotoboyChange({phoneNumber: evt.target.value})}
+              onChange={(evt) => this.updateNewMotoboy({phoneNumber: evt.target.value})}
               value={newMotoboy.phoneNumber}
               className="mt-4 mb-4"
               fullWidth
@@ -164,27 +167,30 @@ export default class MotoboysPage extends React.Component{
                     <TableCell>
                       {editMode ? <TextField
                         label={false}
-                        placeholder="Nome do motoboy"
-                        onChange={(evt) => this.handleChange(motoboys, i, {name: evt.target.value})}
+                        onChange={(evt) => this.updateMotoboys(motoboys, i, {name: evt.target.value})}
                         value={motoboy.name}
                         margin="normal"
+                        className={classes.fextFieldContainer}
+                        InputClassName={classes.input}
                         fullWidth
                       /> : motoboy.name}
                     </TableCell>
                     <TableCell>
-                      {editMode ? <TextField
-                        label={false}
-                        placeholder="Telefone"
-                        onChange={(evt) => this.handleChange(motoboys, i, {phoneNumber: evt.target.value})}
-                        value={motoboy.phoneNumber}
-                        margin="normal"
-                        fullWidth
-                      /> : motoboy.phoneNumber}
+                      {
+                        editMode ? <PhoneField
+                          label={false}
+                          onChange={(evt) => this.updateMotoboys(motoboys, i, {phoneNumber: evt.target.value})}
+                          value={motoboy.phoneNumber}
+                          InputClassName={classes.input}
+                          fullWidth
+                        />
+                        : motoboy.phoneNumber
+                      }
                     </TableCell>
                     <TableCell>
                      {editMode ? <Switch
                         checked={motoboy.active}
-                        onChange={() => this.handleChange(motoboys, i, {active: !motoboy.active})}
+                        onChange={() => this.updateMotoboys(motoboys, i, {active: !motoboy.active})}
                         aria-label="Ativo?"
                       /> : (motoboy.active ? "Sim" : "Não")}
                     </TableCell>
@@ -204,3 +210,14 @@ export default class MotoboysPage extends React.Component{
     )
   }
 }
+
+const styles = theme => ({
+  input: {
+    fontSize: 13,
+  },
+  fextFieldContainer: {
+    margin: 0
+  }
+})
+
+export default withStyles(styles)(MotoboysPage)
