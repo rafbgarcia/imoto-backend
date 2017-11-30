@@ -20,13 +20,25 @@ defmodule Central.GraphqlSchema do
     end
 
     field :create_motoboy, :motoboy do
-      arg :motoboy_params, :motoboy_params
+      arg :params, :motoboy_create_params
       resolve &Central.Resolve.CreateMotoboy.handle/2
+    end
+
+    field :update_motoboy, :motoboy do
+      arg :id, non_null(:id)
+      arg :params, :motoboy_update_params
+      resolve &Central.Resolve.UpdateMotoboy.handle/2
     end
   end
 
-  input_object :motoboy_params do
-    field :name, :string
-    field :phone_number, :string
+  input_object :motoboy_create_params do
+    field :name, non_null(:string)
+    field :phone_number, non_null(:string)
+  end
+
+  input_object :motoboy_update_params do
+    field :name, non_null(:string)
+    field :phone_number, non_null(:string)
+    field :active, non_null(:boolean)
   end
 end

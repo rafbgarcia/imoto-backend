@@ -27,6 +27,7 @@ defmodule Core.Motoboy do
     |> cast(params, [
       :name, :login_token, :phone_number, :state, :central_id,
       :became_available_at, :became_unavailable_at, :became_busy_at,
+      :active,
     ])
     |> validate_inclusion(:state, [busy(), available(), unavailable(), confirming_order()])
     |> validate_required([:name, :phone_number])

@@ -14,7 +14,7 @@ export default class Snack extends React.Component {
         autoHideDuration={5000}
         onRequestClose={() => onClose()}
         SnackbarContentProps={{'aria-describedby': 'message-id'}}
-        message={messages.map(Err)}
+        message={formatMessages(messages)}
         action={[
           <IconButton key="close" color="inherit" onClick={() => onClose()}>
             <CloseIcon />
@@ -22,6 +22,14 @@ export default class Snack extends React.Component {
         ]}
       />
     )
+  }
+}
+
+const formatMessages = (messages) => {
+  if (typeof messages === "string") {
+    return messages
+  } else {
+    return messages.map(Err)
   }
 }
 

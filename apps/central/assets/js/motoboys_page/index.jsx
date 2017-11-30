@@ -11,21 +11,21 @@ import Button from 'material-ui/Button'
 import DoneIcon from 'material-ui-icons/Done'
 import AddIcon from 'material-ui-icons/Add'
 import EditIcon from 'material-ui-icons/Edit'
+import CancelIcon from 'material-ui-icons/Cancel'
 import Typography from 'material-ui/Typography'
-import { withStyles } from 'material-ui/styles';
+import { withStyles } from 'material-ui/styles'
+import IconButton from 'material-ui/IconButton'
+import Tooltip from 'material-ui/Tooltip'
 
 import Snack from 'js/snack'
 import PhoneField from 'js/shared/phone_field'
 
 class MotoboysPage extends React.Component{
   state = {
-    editMode: false,
-    showForm: false,
-    motoboysBeforeEditMode: [],
     motoboys: [],
     newMotoboy: {name: "", phoneNumber: ""},
     showSnack: false,
-    errorMessages: [],
+    snackMessages: [],
   }
 
   componentWillMount() {
@@ -42,9 +42,8 @@ class MotoboysPage extends React.Component{
     .then(({data: {motoboys}}) => this.setState({motoboys}))
   }
 
-  updateMotoboys(motoboys, index, changes = {}) {
-    motoboys[index] = {...motoboys[index], ...changes}
-    this.setState({motoboys})
+  displaySnack = (message) => {
+    this.setState({showSnack: true, snackMessages: message})
   }
 
   updateNewMotoboy(changes = {}) {
@@ -52,67 +51,32 @@ class MotoboysPage extends React.Component{
     this.setState({newMotoboy: data})
   }
 
-  cancelEditMode() {
-    this.setState({
-      motoboys: this.state.motoboysBeforeEditMode,
-      editMode: false,
-    })
-  }
-
-  enterEditMode() {
-    this.setState({
-      motoboysBeforeEditMode: this.state.motoboys,
-      editMode: true,
-    })
-  }
-
-  toggleEditMode() {
-    this.state.editMode ? this.cancelEditMode() : this.enterEditMode()
-  }
-
   createMotoboy = (motoboy) => {
     apolloClient.mutate({
-      mutation: gql`mutation createMotoboy($motoboyParams: MotoboyParams) {
-        motoboy: createMotoboy(motoboyParams: $motoboyParams) {
+      mutation: gql`mutation createMotoboy($params: MotoboyCreateParams) {
+        motoboy: createMotoboy(params: $params) {
           id name phoneNumber active
         }
       }`,
-      variables: {motoboyParams: motoboy},
+      variables: {params: motoboy},
     })
     .then(({data: {motoboy}}) => {
       this.setState({
         motoboys: this.state.motoboys.concat(motoboy),
         newMotoboy: {name: "", phoneNumber: ""},
       })
+      this.displaySnack("Motoboy adicionado!")
     })
-    .catch(res => this.setState({
-      showSnack: true,
-      errorMessages: res.graphQLErrors.map(error => error.message)
-    }))
-
-    this.setState({editMode: false})
-  }
-
-  saveMotoboys = () => {
-    apolloClient.mutate({
-      mutation: gql``,
-      variables: {},
-    })
-    .then(({data: {motoboys}}) => this.setState({motoboys}))
-    .catch(res => this.setState({motoboys: this.state.motoboysBeforeEditMode}))
-
-    this.setState({editMode: false})
+    .catch(({graphQLErrors}) =>
+      this.displaySnack(graphQLErrors.map(err => err.message))
+    )
   }
 
   render() {
     const {classes} = this.props
-    const {
-      editMode, newMotoboy, showForm,
-      errorMessages, showSnack
-    } = this.state
+    const {newMotoboy, snackMessages, showSnack} = this.state
 
     const motoboys = _.sortBy(_.cloneDeep(this.state.motoboys), 'name')
-
 
     return (
       <div className="row">
@@ -140,62 +104,25 @@ class MotoboysPage extends React.Component{
         </div>
 
         <div className="col-sm-8">
-          <div className="d-flex align-items-center justify-content-start mb-3">
-            <Button raised onClick={() => this.toggleEditMode()}>
-              {!editMode && <EditIcon className="mr-2" />}
-              {editMode ? "Cancelar" : "Editar motoboys"}
-            </Button>
-            {editMode &&
-              <Button raised color="primary" onClick={() => this.saveMotoboys()} className="ml-3">
-                <DoneIcon className="mr-2" />
-                Salvar
-              </Button>}
-          </div>
-
           <Paper>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell style={{width: "35%"}}>Motoboy</TableCell>
-                  <TableCell style={{width: "35%"}}>Telefone</TableCell>
+                  <TableCell style={{width: "30%"}}>Motoboy</TableCell>
+                  <TableCell style={{width: "30%"}}>Telefone</TableCell>
                   <TableCell>Trabalhando para a {Central.current().name}?</TableCell>
+                  <TableCell style={{width: "20%"}}>&nbsp;</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {motoboys.map((motoboy, i) => (
-                  <TableRow key={i}>
-                    <TableCell>
-                      {editMode ? <TextField
-                        label={false}
-                        onChange={(evt) => this.updateMotoboys(motoboys, i, {name: evt.target.value})}
-                        value={motoboy.name}
-                        margin="normal"
-                        className={classes.fextFieldContainer}
-                        InputClassName={classes.input}
-                        fullWidth
-                      /> : motoboy.name}
-                    </TableCell>
-                    <TableCell>
-                      {
-                        editMode ? <PhoneField
-                          label={false}
-                          onChange={(evt) => this.updateMotoboys(motoboys, i, {phoneNumber: evt.target.value})}
-                          value={motoboy.phoneNumber}
-                          InputClassName={classes.input}
-                          fullWidth
-                        />
-                        : motoboy.phoneNumber
-                      }
-                    </TableCell>
-                    <TableCell>
-                     {editMode ? <Switch
-                        checked={motoboy.active}
-                        onChange={() => this.updateMotoboys(motoboys, i, {active: !motoboy.active})}
-                        aria-label="Ativo?"
-                      /> : (motoboy.active ? "Sim" : "Não")}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {motoboys.map((motoboy) =>
+                  <MotoboyRow
+                    motoboy={motoboy}
+                    classes={classes}
+                    displaySnack={this.displaySnack}
+                    key={motoboy.id}
+                  />
+                )}
               </TableBody>
             </Table>
           </Paper>
@@ -203,10 +130,125 @@ class MotoboysPage extends React.Component{
 
         <Snack
           show={showSnack}
-          messages={errorMessages}
+          messages={snackMessages}
           onClose={() => this.setState({showSnack: false})}
         />
       </div>
+    )
+  }
+}
+
+class MotoboyRow extends React.Component {
+  state = {
+    editMode: false,
+    motoboy: {name: "", phoneNumber: "", active: true},
+    motoboyBeforeEdit: [],
+  }
+
+  componentWillMount() {
+    this.setState({motoboy: this.props.motoboy})
+  }
+
+  cancelEditMode() {
+    this.setState({
+      motoboy: this.state.motoboyBeforeEdit,
+      editMode: false,
+    })
+  }
+
+  enterEditMode() {
+    this.setState({
+      motoboyBeforeEdit: this.state.motoboy,
+      editMode: true,
+    })
+  }
+
+  toggleEditMode() {
+    this.state.editMode ? this.cancelEditMode() : this.enterEditMode()
+  }
+
+  updateMotoboyFields(changes = {}) {
+    this.setState({motoboy: {...this.state.motoboy, ...changes}})
+  }
+
+  saveMotoboy(motoboy) {
+    const {displaySnack} = this.props
+    const {id, name, phoneNumber, active} = motoboy
+
+    apolloClient.mutate({
+      mutation: gql`
+        mutation updateMotoboy($id: ID!, $params: MotoboyUpdateParams) {
+          motoboy: updateMotoboy(id: $id, params: $params) {
+            id name phoneNumber active
+          }
+        }
+      `,
+      variables: { id, params: {name, phoneNumber, active} },
+    })
+    .then(() => displaySnack("Motoboy atualizado!"))
+    .catch((res) => {
+      this.setState({
+        motoboy: this.state.motoboysBeforeEdit,
+        editMode: true,
+      })
+      displaySnack("Ops! Ocorreu")
+    })
+
+    this.setState({editMode: false})
+  }
+
+  render() {
+    const {classes} = this.props
+    const {motoboy, editMode} = this.state
+
+    return (
+      <TableRow>
+        <TableCell>
+          {editMode ? <TextField
+            label={false}
+            onChange={(evt) => this.updateMotoboyFields({name: evt.target.value})}
+            value={motoboy.name}
+            margin="normal"
+            className={classes.textFieldContainer}
+            InputClassName={classes.input}
+            fullWidth
+          /> : motoboy.name}
+        </TableCell>
+        <TableCell>
+          {
+            editMode ? <PhoneField
+              label={false}
+              onChange={(evt) => this.updateMotoboyFields({phoneNumber: evt.target.value})}
+              value={motoboy.phoneNumber}
+              InputClassName={classes.input}
+              fullWidth
+            />
+            : motoboy.phoneNumber
+          }
+        </TableCell>
+        <TableCell>
+         {editMode ? <Switch
+            checked={motoboy.active}
+            onChange={(evt) => this.updateMotoboyFields({active: !motoboy.active})}
+            aria-label="Ativo?"
+          /> : (motoboy.active ? "Sim" : "Não")}
+        </TableCell>
+        <TableCell className="d-flex align-items-center justify-content-between">
+          <Tooltip title={editMode ? "Cancelar" : "Editar motoboy"} placement="top">
+            <IconButton className={classes.button} onClick={() => this.toggleEditMode()}>
+              {editMode ? <CancelIcon /> : <EditIcon />}
+            </IconButton>
+          </Tooltip>
+
+          {editMode &&
+            <Tooltip title="Salvar" placement="top">
+              <Button fab color="primary" onClick={() => this.saveMotoboy(motoboy)}>
+                <DoneIcon />
+              </Button>
+            </Tooltip>
+          }
+        </TableCell>
+      </TableRow>
     )
   }
 }
@@ -215,9 +257,12 @@ const styles = theme => ({
   input: {
     fontSize: 13,
   },
-  fextFieldContainer: {
+  textFieldContainer: {
     margin: 0
-  }
+  },
+  button: {
+    margin: theme.spacing.unit,
+  },
 })
 
 export default withStyles(styles)(MotoboysPage)
