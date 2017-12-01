@@ -93966,13 +93966,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(['mutation createMotoboy($params: MotoboyCreateParams) {\n        motoboy: createMotoboy(params: $params) {\n          id name phoneNumber active\n        }\n      }'], ['mutation createMotoboy($params: MotoboyCreateParams) {\n        motoboy: createMotoboy(params: $params) {\n          id name phoneNumber active\n        }\n      }']),
-    _templateObject2 = _taggedTemplateLiteral(['\n      query getMotoboys {\n        motoboys {\n          id\n          name\n          phoneNumber\n          active\n        }\n      }\n    '], ['\n      query getMotoboys {\n        motoboys {\n          id\n          name\n          phoneNumber\n          active\n        }\n      }\n    ']),
-    _templateObject3 = _taggedTemplateLiteral(['\n        mutation updateMotoboy($id: ID!, $params: MotoboyUpdateParams) {\n          motoboy: updateMotoboy(id: $id, params: $params) {\n            id name phoneNumber active\n          }\n        }\n      '], ['\n        mutation updateMotoboy($id: ID!, $params: MotoboyUpdateParams) {\n          motoboy: updateMotoboy(id: $id, params: $params) {\n            id name phoneNumber active\n          }\n        }\n      ']);
+var _templateObject = _taggedTemplateLiteral(['\n      query getMotoboys {\n        motoboys {\n          id\n          name\n          phoneNumber\n          active\n        }\n      }\n    '], ['\n      query getMotoboys {\n        motoboys {\n          id\n          name\n          phoneNumber\n          active\n        }\n      }\n    ']);
 
 var _react = require('react');
 
@@ -93990,67 +93986,33 @@ var _Table = require('material-ui/Table');
 
 var _Table2 = _interopRequireDefault(_Table);
 
-var _Switch = require('material-ui/Switch');
-
-var _Switch2 = _interopRequireDefault(_Switch);
-
 var _Paper = require('material-ui/Paper');
 
 var _Paper2 = _interopRequireDefault(_Paper);
-
-var _central = require('js/central');
-
-var _central2 = _interopRequireDefault(_central);
 
 var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _TextField = require('material-ui/TextField');
-
-var _TextField2 = _interopRequireDefault(_TextField);
-
-var _Button = require('material-ui/Button');
-
-var _Button2 = _interopRequireDefault(_Button);
-
-var _Done = require('material-ui-icons/Done');
-
-var _Done2 = _interopRequireDefault(_Done);
-
-var _Add = require('material-ui-icons/Add');
-
-var _Add2 = _interopRequireDefault(_Add);
-
-var _Edit = require('material-ui-icons/Edit');
-
-var _Edit2 = _interopRequireDefault(_Edit);
-
-var _Cancel = require('material-ui-icons/Cancel');
-
-var _Cancel2 = _interopRequireDefault(_Cancel);
-
-var _Typography = require('material-ui/Typography');
-
-var _Typography2 = _interopRequireDefault(_Typography);
-
-var _styles = require('material-ui/styles');
-
-var _IconButton = require('material-ui/IconButton');
-
-var _IconButton2 = _interopRequireDefault(_IconButton);
-
-var _Tooltip = require('material-ui/Tooltip');
-
-var _Tooltip2 = _interopRequireDefault(_Tooltip);
-
 var _snack = require('js/snack');
 
 var _snack2 = _interopRequireDefault(_snack);
 
+var _central = require('js/central');
+
+var _central2 = _interopRequireDefault(_central);
+
 var _phone_field = require('js/shared/phone_field');
 
 var _phone_field2 = _interopRequireDefault(_phone_field);
+
+var _motoboy_row = require('./motoboy_row');
+
+var _motoboy_row2 = _interopRequireDefault(_motoboy_row);
+
+var _new_motoboy_form = require('./new_motoboy_form');
+
+var _new_motoboy_form2 = _interopRequireDefault(_new_motoboy_form);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -94081,37 +94043,20 @@ var MotoboysPage = function (_React$Component) {
       writable: true,
       value: {
         motoboys: [],
-        newMotoboy: { name: "", phoneNumber: "" },
         showSnack: false,
         snackMessages: []
+      }
+    }), Object.defineProperty(_this, 'pushNewMotoboy', {
+      enumerable: true,
+      writable: true,
+      value: function value(motoboy) {
+        _this.setState({ motoboys: _this.state.motoboys.concat(motoboy) });
       }
     }), Object.defineProperty(_this, 'displaySnack', {
       enumerable: true,
       writable: true,
       value: function value(message) {
         _this.setState({ showSnack: true, snackMessages: message });
-      }
-    }), Object.defineProperty(_this, 'createMotoboy', {
-      enumerable: true,
-      writable: true,
-      value: function value(motoboy) {
-        _graphql_client2.default.mutate({
-          mutation: (0, _graphqlTag2.default)(_templateObject),
-          variables: { params: motoboy }
-        }).then(function (_ref2) {
-          var motoboy = _ref2.data.motoboy;
-
-          _this.setState({
-            motoboys: _this.state.motoboys.concat(motoboy),
-            newMotoboy: { name: "", phoneNumber: "" }
-          });
-          _this.displaySnack("Motoboy adicionado!");
-        }).catch(function (_ref3) {
-          var graphQLErrors = _ref3.graphQLErrors;
-          return _this.displaySnack(graphQLErrors.map(function (err) {
-            return err.message;
-          }));
-        });
       }
     }), _temp), _possibleConstructorReturn(_this, _ret);
   }
@@ -94121,30 +94066,19 @@ var MotoboysPage = function (_React$Component) {
     value: function componentWillMount() {
       var _this2 = this;
 
-      _graphql_client2.default.query({ query: (0, _graphqlTag2.default)(_templateObject2) }).then(function (_ref4) {
-        var motoboys = _ref4.data.motoboys;
+      _graphql_client2.default.query({ query: (0, _graphqlTag2.default)(_templateObject) }).then(function (_ref2) {
+        var motoboys = _ref2.data.motoboys;
         return _this2.setState({ motoboys: motoboys });
       });
-    }
-  }, {
-    key: 'updateNewMotoboy',
-    value: function updateNewMotoboy() {
-      var changes = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-      var data = _extends({}, this.state.newMotoboy, changes);
-      this.setState({ newMotoboy: data });
     }
   }, {
     key: 'render',
     value: function render() {
       var _this3 = this;
 
-      var classes = this.props.classes;
       var _state = this.state,
-          newMotoboy = _state.newMotoboy,
           snackMessages = _state.snackMessages,
           showSnack = _state.showSnack;
-
 
       var motoboys = _lodash2.default.sortBy(_lodash2.default.cloneDeep(this.state.motoboys), 'name');
 
@@ -94154,94 +94088,15 @@ var MotoboysPage = function (_React$Component) {
         _react2.default.createElement(
           'div',
           { className: 'col-sm-4' },
-          _react2.default.createElement(
-            _Typography2.default,
-            { type: 'headline', style: { marginBottom: 24 } },
-            'Adicionar motoboys'
-          ),
-          _react2.default.createElement(
-            _Paper2.default,
-            { className: 'p-3 mb-4' },
-            _react2.default.createElement(_TextField2.default, {
-              label: 'Nome do motoboy',
-              onChange: function onChange(evt) {
-                return _this3.updateNewMotoboy({ name: evt.target.value });
-              },
-              value: newMotoboy.name,
-              fullWidth: true
-            }),
-            _react2.default.createElement(_phone_field2.default, {
-              label: 'Telefone',
-              onChange: function onChange(evt) {
-                return _this3.updateNewMotoboy({ phoneNumber: evt.target.value });
-              },
-              value: newMotoboy.phoneNumber,
-              className: 'mt-4 mb-4',
-              fullWidth: true
-            }),
-            _react2.default.createElement(
-              _Button2.default,
-              { raised: true, onClick: function onClick() {
-                  return _this3.createMotoboy(newMotoboy);
-                } },
-              _react2.default.createElement(_Add2.default, { className: 'mr-2' }),
-              'Salvar'
-            )
-          )
+          _react2.default.createElement(_new_motoboy_form2.default, {
+            displaySnack: this.displaySnack,
+            onCreate: this.pushNewMotoboy
+          })
         ),
         _react2.default.createElement(
           'div',
           { className: 'col-sm-8' },
-          _react2.default.createElement(
-            _Paper2.default,
-            null,
-            _react2.default.createElement(
-              _Table2.default,
-              null,
-              _react2.default.createElement(
-                _Table.TableHead,
-                null,
-                _react2.default.createElement(
-                  _Table.TableRow,
-                  null,
-                  _react2.default.createElement(
-                    _Table.TableCell,
-                    { style: { width: "30%" } },
-                    'Motoboy'
-                  ),
-                  _react2.default.createElement(
-                    _Table.TableCell,
-                    { style: { width: "30%" } },
-                    'Telefone'
-                  ),
-                  _react2.default.createElement(
-                    _Table.TableCell,
-                    null,
-                    'Trabalhando para a ',
-                    _central2.default.current().name,
-                    '?'
-                  ),
-                  _react2.default.createElement(
-                    _Table.TableCell,
-                    { style: { width: "20%" } },
-                    '\xA0'
-                  )
-                )
-              ),
-              _react2.default.createElement(
-                _Table.TableBody,
-                null,
-                motoboys.map(function (motoboy) {
-                  return _react2.default.createElement(MotoboyRow, {
-                    motoboy: motoboy,
-                    classes: classes,
-                    displaySnack: _this3.displaySnack,
-                    key: motoboy.id
-                  });
-                })
-              )
-            )
-          )
+          MotoboysTable(motoboys, this.displaySnack)
         ),
         _react2.default.createElement(_snack2.default, {
           show: showSnack,
@@ -94257,21 +94112,156 @@ var MotoboysPage = function (_React$Component) {
   return MotoboysPage;
 }(_react2.default.Component);
 
-var MotoboyRow = function (_React$Component2) {
-  _inherits(MotoboyRow, _React$Component2);
+exports.default = MotoboysPage;
+
+
+var MotoboysTable = function MotoboysTable(motoboys, displaySnack) {
+  return _react2.default.createElement(
+    _Paper2.default,
+    null,
+    _react2.default.createElement(
+      _Table2.default,
+      null,
+      _react2.default.createElement(
+        _Table.TableHead,
+        null,
+        _react2.default.createElement(
+          _Table.TableRow,
+          null,
+          _react2.default.createElement(
+            _Table.TableCell,
+            { style: { width: "30%" } },
+            'Motoboy'
+          ),
+          _react2.default.createElement(
+            _Table.TableCell,
+            { style: { width: "30%" } },
+            'Telefone'
+          ),
+          _react2.default.createElement(
+            _Table.TableCell,
+            null,
+            'Trabalhando para a ',
+            _central2.default.current().name,
+            '?'
+          ),
+          _react2.default.createElement(
+            _Table.TableCell,
+            { style: { width: "20%" } },
+            '\xA0'
+          )
+        )
+      ),
+      _react2.default.createElement(
+        _Table.TableBody,
+        null,
+        motoboys.map(function (motoboy) {
+          return _react2.default.createElement(_motoboy_row2.default, {
+            key: motoboy.id,
+            motoboy: motoboy,
+            displaySnack: displaySnack
+          });
+        })
+      )
+    )
+  );
+};
+});
+
+;require.register("js/motoboys_page/motoboy_row.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _templateObject = _taggedTemplateLiteral(['\n        mutation updateMotoboy($id: ID!, $params: MotoboyUpdateParams) {\n          motoboy: updateMotoboy(id: $id, params: $params) {\n            id name phoneNumber active\n          }\n        }\n      '], ['\n        mutation updateMotoboy($id: ID!, $params: MotoboyUpdateParams) {\n          motoboy: updateMotoboy(id: $id, params: $params) {\n            id name phoneNumber active\n          }\n        }\n      ']);
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _graphqlTag = require('graphql-tag');
+
+var _graphqlTag2 = _interopRequireDefault(_graphqlTag);
+
+var _graphql_client = require('js/graphql_client');
+
+var _graphql_client2 = _interopRequireDefault(_graphql_client);
+
+var _Table = require('material-ui/Table');
+
+var _TextField = require('material-ui/TextField');
+
+var _TextField2 = _interopRequireDefault(_TextField);
+
+var _Button = require('material-ui/Button');
+
+var _Button2 = _interopRequireDefault(_Button);
+
+var _Done = require('material-ui-icons/Done');
+
+var _Done2 = _interopRequireDefault(_Done);
+
+var _Edit = require('material-ui-icons/Edit');
+
+var _Edit2 = _interopRequireDefault(_Edit);
+
+var _Cancel = require('material-ui-icons/Cancel');
+
+var _Cancel2 = _interopRequireDefault(_Cancel);
+
+var _styles = require('material-ui/styles');
+
+var _IconButton = require('material-ui/IconButton');
+
+var _IconButton2 = _interopRequireDefault(_IconButton);
+
+var _Tooltip = require('material-ui/Tooltip');
+
+var _Tooltip2 = _interopRequireDefault(_Tooltip);
+
+var _phone_field = require('js/shared/phone_field');
+
+var _phone_field2 = _interopRequireDefault(_phone_field);
+
+var _Switch = require('material-ui/Switch');
+
+var _Switch2 = _interopRequireDefault(_Switch);
+
+var _red = require('material-ui/colors/red');
+
+var _red2 = _interopRequireDefault(_red);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var MotoboyRow = function (_React$Component) {
+  _inherits(MotoboyRow, _React$Component);
 
   function MotoboyRow() {
-    var _ref5;
+    var _ref;
 
-    var _temp2, _this4, _ret2;
+    var _temp, _this, _ret;
 
     _classCallCheck(this, MotoboyRow);
 
-    for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
-      args[_key2] = arguments[_key2];
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
     }
 
-    return _ret2 = (_temp2 = (_this4 = _possibleConstructorReturn(this, (_ref5 = MotoboyRow.__proto__ || Object.getPrototypeOf(MotoboyRow)).call.apply(_ref5, [this].concat(args))), _this4), Object.defineProperty(_this4, 'state', {
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = MotoboyRow.__proto__ || Object.getPrototypeOf(MotoboyRow)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
       enumerable: true,
       writable: true,
       value: {
@@ -94279,7 +94269,7 @@ var MotoboyRow = function (_React$Component2) {
         motoboy: { name: "", phoneNumber: "", active: true },
         motoboyBeforeEdit: []
       }
-    }), _temp2), _possibleConstructorReturn(_this4, _ret2);
+    }), _temp), _possibleConstructorReturn(_this, _ret);
   }
 
   _createClass(MotoboyRow, [{
@@ -94318,7 +94308,7 @@ var MotoboyRow = function (_React$Component2) {
   }, {
     key: 'saveMotoboy',
     value: function saveMotoboy(motoboy) {
-      var _this5 = this;
+      var _this2 = this;
 
       var displaySnack = this.props.displaySnack;
       var id = motoboy.id,
@@ -94328,13 +94318,13 @@ var MotoboyRow = function (_React$Component2) {
 
 
       _graphql_client2.default.mutate({
-        mutation: (0, _graphqlTag2.default)(_templateObject3),
+        mutation: (0, _graphqlTag2.default)(_templateObject),
         variables: { id: id, params: { name: name, phoneNumber: phoneNumber, active: active } }
       }).then(function () {
         return displaySnack("Motoboy atualizado!");
       }).catch(function (res) {
-        _this5.setState({
-          motoboy: _this5.state.motoboysBeforeEdit,
+        _this2.setState({
+          motoboy: _this2.state.motoboysBeforeEdit,
           editMode: true
         });
         displaySnack("Ops! Ocorreu");
@@ -94345,24 +94335,24 @@ var MotoboyRow = function (_React$Component2) {
   }, {
     key: 'render',
     value: function render() {
-      var _this6 = this;
+      var _this3 = this;
 
       var classes = this.props.classes;
-      var _state2 = this.state,
-          motoboy = _state2.motoboy,
-          editMode = _state2.editMode;
+      var _state = this.state,
+          motoboy = _state.motoboy,
+          editMode = _state.editMode;
 
 
       return _react2.default.createElement(
         _Table.TableRow,
-        null,
+        { className: !motoboy.active && classes.inactiveMotoboyRow },
         _react2.default.createElement(
           _Table.TableCell,
           null,
           editMode ? _react2.default.createElement(_TextField2.default, {
             label: false,
             onChange: function onChange(evt) {
-              return _this6.updateMotoboyFields({ name: evt.target.value });
+              return _this3.updateMotoboyFields({ name: evt.target.value });
             },
             value: motoboy.name,
             margin: 'normal',
@@ -94377,7 +94367,7 @@ var MotoboyRow = function (_React$Component2) {
           editMode ? _react2.default.createElement(_phone_field2.default, {
             label: false,
             onChange: function onChange(evt) {
-              return _this6.updateMotoboyFields({ phoneNumber: evt.target.value });
+              return _this3.updateMotoboyFields({ phoneNumber: evt.target.value });
             },
             value: motoboy.phoneNumber,
             InputClassName: classes.input,
@@ -94390,7 +94380,7 @@ var MotoboyRow = function (_React$Component2) {
           editMode ? _react2.default.createElement(_Switch2.default, {
             checked: motoboy.active,
             onChange: function onChange(evt) {
-              return _this6.updateMotoboyFields({ active: !motoboy.active });
+              return _this3.updateMotoboyFields({ active: !motoboy.active });
             },
             'aria-label': 'Ativo?'
           }) : motoboy.active ? "Sim" : "Não"
@@ -94404,7 +94394,7 @@ var MotoboyRow = function (_React$Component2) {
             _react2.default.createElement(
               _IconButton2.default,
               { className: classes.button, onClick: function onClick() {
-                  return _this6.toggleEditMode();
+                  return _this3.toggleEditMode();
                 } },
               editMode ? _react2.default.createElement(_Cancel2.default, null) : _react2.default.createElement(_Edit2.default, null)
             )
@@ -94415,7 +94405,7 @@ var MotoboyRow = function (_React$Component2) {
             _react2.default.createElement(
               _Button2.default,
               { fab: true, color: 'primary', onClick: function onClick() {
-                  return _this6.saveMotoboy(motoboy);
+                  return _this3.saveMotoboy(motoboy);
                 } },
               _react2.default.createElement(_Done2.default, null)
             )
@@ -94438,15 +94428,184 @@ var styles = function styles(theme) {
     },
     button: {
       margin: theme.spacing.unit
+    },
+    inactiveMotoboyRow: {
+      background: _red2.default[100]
     }
   };
 };
 
-exports.default = (0, _styles.withStyles)(styles)(MotoboysPage);
+exports.default = (0, _styles.withStyles)(styles)(MotoboyRow);
 });
 
-;require.register("js/motoboys_page/motoboy_row.jsx", function(exports, require, module) {
-"use strict";
+;require.register("js/motoboys_page/new_motoboy_form.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _templateObject = _taggedTemplateLiteral(['mutation createMotoboy($params: MotoboyCreateParams) {\n        motoboy: createMotoboy(params: $params) {\n          id name phoneNumber active\n        }\n      }'], ['mutation createMotoboy($params: MotoboyCreateParams) {\n        motoboy: createMotoboy(params: $params) {\n          id name phoneNumber active\n        }\n      }']);
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _graphqlTag = require('graphql-tag');
+
+var _graphqlTag2 = _interopRequireDefault(_graphqlTag);
+
+var _graphql_client = require('js/graphql_client');
+
+var _graphql_client2 = _interopRequireDefault(_graphql_client);
+
+var _Typography = require('material-ui/Typography');
+
+var _Typography2 = _interopRequireDefault(_Typography);
+
+var _Add = require('material-ui-icons/Add');
+
+var _Add2 = _interopRequireDefault(_Add);
+
+var _TextField = require('material-ui/TextField');
+
+var _TextField2 = _interopRequireDefault(_TextField);
+
+var _Button = require('material-ui/Button');
+
+var _Button2 = _interopRequireDefault(_Button);
+
+var _Paper = require('material-ui/Paper');
+
+var _Paper2 = _interopRequireDefault(_Paper);
+
+var _phone_field = require('js/shared/phone_field');
+
+var _phone_field2 = _interopRequireDefault(_phone_field);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var NewMotoboyForm = function (_React$Component) {
+  _inherits(NewMotoboyForm, _React$Component);
+
+  function NewMotoboyForm() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
+    _classCallCheck(this, NewMotoboyForm);
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = NewMotoboyForm.__proto__ || Object.getPrototypeOf(NewMotoboyForm)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
+      enumerable: true,
+      writable: true,
+      value: {
+        newMotoboy: { name: "", phoneNumber: "" }
+      }
+    }), Object.defineProperty(_this, 'createMotoboy', {
+      enumerable: true,
+      writable: true,
+      value: function value(motoboy) {
+        var _this$props = _this.props,
+            displaySnack = _this$props.displaySnack,
+            onCreate = _this$props.onCreate;
+
+
+        _graphql_client2.default.mutate({
+          mutation: (0, _graphqlTag2.default)(_templateObject),
+          variables: { params: motoboy }
+        }).then(function (_ref2) {
+          var motoboy = _ref2.data.motoboy;
+
+          _this.setState({ newMotoboy: { name: "", phoneNumber: "" } });
+          displaySnack("Motoboy adicionado!");
+
+          onCreate(motoboy);
+        }).catch(function (_ref3) {
+          var graphQLErrors = _ref3.graphQLErrors;
+          return displaySnack(graphQLErrors.map(function (err) {
+            return err.message;
+          }));
+        });
+      }
+    }), _temp), _possibleConstructorReturn(_this, _ret);
+  }
+
+  _createClass(NewMotoboyForm, [{
+    key: 'updateNewMotoboy',
+    value: function updateNewMotoboy() {
+      var changes = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+      this.setState({ newMotoboy: _extends({}, this.state.newMotoboy, changes) });
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _this2 = this;
+
+      var newMotoboy = this.state.newMotoboy;
+
+
+      return _react2.default.createElement(
+        _Paper2.default,
+        { className: 'p-4' },
+        _react2.default.createElement(
+          _Typography2.default,
+          { type: 'headline', style: { marginBottom: 24 } },
+          'Adicionar novos motoboys'
+        ),
+        _react2.default.createElement(_TextField2.default, {
+          label: 'Nome do motoboy',
+          onChange: function onChange(evt) {
+            return _this2.updateNewMotoboy({ name: evt.target.value });
+          },
+          value: newMotoboy.name,
+          fullWidth: true
+        }),
+        _react2.default.createElement(_phone_field2.default, {
+          label: 'Telefone',
+          onChange: function onChange(evt) {
+            return _this2.updateNewMotoboy({ phoneNumber: evt.target.value });
+          },
+          value: newMotoboy.phoneNumber,
+          className: 'mt-4 mb-5',
+          fullWidth: true
+        }),
+        _react2.default.createElement(
+          'div',
+          { className: 'text-right' },
+          _react2.default.createElement(
+            _Button2.default,
+            { raised: true, onClick: function onClick() {
+                return _this2.createMotoboy(newMotoboy);
+              } },
+            _react2.default.createElement(_Add2.default, { className: 'mr-2' }),
+            'Salvar'
+          )
+        )
+      );
+    }
+  }]);
+
+  return NewMotoboyForm;
+}(_react2.default.Component);
+
+exports.default = NewMotoboyForm;
 });
 
 ;require.register("js/shared/phone_field.jsx", function(exports, require, module) {

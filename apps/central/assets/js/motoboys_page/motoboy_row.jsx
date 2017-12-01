@@ -11,8 +11,10 @@ import { withStyles } from 'material-ui/styles'
 import IconButton from 'material-ui/IconButton'
 import Tooltip from 'material-ui/Tooltip'
 import PhoneField from 'js/shared/phone_field'
+import Switch from 'material-ui/Switch'
+import red from 'material-ui/colors/red'
 
-export default class MotoboyRow extends React.Component {
+class MotoboyRow extends React.Component {
   state = {
     editMode: false,
     motoboy: {name: "", phoneNumber: "", active: true},
@@ -76,7 +78,7 @@ export default class MotoboyRow extends React.Component {
     const {motoboy, editMode} = this.state
 
     return (
-      <TableRow>
+      <TableRow className={!motoboy.active && classes.inactiveMotoboyRow}>
         <TableCell>
           {editMode ? <TextField
             label={false}
@@ -137,6 +139,9 @@ const styles = theme => ({
   button: {
     margin: theme.spacing.unit,
   },
+  inactiveMotoboyRow: {
+    background: red[100]
+  }
 })
 
 export default withStyles(styles)(MotoboyRow)
