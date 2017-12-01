@@ -94430,7 +94430,7 @@ var styles = function styles(theme) {
       margin: theme.spacing.unit
     },
     inactiveMotoboyRow: {
-      background: _red2.default[100]
+      background: _red2.default[50]
     }
   };
 };

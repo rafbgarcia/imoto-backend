@@ -140,7 +140,7 @@ const styles = theme => ({
     margin: theme.spacing.unit,
   },
   inactiveMotoboyRow: {
-    background: red[100]
+    background: red[50]
   }
 })
 
