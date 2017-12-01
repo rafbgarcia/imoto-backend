@@ -40,14 +40,20 @@ export default class Layout extends React.Component {
     return (
       <div>
         <AppBar position="static">
-          <Toolbar>
-            <IconButton onClick={this.openDrawer} color="contrast" aria-label="Menu">
-              <MenuIcon />
-            </IconButton>
-            <Typography type="title" color="inherit">
-              {Central.current().name}
-            </Typography>
-          </Toolbar>
+          <div className="d-flex align-items-center">
+            <Toolbar>
+              <IconButton onClick={this.openDrawer} color="contrast" aria-label="Menu">
+                <MenuIcon />
+              </IconButton>
+              <Typography type="title" color="inherit">
+                {Central.current().name}
+              </Typography>
+            </Toolbar>
+
+            <div className="m-auto">
+              <img src="/images/logo_icon_white.svg" width="30" style={{marginRight: "10.5rem"}} />
+            </div>
+          </div>
         </AppBar>
 
         <main className="p-4">

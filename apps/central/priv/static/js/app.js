@@ -92386,6 +92386,10 @@ var _reactRouterDom = require('react-router-dom');
 
 var _reactIntl = require('react-intl');
 
+var _styles = require('material-ui/styles');
+
+var _colors = require('material-ui/colors');
+
 var _pt = require('react-intl/locale-data/pt');
 
 var _pt2 = _interopRequireDefault(_pt);
@@ -92406,13 +92410,16 @@ var _graphql_client = require('./graphql_client');
 
 var _graphql_client2 = _interopRequireDefault(_graphql_client);
 
-var _styles = require('material-ui/styles');
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 (0, _reactIntl.addLocaleData)(_pt2.default);
 
-var theme = (0, _styles.createMuiTheme)({});
+var theme = (0, _styles.createMuiTheme)({
+  palette: {
+    // Logo color: #074C8C
+    primary: _colors.indigo
+  }
+});
 
 document.addEventListener('DOMContentLoaded', function () {
   var page = _central2.default.loggedIn() ? _react2.default.createElement(_layout2.default, null) : _react2.default.createElement(_login2.default, null);
@@ -93768,17 +93775,26 @@ var Layout = function (_React$Component) {
           _AppBar2.default,
           { position: 'static' },
           _react2.default.createElement(
-            _Toolbar2.default,
-            null,
+            'div',
+            { className: 'd-flex align-items-center' },
             _react2.default.createElement(
-              _IconButton2.default,
-              { onClick: this.openDrawer, color: 'contrast', 'aria-label': 'Menu' },
-              _react2.default.createElement(_Menu2.default, null)
+              _Toolbar2.default,
+              null,
+              _react2.default.createElement(
+                _IconButton2.default,
+                { onClick: this.openDrawer, color: 'contrast', 'aria-label': 'Menu' },
+                _react2.default.createElement(_Menu2.default, null)
+              ),
+              _react2.default.createElement(
+                _Typography2.default,
+                { type: 'title', color: 'inherit' },
+                _central2.default.current().name
+              )
             ),
             _react2.default.createElement(
-              _Typography2.default,
-              { type: 'title', color: 'inherit' },
-              _central2.default.current().name
+              'div',
+              { className: 'm-auto' },
+              _react2.default.createElement('img', { src: '/images/logo_icon_white.svg', width: '30', style: { marginRight: "10.5rem" } })
             )
           )
         ),

@@ -1,6 +1,6 @@
 defmodule Company.Resolve.Login do
+  use Api, :resolver
   alias Core.Company
-  alias Db.Repo
 
   def handle(params, _ctx) do
     with {:ok, company} <- authenticate(params),

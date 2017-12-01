@@ -1,5 +1,5 @@
 defmodule Company.Resolve.AllOrders do
-  use Api, :context
+  use Api, :resolver
 
   def handle(_args, %{context: %{current_company: company}}) do
     from(

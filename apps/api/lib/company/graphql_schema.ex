@@ -25,8 +25,6 @@ defmodule Company.GraphqlSchema do
     end
   end
 
-
-
   input_object :order_params do
     field :stops, list_of(:stop_input)
   end

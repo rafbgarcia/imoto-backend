@@ -1,12 +1,11 @@
 defmodule Company.Resolve.CreateOrder do
-  use Api, :context
+  use Api, :resolver
   alias Core.{Central, Motoboy, Order, History}
 
   def handle(%{order_params: order_params}, %{context: %{current_company: company}}) do
     with {:ok, motoboy} <- next_motoboy_or_error(company.id),
     {:ok, order} <- create_order(company, motoboy, order_params) do
       add_to_history(order.id, motoboy.id)
-      # spawn fn -> after_create(order) end
       {:ok, order}
     end
   end
@@ -19,7 +18,6 @@ defmodule Company.Resolve.CreateOrder do
       company_id: company.id,
       motoboy_id: motoboy.id,
       state: "pending",
-      price: 1232, # TODO: fix this
     })
 
     Order.changeset(%Order{}, order_params)
