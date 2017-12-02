@@ -9,7 +9,7 @@ defmodule Motoboy.AuthPlug do
     |> current_resource
     |> case do
       nil -> conn
-      resource -> put_private(conn, :absinthe, %{context: %{current_company: resource}})
+      resource -> put_private(conn, :absinthe, %{context: %{current_motoboy: resource}})
     end
   end
 

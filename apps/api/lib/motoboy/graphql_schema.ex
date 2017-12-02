@@ -3,6 +3,9 @@ defmodule Motoboy.GraphqlSchema do
   import_types Graphql.Types
 
   query do
+    field :myself, :motoboy do
+      resolve &Motoboy.Resolve.GetMyData.handle/2
+    end
   end
 
   mutation do
