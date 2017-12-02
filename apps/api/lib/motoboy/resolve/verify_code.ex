@@ -1,4 +1,4 @@
-defmodule Motoboy.Resolve.Login do
+defmodule Motoboy.Resolve.VerifyCode do
   use Api, :resolver
 
   def handle(%{params: params}, _) do
@@ -19,8 +19,12 @@ defmodule Motoboy.Resolve.Login do
     Motoboy.NexmoApi.start
 
     case Motoboy.NexmoApi.verify_code(request_id, code) do
-      {:ok, %{status: "0"}} -> {:ok, "Telefone verificado"}
-      {_, _} -> {:error, "Seu celular não pôde ser verificado"}
+      {:ok, %{"status" => "0"}} ->
+        {:ok, "Telefone verificado"}
+      {_, %{"error_text" => error}} ->
+        {:error, error}
+      _ ->
+        {:error, "Seu celular não pôde ser verificado"}
     end
   end
 

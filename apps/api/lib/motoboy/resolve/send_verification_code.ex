@@ -12,10 +12,12 @@ defmodule Motoboy.Resolve.SendVerificationCode do
     Motoboy.NexmoApi.start
 
     case Motoboy.NexmoApi.send_verification_code(phone_number) do
-      {:ok, %{status: "0", request_id: request_id}} ->
+      {:ok, %{"status" => "0", "request_id" => request_id}} ->
         {:ok, request_id}
-      {_, res} ->
-        {:error, res}
+      {_, %{"error_text" => error}} ->
+        {:error, error}
+      _ ->
+        {:error, "Tivemos um problema inesperado, por favor tente novamente"}
     end
   end
 
