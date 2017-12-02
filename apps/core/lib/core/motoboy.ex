@@ -11,7 +11,6 @@ defmodule Core.Motoboy do
     has_many :orders, Core.Order
     field :name, :string
     field :state, :string
-    field :login_token, :string
     field :phone_number, :string
     field :became_available_at, Timex.Ecto.DateTime
     field :became_unavailable_at, Timex.Ecto.DateTime
@@ -25,7 +24,7 @@ defmodule Core.Motoboy do
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, [
-      :name, :login_token, :phone_number, :state, :central_id,
+      :name, :phone_number, :state, :central_id,
       :became_available_at, :became_unavailable_at, :became_busy_at,
       :active,
     ])

@@ -20,7 +20,7 @@ defmodule Api.Router do
   end
   scope "/motoboy" do
     pipe_through :motoboy_api
-    post "/", Absinthe.Plug, schema: Api.GraphqlSchema
+    post "/", Absinthe.Plug, schema: Motoboy.GraphqlSchema
   end
 
   pipeline :central_api do

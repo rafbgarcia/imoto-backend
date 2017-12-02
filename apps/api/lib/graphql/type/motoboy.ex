@@ -15,7 +15,7 @@ defmodule Graphql.Type.Motoboy do
     field :id, :id
     field :first_name, :string, resolve: &Api.Orders.Motoboy.first_name/3
     field :name, :string
-    field :auth_token, :string
+    field :token, :string
     field :phone_number, :string
     field :became_available_at, :datetime
     field :became_unavailable_at, :datetime

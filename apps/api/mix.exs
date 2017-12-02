@@ -63,6 +63,7 @@ defmodule Api.Mixfile do
       {:comeonin, "~> 4.0"},
       {:argon2_elixir, "~> 1.2"},
       {:guardian, "~> 1.0.0"},
+      {:httpoison, "~> 0.13"},
     ]
   end
 
