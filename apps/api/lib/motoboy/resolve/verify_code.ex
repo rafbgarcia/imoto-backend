@@ -20,11 +20,21 @@ defmodule Motoboy.Resolve.VerifyCode do
 
     case Motoboy.NexmoApi.verify_code(request_id, code) do
       {:ok, %{"status" => "0"}} ->
-        {:ok, "Telefone verificado"}
+        {:ok, "Telefone verificado."}
+      {:ok, %{"status" => "16"}} ->
+        {:error, "O código informado está incorreto."}
+      {:ok, %{"status" => "17"}} ->
+        {:error, "Você excedeu o limite de tentativas, por favor volte e tente novamente."}
+      {:ok, %{"status" => "6"}} ->
+        {:error, "Sua verificação expirou. Volte a página e peça outro código."}
+      {:ok, %{"status" => "19"}} ->
+        {:error, "Sua verificação expirou. Volte a página e peça outro código."}
+      {:ok, %{"status" => "101"}} ->
+        {:error, "Sua verificação expirou. Volte a página e peça outro código."}
       {_, %{"error_text" => error}} ->
         {:error, error}
       _ ->
-        {:error, "Seu celular não pôde ser verificado"}
+        {:error, "Seu celular não pôde ser verificado, por favor tente novamente"}
     end
   end
 
