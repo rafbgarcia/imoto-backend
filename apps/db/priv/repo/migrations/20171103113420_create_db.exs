@@ -23,7 +23,8 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       add :name, :string
       add :central_id, references(:centrals)
       add :state, :string, default: "unavailable"
-      add :phone_number, unique: true
+      add :phone_number, :string, unique: true
+      add :one_signal_player_id, :string
       add :became_unavailable_at, :utc_datetime
       add :became_available_at, :utc_datetime
       add :became_busy_at, :utc_datetime
