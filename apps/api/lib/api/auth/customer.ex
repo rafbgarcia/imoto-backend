@@ -1,7 +1,6 @@
 defmodule Api.Auth.Customer do
   use Api, :graphql_schema
 
-  alias Api.Auth.Helpers
   alias Db.Repo
   alias Core.Customer
 

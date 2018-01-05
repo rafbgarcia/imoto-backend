@@ -78,7 +78,7 @@ class MotoboyRow extends React.Component {
     const {motoboy, editMode} = this.state
 
     return (
-      <TableRow className={!motoboy.active && classes.inactiveMotoboyRow}>
+      <TableRow className={motoboy.active ? "" : classes.inactiveMotoboyRow}>
         <TableCell>
           {editMode ? <TextField
             label={false}

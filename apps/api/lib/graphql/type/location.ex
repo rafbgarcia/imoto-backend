@@ -4,7 +4,6 @@ defmodule Graphql.Type.Location do
   object :location do
     field :name, :string
     field :reference, :string
-    field :name, :string
     field :street, :string
     field :number, :string
     field :neighborhood, :string
@@ -12,7 +11,6 @@ defmodule Graphql.Type.Location do
     field :city, :string
     field :uf, :string
     field :complement, :string
-    field :reference, :string
     field :line1, :string, resolve: &Api.Orders.Location.line1/3
     field :geocodable_address, :string, resolve: &Api.Orders.Location.geocodable_address/3
   end

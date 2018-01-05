@@ -12,6 +12,7 @@ defmodule Core.Motoboy do
     field :name, :string
     field :state, :string
     field :phone_number, :string
+    field :one_signal_player_id, :string
     field :became_available_at, Timex.Ecto.DateTime
     field :became_unavailable_at, Timex.Ecto.DateTime
     field :became_busy_at, Timex.Ecto.DateTime
@@ -24,9 +25,9 @@ defmodule Core.Motoboy do
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, [
-      :name, :phone_number, :state, :central_id,
+      :central_id,
+      :name, :phone_number, :one_signal_player_id, :state, :active,
       :became_available_at, :became_unavailable_at, :became_busy_at,
-      :active,
     ])
     |> validate_inclusion(:state, [busy(), available(), unavailable(), confirming_order()])
     |> validate_required([:name, :phone_number])

@@ -5,7 +5,9 @@ defmodule Company.Resolve.CreateOrder do
   def handle(%{order_params: order_params}, %{context: %{current_company: company}}) do
     with {:ok, motoboy} <- next_motoboy_or_error(company.id),
     {:ok, order} <- create_order(company, motoboy, order_params) do
+      notify_motoboy_new_order(motoboy.one_signal_player_id, order.id)
       add_to_history(order.id, motoboy.id)
+
       {:ok, order}
     end
   end
@@ -66,5 +68,9 @@ defmodule Company.Resolve.CreateOrder do
   defp add_to_history(order_id, motoboy_id) do
     Repo.insert(%History{scope: "motoboy_order", text: "Recebeu pedido", order_id: order_id, motoboy_id: motoboy_id})
     Repo.insert(%History{scope: "order", text: "Pedido enviado", order_id: order_id, motoboy_id: motoboy_id})
+  end
+
+  defp notify_motoboy_new_order(player_id, order_id) do
+    Api.OneSignal.notify(player_id, "Você tem uma nova entrega!")
   end
 end

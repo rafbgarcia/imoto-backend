@@ -33,18 +33,18 @@ defmodule Api.Orders.Location do
     |> Enum.join(", ")
   end
 
-  def after_create_order(order) do
-    Repo.all(assoc(order, :locations))
-    |> Enum.each(fn location ->
-      Location.changeset(location, %{
-        last_used_at: Timex.local,
-        customer_id: order.customer_id,
-        used_count: case location.used_count do
-          nil -> 1
-          count -> count + 1
-        end
-      })
-      |> Repo.update
-    end)
-  end
+  # def after_create_order(order) do
+  #   Repo.all(assoc(order, :locations))
+  #   |> Enum.each(fn location ->
+  #     Location.changeset(location, %{
+  #       last_used_at: Timex.local,
+  #       customer_id: order.customer_id,
+  #       used_count: case location.used_count do
+  #         nil -> 1
+  #         count -> count + 1
+  #       end
+  #     })
+  #     |> Repo.update
+  #   end)
+  # end
 end

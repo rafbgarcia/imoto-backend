@@ -1,35 +1,6 @@
 defmodule Graphql.Type.OrderOrError do
   use Api, :graphql_schema
 
-  # Queries
-  object :orders_queries do
-    field :order, :order_or_error do
-      arg :id, non_null(:id)
-      resolve &Api.Orders.Order.get/2
-    end
-  end
-
-
-  # Mutations
-  object :orders_mutations do
-    field :confirm_order, :order_or_error do
-      arg :order_id, non_null(:id)
-      resolve &Api.Orders.Order.confirm/2
-    end
-
-    field :cancel_order, :motoboy do
-      arg :order_id, non_null(:id)
-      arg :reason, :string
-      resolve &Api.Orders.Order.cancel/2
-    end
-
-    field :finish_order, :order_or_error do
-      arg :order_id, non_null(:id)
-      resolve &Api.Orders.Order.finish/2
-    end
-  end
-
-
   # Objects
   object :order do
     field :id, :id

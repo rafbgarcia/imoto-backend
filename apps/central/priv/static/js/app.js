@@ -94361,7 +94361,7 @@ var MotoboyRow = function (_React$Component) {
 
       return _react2.default.createElement(
         _Table.TableRow,
-        { className: !motoboy.active && classes.inactiveMotoboyRow },
+        { className: motoboy.active ? "" : classes.inactiveMotoboyRow },
         _react2.default.createElement(
           _Table.TableCell,
           null,
