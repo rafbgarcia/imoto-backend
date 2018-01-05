@@ -1,3 +1,5 @@
+# https://documentation.onesignal.com/reference#create-notification
+
 defmodule Api.OneSignal do
   use HTTPoison.Base
 
@@ -7,7 +9,9 @@ defmodule Api.OneSignal do
       contents: %{en: message},
       include_player_ids: [player_id],
       content_available: true,
+      android_visibility: 1,
       priority: 10,
+      ttl: 45, # seconds
       data: data,
     }
 
