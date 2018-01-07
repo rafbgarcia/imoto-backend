@@ -32,7 +32,7 @@ class DashboardPage extends React.Component {
     return {
       stops: [{
         sequence: 0,
-        instructions: "Ir ao local e falar com o responsável",
+        instructions: "Falar com o responsável",
         location: {name, street, number, neighborhood, zipcode, city, uf, complement, reference},
       }]
     }
