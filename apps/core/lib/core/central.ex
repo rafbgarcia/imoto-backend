@@ -12,7 +12,6 @@ defmodule Core.Central do
     field :password_hash, :string
     field :phone_number, :string
     field :active, :boolean
-    field :created_by_central, :boolean
     field :token, :string, virtual: true
 
     timestamps()

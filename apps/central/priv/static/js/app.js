@@ -93089,7 +93089,7 @@ function Entry(entry, index) {
 }
 
 function entryText(entry) {
-  if (entry.scope === "motoboy_order") {
+  if (entry.scope === "motoboy" && entry.orderId) {
     return _react2.default.createElement(
       'span',
       null,

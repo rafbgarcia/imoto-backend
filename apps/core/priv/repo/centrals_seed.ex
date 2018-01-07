@@ -29,7 +29,7 @@ Db.Repo.insert!(Core.Company.changeset(%Core.Company{}, %{
 }))
 
 
-Db.Repo.insert!(%Core.Motoboy{name: "Anderson", central_id: unimoto.id, phone_number: "(45) 98888-4444"})
+Db.Repo.insert!(%Core.Motoboy{name: "Rafa", central_id: unimoto.id, phone_number: "(84) 98141-4140"})
 # Db.Repo.insert!(%Core.Motoboy{name: "João", central_id: unimoto.id, login: "joao-token"})
 # Db.Repo.insert!(%Core.Motoboy{name: "Pedro", central_id: unimoto.id, login: "pedro-token"})
 # Db.Repo.insert!(%Core.Motoboy{name: "Paulo Andrade", central_id: unimoto.id})
