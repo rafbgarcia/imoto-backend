@@ -34,23 +34,19 @@ defmodule Motoboy.Resolve.CancelOrder do
     Repo.transaction(fn ->
       from(m in Core.Motoboy,
         lock: "FOR UPDATE",
-        join: c in assoc(m, :central),
-        preload: [central: c],
-        where: m.central_id == ^central_id,
         where: m.state == ^Core.Motoboy.available(),
         where: m.id != ^id,
         order_by: fragment(
           """
-          CASE c1.id WHEN ? THEN 1 ELSE 2 END,
+          CASE m0.central_id WHEN ? THEN 1 ELSE 2 END,
           m0.became_available_at ASC,
-          c1.last_order_taken_at ASC
           """, ^central_id
         )
       )
       |> first
       |> Repo.one
       |> case do
-        nil -> nil # Repo.rollback("Nenhum motoboy disponível")
+        nil -> nil
         motoboy -> make_motoboy_busy!(motoboy)
       end
     end)

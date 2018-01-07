@@ -46,12 +46,6 @@ defmodule Company.GraphqlSchema do
     field :complement, :string
     field :reference, :string
     field :city, :string
-    field :country, :string
     field :uf, :string
-    field :lat, :float
-    field :lng, :float
-    field :place_id, :string, description: "Google's"
-    field :formatted_address, :string, description: "Google's"
-    field :formatted_phone_number, :string, description: "Google's"
   end
 end

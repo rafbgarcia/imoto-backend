@@ -4,6 +4,7 @@ defmodule Core.Central do
   schema "centrals" do
     has_many :motoboys, Core.Motoboy
     has_many :orders, through: [:motoboys, :orders]
+    has_many :my_companies, Core.Company, foreign_key: :central_id
     many_to_many :companies, Core.Company, join_through: "companies_centrals"
 
     field :name, :string
@@ -11,7 +12,7 @@ defmodule Core.Central do
     field :password_hash, :string
     field :phone_number, :string
     field :active, :boolean
-    field :last_order_taken_at, Timex.Ecto.DateTime
+    field :created_by_central, :boolean
     field :token, :string, virtual: true
 
     timestamps()
@@ -20,7 +21,7 @@ defmodule Core.Central do
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, [
-      :name, :phone_number, :last_order_taken_at, :password_hash, :login, :active
+      :name, :phone_number, :password_hash, :login, :active
     ])
     |> validate_required([:name])
     |> unique_constraint(:login)

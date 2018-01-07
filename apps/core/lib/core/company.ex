@@ -2,6 +2,7 @@ defmodule Core.Company do
   use Core, :schema
 
   schema "companies" do
+    belongs_to :central, Core.Central
     has_one :location, Core.Location
     has_many :orders, Core.Order
     has_many :customers, Core.Customer
@@ -17,10 +18,6 @@ defmodule Core.Company do
   end
 
   def changeset(changeset, params \\ %{}) do
-    IO.puts(">>> 1")
-    IO.puts(params.centrals_ids)
-    IO.puts(">>> 2")
-
     changeset
     |> cast(params, [:phone_number, :name, :password_hash, :login])
     |> cast_assoc(:location)

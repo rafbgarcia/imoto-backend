@@ -19,7 +19,7 @@ defmodule Core.Location do
     field :google_place_id, :string
     field :formatted_address, :string
     field :formatted_phone_number, :string
-    field :used_count, :integer
+    field :used_count, :integer, default: 0
     field :last_used_at, Timex.Ecto.DateTime
   end
 

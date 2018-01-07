@@ -13,9 +13,8 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       add :login, :string, unique: true
       add :password_hash, :string
       add :cnpj, :string
-      add :accepted_terms_of_use, :boolean
+      add :accepted_terms_of_use, :boolean, default: false, null: false
       add :active, :boolean, default: false, null: false
-      add :last_order_taken_at, :utc_datetime
       timestamps()
     end
 
@@ -37,6 +36,7 @@ defmodule Db.Repo.Migrations.CreateCentrals do
     ##################
 
     create table(:companies) do
+      add :central_id, references(:centrals)
       add :name, :string
       add :login, :string, unique: true
       add :password_hash, :string
@@ -80,6 +80,7 @@ defmodule Db.Repo.Migrations.CreateCentrals do
 
     create table(:stops) do
       add :order_id, references(:orders, on_delete: :delete_all)
+      add :location_id, references(:locations, on_delete: :nilify_all)
       add :sequence, :integer, limit: 2
       add :instructions, :text
     end
