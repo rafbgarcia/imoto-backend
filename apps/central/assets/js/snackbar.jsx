@@ -4,19 +4,40 @@ import CloseIcon from 'material-ui-icons/Close'
 import IconButton from 'material-ui/IconButton'
 
 export default class Snack extends React.Component {
+  state = {
+    show: false,
+    message: "",
+  }
+
+  show(message) {
+    this.setState({
+      message,
+      show: true,
+    })
+  }
+
+  close = () => {
+    this.setState({show: false})
+  }
+
   render() {
-    const {show, messages, onClose} = this.props
+    const {show, message} = this.state
 
     return (
       <Snackbar
         anchorOrigin={{vertical: 'top', horizontal: 'right'}}
         open={show}
         autoHideDuration={5000}
-        onRequestClose={() => onClose()}
+        onClose={this.close}
         SnackbarContentProps={{'aria-describedby': 'message-id'}}
-        message={formatMessages(messages)}
+        message={message}
         action={[
-          <IconButton key="close" color="inherit" onClick={() => onClose()}>
+          <IconButton
+            key="close"
+            aria-label="Close"
+            color="inherit"
+            onClick={this.close}
+          >
             <CloseIcon />
           </IconButton>,
         ]}
@@ -24,15 +45,3 @@ export default class Snack extends React.Component {
     )
   }
 }
-
-const formatMessages = (messages) => {
-  if (typeof messages === "string") {
-    return messages
-  } else {
-    return messages.map(Err)
-  }
-}
-
-const Err = (error, i) => (
-  <div className="mb-2" key={i}>{error}</div>
-)

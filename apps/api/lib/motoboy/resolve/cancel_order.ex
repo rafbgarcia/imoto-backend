@@ -39,7 +39,7 @@ defmodule Motoboy.Resolve.CancelOrder do
         order_by: fragment(
           """
           CASE m0.central_id WHEN ? THEN 1 ELSE 2 END,
-          m0.became_available_at ASC,
+          m0.became_available_at ASC
           """, ^central_id
         )
       )

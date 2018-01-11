@@ -12,6 +12,7 @@ import Layout from './layout'
 import Login from './login'
 import Central from './central'
 import client from './graphql_client'
+import SnackProvider from './snack_provider'
 
 const theme = createMuiTheme({
   palette: {
@@ -19,7 +20,6 @@ const theme = createMuiTheme({
     primary: indigo,
   },
 })
-
 
 document.addEventListener('DOMContentLoaded', () => {
   const page = Central.loggedIn() ? <Layout /> : <Login />
@@ -29,7 +29,9 @@ document.addEventListener('DOMContentLoaded', () => {
       <MuiThemeProvider theme={theme}>
         <IntlProvider locale="pt">
           <BrowserRouter>
-            {page}
+            <SnackProvider>
+              {page}
+            </SnackProvider>
           </BrowserRouter>
         </IntlProvider>
       </MuiThemeProvider>

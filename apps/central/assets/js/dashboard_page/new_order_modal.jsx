@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import update from 'immutability-helper';
 import gql from 'graphql-tag'
 import apolloClient from 'js/graphql_client'
@@ -15,7 +16,7 @@ import { InputLabel } from 'material-ui/Input';
 import PhoneField from 'js/shared/phone_field'
 import ZipcodeField from 'js/shared/zipcode_field'
 
-export default class NewOrderModal extends React.Component {
+class NewOrderModal extends React.Component {
   state = {
     companies: null,
     companyId: "",
@@ -43,6 +44,8 @@ export default class NewOrderModal extends React.Component {
   }
 
   fetchMyCompanies() {
+    const {showSnack} = this.context
+
     apolloClient.query({
       query: gql`query getMyCompanies {
         companies: myCompanies {
@@ -52,7 +55,7 @@ export default class NewOrderModal extends React.Component {
       }`,
     })
     .then(({data: {companies}}) => this.setState({companies}))
-    .catch(({graphQLErrors}) => displaySnack(graphQLErrors.map(err => err.message)))
+    .catch(({graphQLErrors}) => showSnack(graphQLErrors.map(err => err.message)))
   }
 
   updateCompanyId = (evt) => {
@@ -62,6 +65,7 @@ export default class NewOrderModal extends React.Component {
     if (companyId.length > 0) {
       const selectedCompany = companies.find((company) => company.id == companyId)
       const companyClone = Object.assign({}, selectedCompany)
+      debugger
       this.setState({companyId, company: selectedCompany})
     } else {
       this.setState({companyId, company: this.emptyCompany()})
@@ -89,12 +93,15 @@ export default class NewOrderModal extends React.Component {
   }
 
   createOrderForExistingCompany() {
+    const {showSnack} = this.context
 
   }
 
   createOrderForNewCompany() {
     const {company} = this.state
-    const {onClose} = this.props
+    const {showSnack} = this.context
+
+    this.props.onClose()
 
     apolloClient.mutate({
       mutation: gql`mutation createOrderForNewCompany($companyParams: CompanyParams) {
@@ -104,12 +111,8 @@ export default class NewOrderModal extends React.Component {
       }`,
       variables: {companyParams: company},
     })
-    .then(({data: {order}}) => {
-      onClose()
-    })
-    .catch(({graphQLErrors}) =>
-      displaySnack(graphQLErrors.map(err => err.message))
-    )
+    .then(({data: {order}}) => showSnack("Pedido enviado"))
+    .catch(({graphQLErrors}) => showSnack(graphQLErrors.map(err => err.message)))
   }
 
   render() {
@@ -220,6 +223,10 @@ export default class NewOrderModal extends React.Component {
   }
 }
 
+NewOrderModal.contextTypes = {
+  showSnack: PropTypes.func
+}
+
 function classes() {
   return {
     formControl: "mb-3",
@@ -257,3 +264,5 @@ function getCompaniesOptions(companies) {
     ))
   }
 }
+
+export default NewOrderModal

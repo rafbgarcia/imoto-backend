@@ -5,7 +5,6 @@ import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Ta
 import Paper from 'material-ui/Paper'
 import _ from 'lodash'
 
-import Snack from 'js/snack'
 import Central from 'js/central'
 import PhoneField from 'js/shared/phone_field'
 import MotoboyRow from './motoboy_row'
@@ -14,8 +13,6 @@ import NewMotoboyForm from './new_motoboy_form'
 export default class MotoboysPage extends React.Component{
   state = {
     motoboys: [],
-    showSnack: false,
-    snackMessages: [],
   }
 
   componentWillMount() {
@@ -56,12 +53,6 @@ export default class MotoboysPage extends React.Component{
         <div className="col-sm-8">
           {MotoboysTable(motoboys, this.displaySnack)}
         </div>
-
-        <Snack
-          show={showSnack}
-          messages={snackMessages}
-          onClose={() => this.setState({showSnack: false})}
-        />
       </div>
     )
   }

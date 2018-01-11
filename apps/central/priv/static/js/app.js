@@ -89454,6 +89454,10 @@ var _graphql_client = require('./graphql_client');
 
 var _graphql_client2 = _interopRequireDefault(_graphql_client);
 
+var _snack_provider = require('./snack_provider');
+
+var _snack_provider2 = _interopRequireDefault(_snack_provider);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 (0, _reactIntl.addLocaleData)(_pt2.default);
@@ -89480,7 +89484,11 @@ document.addEventListener('DOMContentLoaded', function () {
         _react2.default.createElement(
           _reactRouterDom.BrowserRouter,
           null,
-          page
+          _react2.default.createElement(
+            _snack_provider2.default,
+            null,
+            page
+          )
         )
       )
     )
@@ -89951,7 +89959,7 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _templateObject = _taggedTemplateLiteral(['\n  query getOrdersAndMotoboys {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      noMotoboy\n      finished\n      insertedAt\n      confirmedAt\n      finishedAt\n      stops {\n        sequence\n        instructions\n        location {\n          name\n          reference\n          line1\n        }\n      }\n      customer {\n        id name phoneNumber\n      }\n      company { id name phoneNumber}\n      motoboy {\n        id\n        name\n      }\n    }\n\n    motoboys {\n      id\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameUnavailableAt\n      becameBusyAt\n    }\n  }\n'], ['\n  query getOrdersAndMotoboys {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      noMotoboy\n      finished\n      insertedAt\n      confirmedAt\n      finishedAt\n      stops {\n        sequence\n        instructions\n        location {\n          name\n          reference\n          line1\n        }\n      }\n      customer {\n        id name phoneNumber\n      }\n      company { id name phoneNumber}\n      motoboy {\n        id\n        name\n      }\n    }\n\n    motoboys {\n      id\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameUnavailableAt\n      becameBusyAt\n    }\n  }\n']);
+var _templateObject = _taggedTemplateLiteral(['\n  query getOrdersAndMotoboys {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      noMotoboy\n      finished\n      insertedAt\n      confirmedAt\n      finishedAt\n      stops {\n        sequence\n        instructions\n        location { name reference line1 }\n      }\n      customer { id name phoneNumber }\n      company { id name phoneNumber}\n      motoboy { id name }\n    }\n\n    motoboys {\n      id\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameUnavailableAt\n      becameBusyAt\n    }\n  }\n'], ['\n  query getOrdersAndMotoboys {\n    orders {\n      id\n      formattedPrice\n      pending\n      confirmed\n      noMotoboy\n      finished\n      insertedAt\n      confirmedAt\n      finishedAt\n      stops {\n        sequence\n        instructions\n        location { name reference line1 }\n      }\n      customer { id name phoneNumber }\n      company { id name phoneNumber}\n      motoboy { id name }\n    }\n\n    motoboys {\n      id\n      name\n      available\n      busy\n      unavailable\n      becameAvailableAt\n      becameUnavailableAt\n      becameBusyAt\n    }\n  }\n']);
 
 var _react = require('react');
 
@@ -90013,24 +90021,52 @@ var DashboardPage = function (_React$Component) {
       value: {
         modalOpen: false
       }
+    }), Object.defineProperty(_this, 'onCloseNewOrderModal', {
+      enumerable: true,
+      writable: true,
+      value: function value() {
+        _this.setState({ modalOpen: false });
+      }
     }), _temp), _possibleConstructorReturn(_this, _ret);
   }
 
   _createClass(DashboardPage, [{
-    key: 'componentWillMount',
-    value: function componentWillMount() {
-      this.props.data.startPolling(30000);
+    key: 'startStopPolling',
+    value: function startStopPolling() {
+      var _props$data = this.props.data,
+          orders = _props$data.orders,
+          loading = _props$data.loading;
+
+
+      if (loading) return;
+
+      var hasPendingOrder = orders.some(function (order) {
+        return order.pending;
+      });
+      var hasOngoingOrder = orders.some(function (order) {
+        return order.confirmed;
+      });
+
+      if (hasPendingOrder) {
+        this.props.data.startPolling(2000);
+      } else if (hasOngoingOrder) {
+        this.props.data.startPolling(30000);
+      } else {
+        this.props.data.stopPolling();
+      }
     }
   }, {
     key: 'render',
     value: function render() {
       var _this2 = this;
 
-      var _props$data = this.props.data,
-          orders = _props$data.orders,
-          motoboys = _props$data.motoboys;
+      var _props$data2 = this.props.data,
+          orders = _props$data2.orders,
+          motoboys = _props$data2.motoboys;
       var modalOpen = this.state.modalOpen;
 
+
+      this.startStopPolling();
 
       return _react2.default.createElement(
         'main',
@@ -90045,9 +90081,7 @@ var DashboardPage = function (_React$Component) {
           _react2.default.createElement(_Add2.default, { className: 'mr-2' }),
           'Nova entrega'
         ),
-        _react2.default.createElement(_new_order_modal2.default, { open: modalOpen, onClose: function onClose() {
-            return _this2.setState({ modalOpen: false });
-          } }),
+        _react2.default.createElement(_new_order_modal2.default, { open: modalOpen, onClose: this.onCloseNewOrderModal }),
         _react2.default.createElement(
           'div',
           { className: 'row' },
@@ -90419,6 +90453,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _immutabilityHelper = require('immutability-helper');
 
 var _immutabilityHelper2 = _interopRequireDefault(_immutabilityHelper);
@@ -90516,6 +90554,7 @@ var NewOrderModal = function (_React$Component) {
             return company.id == companyId;
           });
           var companyClone = Object.assign({}, selectedCompany);
+          debugger;
           _this.setState({ companyId: companyId, company: selectedCompany });
         } else {
           _this.setState({ companyId: companyId, company: _this.emptyCompany() });
@@ -90578,6 +90617,9 @@ var NewOrderModal = function (_React$Component) {
     value: function fetchMyCompanies() {
       var _this2 = this;
 
+      var showSnack = this.context.showSnack;
+
+
       _graphql_client2.default.query({
         query: (0, _graphqlTag2.default)(_templateObject)
       }).then(function (_ref2) {
@@ -90585,31 +90627,34 @@ var NewOrderModal = function (_React$Component) {
         return _this2.setState({ companies: companies });
       }).catch(function (_ref3) {
         var graphQLErrors = _ref3.graphQLErrors;
-        return displaySnack(graphQLErrors.map(function (err) {
+        return showSnack(graphQLErrors.map(function (err) {
           return err.message;
         }));
       });
     }
   }, {
     key: 'createOrderForExistingCompany',
-    value: function createOrderForExistingCompany() {}
+    value: function createOrderForExistingCompany() {
+      var showSnack = this.context.showSnack;
+    }
   }, {
     key: 'createOrderForNewCompany',
     value: function createOrderForNewCompany() {
       var company = this.state.company;
-      var onClose = this.props.onClose;
+      var showSnack = this.context.showSnack;
 
+
+      this.props.onClose();
 
       _graphql_client2.default.mutate({
         mutation: (0, _graphqlTag2.default)(_templateObject2),
         variables: { companyParams: company }
       }).then(function (_ref4) {
         var order = _ref4.data.order;
-
-        onClose();
+        return showSnack("Pedido enviado");
       }).catch(function (_ref5) {
         var graphQLErrors = _ref5.graphQLErrors;
-        return displaySnack(graphQLErrors.map(function (err) {
+        return showSnack(graphQLErrors.map(function (err) {
           return err.message;
         }));
       });
@@ -90780,8 +90825,9 @@ var NewOrderModal = function (_React$Component) {
   return NewOrderModal;
 }(_react2.default.Component);
 
-exports.default = NewOrderModal;
-
+NewOrderModal.contextTypes = {
+  showSnack: _propTypes2.default.func
+};
 
 function classes() {
   return {
@@ -90840,6 +90886,8 @@ function getCompaniesOptions(companies) {
     });
   }
 }
+
+exports.default = NewOrderModal;
 });
 
 ;require.register("js/dashboard_page/orders.jsx", function(exports, require, module) {
@@ -91552,10 +91600,6 @@ var _lodash = require('lodash');
 
 var _lodash2 = _interopRequireDefault(_lodash);
 
-var _snack = require('js/snack');
-
-var _snack2 = _interopRequireDefault(_snack);
-
 var _central = require('js/central');
 
 var _central2 = _interopRequireDefault(_central);
@@ -91600,9 +91644,7 @@ var MotoboysPage = function (_React$Component) {
       enumerable: true,
       writable: true,
       value: {
-        motoboys: [],
-        showSnack: false,
-        snackMessages: []
+        motoboys: []
       }
     }), Object.defineProperty(_this, 'pushNewMotoboy', {
       enumerable: true,
@@ -91632,8 +91674,6 @@ var MotoboysPage = function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
-      var _this3 = this;
-
       var _state = this.state,
           snackMessages = _state.snackMessages,
           showSnack = _state.showSnack;
@@ -91655,14 +91695,7 @@ var MotoboysPage = function (_React$Component) {
           'div',
           { className: 'col-sm-8' },
           MotoboysTable(motoboys, this.displaySnack)
-        ),
-        _react2.default.createElement(_snack2.default, {
-          show: showSnack,
-          messages: snackMessages,
-          onClose: function onClose() {
-            return _this3.setState({ showSnack: false });
-          }
-        })
+        )
       );
     }
   }]);
@@ -92385,7 +92418,165 @@ var ZipcodeFieldElement = function (_React$Component2) {
 }(_react2.default.Component);
 });
 
-;require.register("js/snack.jsx", function(exports, require, module) {
+;require.register("js/snack_provider.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+var _Snackbar = require('material-ui/Snackbar');
+
+var _Snackbar2 = _interopRequireDefault(_Snackbar);
+
+var _Close = require('material-ui-icons/Close');
+
+var _Close2 = _interopRequireDefault(_Close);
+
+var _IconButton = require('material-ui/IconButton');
+
+var _IconButton2 = _interopRequireDefault(_IconButton);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var SnackProvider = function (_React$Component) {
+  _inherits(SnackProvider, _React$Component);
+
+  function SnackProvider() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
+    _classCallCheck(this, SnackProvider);
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = SnackProvider.__proto__ || Object.getPrototypeOf(SnackProvider)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
+      enumerable: true,
+      writable: true,
+      value: {
+        open: false,
+        messages: [""]
+      }
+    }), Object.defineProperty(_this, 'close', {
+      enumerable: true,
+      writable: true,
+      value: function value() {
+        _this.setState({ open: false, messages: [""] });
+      }
+    }), _temp), _possibleConstructorReturn(_this, _ret);
+  }
+
+  _createClass(SnackProvider, [{
+    key: 'getChildContext',
+    value: function getChildContext() {
+      var _this2 = this;
+
+      return {
+        showSnack: function showSnack(messages) {
+          _this2.setState({ open: true, messages: messages });
+        }
+      };
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _state = this.state,
+          open = _state.open,
+          messages = _state.messages;
+
+
+      return _react2.default.createElement(
+        'div',
+        null,
+        this.props.children,
+        _react2.default.createElement(Snack, { open: open, messages: messages, onClose: this.close })
+      );
+    }
+  }]);
+
+  return SnackProvider;
+}(_react2.default.Component);
+
+SnackProvider.childContextTypes = {
+  showSnack: _propTypes2.default.func
+};
+
+var Snack = function (_React$Component2) {
+  _inherits(Snack, _React$Component2);
+
+  function Snack() {
+    _classCallCheck(this, Snack);
+
+    return _possibleConstructorReturn(this, (Snack.__proto__ || Object.getPrototypeOf(Snack)).apply(this, arguments));
+  }
+
+  _createClass(Snack, [{
+    key: 'render',
+    value: function render() {
+      var _props = this.props,
+          open = _props.open,
+          messages = _props.messages,
+          onClose = _props.onClose;
+
+
+      return _react2.default.createElement(_Snackbar2.default, {
+        anchorOrigin: { vertical: 'top', horizontal: 'right' },
+        open: open,
+        autoHideDuration: 5000,
+        onClose: onClose,
+        SnackbarContentProps: { 'aria-describedby': 'message-id' },
+        message: formatMessages(messages),
+        action: [_react2.default.createElement(
+          _IconButton2.default,
+          { key: 'close', color: 'inherit', onClick: onClose },
+          _react2.default.createElement(_Close2.default, null)
+        )]
+      });
+    }
+  }]);
+
+  return Snack;
+}(_react2.default.Component);
+
+var formatMessages = function formatMessages(messages) {
+  if (typeof messages === "string") {
+    return messages;
+  } else {
+    return messages.map(Err);
+  }
+};
+
+var Err = function Err(error, i) {
+  return _react2.default.createElement(
+    'div',
+    { className: 'mb-2', key: i },
+    error
+  );
+};
+
+exports.default = SnackProvider;
+});
+
+;require.register("js/snackbar.jsx", function(exports, require, module) {
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -92422,34 +92613,63 @@ var Snack = function (_React$Component) {
   _inherits(Snack, _React$Component);
 
   function Snack() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
     _classCallCheck(this, Snack);
 
-    return _possibleConstructorReturn(this, (Snack.__proto__ || Object.getPrototypeOf(Snack)).apply(this, arguments));
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = Snack.__proto__ || Object.getPrototypeOf(Snack)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
+      enumerable: true,
+      writable: true,
+      value: {
+        show: false,
+        message: ""
+      }
+    }), Object.defineProperty(_this, 'close', {
+      enumerable: true,
+      writable: true,
+      value: function value() {
+        _this.setState({ show: false });
+      }
+    }), _temp), _possibleConstructorReturn(_this, _ret);
   }
 
   _createClass(Snack, [{
+    key: 'show',
+    value: function show(message) {
+      this.setState({
+        message: message,
+        show: true
+      });
+    }
+  }, {
     key: 'render',
     value: function render() {
-      var _props = this.props,
-          show = _props.show,
-          messages = _props.messages,
-          onClose = _props.onClose;
+      var _state = this.state,
+          show = _state.show,
+          message = _state.message;
 
 
       return _react2.default.createElement(_Snackbar2.default, {
         anchorOrigin: { vertical: 'top', horizontal: 'right' },
         open: show,
         autoHideDuration: 5000,
-        onRequestClose: function onRequestClose() {
-          return onClose();
-        },
+        onClose: this.close,
         SnackbarContentProps: { 'aria-describedby': 'message-id' },
-        message: formatMessages(messages),
+        message: message,
         action: [_react2.default.createElement(
           _IconButton2.default,
-          { key: 'close', color: 'inherit', onClick: function onClick() {
-              return onClose();
-            } },
+          {
+            key: 'close',
+            'aria-label': 'Close',
+            color: 'inherit',
+            onClick: this.close
+          },
           _react2.default.createElement(_Close2.default, null)
         )]
       });
@@ -92460,23 +92680,6 @@ var Snack = function (_React$Component) {
 }(_react2.default.Component);
 
 exports.default = Snack;
-
-
-var formatMessages = function formatMessages(messages) {
-  if (typeof messages === "string") {
-    return messages;
-  } else {
-    return messages.map(Err);
-  }
-};
-
-var Err = function Err(error, i) {
-  return _react2.default.createElement(
-    'div',
-    { className: 'mb-2', key: i },
-    error
-  );
-};
 });
 
 ;require.register("js/timeago.jsx", function(exports, require, module) {

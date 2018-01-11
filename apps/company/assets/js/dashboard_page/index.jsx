@@ -77,7 +77,7 @@ class DashboardPage extends React.Component {
     if (pendingOrders.length > 0) {
       this.props.data.startPolling(2000)
     } else if (confirmedOrders.length > 0) {
-      this.props.data.startPolling(10000)
+      this.props.data.startPolling(30000)
     } else {
       this.props.data.stopPolling()
     }
