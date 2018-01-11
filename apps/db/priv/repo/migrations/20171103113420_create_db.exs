@@ -78,15 +78,7 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       timestamps()
     end
 
-    create table(:stops) do
-      add :order_id, references(:orders, on_delete: :delete_all)
-      add :location_id, references(:locations, on_delete: :nilify_all)
-      add :sequence, :integer, limit: 2
-      add :instructions, :text
-    end
-
     create table(:locations) do
-      add :stop_id, references(:stops, on_delete: :delete_all)
       add :customer_id, references(:customers, on_delete: :nilify_all)
       add :company_id, references(:companies, on_delete: :nilify_all)
       add :name, :string
@@ -105,6 +97,13 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       add :google_place_id, :string
       add :used_count, :integer, limit: 5
       add :last_used_at, :utc_datetime
+    end
+
+    create table(:stops) do
+      add :order_id, references(:orders, on_delete: :delete_all)
+      add :location_id, references(:locations, on_delete: :nilify_all)
+      add :sequence, :integer, limit: 2
+      add :instructions, :text
     end
 
     create table(:history) do

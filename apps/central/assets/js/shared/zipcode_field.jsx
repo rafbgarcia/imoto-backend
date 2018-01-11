@@ -3,7 +3,7 @@ import MaskedInput from "react-text-mask"
 import Input, { InputLabel } from "material-ui/Input"
 import {FormControl} from "material-ui/Form"
 
-export default class PhoneField extends React.Component {
+export default class ZipcodeField extends React.Component {
   render() {
     const {
       value, onChange, className, fullWidth,
@@ -12,36 +12,26 @@ export default class PhoneField extends React.Component {
 
     return (
       <FormControl className={className} fullWidth={fullWidth}>
-        {label && <InputLabel htmlFor="phoneNumber">{label}</InputLabel>}
+        {label && <InputLabel htmlFor="zipcode">{label}</InputLabel>}
         <Input
-          id="phoneNumber"
+          id="zipcode"
           value={value}
           name={name}
           className={InputClassName}
           onChange={onChange}
-          inputComponent={PhoneFieldElement}
+          inputComponent={ZipcodeFieldElement}
         />
       </FormControl>
     )
   }
 }
 
-class PhoneFieldElement extends React.Component {
-  phoneMask(phoneNumber) {
-    const rawPhoneNumber = phoneNumber.replace(/[^\d]/g, "")
-
-    if (rawPhoneNumber.length > 10) {
-      return ['(', /[1-9]/, /\d/, ')', ' ', /\d/, /\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]
-    } else {
-      return ['(', /[1-9]/, /\d/, ')', ' ', /\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]
-    }
-  }
-
+class ZipcodeFieldElement extends React.Component {
   render() {
     return (
       <MaskedInput
         {...this.props}
-        mask={this.phoneMask}
+        mask={[/\d/, /\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/]}
         placeholderChar={"\u2000"}
         guide={false}
       />

@@ -22,7 +22,7 @@ defmodule Motoboy.Resolve.SendVerificationCode do
   end
 
   defp find_motoboy(phone_number) do
-    Repo.get_by(Core.Motoboy, phone_number: phone_number)
+    Repo.get_by(Core.Motoboy, phone_number: phone_number, active: true)
     |> case do
       nil -> {:error, "Número de telefone não encontrado"}
       motoboy -> {:ok, motoboy}

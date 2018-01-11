@@ -9530,74 +9530,6 @@ module.exports = function removeClass(element, className) {
   })();
 });
 
-require.register("dom-helpers/events/off.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "dom-helpers");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _inDOM = require('../util/inDOM');
-
-var _inDOM2 = _interopRequireDefault(_inDOM);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var off = function off() {};
-if (_inDOM2.default) {
-  off = function () {
-    if (document.addEventListener) return function (node, eventName, handler, capture) {
-      return node.removeEventListener(eventName, handler, capture || false);
-    };else if (document.attachEvent) return function (node, eventName, handler) {
-      return node.detachEvent('on' + eventName, handler);
-    };
-  }();
-}
-
-exports.default = off;
-module.exports = exports['default'];
-  })();
-});
-
-require.register("dom-helpers/events/on.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "dom-helpers");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _inDOM = require('../util/inDOM');
-
-var _inDOM2 = _interopRequireDefault(_inDOM);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var on = function on() {};
-if (_inDOM2.default) {
-  on = function () {
-
-    if (document.addEventListener) return function (node, eventName, handler, capture) {
-      return node.addEventListener(eventName, handler, capture || false);
-    };else if (document.attachEvent) return function (node, eventName, handler) {
-      return node.attachEvent('on' + eventName, function (e) {
-        e = e || window.event;
-        e.target = e.target || e.srcElement;
-        e.currentTarget = node;
-        handler.call(node, e);
-      });
-    };
-  }();
-}
-
-exports.default = on;
-module.exports = exports['default'];
-  })();
-});
-
 require.register("dom-helpers/ownerDocument.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "dom-helpers");
   (function() {
@@ -9667,6 +9599,381 @@ function getWindow(node) {
   return node === node.window ? node : node.nodeType === 9 ? node.defaultView || node.parentWindow : false;
 }
 module.exports = exports["default"];
+  })();
+});
+
+require.register("dom-helpers/style/getComputedStyle.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "dom-helpers");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = _getComputedStyle;
+
+var _camelizeStyle = require('../util/camelizeStyle');
+
+var _camelizeStyle2 = _interopRequireDefault(_camelizeStyle);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var rposition = /^(top|right|bottom|left)$/;
+var rnumnonpx = /^([+-]?(?:\d*\.|)\d+(?:[eE][+-]?\d+|))(?!px)[a-z%]+$/i;
+
+function _getComputedStyle(node) {
+  if (!node) throw new TypeError('No Element passed to `getComputedStyle()`');
+  var doc = node.ownerDocument;
+
+  return 'defaultView' in doc ? doc.defaultView.opener ? node.ownerDocument.defaultView.getComputedStyle(node, null) : window.getComputedStyle(node, null) : {
+    //ie 8 "magic" from: https://github.com/jquery/jquery/blob/1.11-stable/src/css/curCSS.js#L72
+    getPropertyValue: function getPropertyValue(prop) {
+      var style = node.style;
+
+      prop = (0, _camelizeStyle2.default)(prop);
+
+      if (prop == 'float') prop = 'styleFloat';
+
+      var current = node.currentStyle[prop] || null;
+
+      if (current == null && style && style[prop]) current = style[prop];
+
+      if (rnumnonpx.test(current) && !rposition.test(prop)) {
+        // Remember the original values
+        var left = style.left;
+        var runStyle = node.runtimeStyle;
+        var rsLeft = runStyle && runStyle.left;
+
+        // Put in the new values to get a computed value out
+        if (rsLeft) runStyle.left = node.currentStyle.left;
+
+        style.left = prop === 'fontSize' ? '1em' : current;
+        current = style.pixelLeft + 'px';
+
+        // Revert the changed values
+        style.left = left;
+        if (rsLeft) runStyle.left = rsLeft;
+      }
+
+      return current;
+    }
+  };
+}
+module.exports = exports['default'];
+  })();
+});
+
+require.register("dom-helpers/style/index.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "dom-helpers");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = style;
+
+var _camelizeStyle = require('../util/camelizeStyle');
+
+var _camelizeStyle2 = _interopRequireDefault(_camelizeStyle);
+
+var _hyphenateStyle = require('../util/hyphenateStyle');
+
+var _hyphenateStyle2 = _interopRequireDefault(_hyphenateStyle);
+
+var _getComputedStyle2 = require('./getComputedStyle');
+
+var _getComputedStyle3 = _interopRequireDefault(_getComputedStyle2);
+
+var _removeStyle = require('./removeStyle');
+
+var _removeStyle2 = _interopRequireDefault(_removeStyle);
+
+var _properties = require('../transition/properties');
+
+var _isTransform = require('../transition/isTransform');
+
+var _isTransform2 = _interopRequireDefault(_isTransform);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function style(node, property, value) {
+  var css = '';
+  var transforms = '';
+  var props = property;
+
+  if (typeof property === 'string') {
+    if (value === undefined) {
+      return node.style[(0, _camelizeStyle2.default)(property)] || (0, _getComputedStyle3.default)(node).getPropertyValue((0, _hyphenateStyle2.default)(property));
+    } else {
+      (props = {})[property] = value;
+    }
+  }
+
+  Object.keys(props).forEach(function (key) {
+    var value = props[key];
+    if (!value && value !== 0) {
+      (0, _removeStyle2.default)(node, (0, _hyphenateStyle2.default)(key));
+    } else if ((0, _isTransform2.default)(key)) {
+      transforms += key + '(' + value + ') ';
+    } else {
+      css += (0, _hyphenateStyle2.default)(key) + ': ' + value + ';';
+    }
+  });
+
+  if (transforms) {
+    css += _properties.transform + ': ' + transforms + ';';
+  }
+
+  node.style.cssText += ';' + css;
+}
+module.exports = exports['default'];
+  })();
+});
+
+require.register("dom-helpers/style/removeStyle.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "dom-helpers");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = removeStyle;
+function removeStyle(node, key) {
+  return 'removeProperty' in node.style ? node.style.removeProperty(key) : node.style.removeAttribute(key);
+}
+module.exports = exports['default'];
+  })();
+});
+
+require.register("dom-helpers/transition/isTransform.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "dom-helpers");
+  (function() {
+    "use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = isTransform;
+var supportedTransforms = /^((translate|rotate|scale)(X|Y|Z|3d)?|matrix(3d)?|perspective|skew(X|Y)?)$/i;
+
+function isTransform(property) {
+  return !!(property && supportedTransforms.test(property));
+}
+module.exports = exports["default"];
+  })();
+});
+
+require.register("dom-helpers/transition/properties.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "dom-helpers");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.animationEnd = exports.animationDelay = exports.animationTiming = exports.animationDuration = exports.animationName = exports.transitionEnd = exports.transitionDuration = exports.transitionDelay = exports.transitionTiming = exports.transitionProperty = exports.transform = undefined;
+
+var _inDOM = require('../util/inDOM');
+
+var _inDOM2 = _interopRequireDefault(_inDOM);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var transform = 'transform';
+var prefix = void 0,
+    transitionEnd = void 0,
+    animationEnd = void 0;
+var transitionProperty = void 0,
+    transitionDuration = void 0,
+    transitionTiming = void 0,
+    transitionDelay = void 0;
+var animationName = void 0,
+    animationDuration = void 0,
+    animationTiming = void 0,
+    animationDelay = void 0;
+
+if (_inDOM2.default) {
+  var _getTransitionPropert = getTransitionProperties();
+
+  prefix = _getTransitionPropert.prefix;
+  exports.transitionEnd = transitionEnd = _getTransitionPropert.transitionEnd;
+  exports.animationEnd = animationEnd = _getTransitionPropert.animationEnd;
+
+
+  exports.transform = transform = prefix + '-' + transform;
+  exports.transitionProperty = transitionProperty = prefix + '-transition-property';
+  exports.transitionDuration = transitionDuration = prefix + '-transition-duration';
+  exports.transitionDelay = transitionDelay = prefix + '-transition-delay';
+  exports.transitionTiming = transitionTiming = prefix + '-transition-timing-function';
+
+  exports.animationName = animationName = prefix + '-animation-name';
+  exports.animationDuration = animationDuration = prefix + '-animation-duration';
+  exports.animationTiming = animationTiming = prefix + '-animation-delay';
+  exports.animationDelay = animationDelay = prefix + '-animation-timing-function';
+}
+
+exports.transform = transform;
+exports.transitionProperty = transitionProperty;
+exports.transitionTiming = transitionTiming;
+exports.transitionDelay = transitionDelay;
+exports.transitionDuration = transitionDuration;
+exports.transitionEnd = transitionEnd;
+exports.animationName = animationName;
+exports.animationDuration = animationDuration;
+exports.animationTiming = animationTiming;
+exports.animationDelay = animationDelay;
+exports.animationEnd = animationEnd;
+exports.default = {
+  transform: transform,
+  end: transitionEnd,
+  property: transitionProperty,
+  timing: transitionTiming,
+  delay: transitionDelay,
+  duration: transitionDuration
+};
+
+
+function getTransitionProperties() {
+  var style = document.createElement('div').style;
+
+  var vendorMap = {
+    O: function O(e) {
+      return 'o' + e.toLowerCase();
+    },
+    Moz: function Moz(e) {
+      return e.toLowerCase();
+    },
+    Webkit: function Webkit(e) {
+      return 'webkit' + e;
+    },
+    ms: function ms(e) {
+      return 'MS' + e;
+    }
+  };
+
+  var vendors = Object.keys(vendorMap);
+
+  var transitionEnd = void 0,
+      animationEnd = void 0;
+  var prefix = '';
+
+  for (var i = 0; i < vendors.length; i++) {
+    var vendor = vendors[i];
+
+    if (vendor + 'TransitionProperty' in style) {
+      prefix = '-' + vendor.toLowerCase();
+      transitionEnd = vendorMap[vendor]('TransitionEnd');
+      animationEnd = vendorMap[vendor]('AnimationEnd');
+      break;
+    }
+  }
+
+  if (!transitionEnd && 'transitionProperty' in style) transitionEnd = 'transitionend';
+
+  if (!animationEnd && 'animationName' in style) animationEnd = 'animationend';
+
+  style = null;
+
+  return { animationEnd: animationEnd, transitionEnd: transitionEnd, prefix: prefix };
+}
+  })();
+});
+
+require.register("dom-helpers/util/camelize.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "dom-helpers");
+  (function() {
+    "use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = camelize;
+var rHyphen = /-(.)/g;
+
+function camelize(string) {
+  return string.replace(rHyphen, function (_, chr) {
+    return chr.toUpperCase();
+  });
+}
+module.exports = exports["default"];
+  })();
+});
+
+require.register("dom-helpers/util/camelizeStyle.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "dom-helpers");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = camelizeStyleName;
+
+var _camelize = require('./camelize');
+
+var _camelize2 = _interopRequireDefault(_camelize);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var msPattern = /^-ms-/; /**
+                          * Copyright 2014-2015, Facebook, Inc.
+                          * All rights reserved.
+                          * https://github.com/facebook/react/blob/2aeb8a2a6beb00617a4217f7f8284924fa2ad819/src/vendor/core/camelizeStyleName.js
+                          */
+function camelizeStyleName(string) {
+  return (0, _camelize2.default)(string.replace(msPattern, 'ms-'));
+}
+module.exports = exports['default'];
+  })();
+});
+
+require.register("dom-helpers/util/hyphenate.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "dom-helpers");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = hyphenate;
+
+var rUpper = /([A-Z])/g;
+
+function hyphenate(string) {
+  return string.replace(rUpper, '-$1').toLowerCase();
+}
+module.exports = exports['default'];
+  })();
+});
+
+require.register("dom-helpers/util/hyphenateStyle.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "dom-helpers");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = hyphenateStyleName;
+
+var _hyphenate = require('./hyphenate');
+
+var _hyphenate2 = _interopRequireDefault(_hyphenate);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var msPattern = /^ms-/; /**
+                         * Copyright 2013-2014, Facebook, Inc.
+                         * All rights reserved.
+                         * https://github.com/facebook/react/blob/2aeb8a2a6beb00617a4217f7f8284924fa2ad819/src/vendor/core/hyphenateStyleName.js
+                         */
+
+function hyphenateStyleName(string) {
+  return (0, _hyphenate2.default)(string).replace(msPattern, '-ms-');
+}
+module.exports = exports['default'];
   })();
 });
 
@@ -15602,6 +15909,271 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   })();
 });
 
+require.register("immutability-helper/index.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "immutability-helper");
+  (function() {
+    var invariant = require('invariant');
+
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+var splice = Array.prototype.splice;
+
+var toString = Object.prototype.toString
+var type = function(obj) {
+  return toString.call(obj).slice(8, -1);
+}
+
+var assign = Object.assign || /* istanbul ignore next */ function assign(target, source) {
+  getAllKeys(source).forEach(function(key) {
+    if (hasOwnProperty.call(source, key)) {
+      target[key] = source[key];
+    }
+  });
+  return target;
+};
+
+var getAllKeys = typeof Object.getOwnPropertySymbols === 'function' ?
+  function(obj) { return Object.keys(obj).concat(Object.getOwnPropertySymbols(obj)) } :
+  /* istanbul ignore next */ function(obj) { return Object.keys(obj) };
+
+/* istanbul ignore next */
+function copy(object) {
+  if (Array.isArray(object)) {
+    return assign(object.constructor(object.length), object)
+  } else if (type(object) === 'Map') {
+    return new Map(object)
+  } else if (type(object) === 'Set') {
+    return new Set(object)
+  } else if (object && typeof object === 'object') {
+    var prototype = object.constructor && object.constructor.prototype
+    return assign(Object.create(prototype || null), object);
+  } else {
+    return object;
+  }
+}
+
+function newContext() {
+  var commands = assign({}, defaultCommands);
+  update.extend = function(directive, fn) {
+    commands[directive] = fn;
+  };
+  update.isEquals = function(a, b) { return a === b; };
+
+  return update;
+
+  function update(object, spec) {
+    if (typeof spec === 'function') {
+      return spec(object);
+    }
+
+    if (!(Array.isArray(object) && Array.isArray(spec))) {
+      invariant(
+        !Array.isArray(spec),
+        'update(): You provided an invalid spec to update(). The spec may ' +
+        'not contain an array except as the value of $set, $push, $unshift, ' +
+        '$splice or any custom command allowing an array value.'
+      );
+    }
+
+    invariant(
+      typeof spec === 'object' && spec !== null,
+      'update(): You provided an invalid spec to update(). The spec and ' +
+      'every included key path must be plain objects containing one of the ' +
+      'following commands: %s.',
+      Object.keys(commands).join(', ')
+    );
+
+    var nextObject = object;
+    var index, key;
+    getAllKeys(spec).forEach(function(key) {
+      if (hasOwnProperty.call(commands, key)) {
+        var objectWasNextObject = object === nextObject;
+        nextObject = commands[key](spec[key], nextObject, spec, object);
+        if (objectWasNextObject && update.isEquals(nextObject, object)) {
+          nextObject = object;
+        }
+      } else {
+        var nextValueForKey = update(object[key], spec[key]);
+        if (!update.isEquals(nextValueForKey, nextObject[key]) || typeof nextValueForKey === 'undefined' && !hasOwnProperty.call(object, key)) {
+          if (nextObject === object) {
+            nextObject = copy(object);
+          }
+          nextObject[key] = nextValueForKey;
+        }
+      }
+    })
+    return nextObject;
+  }
+
+}
+
+var defaultCommands = {
+  $push: function(value, nextObject, spec) {
+    invariantPushAndUnshift(nextObject, spec, '$push');
+    return value.length ? nextObject.concat(value) : nextObject;
+  },
+  $unshift: function(value, nextObject, spec) {
+    invariantPushAndUnshift(nextObject, spec, '$unshift');
+    return value.length ? value.concat(nextObject) : nextObject;
+  },
+  $splice: function(value, nextObject, spec, originalObject) {
+    invariantSplices(nextObject, spec);
+    value.forEach(function(args) {
+      invariantSplice(args);
+      if (nextObject === originalObject && args.length) nextObject = copy(originalObject);
+      splice.apply(nextObject, args);
+    });
+    return nextObject;
+  },
+  $set: function(value, nextObject, spec) {
+    invariantSet(spec);
+    return value;
+  },
+  $toggle: function(targets, nextObject) {
+    invariantSpecArray(targets, '$toggle');
+    var nextObjectCopy = targets.length ? copy(nextObject) : nextObject;
+
+    targets.forEach(function(target) {
+      nextObjectCopy[target] = !nextObject[target];
+    });
+
+    return nextObjectCopy;
+  },
+  $unset: function(value, nextObject, spec, originalObject) {
+    invariantSpecArray(value, '$unset');
+    value.forEach(function(key) {
+      if (Object.hasOwnProperty.call(nextObject, key)) {
+        if (nextObject === originalObject) nextObject = copy(originalObject);
+        delete nextObject[key];
+      }
+    });
+    return nextObject;
+  },
+  $add: function(value, nextObject, spec, originalObject) {
+    invariantMapOrSet(nextObject, '$add');
+    invariantSpecArray(value, '$add');
+    if (type(nextObject) === 'Map') {
+      value.forEach(function(pair) {
+        var key = pair[0];
+        var value = pair[1];
+        if (nextObject === originalObject && nextObject.get(key) !== value) nextObject = copy(originalObject);
+        nextObject.set(key, value);
+      });
+    } else {
+      value.forEach(function(value) {
+        if (nextObject === originalObject && !nextObject.has(value)) nextObject = copy(originalObject);
+        nextObject.add(value);
+      });
+    }
+    return nextObject;
+  },
+  $remove: function(value, nextObject, spec, originalObject) {
+    invariantMapOrSet(nextObject, '$remove');
+    invariantSpecArray(value, '$remove');
+    value.forEach(function(key) {
+      if (nextObject === originalObject && nextObject.has(key)) nextObject = copy(originalObject);
+      nextObject.delete(key);
+    });
+    return nextObject;
+  },
+  $merge: function(value, nextObject, spec, originalObject) {
+    invariantMerge(nextObject, value);
+    getAllKeys(value).forEach(function(key) {
+      if (value[key] !== nextObject[key]) {
+        if (nextObject === originalObject) nextObject = copy(originalObject);
+        nextObject[key] = value[key];
+      }
+    });
+    return nextObject;
+  },
+  $apply: function(value, original) {
+    invariantApply(value);
+    return value(original);
+  }
+};
+
+module.exports = newContext();
+module.exports.newContext = newContext;
+
+// invariants
+
+function invariantPushAndUnshift(value, spec, command) {
+  invariant(
+    Array.isArray(value),
+    'update(): expected target of %s to be an array; got %s.',
+    command,
+    value
+  );
+  invariantSpecArray(spec[command], command)
+}
+
+function invariantSpecArray(spec, command) {
+  invariant(
+    Array.isArray(spec),
+    'update(): expected spec of %s to be an array; got %s. ' +
+    'Did you forget to wrap your parameter in an array?',
+    command,
+    spec
+  );
+}
+
+function invariantSplices(value, spec) {
+  invariant(
+    Array.isArray(value),
+    'Expected $splice target to be an array; got %s',
+    value
+  );
+  invariantSplice(spec['$splice']);
+}
+
+function invariantSplice(value) {
+  invariant(
+    Array.isArray(value),
+    'update(): expected spec of $splice to be an array of arrays; got %s. ' +
+    'Did you forget to wrap your parameters in an array?',
+    value
+  );
+}
+
+function invariantApply(fn) {
+  invariant(
+    typeof fn === 'function',
+    'update(): expected spec of $apply to be a function; got %s.',
+    fn
+  );
+}
+
+function invariantSet(spec) {
+  invariant(
+    Object.keys(spec).length === 1,
+    'Cannot have more than one key in an object with $set'
+  );
+}
+
+function invariantMerge(target, specValue) {
+  invariant(
+    specValue && typeof specValue === 'object',
+    'update(): $merge expects a spec of type \'object\'; got %s',
+    specValue
+  );
+  invariant(
+    target && typeof target === 'object',
+    'update(): $merge expects a target of type \'object\'; got %s',
+    target
+  );
+}
+
+function invariantMapOrSet(target, command) {
+  var typeOfTarget = type(target);
+  invariant(
+    typeOfTarget === 'Map' || typeOfTarget === 'Set',
+    'update(): %s expects a target of type Set or Map; got %s',
+    command,
+    typeOfTarget
+  );
+}
+  })();
+});
+
 require.register("intl-format-cache/index.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "intl-format-cache");
   (function() {
@@ -18422,53 +18994,6 @@ exports.default = isBrowser;
   })();
 });
 
-require.register("is-observable/index.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "is-observable");
-  (function() {
-    'use strict';
-var symbolObservable = require('symbol-observable');
-
-module.exports = function (fn) {
-	return Boolean(fn && fn[symbolObservable]);
-};
-  })();
-});
-
-require.register("is-observable/node_modules/symbol-observable/index.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "is-observable/node_modules/symbol-observable");
-  (function() {
-    /* global window */
-'use strict';
-
-module.exports = require('./ponyfill')(global || window || this);
-  })();
-});
-
-require.register("is-observable/node_modules/symbol-observable/ponyfill.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "is-observable/node_modules/symbol-observable");
-  (function() {
-    'use strict';
-
-module.exports = function symbolObservablePonyfill(root) {
-	var result;
-	var Symbol = root.Symbol;
-
-	if (typeof Symbol === 'function') {
-		if (Symbol.observable) {
-			result = Symbol.observable;
-		} else {
-			result = Symbol('observable');
-			Symbol.observable = result;
-		}
-	} else {
-		result = '@@observable';
-	}
-
-	return result;
-};
-  })();
-});
-
 require.register("isarray/index.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "isarray");
   (function() {
@@ -18536,789 +19061,6 @@ function camelCase() {
     }
 
     return convertCase(style);
-  }
-
-  return { onProcessStyle: onProcessStyle };
-}
-  })();
-});
-
-require.register("jss-compose/lib/index.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "jss-compose");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.default = jssCompose;
-
-var _warning = require('warning');
-
-var _warning2 = _interopRequireDefault(_warning);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * Set selector.
- *
- * @param {Object} original rule
- * @param {String} className class string
- * @return {Boolean} flag, indicating function was successfull or not
- */
-function registerClass(rule, className) {
-  // Skip falsy values
-  if (!className) return true;
-
-  // Support array of class names `{composes: ['foo', 'bar']}`
-  if (Array.isArray(className)) {
-    for (var index = 0; index < className.length; index++) {
-      var isSetted = registerClass(rule, className[index]);
-      if (!isSetted) return false;
-    }
-
-    return true;
-  }
-
-  // Support space separated class names `{composes: 'foo bar'}`
-  if (className.indexOf(' ') > -1) {
-    return registerClass(rule, className.split(' '));
-  }
-
-  var parent = rule.options.parent;
-
-  // It is a ref to a local rule.
-
-  if (className[0] === '$') {
-    var refRule = parent.getRule(className.substr(1));
-
-    if (!refRule) {
-      (0, _warning2.default)(false, '[JSS] Referenced rule is not defined. \r\n%s', rule);
-      return false;
-    }
-
-    if (refRule === rule) {
-      (0, _warning2.default)(false, '[JSS] Cyclic composition detected. \r\n%s', rule);
-      return false;
-    }
-
-    parent.classes[rule.key] += ' ' + parent.classes[refRule.key];
-
-    return true;
-  }
-
-  rule.options.parent.classes[rule.key] += ' ' + className;
-
-  return true;
-}
-
-/**
- * Convert compose property to additional class, remove property from original styles.
- *
- * @param {Rule} rule
- * @api public
- */
-function jssCompose() {
-  function onProcessStyle(style, rule) {
-    if (!style.composes) return style;
-    registerClass(rule, style.composes);
-    // Remove composes property to prevent infinite loop.
-    delete style.composes;
-    return style;
-  }
-  return { onProcessStyle: onProcessStyle };
-}
-  })();
-});
-
-require.register("jss-default-unit/lib/defaultUnits.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "jss-default-unit");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-/**
- * Generated jss-default-unit CSS property units
- *
- * @type object
- */
-exports['default'] = {
-  'animation-delay': 'ms',
-  'animation-duration': 'ms',
-  'background-position': 'px',
-  'background-position-x': 'px',
-  'background-position-y': 'px',
-  'background-size': 'px',
-  border: 'px',
-  'border-bottom': 'px',
-  'border-bottom-left-radius': 'px',
-  'border-bottom-right-radius': 'px',
-  'border-bottom-width': 'px',
-  'border-left': 'px',
-  'border-left-width': 'px',
-  'border-radius': 'px',
-  'border-right': 'px',
-  'border-right-width': 'px',
-  'border-spacing': 'px',
-  'border-top': 'px',
-  'border-top-left-radius': 'px',
-  'border-top-right-radius': 'px',
-  'border-top-width': 'px',
-  'border-width': 'px',
-  'border-after-width': 'px',
-  'border-before-width': 'px',
-  'border-end-width': 'px',
-  'border-horizontal-spacing': 'px',
-  'border-start-width': 'px',
-  'border-vertical-spacing': 'px',
-  bottom: 'px',
-  'box-shadow': 'px',
-  'column-gap': 'px',
-  'column-rule': 'px',
-  'column-rule-width': 'px',
-  'column-width': 'px',
-  'flex-basis': 'px',
-  'font-size': 'px',
-  'font-size-delta': 'px',
-  height: 'px',
-  left: 'px',
-  'letter-spacing': 'px',
-  'logical-height': 'px',
-  'logical-width': 'px',
-  margin: 'px',
-  'margin-after': 'px',
-  'margin-before': 'px',
-  'margin-bottom': 'px',
-  'margin-left': 'px',
-  'margin-right': 'px',
-  'margin-top': 'px',
-  'max-height': 'px',
-  'max-width': 'px',
-  'margin-end': 'px',
-  'margin-start': 'px',
-  'mask-position-x': 'px',
-  'mask-position-y': 'px',
-  'mask-size': 'px',
-  'max-logical-height': 'px',
-  'max-logical-width': 'px',
-  'min-height': 'px',
-  'min-width': 'px',
-  'min-logical-height': 'px',
-  'min-logical-width': 'px',
-  motion: 'px',
-  'motion-offset': 'px',
-  outline: 'px',
-  'outline-offset': 'px',
-  'outline-width': 'px',
-  padding: 'px',
-  'padding-bottom': 'px',
-  'padding-left': 'px',
-  'padding-right': 'px',
-  'padding-top': 'px',
-  'padding-after': 'px',
-  'padding-before': 'px',
-  'padding-end': 'px',
-  'padding-start': 'px',
-  'perspective-origin-x': '%',
-  'perspective-origin-y': '%',
-  perspective: 'px',
-  right: 'px',
-  'shape-margin': 'px',
-  size: 'px',
-  'text-indent': 'px',
-  'text-stroke': 'px',
-  'text-stroke-width': 'px',
-  top: 'px',
-  'transform-origin': '%',
-  'transform-origin-x': '%',
-  'transform-origin-y': '%',
-  'transform-origin-z': '%',
-  'transition-delay': 'ms',
-  'transition-duration': 'ms',
-  'vertical-align': 'px',
-  width: 'px',
-  'word-spacing': 'px',
-  // Not existing properties.
-  // Used to avoid issues with jss-expand intergration.
-  'box-shadow-x': 'px',
-  'box-shadow-y': 'px',
-  'box-shadow-blur': 'px',
-  'box-shadow-spread': 'px',
-  'font-line-height': 'px',
-  'text-shadow-x': 'px',
-  'text-shadow-y': 'px',
-  'text-shadow-blur': 'px'
-};
-  })();
-});
-
-require.register("jss-default-unit/lib/index.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "jss-default-unit");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-exports['default'] = defaultUnit;
-
-var _isObservable = require('is-observable');
-
-var _isObservable2 = _interopRequireDefault(_isObservable);
-
-var _defaultUnits = require('./defaultUnits');
-
-var _defaultUnits2 = _interopRequireDefault(_defaultUnits);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-/**
- * Clones the object and adds a camel cased property version.
- */
-function addCamelCasedVersion(obj) {
-  var regExp = /(-[a-z])/g;
-  var replace = function replace(str) {
-    return str[1].toUpperCase();
-  };
-  var newObj = {};
-  for (var key in obj) {
-    newObj[key] = obj[key];
-    newObj[key.replace(regExp, replace)] = obj[key];
-  }
-  return newObj;
-}
-
-var units = addCamelCasedVersion(_defaultUnits2['default']);
-
-/**
- * Recursive deep style passing function
- *
- * @param {String} current property
- * @param {(Object|Array|Number|String)} property value
- * @param {Object} options
- * @return {(Object|Array|Number|String)} resulting value
- */
-function iterate(prop, value, options) {
-  if (!value) return value;
-
-  var convertedValue = value;
-
-  var type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
-  if (type === 'object') {
-    if (Array.isArray(value)) type = 'array';
-    if ((0, _isObservable2['default'])(value)) type = 'observable';
-  }
-
-  switch (type) {
-    case 'object':
-      if (prop === 'fallbacks') {
-        for (var innerProp in value) {
-          value[innerProp] = iterate(innerProp, value[innerProp], options);
-        }
-        break;
-      }
-      for (var _innerProp in value) {
-        value[_innerProp] = iterate(prop + '-' + _innerProp, value[_innerProp], options);
-      }
-      break;
-    case 'array':
-      for (var i = 0; i < value.length; i++) {
-        value[i] = iterate(prop, value[i], options);
-      }
-      break;
-    case 'number':
-      if (value !== 0) {
-        convertedValue = value + (options[prop] || units[prop] || '');
-      }
-      break;
-    default:
-      break;
-  }
-
-  return convertedValue;
-}
-
-/**
- * Add unit to numeric values.
- */
-function defaultUnit() {
-  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-  var camelCasedOptions = addCamelCasedVersion(options);
-
-  function onProcessStyle(style, rule) {
-    if (rule.type !== 'style') return style;
-
-    for (var prop in style) {
-      style[prop] = iterate(prop, style[prop], camelCasedOptions);
-    }
-
-    return style;
-  }
-
-  function onChangeValue(value, prop) {
-    return iterate(prop, value, camelCasedOptions);
-  }
-
-  return { onProcessStyle: onProcessStyle, onChangeValue: onChangeValue };
-}
-  })();
-});
-
-require.register("jss-expand/lib/index.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "jss-expand");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-exports.default = jssExpand;
-
-var _isObservable = require('is-observable');
-
-var _isObservable2 = _interopRequireDefault(_isObservable);
-
-var _props = require('./props');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-/**
- * Map values by given prop.
- *
- * @param {Array} array of values
- * @param {String} original property
- * @param {String} original rule
- * @return {String} mapped values
- */
-function mapValuesByProp(value, prop, rule) {
-  return value.map(function (item) {
-    return objectToString(item, prop, rule);
-  });
-}
-
-/**
- * Convert array to string.
- *
- * @param {Array} array of values
- * @param {String} original property
- * @param {Object} sheme, for converting arrays in strings
- * @param {Object} original rule
- * @return {String} converted string
- */
-function arrayToString(value, prop, scheme, rule) {
-  if (scheme[prop] == null) return value.join(',');
-  if (value.length === 0) return '';
-  if (Array.isArray(value[0])) return arrayToString(value[0], prop, scheme);
-  if (_typeof(value[0]) === 'object' && !(0, _isObservable2.default)(value[0])) {
-    return mapValuesByProp(value, prop, rule);
-  }
-  return value.join(' ');
-}
-
-/**
- * Convert object to string.
- *
- * @param {Object} object of values
- * @param {String} original property
- * @param {Object} original rule
- * @param {Boolean} is fallback prop
- * @return {String} converted string
- */
-function objectToString(value, prop, rule, isFallback) {
-  if (!(_props.propObj[prop] || _props.customPropObj[prop])) return '';
-
-  var result = [];
-
-  // Check if exists any non-standart property
-  if (_props.customPropObj[prop]) {
-    value = customPropsToStyle(value, rule, _props.customPropObj[prop], isFallback);
-  }
-
-  // Pass throught all standart props
-  if (Object.keys(value).length) {
-    for (var baseProp in _props.propObj[prop]) {
-      if (value[baseProp]) {
-        if (Array.isArray(value[baseProp])) {
-          result.push(arrayToString(value[baseProp], baseProp, _props.propArrayInObj));
-        } else result.push(value[baseProp]);
-        continue;
-      }
-
-      // Add default value from props config.
-      if (_props.propObj[prop][baseProp] != null) {
-        result.push(_props.propObj[prop][baseProp]);
-      }
-    }
-  }
-
-  return result.join(' ');
-}
-
-/**
- * Convert custom properties values to styles adding them to rule directly
- *
- * @param {Object} object of values
- * @param {Object} original rule
- * @param {String} property, that contain partial custom properties
- * @param {Boolean} is fallback prop
- * @return {Object} value without custom properties, that was already added to rule
- */
-function customPropsToStyle(value, rule, customProps, isFallback) {
-  for (var prop in customProps) {
-    var propName = customProps[prop];
-
-    // If current property doesn't exist already in rule - add new one
-    if (typeof value[prop] !== 'undefined' && (isFallback || !rule.prop(propName))) {
-      var appendedValue = styleDetector(_defineProperty({}, propName, value[prop]), rule)[propName];
-
-      // Add style directly in rule
-      if (isFallback) rule.style.fallbacks[propName] = appendedValue;else rule.style[propName] = appendedValue;
-    }
-    // Delete converted property to avoid double converting
-    delete value[prop];
-  }
-
-  return value;
-}
-
-/**
- * Detect if a style needs to be converted.
- *
- * @param {Object} style
- * @param {Object} rule
- * @param {Boolean} is fallback prop
- * @return {Object} convertedStyle
- */
-function styleDetector(style, rule, isFallback) {
-  for (var prop in style) {
-    var value = style[prop];
-
-    if (Array.isArray(value)) {
-      // Check double arrays to avoid recursion.
-      if (!Array.isArray(value[0])) {
-        if (prop === 'fallbacks') {
-          for (var index = 0; index < style.fallbacks.length; index++) {
-            style.fallbacks[index] = styleDetector(style.fallbacks[index], rule, true);
-          }
-          continue;
-        }
-
-        style[prop] = arrayToString(value, prop, _props.propArray);
-        // Avoid creating properties with empty values
-        if (!style[prop]) delete style[prop];
-      }
-    } else if ((typeof value === 'undefined' ? 'undefined' : _typeof(value)) === 'object' && !(0, _isObservable2.default)(value)) {
-      if (prop === 'fallbacks') {
-        style.fallbacks = styleDetector(style.fallbacks, rule, true);
-        continue;
-      }
-
-      style[prop] = objectToString(value, prop, rule, isFallback);
-      // Avoid creating properties with empty values
-      if (!style[prop]) delete style[prop];
-    }
-
-    // Maybe a computed value resulting in an empty string
-    else if (style[prop] === '') delete style[prop];
-  }
-
-  return style;
-}
-
-/**
- * Adds possibility to write expanded styles.
- *
- * @param {Rule} rule
- * @api public
- */
-function jssExpand() {
-  function onProcessStyle(style, rule) {
-    if (!style || rule.type !== 'style') return style;
-
-    if (Array.isArray(style)) {
-      // Pass rules one by one and reformat them
-      for (var index = 0; index < style.length; index++) {
-        style[index] = styleDetector(style[index], rule);
-      }
-      return style;
-    }
-
-    return styleDetector(style, rule);
-  }
-
-  return { onProcessStyle: onProcessStyle };
-}
-  })();
-});
-
-require.register("jss-expand/lib/props.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "jss-expand");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-/**
- * A scheme for converting properties from array to regular style.
- * All properties listed below will be transformed to a string separated by space.
- */
-var propArray = exports.propArray = {
-  'background-size': true,
-  'background-position': true,
-  border: true,
-  'border-bottom': true,
-  'border-left': true,
-  'border-top': true,
-  'border-right': true,
-  'border-radius': true,
-  'box-shadow': true,
-  flex: true,
-  margin: true,
-  padding: true,
-  outline: true,
-  'transform-origin': true,
-  transform: true,
-  transition: true
-};
-
-/**
- * A scheme for converting arrays to regular styles inside of objects.
- * For e.g.: "{position: [0, 0]}" => "background-position: 0 0;".
- */
-var propArrayInObj = exports.propArrayInObj = {
-  position: true, // background-position
-  size: true // background-size
-};
-
-/**
- * A scheme for parsing and building correct styles from passed objects.
- */
-var propObj = exports.propObj = {
-  padding: {
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0
-  },
-  margin: {
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0
-  },
-  background: {
-    attachment: null,
-    color: null,
-    image: null,
-    position: null,
-    repeat: null
-  },
-  border: {
-    width: null,
-    style: null,
-    color: null
-  },
-  'border-top': {
-    width: null,
-    style: null,
-    color: null
-  },
-  'border-right': {
-    width: null,
-    style: null,
-    color: null
-  },
-  'border-bottom': {
-    width: null,
-    style: null,
-    color: null
-  },
-  'border-left': {
-    width: null,
-    style: null,
-    color: null
-  },
-  outline: {
-    width: null,
-    style: null,
-    color: null
-  },
-  'list-style': {
-    type: null,
-    position: null,
-    image: null
-  },
-  transition: {
-    property: null,
-    duration: null,
-    'timing-function': null,
-    timingFunction: null, // Needed for avoiding comilation issues with jss-camel-case
-    delay: null
-  },
-  animation: {
-    name: null,
-    duration: null,
-    'timing-function': null,
-    timingFunction: null, // Needed to avoid compilation issues with jss-camel-case
-    delay: null,
-    'iteration-count': null,
-    iterationCount: null, // Needed to avoid compilation issues with jss-camel-case
-    direction: null,
-    'fill-mode': null,
-    fillMode: null, // Needed to avoid compilation issues with jss-camel-case
-    'play-state': null,
-    playState: null // Needed to avoid compilation issues with jss-camel-case
-  },
-  'box-shadow': {
-    x: 0,
-    y: 0,
-    blur: 0,
-    spread: 0,
-    color: null,
-    inset: null
-  },
-  'text-shadow': {
-    x: 0,
-    y: 0,
-    blur: null,
-    color: null
-  }
-};
-
-/**
- * A scheme for converting non-standart properties inside object.
- * For e.g.: include 'border-radius' property inside 'border' object.
- */
-var customPropObj = exports.customPropObj = {
-  border: {
-    radius: 'border-radius'
-  },
-  background: {
-    size: 'background-size',
-    image: 'background-image'
-  },
-  font: {
-    style: 'font-style',
-    variant: 'font-variant',
-    weight: 'font-weight',
-    stretch: 'font-stretch',
-    size: 'font-size',
-    family: 'font-family',
-    lineHeight: 'line-height', // Needed to avoid compilation issues with jss-camel-case
-    'line-height': 'line-height'
-  },
-  flex: {
-    grow: 'flex-grow',
-    basis: 'flex-basis',
-    direction: 'flex-direction',
-    wrap: 'flex-wrap',
-    flow: 'flex-flow',
-    shrink: 'flex-shrink'
-  },
-  align: {
-    self: 'align-self',
-    items: 'align-items',
-    content: 'align-content'
-  }
-};
-  })();
-});
-
-require.register("jss-extend/lib/index.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "jss-extend");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-exports['default'] = jssExtend;
-
-var _warning = require('warning');
-
-var _warning2 = _interopRequireDefault(_warning);
-
-var _isObservable = require('is-observable');
-
-var _isObservable2 = _interopRequireDefault(_isObservable);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-var isObject = function isObject(obj) {
-  return obj && (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object' && !Array.isArray(obj) && !(0, _isObservable2['default'])(obj);
-};
-
-/**
- * Recursively extend styles.
- */
-function extend(style, rule, sheet) {
-  var newStyle = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
-
-  if (typeof style.extend === 'string') {
-    if (sheet) {
-      var refRule = sheet.getRule(style.extend);
-      if (refRule) {
-        if (refRule === rule) (0, _warning2['default'])(false, '[JSS] A rule tries to extend itself \r\n%s', rule);else if (refRule.options.parent) {
-          var originalStyle = refRule.options.parent.rules.raw[style.extend];
-          extend(originalStyle, rule, sheet, newStyle);
-        }
-      }
-    }
-  } else if (Array.isArray(style.extend)) {
-    for (var index = 0; index < style.extend.length; index++) {
-      extend(style.extend[index], rule, sheet, newStyle);
-    }
-  } else {
-    for (var prop in style.extend) {
-      if (prop === 'extend') {
-        extend(style.extend.extend, rule, sheet, newStyle);
-      } else if (isObject(style.extend[prop])) {
-        if (!newStyle[prop]) newStyle[prop] = {};
-        extend(style.extend[prop], rule, sheet, newStyle[prop]);
-      } else {
-        newStyle[prop] = style.extend[prop];
-      }
-    }
-  }
-  // Copy base style.
-  for (var _prop in style) {
-    if (_prop === 'extend') continue;
-    if (isObject(newStyle[_prop]) && isObject(style[_prop])) {
-      extend(style[_prop], rule, sheet, newStyle[_prop]);
-    } else if (isObject(style[_prop])) {
-      newStyle[_prop] = extend(style[_prop], rule, sheet);
-    } else {
-      newStyle[_prop] = style[_prop];
-    }
-  }
-
-  return newStyle;
-}
-
-/**
- * Handle `extend` property.
- *
- * @param {Rule} rule
- * @api public
- */
-function jssExtend() {
-  function onProcessStyle(style, rule, sheet) {
-    return style.extend ? extend(style, rule, sheet) : style;
   }
 
   return { onProcessStyle: onProcessStyle };
@@ -19640,66 +19382,6 @@ function jssNested() {
   })();
 });
 
-require.register("jss-preset-default/lib/index.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "jss-preset-default");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _jssTemplate = require('jss-template');
-
-var _jssTemplate2 = _interopRequireDefault(_jssTemplate);
-
-var _jssGlobal = require('jss-global');
-
-var _jssGlobal2 = _interopRequireDefault(_jssGlobal);
-
-var _jssExtend = require('jss-extend');
-
-var _jssExtend2 = _interopRequireDefault(_jssExtend);
-
-var _jssNested = require('jss-nested');
-
-var _jssNested2 = _interopRequireDefault(_jssNested);
-
-var _jssCompose = require('jss-compose');
-
-var _jssCompose2 = _interopRequireDefault(_jssCompose);
-
-var _jssCamelCase = require('jss-camel-case');
-
-var _jssCamelCase2 = _interopRequireDefault(_jssCamelCase);
-
-var _jssDefaultUnit = require('jss-default-unit');
-
-var _jssDefaultUnit2 = _interopRequireDefault(_jssDefaultUnit);
-
-var _jssExpand = require('jss-expand');
-
-var _jssExpand2 = _interopRequireDefault(_jssExpand);
-
-var _jssVendorPrefixer = require('jss-vendor-prefixer');
-
-var _jssVendorPrefixer2 = _interopRequireDefault(_jssVendorPrefixer);
-
-var _jssPropsSort = require('jss-props-sort');
-
-var _jssPropsSort2 = _interopRequireDefault(_jssPropsSort);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-exports.default = function () {
-  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  return {
-    plugins: [(0, _jssTemplate2.default)(options.template), (0, _jssGlobal2.default)(options.global), (0, _jssExtend2.default)(options.extend), (0, _jssNested2.default)(options.nested), (0, _jssCompose2.default)(options.compose), (0, _jssCamelCase2.default)(options.camelCase), (0, _jssDefaultUnit2.default)(options.defaultUnit), (0, _jssExpand2.default)(options.expand), (0, _jssVendorPrefixer2.default)(options.vendorPrefixer), (0, _jssPropsSort2.default)(options.propsSort)]
-  };
-};
-  })();
-});
-
 require.register("jss-props-sort/lib/index.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "jss-props-sort");
   (function() {
@@ -19730,78 +19412,6 @@ function jssPropsSort() {
 
   return { onProcessStyle: onProcessStyle };
 }
-  })();
-});
-
-require.register("jss-template/lib/index.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "jss-template");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _parse = require('./parse');
-
-var _parse2 = _interopRequireDefault(_parse);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-var onProcessRule = function onProcessRule(rule) {
-  if (typeof rule.style === 'string') {
-    rule.style = (0, _parse2['default'])(rule.style);
-  }
-};
-
-exports['default'] = function () {
-  return { onProcessRule: onProcessRule };
-};
-  })();
-});
-
-require.register("jss-template/lib/parse.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "jss-template");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _warning = require('warning');
-
-var _warning2 = _interopRequireDefault(_warning);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-var semiWithNl = /;\n/;
-
-/**
- * Naive CSS parser.
- * - Supports only rule body (no selectors)
- * - Requires semicolon and new line after the value (except of last line)
- * - No nested rules support
- */
-
-exports['default'] = function (cssText) {
-  var style = {};
-  var split = cssText.split(semiWithNl);
-  for (var i = 0; i < split.length; i++) {
-    var decl = split[i];
-
-    if (!decl) continue;
-    var colonIndex = decl.indexOf(':');
-    if (colonIndex === -1) {
-      (0, _warning2['default'])(false, 'Malformed CSS string "%s"', decl);
-      continue;
-    }
-    var prop = decl.substr(0, colonIndex).trim();
-    var value = decl.substr(colonIndex + 1).trim();
-    style[prop] = value;
-  }
-  return style;
-};
   })();
 });
 
@@ -22228,47 +21838,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'd
  * each request in order to not leak sheets across requests.
  */
 exports['default'] = new _SheetsRegistry2['default']();
-  })();
-});
-
-require.register("jss/lib/types.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "jss");
-  (function() {
-    'use strict';
-
-var _Jss = require('./Jss');
-
-var _Jss2 = _interopRequireDefault(_Jss);
-
-var _StyleSheet = require('./StyleSheet');
-
-var _StyleSheet2 = _interopRequireDefault(_StyleSheet);
-
-var _ConditionalRule = require('./rules/ConditionalRule');
-
-var _ConditionalRule2 = _interopRequireDefault(_ConditionalRule);
-
-var _KeyframesRule = require('./rules/KeyframesRule');
-
-var _KeyframesRule2 = _interopRequireDefault(_KeyframesRule);
-
-var _StyleRule = require('./rules/StyleRule');
-
-var _StyleRule2 = _interopRequireDefault(_StyleRule);
-
-var _ViewportRule = require('./rules/ViewportRule');
-
-var _ViewportRule2 = _interopRequireDefault(_ViewportRule);
-
-var _SimpleRule = require('./rules/SimpleRule');
-
-var _SimpleRule2 = _interopRequireDefault(_SimpleRule);
-
-var _FontFaceRule = require('./rules/FontFaceRule');
-
-var _FontFaceRule2 = _interopRequireDefault(_FontFaceRule);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
   })();
 });
 
@@ -42065,12 +41634,13 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-// @inheritedComponent Paper
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -42088,7 +41658,7 @@ var _Paper2 = _interopRequireDefault(_Paper);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
+// @inheritedComponent Paper
 
 var styles = exports.styles = function styles(theme) {
   return {
@@ -42131,38 +41701,6 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Color = require('prop-types').oneOf(['inherit', 'primary', 'accent', 'default']);
-
-var babelPluginFlowReactPropTypes_proptype_Position = require('prop-types').oneOf(['static', 'fixed', 'absolute']);
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The color of the component. It's using the theme palette when that makes sense.
-   */
-  color: require('prop-types').oneOf(['inherit', 'primary', 'accent', 'default']),
-
-  /**
-   * The positioning type.
-   */
-  position: require('prop-types').oneOf(['static', 'fixed', 'absolute'])
-};
-
-
 function AppBar(props) {
   var _classNames;
 
@@ -42183,12 +41721,29 @@ function AppBar(props) {
   );
 }
 
-AppBar.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  color: require('prop-types').oneOf(['inherit', 'primary', 'accent', 'default']).isRequired,
-  position: require('prop-types').oneOf(['static', 'fixed', 'absolute']).isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'color', require('prop-types').oneOf(['inherit', 'primary', 'accent', 'default'])), (0, _defineProperty3.default)(_ref, 'position', require('prop-types').oneOf(['static', 'fixed', 'absolute'])), _ref) : {};
+AppBar.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component.
+   */
+  children: _propTypes2.default.node.isRequired,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The color of the component. It's using the theme palette when that makes sense.
+   */
+  color: _propTypes2.default.oneOf(['inherit', 'primary', 'accent', 'default']),
+  /**
+   * The positioning type.
+   */
+  position: _propTypes2.default.oneOf(['static', 'fixed', 'absolute'])
+} : {};
+
 AppBar.defaultProps = {
   color: 'primary',
   position: 'fixed'
@@ -42242,12 +41797,13 @@ var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
 
-var _ref;
-// @inheritedComponent ButtonBase
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -42265,9 +41821,7 @@ var _ButtonBase2 = _interopRequireDefault(_ButtonBase);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
+// @inheritedComponent ButtonBase
 
 var styles = exports.styles = function styles(theme) {
   return {
@@ -42407,83 +41961,13 @@ var styles = exports.styles = function styles(theme) {
       '&:active': {
         boxShadow: theme.shadows[12]
       }
+    },
+    mini: {
+      width: 40,
+      height: 40
     }
   };
 };
-
-var babelPluginFlowReactPropTypes_proptype_Color = require('prop-types').oneOf(['default', 'inherit', 'primary', 'accent', 'contrast']);
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the button.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired,
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The color of the component. It's using the theme palette when that makes sense.
-   */
-  color: require('prop-types').oneOf(['default', 'inherit', 'primary', 'accent', 'contrast']),
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   * The default value is a `button`.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType),
-
-  /**
-   * Uses a smaller minWidth, ideal for things like card actions.
-   */
-  dense: require('prop-types').bool,
-
-  /**
-   * If `true`, the button will be disabled.
-   */
-  disabled: require('prop-types').bool,
-
-  /**
-   * If `true`, the  keyboard focus ripple will be disabled.
-   * `disableRipple` must also be true.
-   */
-  disableFocusRipple: require('prop-types').bool,
-
-  /**
-   * If `true`, the ripple effect will be disabled.
-   */
-  disableRipple: require('prop-types').bool,
-
-  /**
-   * If `true`, will use floating action button styling.
-   */
-  fab: require('prop-types').bool,
-
-  /**
-   * The URL to link to when the button is clicked.
-   * If defined, an `a` element will be used as the root node.
-   */
-  href: require('prop-types').string,
-
-  /**
-   * If `true`, the button will use raised styling.
-   */
-  raised: require('prop-types').bool,
-
-  /**
-   * @ignore
-   */
-  type: require('prop-types').string
-};
-
 
 function Button(props) {
   var _classNames;
@@ -42496,12 +41980,13 @@ function Button(props) {
       disabled = props.disabled,
       disableFocusRipple = props.disableFocusRipple,
       fab = props.fab,
+      mini = props.mini,
       raised = props.raised,
-      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'className', 'color', 'dense', 'disabled', 'disableFocusRipple', 'fab', 'raised']);
+      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'className', 'color', 'dense', 'disabled', 'disableFocusRipple', 'fab', 'mini', 'raised']);
 
 
   var flat = !raised && !fab;
-  var className = (0, _classnames2.default)((_classNames = {}, (0, _defineProperty3.default)(_classNames, classes.root, true), (0, _defineProperty3.default)(_classNames, classes.raised, raised || fab), (0, _defineProperty3.default)(_classNames, classes.fab, fab), (0, _defineProperty3.default)(_classNames, classes.colorInherit, color === 'inherit'), (0, _defineProperty3.default)(_classNames, classes.flatPrimary, flat && color === 'primary'), (0, _defineProperty3.default)(_classNames, classes.flatAccent, flat && color === 'accent'), (0, _defineProperty3.default)(_classNames, classes.flatContrast, flat && color === 'contrast'), (0, _defineProperty3.default)(_classNames, classes.raisedPrimary, !flat && color === 'primary'), (0, _defineProperty3.default)(_classNames, classes.raisedAccent, !flat && color === 'accent'), (0, _defineProperty3.default)(_classNames, classes.raisedContrast, !flat && color === 'contrast'), (0, _defineProperty3.default)(_classNames, classes.dense, dense), (0, _defineProperty3.default)(_classNames, classes.disabled, disabled), _classNames), classNameProp);
+  var className = (0, _classnames2.default)(classes.root, (_classNames = {}, (0, _defineProperty3.default)(_classNames, classes.raised, raised || fab), (0, _defineProperty3.default)(_classNames, classes.fab, fab), (0, _defineProperty3.default)(_classNames, classes.mini, fab && mini), (0, _defineProperty3.default)(_classNames, classes.colorInherit, color === 'inherit'), (0, _defineProperty3.default)(_classNames, classes.flatPrimary, flat && color === 'primary'), (0, _defineProperty3.default)(_classNames, classes.flatAccent, flat && color === 'accent'), (0, _defineProperty3.default)(_classNames, classes.flatContrast, flat && color === 'contrast'), (0, _defineProperty3.default)(_classNames, classes.raisedPrimary, !flat && color === 'primary'), (0, _defineProperty3.default)(_classNames, classes.raisedAccent, !flat && color === 'accent'), (0, _defineProperty3.default)(_classNames, classes.raisedContrast, !flat && color === 'contrast'), (0, _defineProperty3.default)(_classNames, classes.dense, dense), (0, _defineProperty3.default)(_classNames, classes.disabled, disabled), _classNames), classNameProp);
 
   return _react2.default.createElement(
     _ButtonBase2.default,
@@ -42519,26 +42004,78 @@ function Button(props) {
   );
 }
 
-Button.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  color: require('prop-types').oneOf(['default', 'inherit', 'primary', 'accent', 'contrast']).isRequired,
-  dense: require('prop-types').bool.isRequired,
-  disabled: require('prop-types').bool.isRequired,
-  fab: require('prop-types').bool.isRequired,
-  disableFocusRipple: require('prop-types').bool.isRequired,
-  raised: require('prop-types').bool.isRequired,
-  disableRipple: require('prop-types').bool.isRequired,
-  type: require('prop-types').string.isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'color', require('prop-types').oneOf(['default', 'inherit', 'primary', 'accent', 'contrast'])), (0, _defineProperty3.default)(_ref, 'component', typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType)), (0, _defineProperty3.default)(_ref, 'dense', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'disabled', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'disableFocusRipple', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'disableRipple', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'fab', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'href', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'raised', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'type', require('prop-types').string), _ref) : {};
+Button.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the button.
+   */
+  children: _propTypes2.default.node.isRequired,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The color of the component. It's using the theme palette when that makes sense.
+   */
+  color: _propTypes2.default.oneOf(['default', 'inherit', 'primary', 'accent', 'contrast']),
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   * The default value is a `button`.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * Uses a smaller minWidth, ideal for things like card actions.
+   */
+  dense: _propTypes2.default.bool,
+  /**
+   * If `true`, the button will be disabled.
+   */
+  disabled: _propTypes2.default.bool,
+  /**
+   * If `true`, the  keyboard focus ripple will be disabled.
+   * `disableRipple` must also be true.
+   */
+  disableFocusRipple: _propTypes2.default.bool,
+  /**
+   * If `true`, the ripple effect will be disabled.
+   */
+  disableRipple: _propTypes2.default.bool,
+  /**
+   * If `true`, will use floating action button styling.
+   */
+  fab: _propTypes2.default.bool,
+  /**
+   * The URL to link to when the button is clicked.
+   * If defined, an `a` element will be used as the root node.
+   */
+  href: _propTypes2.default.string,
+  /**
+   * If `true`, and `fab` is `true`, will use mini floating action button styling.
+   */
+  mini: _propTypes2.default.bool,
+  /**
+   * If `true`, the button will use raised styling.
+   */
+  raised: _propTypes2.default.bool,
+  /**
+   * @ignore
+   */
+  type: _propTypes2.default.string
+} : {};
+
 Button.defaultProps = {
   color: 'default',
   dense: false,
   disabled: false,
-  fab: false,
   disableFocusRipple: false,
-  raised: false,
   disableRipple: false,
+  fab: false,
+  mini: false,
+  raised: false,
   type: 'button'
 };
 
@@ -42614,6 +42151,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _reactDom = require('react-dom');
 
 var _classnames = require('classnames');
@@ -42640,10 +42181,6 @@ var _createRippleHandler2 = _interopRequireDefault(_createRippleHandler);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any; //  weak
-
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: {
@@ -42657,8 +42194,10 @@ var styles = exports.styles = function styles(theme) {
       outline: 'none',
       border: 0,
       borderRadius: 0,
+      padding: 0, // Reset default style
       cursor: 'pointer',
       userSelect: 'none',
+      verticalAlign: 'middle',
       appearance: 'none',
       textDecoration: 'none',
       // So we take precedent over the style of a native <a /> element.
@@ -42672,138 +42211,6 @@ var styles = exports.styles = function styles(theme) {
       cursor: 'default'
     }
   };
-};
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * If `true`, the ripples will be centered.
-   * They won't start at the cursor interaction position.
-   */
-  centerRipple: require('prop-types').bool,
-
-  /**
-   * The content of the component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   * The default value is a `button`.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType),
-
-  /**
-   * If `true`, the base button will be disabled.
-   */
-  disabled: require('prop-types').bool,
-
-  /**
-   * If `true`, the ripple effect will be disabled.
-   */
-  disableRipple: require('prop-types').bool,
-
-  /**
-   * If `true`, the base button will have a keyboard focus ripple.
-   * `disableRipple` must also be `false`.
-   */
-  focusRipple: require('prop-types').bool,
-
-  /**
-   * The CSS class applied while the component is keyboard focused.
-   */
-  keyboardFocusedClassName: require('prop-types').string,
-
-  /**
-   * @ignore
-   */
-  onBlur: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  onClick: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  onFocus: require('prop-types').func,
-
-  /**
-   * Callback fired when the component is focused with a keyboard.
-   * We trigger a `onFocus` callback too.
-   */
-  onKeyboardFocus: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  onKeyDown: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  onKeyUp: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  onMouseDown: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  onMouseLeave: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  onMouseUp: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  onTouchEnd: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  onTouchMove: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  onTouchStart: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  role: require('prop-types').string,
-
-  /**
-   * Use that property to pass a ref callback to the root component.
-   */
-  rootRef: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  tabIndex: require('prop-types').oneOfType([require('prop-types').number, require('prop-types').string]),
-
-  /**
-   * @ignore
-   */
-  type: require('prop-types').string.isRequired
 };
 
 var ButtonBase = function (_React$Component) {
@@ -42892,8 +42299,9 @@ var ButtonBase = function (_React$Component) {
       }
 
       event.persist();
-      var keyboardFocusCallback = _this.onKeyboardFocusHandler.bind(_this, event);
-      (0, _keyboardFocus.detectKeyboardFocus)(_this, _this.button, keyboardFocusCallback);
+      (0, _keyboardFocus.detectKeyboardFocus)(_this, _this.button, function () {
+        _this.onKeyboardFocusHandler(event);
+      });
 
       if (_this.props.onFocus) {
         _this.props.onFocus(event);
@@ -42906,6 +42314,17 @@ var ButtonBase = function (_React$Component) {
     value: function componentDidMount() {
       this.button = (0, _reactDom.findDOMNode)(this);
       (0, _keyboardFocus.listenForFocusKeys)();
+    }
+  }, {
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(nextProps) {
+      // The blur won't fire when the disabled state is set on a focused input.
+      // We need to book keep the focused state manually.
+      if (!this.props.disabled && nextProps.disabled && this.state.keyboardFocused) {
+        this.setState({
+          keyboardFocused: false
+        });
+      }
     }
   }, {
     key: 'componentWillUpdate',
@@ -42922,25 +42341,10 @@ var ButtonBase = function (_React$Component) {
     } // Used to help track keyboard activation keyDown
 
   }, {
-    key: 'renderRipple',
-    value: function renderRipple() {
-      var _this2 = this;
-
-      if (!this.props.disableRipple && !this.props.disabled) {
-        return _react2.default.createElement(_TouchRipple2.default, {
-          innerRef: function innerRef(node) {
-            _this2.ripple = node;
-          },
-          center: this.props.centerRipple
-        });
-      }
-
-      return null;
-    }
-  }, {
     key: 'render',
     value: function render() {
-      var _classNames;
+      var _classNames,
+          _this2 = this;
 
       var _props = this.props,
           centerRipple = _props.centerRipple,
@@ -43007,24 +42411,138 @@ var ButtonBase = function (_React$Component) {
           onTouchStart: this.handleTouchStart,
           tabIndex: disabled ? -1 : tabIndex,
           className: className
-        }, buttonProps, other, {
+        }, buttonProps, {
           ref: rootRef
-        }),
+        }, other),
         children,
-        this.renderRipple()
+        !disableRipple && !disabled ? _react2.default.createElement(_TouchRipple2.default, {
+          innerRef: function innerRef(node) {
+            _this2.ripple = node;
+          },
+          center: centerRipple
+        }) : null
       );
     }
   }]);
   return ButtonBase;
 }(_react2.default.Component);
 
+ButtonBase.propTypes = 'development' !== "production" ? {
+  /**
+   * If `true`, the ripples will be centered.
+   * They won't start at the cursor interaction position.
+   */
+  centerRipple: _propTypes2.default.bool,
+  /**
+   * The content of the component.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   * The default value is a `button`.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * If `true`, the base button will be disabled.
+   */
+  disabled: _propTypes2.default.bool,
+  /**
+   * If `true`, the ripple effect will be disabled.
+   */
+  disableRipple: _propTypes2.default.bool,
+  /**
+   * If `true`, the base button will have a keyboard focus ripple.
+   * `disableRipple` must also be `false`.
+   */
+  focusRipple: _propTypes2.default.bool,
+  /**
+   * The CSS class applied while the component is keyboard focused.
+   */
+  keyboardFocusedClassName: _propTypes2.default.string,
+  /**
+   * @ignore
+   */
+  onBlur: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onClick: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onFocus: _propTypes2.default.func,
+  /**
+   * Callback fired when the component is focused with a keyboard.
+   * We trigger a `onFocus` callback too.
+   */
+  onKeyboardFocus: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onKeyDown: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onKeyUp: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onMouseDown: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onMouseLeave: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onMouseUp: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onTouchEnd: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onTouchMove: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onTouchStart: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  role: _propTypes2.default.string,
+  /**
+   * Use that property to pass a ref callback to the root component.
+   */
+  rootRef: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  tabIndex: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.string]),
+  /**
+   * @ignore
+   */
+  type: _propTypes2.default.string
+} : {};
+
 ButtonBase.defaultProps = {
   centerRipple: false,
-  focusRipple: false,
   disableRipple: false,
+  focusRipple: false,
   tabIndex: 0,
   type: 'button'
 };
+
 exports.default = (0, _withStyles2.default)(styles, { name: 'MuiButtonBase' })(ButtonBase);
   })();
 });
@@ -43074,6 +42592,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _classnames = require('classnames');
 
 var _classnames2 = _interopRequireDefault(_classnames);
@@ -43083,38 +42605,6 @@ var _Transition = require('react-transition-group/Transition');
 var _Transition2 = _interopRequireDefault(_Transition);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * If `true`, the ripple pulsates, typically indicating the keyboard focus state of an element.
-   */
-  pulsate: require('prop-types').bool,
-
-  /**
-   * Diameter of the ripple.
-   */
-  rippleSize: require('prop-types').number.isRequired,
-
-  /**
-   * Horizontal position of the ripple center.
-   */
-  rippleX: require('prop-types').number.isRequired,
-
-  /**
-   * Vertical position of the ripple center.
-   */
-  rippleY: require('prop-types').number.isRequired
-}; //  weak
 
 /**
  * @ignore - internal component.
@@ -43136,18 +42626,6 @@ var Ripple = function (_React$Component) {
     return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = Ripple.__proto__ || (0, _getPrototypeOf2.default)(Ripple)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
       rippleVisible: false,
       rippleLeaving: false
-    }, _this.getRippleStyles = function (props) {
-      var rippleSize = props.rippleSize,
-          rippleX = props.rippleX,
-          rippleY = props.rippleY;
-
-
-      return {
-        width: rippleSize,
-        height: rippleSize,
-        top: -(rippleSize / 2) + rippleY,
-        left: -(rippleSize / 2) + rippleX
-      };
     }, _this.handleEnter = function () {
       _this.setState({
         rippleVisible: true
@@ -43181,13 +42659,20 @@ var Ripple = function (_React$Component) {
 
       var rippleClassName = (0, _classnames2.default)(classes.ripple, (_classNames2 = {}, (0, _defineProperty3.default)(_classNames2, classes.rippleVisible, rippleVisible), (0, _defineProperty3.default)(_classNames2, classes.rippleFast, pulsate), _classNames2));
 
+      var rippleStyles = {
+        width: rippleSize,
+        height: rippleSize,
+        top: -(rippleSize / 2) + rippleY,
+        left: -(rippleSize / 2) + rippleX
+      };
+
       return _react2.default.createElement(
         _Transition2.default,
         (0, _extends3.default)({ onEnter: this.handleEnter, onExit: this.handleExit }, other),
         _react2.default.createElement(
           'span',
           { className: className },
-          _react2.default.createElement('span', { className: rippleClassName, style: this.getRippleStyles(this.props) })
+          _react2.default.createElement('span', { className: rippleClassName, style: rippleStyles })
         )
       );
     }
@@ -43195,9 +42680,37 @@ var Ripple = function (_React$Component) {
   return Ripple;
 }(_react2.default.Component);
 
+Ripple.propTypes = 'development' !== "production" ? {
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * If `true`, the ripple pulsates, typically indicating the keyboard focus state of an element.
+   */
+  pulsate: _propTypes2.default.bool,
+  /**
+   * Diameter of the ripple.
+   */
+  rippleSize: _propTypes2.default.number,
+  /**
+   * Horizontal position of the ripple center.
+   */
+  rippleX: _propTypes2.default.number,
+  /**
+   * Vertical position of the ripple center.
+   */
+  rippleY: _propTypes2.default.number
+} : {};
+
 Ripple.defaultProps = {
   pulsate: false
 };
+
 exports.default = Ripple;
   })();
 });
@@ -43248,6 +42761,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _reactDom = require('react-dom');
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
@@ -43269,8 +42786,6 @@ var _Ripple = require('./Ripple');
 var _Ripple2 = _interopRequireDefault(_Ripple);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-//  weak
 
 var DURATION = 550;
 var DELAY_RIPPLE = exports.DELAY_RIPPLE = 80;
@@ -43356,27 +42871,10 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * If `true`, the ripple starts at the center of the component
-   * rather than at the point of interaction.
-   */
-  center: require('prop-types').bool,
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string
-};
-
 /**
  * @ignore - internal component.
  */
+
 var TouchRipple = function (_React$Component) {
   (0, _inherits3.default)(TouchRipple, _React$Component);
 
@@ -43418,8 +42916,7 @@ var TouchRipple = function (_React$Component) {
       }
 
       var element = fakeElement ? null : _reactDom2.default.findDOMNode(_this);
-      var rect = element ? // $FlowFixMe
-      element.getBoundingClientRect() : {
+      var rect = element ? element.getBoundingClientRect() : {
         width: 0,
         height: 0,
         left: 0,
@@ -43449,12 +42946,8 @@ var TouchRipple = function (_React$Component) {
           rippleSize += 1;
         }
       } else {
-        var sizeX = Math.max(
-        // $FlowFixMe
-        Math.abs((element ? element.clientWidth : 0) - rippleX), rippleX) * 2 + 2;
-        var sizeY = Math.max(
-        // $FlowFixMe
-        Math.abs((element ? element.clientHeight : 0) - rippleY), rippleY) * 2 + 2;
+        var sizeX = Math.max(Math.abs((element ? element.clientWidth : 0) - rippleX), rippleX) * 2 + 2;
+        var sizeY = Math.max(Math.abs((element ? element.clientHeight : 0) - rippleY), rippleY) * 2 + 2;
         rippleSize = Math.sqrt(Math.pow(sizeX, 2) + Math.pow(sizeY, 2));
       }
 
@@ -43481,7 +42974,7 @@ var TouchRipple = function (_React$Component) {
 
       var ripples = _this.state.ripples;
 
-      // Add a ripple to the ripples array
+      // Add a ripple to the ripples array.
       ripples = [].concat((0, _toConsumableArray3.default)(ripples), [_react2.default.createElement(_Ripple2.default, {
         key: _this.state.nextKey,
         classes: _this.props.classes,
@@ -43564,9 +43057,26 @@ var TouchRipple = function (_React$Component) {
   return TouchRipple;
 }(_react2.default.Component);
 
+TouchRipple.propTypes = 'development' !== "production" ? {
+  /**
+   * If `true`, the ripple starts at the center of the component
+   * rather than at the point of interaction.
+   */
+  center: _propTypes2.default.bool,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string
+} : {};
+
 TouchRipple.defaultProps = {
   center: false
 };
+
 exports.default = (0, _withStyles2.default)(styles, { flip: false, name: 'MuiTouchRipple' })(TouchRipple);
   })();
 });
@@ -43649,12 +43159,13 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-// @inheritedComponent Modal
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -43682,14 +43193,6 @@ var _Paper2 = _interopRequireDefault(_Paper);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_ComponentType = require('prop-types').func;
-
-var babelPluginFlowReactPropTypes_proptype_TransitionCallback = require('../internal/transition').babelPluginFlowReactPropTypes_proptype_TransitionCallback || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_TransitionDuration = require('../internal/transition').babelPluginFlowReactPropTypes_proptype_TransitionDuration || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: {
@@ -43709,7 +43212,7 @@ var styles = exports.styles = function styles(theme) {
       }
     },
     paperWidthXs: {
-      maxWidth: theme.breakpoints.values.xs
+      maxWidth: Math.max(theme.breakpoints.values.xs, 360)
     },
     paperWidthSm: {
       maxWidth: theme.breakpoints.values.sm
@@ -43731,118 +43234,11 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * Dialog children, usually the included sub-components.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * If `true`, it will be full-screen
-   */
-  fullScreen: require('prop-types').bool,
-
-  /**
-   * If `true`, clicking the backdrop will not fire the `onRequestClose` callback.
-   */
-  ignoreBackdropClick: require('prop-types').bool,
-
-  /**
-   * If `true`, hitting escape will not fire the `onRequestClose` callback.
-   */
-  ignoreEscapeKeyUp: require('prop-types').bool,
-
-  /**
-   * The duration for the transition, in milliseconds.
-   * You may specify a single timeout for all transitions, or individually with an object.
-   */
-  transitionDuration: typeof babelPluginFlowReactPropTypes_proptype_TransitionDuration === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionDuration : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionDuration),
-
-  /**
-   * Determine the max width of the dialog.
-   * The dialog width grows with the size of the screen, this property is useful
-   * on the desktop where you might need some coherent different width size across your
-   * application.
-   */
-  maxWidth: require('prop-types').oneOf(['xs', 'sm', 'md']),
-
-  /**
-   * If specified, stretches dialog to max width.
-   */
-  fullWidth: require('prop-types').bool,
-
-  /**
-   * Callback fired when the backdrop is clicked.
-   */
-  onBackdropClick: require('prop-types').func,
-
-  /**
-   * Callback fired before the dialog enters.
-   */
-  onEnter: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the dialog is entering.
-   */
-  onEntering: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the dialog has entered.
-   */
-  onEntered: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fires when the escape key is released and the modal is in focus.
-   */
-  onEscapeKeyUp: require('prop-types').func,
-
-  /**
-   * Callback fired before the dialog exits.
-   */
-  onExit: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the dialog is exiting.
-   */
-  onExiting: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the dialog has exited.
-   */
-  onExited: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the component requests to be closed.
-   *
-   * @param {object} event The event source of the callback
-   */
-  onRequestClose: require('prop-types').func,
-
-  /**
-   * If `true`, the Dialog is open.
-   */
-  open: require('prop-types').bool,
-
-  /**
-   * Transition component.
-   */
-  transition: typeof babelPluginFlowReactPropTypes_proptype_ComponentType === 'function' ? babelPluginFlowReactPropTypes_proptype_ComponentType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ComponentType)
-};
-
-
 /**
  * Dialogs are overlaid modal paper based components with a backdrop.
  */
+// @inheritedComponent Modal
+
 function Dialog(props) {
   var _classNames;
 
@@ -43850,36 +43246,39 @@ function Dialog(props) {
       classes = props.classes,
       className = props.className,
       fullScreen = props.fullScreen,
-      ignoreBackdropClick = props.ignoreBackdropClick,
-      ignoreEscapeKeyUp = props.ignoreEscapeKeyUp,
-      transitionDuration = props.transitionDuration,
-      maxWidth = props.maxWidth,
       fullWidth = props.fullWidth,
-      open = props.open,
+      disableBackdropClick = props.disableBackdropClick,
+      disableEscapeKeyDown = props.disableEscapeKeyDown,
+      maxWidth = props.maxWidth,
       onBackdropClick = props.onBackdropClick,
-      onEscapeKeyUp = props.onEscapeKeyUp,
+      onClose = props.onClose,
       onEnter = props.onEnter,
-      onEntering = props.onEntering,
       onEntered = props.onEntered,
+      onEntering = props.onEntering,
+      onEscapeKeyDown = props.onEscapeKeyDown,
       onExit = props.onExit,
-      onExiting = props.onExiting,
       onExited = props.onExited,
-      onRequestClose = props.onRequestClose,
+      onExiting = props.onExiting,
+      open = props.open,
       TransitionProp = props.transition,
-      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'className', 'fullScreen', 'ignoreBackdropClick', 'ignoreEscapeKeyUp', 'transitionDuration', 'maxWidth', 'fullWidth', 'open', 'onBackdropClick', 'onEscapeKeyUp', 'onEnter', 'onEntering', 'onEntered', 'onExit', 'onExiting', 'onExited', 'onRequestClose', 'transition']);
+      transitionDuration = props.transitionDuration,
+      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'className', 'fullScreen', 'fullWidth', 'disableBackdropClick', 'disableEscapeKeyDown', 'maxWidth', 'onBackdropClick', 'onClose', 'onEnter', 'onEntered', 'onEntering', 'onEscapeKeyDown', 'onExit', 'onExited', 'onExiting', 'open', 'transition', 'transitionDuration']);
 
 
   return _react2.default.createElement(
     _Modal2.default,
     (0, _extends3.default)({
       className: (0, _classnames2.default)(classes.root, className),
-      BackdropTransitionDuration: transitionDuration,
-      ignoreBackdropClick: ignoreBackdropClick,
-      ignoreEscapeKeyUp: ignoreEscapeKeyUp,
+      BackdropProps: {
+        transitionDuration: transitionDuration
+      },
+      disableBackdropClick: disableBackdropClick,
+      disableEscapeKeyDown: disableEscapeKeyDown,
       onBackdropClick: onBackdropClick,
-      onEscapeKeyUp: onEscapeKeyUp,
-      onRequestClose: onRequestClose,
-      show: open
+      onEscapeKeyDown: onEscapeKeyDown,
+      onClose: onClose,
+      open: open,
+      role: 'dialog'
     }, other),
     _react2.default.createElement(
       TransitionProp,
@@ -43898,7 +43297,7 @@ function Dialog(props) {
         _Paper2.default,
         {
           elevation: 24,
-          className: (0, _classnames2.default)(classes.paper, classes['paperWidth' + (0, _helpers.capitalizeFirstLetter)(maxWidth)], (_classNames = {}, (0, _defineProperty3.default)(_classNames, classes.fullScreen, fullScreen), (0, _defineProperty3.default)(_classNames, classes.fullWidth, fullWidth), _classNames))
+          className: (0, _classnames2.default)(classes.paper, (_classNames = {}, (0, _defineProperty3.default)(_classNames, classes['paperWidth' + (maxWidth ? (0, _helpers.capitalizeFirstLetter)(maxWidth) : '')], maxWidth), (0, _defineProperty3.default)(_classNames, classes.fullScreen, fullScreen), (0, _defineProperty3.default)(_classNames, classes.fullWidth, fullWidth), _classNames))
         },
         children
       )
@@ -43906,23 +43305,104 @@ function Dialog(props) {
   );
 }
 
-Dialog.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  transition: typeof babelPluginFlowReactPropTypes_proptype_ComponentType === 'function' ? babelPluginFlowReactPropTypes_proptype_ComponentType.isRequired ? babelPluginFlowReactPropTypes_proptype_ComponentType.isRequired : babelPluginFlowReactPropTypes_proptype_ComponentType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ComponentType).isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'fullScreen', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'ignoreBackdropClick', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'ignoreEscapeKeyUp', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'transitionDuration', typeof babelPluginFlowReactPropTypes_proptype_TransitionDuration === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionDuration : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionDuration)), (0, _defineProperty3.default)(_ref, 'maxWidth', require('prop-types').oneOf(['xs', 'sm', 'md'])), (0, _defineProperty3.default)(_ref, 'fullWidth', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'onBackdropClick', require('prop-types').func), (0, _defineProperty3.default)(_ref, 'onEnter', typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback)), (0, _defineProperty3.default)(_ref, 'onEntering', typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback)), (0, _defineProperty3.default)(_ref, 'onEntered', typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback)), (0, _defineProperty3.default)(_ref, 'onEscapeKeyUp', require('prop-types').func), (0, _defineProperty3.default)(_ref, 'onExit', typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback)), (0, _defineProperty3.default)(_ref, 'onExiting', typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback)), (0, _defineProperty3.default)(_ref, 'onExited', typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback)), (0, _defineProperty3.default)(_ref, 'onRequestClose', require('prop-types').func), (0, _defineProperty3.default)(_ref, 'open', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'transition', typeof babelPluginFlowReactPropTypes_proptype_ComponentType === 'function' ? babelPluginFlowReactPropTypes_proptype_ComponentType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ComponentType)), _ref) : {};
+Dialog.propTypes = 'development' !== "production" ? {
+  /**
+   * Dialog children, usually the included sub-components.
+   */
+  children: _propTypes2.default.node.isRequired,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * If `true`, clicking the backdrop will not fire the `onClose` callback.
+   */
+  disableBackdropClick: _propTypes2.default.bool,
+  /**
+   * If `true`, hitting escape will not fire the `onClose` callback.
+   */
+  disableEscapeKeyDown: _propTypes2.default.bool,
+  /**
+   * If `true`, it will be full-screen
+   */
+  fullScreen: _propTypes2.default.bool,
+  /**
+   * If specified, stretches dialog to max width.
+   */
+  fullWidth: _propTypes2.default.bool,
+  /**
+   * Determine the max width of the dialog.
+   * The dialog width grows with the size of the screen, this property is useful
+   * on the desktop where you might need some coherent different width size across your
+   * application. Set to `false` to disable `maxWidth`.
+   */
+  maxWidth: _propTypes2.default.oneOf(['xs', 'sm', 'md', false]),
+  /**
+   * Callback fired when the backdrop is clicked.
+   */
+  onBackdropClick: _propTypes2.default.func,
+  /**
+   * Callback fired when the component requests to be closed.
+   *
+   * @param {object} event The event source of the callback
+   */
+  onClose: _propTypes2.default.func,
+  /**
+   * Callback fired before the dialog enters.
+   */
+  onEnter: _propTypes2.default.func,
+  /**
+   * Callback fired when the dialog has entered.
+   */
+  onEntered: _propTypes2.default.func,
+  /**
+   * Callback fired when the dialog is entering.
+   */
+  onEntering: _propTypes2.default.func,
+  /**
+   * Callback fired when the escape key is pressed,
+   * `disableKeyboard` is false and the modal is in focus.
+   */
+  onEscapeKeyDown: _propTypes2.default.func,
+  /**
+   * Callback fired before the dialog exits.
+   */
+  onExit: _propTypes2.default.func,
+  /**
+   * Callback fired when the dialog has exited.
+   */
+  onExited: _propTypes2.default.func,
+  /**
+   * Callback fired when the dialog is exiting.
+   */
+  onExiting: _propTypes2.default.func,
+  /**
+   * If `true`, the Dialog is open.
+   */
+  open: _propTypes2.default.bool.isRequired,
+  /**
+   * Transition component.
+   */
+  transition: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * The duration for the transition, in milliseconds.
+   * You may specify a single timeout for all transitions, or individually with an object.
+   */
+  transitionDuration: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.shape({ enter: _propTypes2.default.number, exit: _propTypes2.default.number })])
+} : {};
+
 Dialog.defaultProps = {
   fullScreen: false,
-  ignoreBackdropClick: false,
-  ignoreEscapeKeyUp: false,
-  transitionDuration: {
-    enter: _transitions.duration.enteringScreen,
-    exit: _transitions.duration.leavingScreen
-  },
-  maxWidth: 'sm',
   fullWidth: false,
-  open: false,
-  transition: _Fade2.default
+  disableBackdropClick: false,
+  disableEscapeKeyDown: false,
+  maxWidth: 'sm',
+  transition: _Fade2.default,
+  transitionDuration: { enter: _transitions.duration.enteringScreen, exit: _transitions.duration.leavingScreen }
 };
 
 exports.default = (0, _withStyles2.default)(styles, { name: 'MuiDialog' })(Dialog);
@@ -43939,10 +43419,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.styles = undefined;
 
-var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
-
-var _defineProperty3 = _interopRequireDefault(_defineProperty2);
-
 var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
@@ -43951,11 +43427,13 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -43968,8 +43446,6 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 require('../Button');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
 
 // So we don't have any override priority issue.
 
@@ -43991,24 +43467,6 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string
-};
-
-
 function DialogActions(props) {
   var children = props.children,
       classes = props.classes,
@@ -44019,22 +43477,37 @@ function DialogActions(props) {
   return _react2.default.createElement(
     'div',
     (0, _extends3.default)({ className: (0, _classnames2.default)(classes.root, className) }, other),
-    _react2.default.Children.map(children, function (button) {
-      return _react2.default.isValidElement(button) && _react2.default.createElement(
+    _react2.default.Children.map(children, function (child) {
+      if (!_react2.default.isValidElement(child)) {
+        return null;
+      }
+
+      return _react2.default.createElement(
         'div',
         { className: classes.action },
-        _react2.default.cloneElement(button, {
-          className: (0, _classnames2.default)(classes.button, button.props.className)
+        _react2.default.cloneElement(child, {
+          className: (0, _classnames2.default)(classes.button, child.props.className)
         })
       );
     })
   );
 }
 
-DialogActions.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), _ref) : {};
+DialogActions.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string
+} : {};
+
 exports.default = (0, _withStyles2.default)(styles, { name: 'MuiDialogActions' })(DialogActions);
   })();
 });
@@ -44049,10 +43522,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.styles = undefined;
 
-var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
-
-var _defineProperty3 = _interopRequireDefault(_defineProperty2);
-
 var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
@@ -44061,11 +43530,13 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -44076,8 +43547,6 @@ var _withStyles = require('../styles/withStyles');
 var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
 
 var styles = exports.styles = function styles(theme) {
   var spacing = theme.spacing.unit * 3;
@@ -44093,24 +43562,6 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string
-};
-
-
 function DialogContent(props) {
   var classes = props.classes,
       children = props.children,
@@ -44125,10 +43576,21 @@ function DialogContent(props) {
   );
 }
 
-DialogContent.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), _ref) : {};
+DialogContent.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string
+} : {};
+
 exports.default = (0, _withStyles2.default)(styles, { name: 'MuiDialogContent' })(DialogContent);
   })();
 });
@@ -44143,10 +43605,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.styles = undefined;
 
-var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
-
-var _defineProperty3 = _interopRequireDefault(_defineProperty2);
-
 var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
@@ -44155,11 +43613,13 @@ var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -44171,8 +43631,6 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: (0, _extends3.default)({}, theme.typography.subheading, {
@@ -44181,24 +43639,6 @@ var styles = exports.styles = function styles(theme) {
     })
   };
 };
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string
-};
-
 
 function DialogContentText(props) {
   var children = props.children,
@@ -44214,10 +43654,21 @@ function DialogContentText(props) {
   );
 }
 
-DialogContentText.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), _ref) : {};
+DialogContentText.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string
+} : {};
+
 exports.default = (0, _withStyles2.default)(styles, { name: 'MuiDialogContentText' })(DialogContentText);
   })();
 });
@@ -44232,10 +43683,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.styles = undefined;
 
-var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
-
-var _defineProperty3 = _interopRequireDefault(_defineProperty2);
-
 var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
@@ -44244,11 +43691,13 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -44264,8 +43713,6 @@ var _Typography2 = _interopRequireDefault(_Typography);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: {
@@ -44275,30 +43722,6 @@ var styles = exports.styles = function styles(theme) {
     }
   };
 };
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * If `true`, the children won't be wrapped by a typography component.
-   * For instance, that can be useful to can render an h4 instead of a
-   */
-  disableTypography: require('prop-types').bool
-};
-
 
 function DialogTitle(props) {
   var children = props.children,
@@ -44319,10 +43742,26 @@ function DialogTitle(props) {
   );
 }
 
-DialogTitle.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'disableTypography', require('prop-types').bool), _ref) : {};
+DialogTitle.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component.
+   */
+  children: _propTypes2.default.node.isRequired,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * If `true`, the children won't be wrapped by a typography component.
+   * For instance, this can be useful to render an h4 instead of the default h2.
+   */
+  disableTypography: _propTypes2.default.bool
+} : {};
+
 DialogTitle.defaultProps = {
   disableTypography: false
 };
@@ -44415,9 +43854,9 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
-var _wrapDisplayName = require('recompose/wrapDisplayName');
+var _propTypes = require('prop-types');
 
-var _wrapDisplayName2 = _interopRequireDefault(_wrapDisplayName);
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _withWidth = require('../utils/withWidth');
 
@@ -44425,27 +43864,16 @@ var _withWidth2 = _interopRequireDefault(_withWidth);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_HigherOrderComponent = require('react-flow-types').babelPluginFlowReactPropTypes_proptype_HigherOrderComponent || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Breakpoint = require('../styles/createBreakpoints').babelPluginFlowReactPropTypes_proptype_Breakpoint || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_InjectedProps = {
-  /**
-   * If isWidthDown(options.breakpoint), return true.
-   */
-  fullScreen: require('prop-types').bool.isRequired
-};
-
-
 /**
  * Dialog will responsively be full screen *at or below* the given breakpoint
  * (defaults to 'sm' for mobile devices).
  * Notice that this Higher-order Component is incompatible with server side rendering.
  */
 var withMobileDialog = function withMobileDialog() {
-  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { breakpoint: 'sm' };
+  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   return function (Component) {
-    var breakpoint = options.breakpoint;
+    var _options$breakpoint = options.breakpoint,
+        breakpoint = _options$breakpoint === undefined ? 'sm' : _options$breakpoint;
 
 
     function WithMobileDialog(props) {
@@ -44453,11 +43881,8 @@ var withMobileDialog = function withMobileDialog() {
     }
 
     WithMobileDialog.propTypes = 'development' !== "production" ? {
-      width: require('prop-types').string.isRequired
+      width: _propTypes2.default.oneOf(['xs', 'sm', 'md', 'lg', 'xl']).isRequired
     } : {};
-    if ('development' !== 'production') {
-      WithMobileDialog.displayName = (0, _wrapDisplayName2.default)(Component, 'withMobileDialog');
-    }
 
     return (0, _withWidth2.default)()(WithMobileDialog);
   };
@@ -44489,11 +43914,13 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -44531,31 +43958,6 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  absolute: require('prop-types').bool,
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * If `true`, the divider will be indented.
-   */
-  inset: require('prop-types').bool,
-
-  /**
-   * If `true`, the divider will have a lighter color.
-   */
-  light: require('prop-types').bool
-};
-
-
 function Divider(props) {
   var _classNames;
 
@@ -44572,10 +43974,26 @@ function Divider(props) {
   return _react2.default.createElement('hr', (0, _extends3.default)({ className: className }, other));
 }
 
-Divider.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  absolute: require('prop-types').bool
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'inset', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'light', require('prop-types').bool), _ref) : {};
+Divider.propTypes = 'development' !== "production" ? {
+  absolute: _propTypes2.default.bool,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * If `true`, the divider will be indented.
+   */
+  inset: _propTypes2.default.bool,
+  /**
+   * If `true`, the divider will have a lighter color.
+   */
+  light: _propTypes2.default.bool
+} : {};
+
 Divider.defaultProps = {
   absolute: false,
   inset: false,
@@ -44654,6 +44072,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _classnames = require('classnames');
 
 var _classnames2 = _interopRequireDefault(_classnames);
@@ -44680,11 +44102,6 @@ var _transitions = require('../styles/transitions');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-// @inheritedComponent Modal
-
-var babelPluginFlowReactPropTypes_proptype_TransitionDuration = require('../internal/transition').babelPluginFlowReactPropTypes_proptype_TransitionDuration || require('prop-types').any;
-
 function getSlideDirection(anchor) {
   if (anchor === 'left') {
     return 'right';
@@ -44696,7 +44113,7 @@ function getSlideDirection(anchor) {
 
   // (anchor === 'bottom')
   return 'up';
-}
+} // @inheritedComponent Modal
 
 var styles = exports.styles = function styles(theme) {
   return {
@@ -44709,11 +44126,17 @@ var styles = exports.styles = function styles(theme) {
       flexDirection: 'column',
       height: '100vh',
       flex: '1 0 auto',
-      zIndex: theme.zIndex.navDrawer,
+      zIndex: theme.zIndex.drawer,
       WebkitOverflowScrolling: 'touch', // Add iOS momentum scrolling.
       // temporary style
       position: 'fixed',
-      top: 0
+      top: 0,
+      // We disable the focus ring for mouse, touch and keyboard users.
+      // At some point, it would be better to keep it for keyboard users.
+      // :focus-ring CSS pseudo-class will help.
+      '&:focus': {
+        outline: 'none'
+      }
     },
     paperAnchorLeft: {
       left: 0,
@@ -44755,75 +44178,6 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Anchor = require('prop-types').oneOf(['left', 'top', 'right', 'bottom']);
-
-var babelPluginFlowReactPropTypes_proptype_Type = require('prop-types').oneOf(['permanent', 'persistent', 'temporary']);
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * Side from which the drawer will appear.
-   */
-  anchor: require('prop-types').oneOf(['left', 'top', 'right', 'bottom']),
-
-  /**
-   * The contents of the drawer.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired,
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The elevation of the drawer.
-   */
-  elevation: require('prop-types').number,
-
-  /**
-   * The duration for the transition, in milliseconds.
-   * You may specify a single timeout for all transitions, or individually with an object.
-   */
-  transitionDuration: typeof babelPluginFlowReactPropTypes_proptype_TransitionDuration === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionDuration : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionDuration),
-
-  /**
-   * Properties applied to the `Modal` element.
-   */
-  ModalProps: require('prop-types').object,
-
-  /**
-   * Callback fired when the component requests to be closed.
-   *
-   * @param {object} event The event source of the callback
-   */
-  onRequestClose: require('prop-types').func,
-
-  /**
-   * If `true`, the drawer is open.
-   */
-  open: require('prop-types').bool,
-
-  /**
-   * @igonre
-   */
-  theme: require('prop-types').object.isRequired,
-
-  /**
-   * Properties applied to the `Slide` element.
-   */
-  SlideProps: require('prop-types').object,
-
-  /**
-   * The type of drawer.
-   */
-  type: require('prop-types').oneOf(['permanent', 'persistent', 'temporary'])
-};
-
 var Drawer = function (_React$Component) {
   (0, _inherits3.default)(Drawer, _React$Component);
 
@@ -44862,17 +44216,17 @@ var Drawer = function (_React$Component) {
           classes = _props.classes,
           className = _props.className,
           elevation = _props.elevation,
-          transitionDuration = _props.transitionDuration,
           ModalProps = _props.ModalProps,
-          onRequestClose = _props.onRequestClose,
+          onClose = _props.onClose,
           open = _props.open,
           SlideProps = _props.SlideProps,
           theme = _props.theme,
+          transitionDuration = _props.transitionDuration,
           type = _props.type,
-          other = (0, _objectWithoutProperties3.default)(_props, ['anchor', 'children', 'classes', 'className', 'elevation', 'transitionDuration', 'ModalProps', 'onRequestClose', 'open', 'SlideProps', 'theme', 'type']);
+          other = (0, _objectWithoutProperties3.default)(_props, ['anchor', 'children', 'classes', 'className', 'elevation', 'ModalProps', 'onClose', 'open', 'SlideProps', 'theme', 'transitionDuration', 'type']);
 
 
-      var rtl = theme.direction === 'rtl';
+      var rtl = theme && theme.direction === 'rtl';
       var anchor = anchorProp;
       if (rtl && ['left', 'right'].includes(anchor)) {
         anchor = anchor === 'left' ? 'right' : 'left';
@@ -44919,10 +44273,12 @@ var Drawer = function (_React$Component) {
       return _react2.default.createElement(
         _Modal2.default,
         (0, _extends3.default)({
-          BackdropTransitionDuration: transitionDuration,
+          BackdropProps: {
+            transitionDuration: transitionDuration
+          },
           className: (0, _classnames2.default)(classes.modal, className),
-          show: open,
-          onRequestClose: onRequestClose
+          open: open,
+          onClose: onClose
         }, other, ModalProps),
         slidingDrawer
       );
@@ -44931,17 +44287,69 @@ var Drawer = function (_React$Component) {
   return Drawer;
 }(_react2.default.Component);
 
+Drawer.propTypes = 'development' !== "production" ? {
+  /**
+   * Side from which the drawer will appear.
+   */
+  anchor: _propTypes2.default.oneOf(['left', 'top', 'right', 'bottom']),
+  /**
+   * The contents of the drawer.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The elevation of the drawer.
+   */
+  elevation: _propTypes2.default.number,
+  /**
+   * Properties applied to the `Modal` element.
+   */
+  ModalProps: _propTypes2.default.object,
+  /**
+   * Callback fired when the component requests to be closed.
+   *
+   * @param {object} event The event source of the callback
+   */
+  onClose: _propTypes2.default.func,
+  /**
+   * If `true`, the drawer is open.
+   */
+  open: _propTypes2.default.bool,
+  /**
+   * Properties applied to the `Slide` element.
+   */
+  SlideProps: _propTypes2.default.object,
+  /**
+   * @ignore
+   */
+  theme: _propTypes2.default.object.isRequired,
+  /**
+   * The duration for the transition, in milliseconds.
+   * You may specify a single timeout for all transitions, or individually with an object.
+   */
+  transitionDuration: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.shape({ enter: _propTypes2.default.number, exit: _propTypes2.default.number })]),
+  /**
+   * The type of drawer.
+   */
+  type: _propTypes2.default.oneOf(['permanent', 'persistent', 'temporary'])
+} : {};
+
 Drawer.defaultProps = {
   anchor: 'left',
   elevation: 16,
-  transitionDuration: {
-    enter: _transitions.duration.enteringScreen,
-    exit: _transitions.duration.leavingScreen
-  },
   open: false,
+  transitionDuration: { enter: _transitions.duration.enteringScreen, exit: _transitions.duration.leavingScreen },
   type: 'temporary' // Mobile first.
 };
-exports.default = (0, _withStyles2.default)(styles, { flip: false, withTheme: true, name: 'MuiDrawer' })(Drawer);
+
+exports.default = (0, _withStyles2.default)(styles, { name: 'MuiDrawer', flip: false, withTheme: true })(Drawer);
   })();
 });
 
@@ -45031,10 +44439,6 @@ var _reactHelpers = require('../utils/reactHelpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: {
@@ -45061,67 +44465,6 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Margin = require('prop-types').oneOf(['none', 'dense', 'normal']);
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The contents of the form control.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType),
-
-  /**
-   * If `true`, the label, input and helper text should be displayed in a disabled state.
-   */
-  disabled: require('prop-types').bool,
-
-  /**
-   * If `true`, the label should be displayed in an error state.
-   */
-  error: require('prop-types').bool,
-
-  /**
-   * If `true`, the component, as well as its children,
-   * will take up the full width of its container.
-   */
-  fullWidth: require('prop-types').bool,
-
-  /**
-   * @ignore
-   */
-  onBlur: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  onFocus: require('prop-types').func,
-
-  /**
-   * If `true`, the label will indicate that the input is required.
-   */
-  required: require('prop-types').bool,
-
-  /**
-   * If `dense` or `normal`, will adjust vertical spacing of this and contained components.
-   */
-  margin: require('prop-types').oneOf(['none', 'dense', 'normal'])
-};
-
 /**
  * Provides context such as dirty/focused/error/required for form inputs.
  * Relying on the context provides high flexibilty and ensures that the state always stay
@@ -45132,6 +44475,7 @@ var babelPluginFlowReactPropTypes_proptype_Props = {
  *  - Input
  *  - InputLabel
  */
+
 var FormControl = function (_React$Component) {
   (0, _inherits3.default)(FormControl, _React$Component);
 
@@ -45235,7 +44579,8 @@ var FormControl = function (_React$Component) {
           children = _props2.children,
           classes = _props2.classes,
           className = _props2.className,
-          ComponentProp = _props2.component,
+          _props2$component = _props2.component,
+          ComponentProp = _props2$component === undefined ? 'div' : _props2$component,
           disabled = _props2.disabled,
           error = _props2.error,
           fullWidth = _props2.fullWidth,
@@ -45258,6 +44603,55 @@ var FormControl = function (_React$Component) {
   return FormControl;
 }(_react2.default.Component);
 
+FormControl.propTypes = 'development' !== "production" ? {
+  /**
+   * The contents of the form control.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * If `true`, the label, input and helper text should be displayed in a disabled state.
+   */
+  disabled: _propTypes2.default.bool,
+  /**
+   * If `true`, the label should be displayed in an error state.
+   */
+  error: _propTypes2.default.bool,
+  /**
+   * If `true`, the component, as well as its children,
+   * will take up the full width of its container.
+   */
+  fullWidth: _propTypes2.default.bool,
+  /**
+   * If `dense` or `normal`, will adjust vertical spacing of this and contained components.
+   */
+  margin: _propTypes2.default.oneOf(['none', 'dense', 'normal']),
+  /**
+   * @ignore
+   */
+  onBlur: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onFocus: _propTypes2.default.func,
+  /**
+   * If `true`, the label will indicate that the input is required.
+   */
+  required: _propTypes2.default.bool
+} : {};
+
 FormControl.defaultProps = {
   component: 'div',
   disabled: false,
@@ -45266,9 +44660,11 @@ FormControl.defaultProps = {
   margin: 'none',
   required: false
 };
+
 FormControl.childContextTypes = {
   muiFormControl: _propTypes2.default.object.isRequired
 };
+
 exports.default = (0, _withStyles2.default)(styles, { name: 'MuiFormControl' })(FormControl);
   })();
 });
@@ -45295,9 +44691,6 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-/* eslint-disable jsx-a11y/label-has-for */
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
@@ -45320,16 +44713,14 @@ var _Typography2 = _interopRequireDefault(_Typography);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Element = require('react').babelPluginFlowReactPropTypes_proptype_Element || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: {
       display: 'inline-flex',
       alignItems: 'center',
       cursor: 'pointer',
+      // For correct alignment with the text.
+      verticalAlign: 'middle',
       // Remove grey highlight
       WebkitTapHighlightColor: theme.palette.common.transparent,
       marginLeft: -14,
@@ -45339,72 +44730,16 @@ var styles = exports.styles = function styles(theme) {
       color: theme.palette.text.disabled,
       cursor: 'default'
     },
-    label: {
-      userSelect: 'none'
-    }
+    label: {}
   };
 };
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * If `true`, the component appears selected.
-   */
-  checked: require('prop-types').oneOfType([require('prop-types').bool, require('prop-types').string]),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * A control element. For instance, it can be be a `Radio`, a `Switch` or a `Checkbox`.
-   */
-  control: typeof babelPluginFlowReactPropTypes_proptype_Element === 'function' ? babelPluginFlowReactPropTypes_proptype_Element.isRequired ? babelPluginFlowReactPropTypes_proptype_Element.isRequired : babelPluginFlowReactPropTypes_proptype_Element : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Element).isRequired,
-
-  /**
-   * If `true`, the control will be disabled.
-   */
-  disabled: require('prop-types').bool,
-
-  /**
-   * Use that property to pass a ref callback to the native input component.
-   */
-  inputRef: require('prop-types').func,
-
-  /**
-   * The text to be used in an enclosing label element.
-   */
-  label: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired,
-
-  /*
-   * @ignore
-   */
-  name: require('prop-types').string,
-
-  /**
-   * Callback fired when the state is changed.
-   *
-   * @param {object} event The event source of the callback
-   * @param {boolean} checked The `checked` value of the switch
-   */
-  onChange: require('prop-types').func,
-
-  /**
-   * The value of the component.
-   */
-  value: require('prop-types').string
-};
-
 
 /**
  * Drop in replacement of the `Radio`, `Switch` and `Checkbox` component.
  * Use this component if you want to display an extra label.
  */
+/* eslint-disable jsx-a11y/label-has-for */
+
 function FormControlLabel(props, context) {
   var checked = props.checked,
       classes = props.classes,
@@ -45448,16 +44783,58 @@ function FormControlLabel(props, context) {
     }),
     _react2.default.createElement(
       _Typography2.default,
-      { className: classes.label },
+      { component: 'span', className: classes.label },
       label
     )
   );
 }
 
-FormControlLabel.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  checked: require('prop-types').oneOfType([require('prop-types').bool, require('prop-types').string])
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'control', typeof babelPluginFlowReactPropTypes_proptype_Element === 'function' ? babelPluginFlowReactPropTypes_proptype_Element.isRequired ? babelPluginFlowReactPropTypes_proptype_Element.isRequired : babelPluginFlowReactPropTypes_proptype_Element : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Element).isRequired), (0, _defineProperty3.default)(_ref, 'disabled', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'inputRef', require('prop-types').func), (0, _defineProperty3.default)(_ref, 'label', typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired), (0, _defineProperty3.default)(_ref, 'name', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'onChange', require('prop-types').func), (0, _defineProperty3.default)(_ref, 'value', require('prop-types').string), _ref) : {};
+FormControlLabel.propTypes = 'development' !== "production" ? {
+  /**
+   * If `true`, the component appears selected.
+   */
+  checked: _propTypes2.default.oneOfType([_propTypes2.default.bool, _propTypes2.default.string]),
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * A control element. For instance, it can be be a `Radio`, a `Switch` or a `Checkbox`.
+   */
+  control: _propTypes2.default.element,
+  /**
+   * If `true`, the control will be disabled.
+   */
+  disabled: _propTypes2.default.bool,
+  /**
+   * Use that property to pass a ref callback to the native input component.
+   */
+  inputRef: _propTypes2.default.func,
+  /**
+   * The text to be used in an enclosing label element.
+   */
+  label: _propTypes2.default.node,
+  /*
+   * @ignore
+   */
+  name: _propTypes2.default.string,
+  /**
+   * Callback fired when the state is changed.
+   *
+   * @param {object} event The event source of the callback
+   * @param {boolean} checked The `checked` value of the switch
+   */
+  onChange: _propTypes2.default.func,
+  /**
+   * The value of the component.
+   */
+  value: _propTypes2.default.string
+} : {};
+
 FormControlLabel.contextTypes = {
   muiFormControl: _propTypes2.default.object
 };
@@ -45488,11 +44865,13 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -45504,8 +44883,6 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
 var styles = exports.styles = {
   root: {
     display: 'flex',
@@ -45516,29 +44893,6 @@ var styles = exports.styles = {
     flexDirection: 'row'
   }
 };
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * Display group of elements in a compact row.
-   */
-  row: require('prop-types').bool
-};
-
 
 /**
  * `FormGroup` wraps controls such as `Checkbox` and `Switch`.
@@ -45561,10 +44915,25 @@ function FormGroup(props) {
   );
 }
 
-FormGroup.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'row', require('prop-types').bool), _ref) : {};
+FormGroup.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * Display group of elements in a compact row.
+   */
+  row: _propTypes2.default.bool
+} : {};
+
 FormGroup.defaultProps = {
   row: false
 };
@@ -45595,8 +44964,6 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
@@ -45614,8 +44981,6 @@ var _withStyles = require('../styles/withStyles');
 var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
 
 var styles = exports.styles = function styles(theme) {
   return {
@@ -45640,40 +45005,6 @@ var styles = exports.styles = function styles(theme) {
     }
   };
 };
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * If `true`, the helper text should be displayed in a disabled state.
-   */
-  disabled: require('prop-types').bool,
-
-  /**
-   * If `true`, helper text should be displayed in an error state.
-   */
-  error: require('prop-types').bool,
-
-  /**
-   * If `dense`, will adjust vertical spacing. This is normally obtained via context from
-   * FormControl.
-   */
-  margin: require('prop-types').oneOf(['dense'])
-};
-
 
 function FormHelperText(props, context) {
   var _classNames;
@@ -45715,10 +45046,34 @@ function FormHelperText(props, context) {
   );
 }
 
-FormHelperText.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'disabled', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'error', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'margin', require('prop-types').oneOf(['dense'])), _ref) : {};
+FormHelperText.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * If `true`, the helper text should be displayed in a disabled state.
+   */
+  disabled: _propTypes2.default.bool,
+  /**
+   * If `true`, helper text should be displayed in an error state.
+   */
+  error: _propTypes2.default.bool,
+  /**
+   * If `dense`, will adjust vertical spacing. This is normally obtained via context from
+   * FormControl.
+   */
+  margin: _propTypes2.default.oneOf(['dense'])
+} : {};
+
 FormHelperText.contextTypes = {
   muiFormControl: _propTypes2.default.object
 };
@@ -45749,8 +45104,6 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
@@ -45768,10 +45121,6 @@ var _withStyles = require('../styles/withStyles');
 var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
 
 var styles = exports.styles = function styles(theme) {
   var focusColor = theme.palette.primary[theme.palette.type === 'light' ? 'A700' : 'A200'];
@@ -45794,50 +45143,6 @@ var styles = exports.styles = function styles(theme) {
     }
   };
 };
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType),
-
-  /**
-   * If `true`, the label should be displayed in a disabled state.
-   */
-  disabled: require('prop-types').bool,
-
-  /**
-   * If `true`, the label should be displayed in an error state.
-   */
-  error: require('prop-types').bool,
-
-  /**
-   * If `true`, the input of this label is focused (used by `FormGroup` components).
-   */
-  focused: require('prop-types').bool,
-
-  /**
-   * If `true`, the label will indicate that the input is required.
-   */
-  required: require('prop-types').bool
-};
-
 
 function FormLabel(props, context) {
   var _classNames;
@@ -45890,11 +45195,42 @@ function FormLabel(props, context) {
   );
 }
 
-FormLabel.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType.isRequired ? babelPluginFlowReactPropTypes_proptype_ElementType.isRequired : babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType).isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'component', typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType)), (0, _defineProperty3.default)(_ref, 'disabled', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'error', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'focused', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'required', require('prop-types').bool), _ref) : {};
+FormLabel.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * If `true`, the label should be displayed in a disabled state.
+   */
+  disabled: _propTypes2.default.bool,
+  /**
+   * If `true`, the label should be displayed in an error state.
+   */
+  error: _propTypes2.default.bool,
+  /**
+   * If `true`, the input of this label is focused (used by `FormGroup` components).
+   */
+  focused: _propTypes2.default.bool,
+  /**
+   * If `true`, the label will indicate that the input is required.
+   */
+  required: _propTypes2.default.bool
+} : {};
+
 FormLabel.defaultProps = {
   component: 'label'
 };
@@ -45987,21 +45323,13 @@ var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
 
 var _defineProperty3 = _interopRequireDefault(_defineProperty2);
 
-var _ref;
-// A grid component using the following libs as inspiration.
-//
-// For the implementation:
-// - http://v4-alpha.getbootstrap.com/layout/flexbox-grid/
-// - https://github.com/kristoferjoseph/flexboxgrid/blob/master/src/css/flexboxgrid.css
-// - https://github.com/roylee0704/react-flexbox-grid
-// - https://material.angularjs.org/latest/layout/introduction
-//
-// Follow this flexbox Guide to better understand the underlying model:
-// - https://css-tricks.com/snippets/css/a-guide-to-flexbox/
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -46023,13 +45351,17 @@ var _Hidden2 = _interopRequireDefault(_Hidden);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
+var GUTTERS = [0, 8, 16, 24, 40]; // A grid component using the following libs as inspiration.
+//
+// For the implementation:
+// - http://v4-alpha.getbootstrap.com/layout/flexbox-grid/
+// - https://github.com/kristoferjoseph/flexboxgrid/blob/master/src/css/flexboxgrid.css
+// - https://github.com/roylee0704/react-flexbox-grid
+// - https://material.angularjs.org/latest/layout/introduction
+//
+// Follow this flexbox Guide to better understand the underlying model:
+// - https://css-tricks.com/snippets/css/a-guide-to-flexbox/
 
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_HiddenProps = require('../Hidden/types').babelPluginFlowReactPropTypes_proptype_HiddenProps || require('prop-types').any;
-
-var GUTTERS = [0, 8, 16, 24, 40];
 var GRID_SIZES = [true, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 
 function generateGrid(globalStyles, theme, breakpoint) {
@@ -46168,136 +45500,27 @@ var styles = exports.styles = function styles(theme) {
   }, {}));
 };
 
-var babelPluginFlowReactPropTypes_proptype_GridSizes = require('prop-types').oneOfType([require('prop-types').bool, require('prop-types').oneOf([1]), require('prop-types').oneOf([2]), require('prop-types').oneOf([3]), require('prop-types').oneOf([4]), require('prop-types').oneOf([5]), require('prop-types').oneOf([6]), require('prop-types').oneOf([7]), require('prop-types').oneOf([8]), require('prop-types').oneOf([9]), require('prop-types').oneOf([10]), require('prop-types').oneOf([11]), require('prop-types').oneOf([12])]);
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType),
-
-  /**
-   * If `true`, the component will have the flex *container* behavior.
-   * You should be wrapping *items* with a *container*.
-   */
-  container: require('prop-types').bool,
-
-  /**
-   * If `true`, the component will have the flex *item* behavior.
-   * You should be wrapping *items* with a *container*.
-   */
-  item: require('prop-types').bool,
-
-  /**
-   * Defines the `align-content` style property.
-   * It's applied for all screen sizes.
-   */
-  alignContent: require('prop-types').oneOf(['stretch', 'center', 'flex-start', 'flex-end', 'space-between', 'space-around']),
-
-  /**
-   * Defines the `align-items` style property.
-   * It's applied for all screen sizes.
-   */
-  alignItems: require('prop-types').oneOf(['flex-start', 'center', 'flex-end', 'stretch', 'baseline']),
-
-  /**
-   * Defines the `flex-direction` style property.
-   * It is applied for all screen sizes.
-   */
-  direction: require('prop-types').oneOf(['row', 'row-reverse', 'column', 'column-reverse']),
-
-  /**
-   * Defines the space between the type `item` component.
-   * It can only be used on a type `container` component.
-   */
-  spacing: require('prop-types').oneOf([0, 8, 16, 24, 40]),
-
-  /**
-   * If provided, will wrap with [Hidden](/api/hidden) component and given properties.
-   */
-  hidden: typeof babelPluginFlowReactPropTypes_proptype_HiddenProps === 'function' ? babelPluginFlowReactPropTypes_proptype_HiddenProps : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_HiddenProps),
-
-  /**
-   * Defines the `justify-content` style property.
-   * It is applied for all screen sizes.
-   */
-  justify: require('prop-types').oneOf(['flex-start', 'center', 'flex-end', 'space-between', 'space-around']),
-
-  /**
-   * Defines the `flex-wrap` style property.
-   * It's applied for all screen sizes.
-   */
-  wrap: require('prop-types').oneOf(['nowrap', 'wrap', 'wrap-reverse']),
-
-  /**
-   * Defines the number of grids the component is going to use.
-   * It's applied for all the screen sizes with the lowest priority.
-   */
-  xs: require('prop-types').oneOfType([require('prop-types').bool, require('prop-types').oneOf([1]), require('prop-types').oneOf([2]), require('prop-types').oneOf([3]), require('prop-types').oneOf([4]), require('prop-types').oneOf([5]), require('prop-types').oneOf([6]), require('prop-types').oneOf([7]), require('prop-types').oneOf([8]), require('prop-types').oneOf([9]), require('prop-types').oneOf([10]), require('prop-types').oneOf([11]), require('prop-types').oneOf([12])]),
-
-  /**
-   * Defines the number of grids the component is going to use.
-   * It's applied for the `sm` breakpoint and wider screens if not overridden.
-   */
-  sm: require('prop-types').oneOfType([require('prop-types').bool, require('prop-types').oneOf([1]), require('prop-types').oneOf([2]), require('prop-types').oneOf([3]), require('prop-types').oneOf([4]), require('prop-types').oneOf([5]), require('prop-types').oneOf([6]), require('prop-types').oneOf([7]), require('prop-types').oneOf([8]), require('prop-types').oneOf([9]), require('prop-types').oneOf([10]), require('prop-types').oneOf([11]), require('prop-types').oneOf([12])]),
-
-  /**
-   * Defines the number of grids the component is going to use.
-   * It's applied for the `md` breakpoint and wider screens if not overridden.
-   */
-  md: require('prop-types').oneOfType([require('prop-types').bool, require('prop-types').oneOf([1]), require('prop-types').oneOf([2]), require('prop-types').oneOf([3]), require('prop-types').oneOf([4]), require('prop-types').oneOf([5]), require('prop-types').oneOf([6]), require('prop-types').oneOf([7]), require('prop-types').oneOf([8]), require('prop-types').oneOf([9]), require('prop-types').oneOf([10]), require('prop-types').oneOf([11]), require('prop-types').oneOf([12])]),
-
-  /**
-   * Defines the number of grids the component is going to use.
-   * It's applied for the `lg` breakpoint and wider screens if not overridden.
-   */
-  lg: require('prop-types').oneOfType([require('prop-types').bool, require('prop-types').oneOf([1]), require('prop-types').oneOf([2]), require('prop-types').oneOf([3]), require('prop-types').oneOf([4]), require('prop-types').oneOf([5]), require('prop-types').oneOf([6]), require('prop-types').oneOf([7]), require('prop-types').oneOf([8]), require('prop-types').oneOf([9]), require('prop-types').oneOf([10]), require('prop-types').oneOf([11]), require('prop-types').oneOf([12])]),
-
-  /**
-   * Defines the number of grids the component is going to use.
-   * It's applied for the `xl` breakpoint and wider screens.
-   */
-  xl: require('prop-types').oneOfType([require('prop-types').bool, require('prop-types').oneOf([1]), require('prop-types').oneOf([2]), require('prop-types').oneOf([3]), require('prop-types').oneOf([4]), require('prop-types').oneOf([5]), require('prop-types').oneOf([6]), require('prop-types').oneOf([7]), require('prop-types').oneOf([8]), require('prop-types').oneOf([9]), require('prop-types').oneOf([10]), require('prop-types').oneOf([11]), require('prop-types').oneOf([12])])
-};
-
-
 function Grid(props) {
   var _classNames;
 
-  var classes = props.classes,
+  var alignContent = props.alignContent,
+      alignItems = props.alignItems,
+      classes = props.classes,
       classNameProp = props.className,
       ComponentProp = props.component,
       container = props.container,
-      item = props.item,
-      alignContent = props.alignContent,
-      alignItems = props.alignItems,
       direction = props.direction,
-      spacing = props.spacing,
       hidden = props.hidden,
+      item = props.item,
       justify = props.justify,
-      wrap = props.wrap,
-      xs = props.xs,
-      sm = props.sm,
-      md = props.md,
       lg = props.lg,
+      md = props.md,
+      sm = props.sm,
+      spacing = props.spacing,
+      wrap = props.wrap,
       xl = props.xl,
-      other = (0, _objectWithoutProperties3.default)(props, ['classes', 'className', 'component', 'container', 'item', 'alignContent', 'alignItems', 'direction', 'spacing', 'hidden', 'justify', 'wrap', 'xs', 'sm', 'md', 'lg', 'xl']);
+      xs = props.xs,
+      other = (0, _objectWithoutProperties3.default)(props, ['alignContent', 'alignItems', 'classes', 'className', 'component', 'container', 'direction', 'hidden', 'item', 'justify', 'lg', 'md', 'sm', 'spacing', 'wrap', 'xl', 'xs']);
 
 
   var className = (0, _classnames2.default)((_classNames = {}, (0, _defineProperty3.default)(_classNames, classes.typeContainer, container), (0, _defineProperty3.default)(_classNames, classes.typeItem, item), (0, _defineProperty3.default)(_classNames, classes['spacing-xs-' + String(spacing)], container && spacing !== 0), (0, _defineProperty3.default)(_classNames, classes['direction-xs-' + String(direction)], direction !== Grid.defaultProps.direction), (0, _defineProperty3.default)(_classNames, classes['wrap-xs-' + String(wrap)], wrap !== Grid.defaultProps.wrap), (0, _defineProperty3.default)(_classNames, classes['align-items-xs-' + String(alignItems)], alignItems !== Grid.defaultProps.alignItems), (0, _defineProperty3.default)(_classNames, classes['align-content-xs-' + String(alignContent)], alignContent !== Grid.defaultProps.alignContent), (0, _defineProperty3.default)(_classNames, classes['justify-xs-' + String(justify)], justify !== Grid.defaultProps.justify), (0, _defineProperty3.default)(_classNames, classes['grid-xs'], xs === true), (0, _defineProperty3.default)(_classNames, classes['grid-xs-' + String(xs)], xs && xs !== true), (0, _defineProperty3.default)(_classNames, classes['grid-sm'], sm === true), (0, _defineProperty3.default)(_classNames, classes['grid-sm-' + String(sm)], sm && sm !== true), (0, _defineProperty3.default)(_classNames, classes['grid-md'], md === true), (0, _defineProperty3.default)(_classNames, classes['grid-md-' + String(md)], md && md !== true), (0, _defineProperty3.default)(_classNames, classes['grid-lg'], lg === true), (0, _defineProperty3.default)(_classNames, classes['grid-lg-' + String(lg)], lg && lg !== true), (0, _defineProperty3.default)(_classNames, classes['grid-xl'], xl === true), (0, _defineProperty3.default)(_classNames, classes['grid-xl-' + String(xl)], xl && xl !== true), _classNames), classNameProp);
@@ -46314,18 +45537,101 @@ function Grid(props) {
   return _react2.default.createElement(ComponentProp, gridProps);
 }
 
-Grid.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType.isRequired ? babelPluginFlowReactPropTypes_proptype_ElementType.isRequired : babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType).isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'component', typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType)), (0, _defineProperty3.default)(_ref, 'container', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'item', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'alignContent', require('prop-types').oneOf(['stretch', 'center', 'flex-start', 'flex-end', 'space-between', 'space-around'])), (0, _defineProperty3.default)(_ref, 'alignItems', require('prop-types').oneOf(['flex-start', 'center', 'flex-end', 'stretch', 'baseline'])), (0, _defineProperty3.default)(_ref, 'direction', require('prop-types').oneOf(['row', 'row-reverse', 'column', 'column-reverse'])), (0, _defineProperty3.default)(_ref, 'spacing', require('prop-types').oneOf([0, 8, 16, 24, 40])), (0, _defineProperty3.default)(_ref, 'hidden', typeof babelPluginFlowReactPropTypes_proptype_HiddenProps === 'function' ? babelPluginFlowReactPropTypes_proptype_HiddenProps : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_HiddenProps)), (0, _defineProperty3.default)(_ref, 'justify', require('prop-types').oneOf(['flex-start', 'center', 'flex-end', 'space-between', 'space-around'])), (0, _defineProperty3.default)(_ref, 'wrap', require('prop-types').oneOf(['nowrap', 'wrap', 'wrap-reverse'])), (0, _defineProperty3.default)(_ref, 'xs', require('prop-types').oneOfType([require('prop-types').bool, require('prop-types').oneOf([1]), require('prop-types').oneOf([2]), require('prop-types').oneOf([3]), require('prop-types').oneOf([4]), require('prop-types').oneOf([5]), require('prop-types').oneOf([6]), require('prop-types').oneOf([7]), require('prop-types').oneOf([8]), require('prop-types').oneOf([9]), require('prop-types').oneOf([10]), require('prop-types').oneOf([11]), require('prop-types').oneOf([12])])), (0, _defineProperty3.default)(_ref, 'sm', require('prop-types').oneOfType([require('prop-types').bool, require('prop-types').oneOf([1]), require('prop-types').oneOf([2]), require('prop-types').oneOf([3]), require('prop-types').oneOf([4]), require('prop-types').oneOf([5]), require('prop-types').oneOf([6]), require('prop-types').oneOf([7]), require('prop-types').oneOf([8]), require('prop-types').oneOf([9]), require('prop-types').oneOf([10]), require('prop-types').oneOf([11]), require('prop-types').oneOf([12])])), (0, _defineProperty3.default)(_ref, 'md', require('prop-types').oneOfType([require('prop-types').bool, require('prop-types').oneOf([1]), require('prop-types').oneOf([2]), require('prop-types').oneOf([3]), require('prop-types').oneOf([4]), require('prop-types').oneOf([5]), require('prop-types').oneOf([6]), require('prop-types').oneOf([7]), require('prop-types').oneOf([8]), require('prop-types').oneOf([9]), require('prop-types').oneOf([10]), require('prop-types').oneOf([11]), require('prop-types').oneOf([12])])), (0, _defineProperty3.default)(_ref, 'lg', require('prop-types').oneOfType([require('prop-types').bool, require('prop-types').oneOf([1]), require('prop-types').oneOf([2]), require('prop-types').oneOf([3]), require('prop-types').oneOf([4]), require('prop-types').oneOf([5]), require('prop-types').oneOf([6]), require('prop-types').oneOf([7]), require('prop-types').oneOf([8]), require('prop-types').oneOf([9]), require('prop-types').oneOf([10]), require('prop-types').oneOf([11]), require('prop-types').oneOf([12])])), (0, _defineProperty3.default)(_ref, 'xl', require('prop-types').oneOfType([require('prop-types').bool, require('prop-types').oneOf([1]), require('prop-types').oneOf([2]), require('prop-types').oneOf([3]), require('prop-types').oneOf([4]), require('prop-types').oneOf([5]), require('prop-types').oneOf([6]), require('prop-types').oneOf([7]), require('prop-types').oneOf([8]), require('prop-types').oneOf([9]), require('prop-types').oneOf([10]), require('prop-types').oneOf([11]), require('prop-types').oneOf([12])])), _ref) : {};
+Grid.propTypes = 'development' !== "production" ? {
+  /**
+   * Defines the `align-content` style property.
+   * It's applied for all screen sizes.
+   */
+  alignContent: _propTypes2.default.oneOf(['stretch', 'center', 'flex-start', 'flex-end', 'space-between', 'space-around']),
+  /**
+   * Defines the `align-items` style property.
+   * It's applied for all screen sizes.
+   */
+  alignItems: _propTypes2.default.oneOf(['flex-start', 'center', 'flex-end', 'stretch', 'baseline']),
+  /**
+   * The content of the component.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * If `true`, the component will have the flex *container* behavior.
+   * You should be wrapping *items* with a *container*.
+   */
+  container: _propTypes2.default.bool,
+  /**
+   * Defines the `flex-direction` style property.
+   * It is applied for all screen sizes.
+   */
+  direction: _propTypes2.default.oneOf(['row', 'row-reverse', 'column', 'column-reverse']),
+  /**
+   * If provided, will wrap with [Hidden](/api/hidden) component and given properties.
+   */
+  hidden: _propTypes2.default.object,
+  /**
+   * If `true`, the component will have the flex *item* behavior.
+   * You should be wrapping *items* with a *container*.
+   */
+  item: _propTypes2.default.bool,
+  /**
+   * Defines the `justify-content` style property.
+   * It is applied for all screen sizes.
+   */
+  justify: _propTypes2.default.oneOf(['flex-start', 'center', 'flex-end', 'space-between', 'space-around']),
+  /**
+   * Defines the number of grids the component is going to use.
+   * It's applied for the `lg` breakpoint and wider screens if not overridden.
+   */
+  lg: _propTypes2.default.oneOf([true, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
+  /**
+   * Defines the number of grids the component is going to use.
+   * It's applied for the `md` breakpoint and wider screens if not overridden.
+   */
+  md: _propTypes2.default.oneOf([true, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
+  /**
+   * Defines the number of grids the component is going to use.
+   * It's applied for the `sm` breakpoint and wider screens if not overridden.
+   */
+  sm: _propTypes2.default.oneOf([true, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
+  /**
+   * Defines the space between the type `item` component.
+   * It can only be used on a type `container` component.
+   */
+  spacing: _propTypes2.default.oneOf(GUTTERS),
+  /**
+   * Defines the `flex-wrap` style property.
+   * It's applied for all screen sizes.
+   */
+  wrap: _propTypes2.default.oneOf(['nowrap', 'wrap', 'wrap-reverse']),
+  /**
+   * Defines the number of grids the component is going to use.
+   * It's applied for the `xl` breakpoint and wider screens.
+   */
+  xl: _propTypes2.default.oneOf([true, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
+  /**
+   * Defines the number of grids the component is going to use.
+   * It's applied for all the screen sizes with the lowest priority.
+   */
+  xs: _propTypes2.default.oneOf([true, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+} : {};
+
 Grid.defaultProps = {
   alignContent: 'stretch',
   alignItems: 'stretch',
   component: 'div',
   container: false,
   direction: 'row',
-  hidden: undefined,
   item: false,
   justify: 'flex-start',
   spacing: 16,
@@ -46334,17 +45640,16 @@ Grid.defaultProps = {
 
 // Add a wrapper component to generate some helper messages in the development
 // environment.
+/* eslint-disable react/no-multi-comp */
 // eslint-disable-next-line import/no-mutable-exports
 var GridWrapper = Grid;
 
 if ('development' !== 'production') {
-  var requireProp = (0, _requirePropFactory2.default)('Grid');
-
   GridWrapper = function GridWrapper(props) {
     return _react2.default.createElement(Grid, props);
   };
 
-  // $FlowFixMe - cannot mix legacy propTypes with current HOC pattern - https://github.com/facebook/flow/issues/4644#issuecomment-332530909
+  var requireProp = (0, _requirePropFactory2.default)('Grid');
   GridWrapper.propTypes = {
     alignContent: requireProp('container'),
     alignItems: requireProp('container'),
@@ -46402,6 +45707,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _HiddenJs = require('./HiddenJs');
 
 var _HiddenJs2 = _interopRequireDefault(_HiddenJs);
@@ -46411,97 +45720,6 @@ var _HiddenCss = require('./HiddenCss');
 var _HiddenCss2 = _interopRequireDefault(_HiddenCss);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Breakpoint = require('../styles/createBreakpoints').babelPluginFlowReactPropTypes_proptype_Breakpoint || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * Hide the given breakpoint(s).
-   */
-  only: require('prop-types').oneOfType([typeof babelPluginFlowReactPropTypes_proptype_Breakpoint === 'function' ? babelPluginFlowReactPropTypes_proptype_Breakpoint : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Breakpoint), require('prop-types').arrayOf(typeof babelPluginFlowReactPropTypes_proptype_Breakpoint === 'function' ? babelPluginFlowReactPropTypes_proptype_Breakpoint : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Breakpoint))]),
-
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  xsUp: require('prop-types').bool,
-
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  smUp: require('prop-types').bool,
-
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  mdUp: require('prop-types').bool,
-
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  lgUp: require('prop-types').bool,
-
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  xlUp: require('prop-types').bool,
-
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  xsDown: require('prop-types').bool,
-
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  smDown: require('prop-types').bool,
-
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  mdDown: require('prop-types').bool,
-
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  lgDown: require('prop-types').bool,
-
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  xlDown: require('prop-types').bool,
-
-  /**
-   * Specify which implementation to use.  'js' is the default, 'css' works better for server
-   * side rendering.
-   */
-  implementation: require('prop-types').oneOf(['js', 'css']),
-
-  /**
-   * You can use this property when choosing the `js` implementation with server side rendering.
-   *
-   * As `window.innerWidth` is unavailable on the server,
-   * we default to rendering an empty componenent during the first mount.
-   * In some situation you might want to use an heristic to approximate
-   * the screen width of the client browser screen width.
-   *
-   * For instance, you could be using the user-agent or the client-hints.
-   * http://caniuse.com/#search=client%20hint
-   */
-  initialWidth: require('prop-types').number
-};
-
 
 /**
  * Responsively hides children based on the selected implementation.
@@ -46518,19 +45736,90 @@ function Hidden(props) {
   return _react2.default.createElement(_HiddenCss2.default, other);
 }
 
-Hidden.propTypes = 'development' !== "production" ? babelPluginFlowReactPropTypes_proptype_Props : {};
+Hidden.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * Specify which implementation to use.  'js' is the default, 'css' works better for server
+   * side rendering.
+   */
+  implementation: _propTypes2.default.oneOf(['js', 'css']),
+  /**
+   * You can use this property when choosing the `js` implementation with server side rendering.
+   *
+   * As `window.innerWidth` is unavailable on the server,
+   * we default to rendering an empty componenent during the first mount.
+   * In some situation you might want to use an heristic to approximate
+   * the screen width of the client browser screen width.
+   *
+   * For instance, you could be using the user-agent or the client-hints.
+   * http://caniuse.com/#search=client%20hint
+   */
+  initialWidth: _propTypes2.default.number,
+  /**
+   * If true, screens this size and down will be hidden.
+   */
+  lgDown: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and up will be hidden.
+   */
+  lgUp: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and down will be hidden.
+   */
+  mdDown: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and up will be hidden.
+   */
+  mdUp: _propTypes2.default.bool,
+  /**
+   * Hide the given breakpoint(s).
+   */
+  only: _propTypes2.default.oneOfType([_propTypes2.default.oneOf(['xs', 'sm', 'md', 'lg', 'xl']), _propTypes2.default.arrayOf(_propTypes2.default.oneOf(['xs', 'sm', 'md', 'lg', 'xl']))]),
+  /**
+   * If true, screens this size and down will be hidden.
+   */
+  smDown: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and up will be hidden.
+   */
+  smUp: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and down will be hidden.
+   */
+  xlDown: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and up will be hidden.
+   */
+  xlUp: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and down will be hidden.
+   */
+  xsDown: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and up will be hidden.
+   */
+  xsUp: _propTypes2.default.bool
+} : {};
+
 Hidden.defaultProps = {
   implementation: 'js',
-  xsUp: false,
-  smUp: false,
-  mdUp: false,
+  lgDown: false,
   lgUp: false,
+  mdDown: false,
+  mdUp: false,
+  smDown: false,
+  smUp: false,
+  xlDown: false,
   xlUp: false,
   xsDown: false,
-  smDown: false,
-  mdDown: false,
-  lgDown: false,
-  xlDown: false
+  xsUp: false
 };
 
 exports.default = Hidden;
@@ -46558,13 +45847,13 @@ var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
 
 var _defineProperty3 = _interopRequireDefault(_defineProperty2);
 
-var _extends2 = require('babel-runtime/helpers/extends');
-
-var _extends3 = _interopRequireDefault(_extends2);
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _warning = require('warning');
 
@@ -46580,39 +45869,18 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any; /* eslint-disable flowtype/require-valid-file-annotation */
-
-var babelPluginFlowReactPropTypes_proptype_HiddenProps = require('./types').babelPluginFlowReactPropTypes_proptype_HiddenProps || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Props = (0, _extends3.default)({}, babelPluginFlowReactPropTypes_proptype_HiddenProps === require('prop-types').any ? {} : babelPluginFlowReactPropTypes_proptype_HiddenProps, {
-  /**
-   * The content of the component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired,
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object.isRequired
-});
-
-
-function generateStyles(theme) {
+var styles = function styles(theme) {
   var hidden = {
     display: 'none'
   };
 
-  return _createBreakpoints.keys.reduce(function (styles, key) {
-    styles['only' + (0, _helpers.capitalizeFirstLetter)(key)] = (0, _defineProperty3.default)({}, theme.breakpoints.only(key), hidden);
-    styles[key + 'Up'] = (0, _defineProperty3.default)({}, theme.breakpoints.up(key), hidden);
-    styles[key + 'Down'] = (0, _defineProperty3.default)({}, theme.breakpoints.down(key), hidden);
+  return _createBreakpoints.keys.reduce(function (acc, key) {
+    acc['only' + (0, _helpers.capitalizeFirstLetter)(key)] = (0, _defineProperty3.default)({}, theme.breakpoints.only(key), hidden);
+    acc[key + 'Up'] = (0, _defineProperty3.default)({}, theme.breakpoints.up(key), hidden);
+    acc[key + 'Down'] = (0, _defineProperty3.default)({}, theme.breakpoints.down(key), hidden);
 
-    return styles;
+    return acc;
   }, {});
-}
-
-var styles = function styles(theme) {
-  return generateStyles(theme);
 };
 
 /**
@@ -46621,18 +45889,18 @@ var styles = function styles(theme) {
 function HiddenCss(props) {
   var children = props.children,
       classes = props.classes,
-      only = props.only,
-      xsUp = props.xsUp,
-      smUp = props.smUp,
-      mdUp = props.mdUp,
+      lgDown = props.lgDown,
       lgUp = props.lgUp,
+      mdDown = props.mdDown,
+      mdUp = props.mdUp,
+      only = props.only,
+      smDown = props.smDown,
+      smUp = props.smUp,
+      xlDown = props.xlDown,
       xlUp = props.xlUp,
       xsDown = props.xsDown,
-      smDown = props.smDown,
-      mdDown = props.mdDown,
-      lgDown = props.lgDown,
-      xlDown = props.xlDown,
-      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'only', 'xsUp', 'smUp', 'mdUp', 'lgUp', 'xlUp', 'xsDown', 'smDown', 'mdDown', 'lgDown', 'xlDown']);
+      xsUp = props.xsUp,
+      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'lgDown', 'lgUp', 'mdDown', 'mdUp', 'only', 'smDown', 'smUp', 'xlDown', 'xlUp', 'xsDown', 'xsUp']);
 
 
   'development' !== "production" ? (0, _warning2.default)((0, _keys2.default)(other).length === 0 || (0, _keys2.default)(other).length === 1 && other.hasOwnProperty('ref'), 'Material-UI: unsupported properties received ' + (0, _keys2.default)(other).join(', ') + ' by `<Hidden />`.') : void 0;
@@ -46653,7 +45921,10 @@ function HiddenCss(props) {
   }
 
   if (only) {
-    className.push(classes['only' + (0, _helpers.capitalizeFirstLetter)(only)]);
+    var onlyBreakpoints = Array.isArray(only) ? only : [only];
+    onlyBreakpoints.forEach(function (breakpoint) {
+      className.push(classes['only' + (0, _helpers.capitalizeFirstLetter)(breakpoint)]);
+    });
   }
 
   return _react2.default.createElement(
@@ -46663,7 +45934,82 @@ function HiddenCss(props) {
   );
 }
 
-HiddenCss.propTypes = 'development' !== "production" ? babelPluginFlowReactPropTypes_proptype_Props : {};
+HiddenCss.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * Specify which implementation to use.  'js' is the default, 'css' works better for server
+   * side rendering.
+   */
+  implementation: _propTypes2.default.oneOf(['js', 'css']),
+  /**
+   * You can use this property when choosing the `js` implementation with server side rendering.
+   *
+   * As `window.innerWidth` is unavailable on the server,
+   * we default to rendering an empty componenent during the first mount.
+   * In some situation you might want to use an heristic to approximate
+   * the screen width of the client browser screen width.
+   *
+   * For instance, you could be using the user-agent or the client-hints.
+   * http://caniuse.com/#search=client%20hint
+   */
+  initialWidth: _propTypes2.default.number,
+  /**
+   * If true, screens this size and down will be hidden.
+   */
+  lgDown: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and up will be hidden.
+   */
+  lgUp: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and down will be hidden.
+   */
+  mdDown: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and up will be hidden.
+   */
+  mdUp: _propTypes2.default.bool,
+  /**
+   * Hide the given breakpoint(s).
+   */
+  only: _propTypes2.default.oneOfType([_propTypes2.default.oneOf(['xs', 'sm', 'md', 'lg', 'xl']), _propTypes2.default.arrayOf(_propTypes2.default.oneOf(['xs', 'sm', 'md', 'lg', 'xl']))]),
+  /**
+   * If true, screens this size and down will be hidden.
+   */
+  smDown: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and up will be hidden.
+   */
+  smUp: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and down will be hidden.
+   */
+  xlDown: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and up will be hidden.
+   */
+  xlUp: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and down will be hidden.
+   */
+  xsDown: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and up will be hidden.
+   */
+  xsUp: _propTypes2.default.bool
+} : {};
+
 exports.default = (0, _withStyles2.default)(styles, { name: 'MuiHiddenCss' })(HiddenCss);
   })();
 });
@@ -46689,9 +46035,9 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _extends2 = require('babel-runtime/helpers/extends');
+var _propTypes = require('prop-types');
 
-var _extends3 = _interopRequireDefault(_extends2);
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _warning = require('warning');
 
@@ -46705,42 +46051,24 @@ var _withWidth2 = _interopRequireDefault(_withWidth);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_HiddenProps = require('./types').babelPluginFlowReactPropTypes_proptype_HiddenProps || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Props = (0, _extends3.default)({}, babelPluginFlowReactPropTypes_proptype_HiddenProps === require('prop-types').any ? {} : babelPluginFlowReactPropTypes_proptype_HiddenProps, {
-  /**
-   * The content of the component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired,
-
-  /**
-   * @ignore
-   * width prop provided by withWidth decorator
-   */
-  width: require('prop-types').string.isRequired
-});
-
-
 /**
  * @ignore - internal component.
  */
 function HiddenJs(props) {
   var children = props.children,
-      only = props.only,
-      xsUp = props.xsUp,
-      smUp = props.smUp,
-      mdUp = props.mdUp,
+      lgDown = props.lgDown,
       lgUp = props.lgUp,
+      mdDown = props.mdDown,
+      mdUp = props.mdUp,
+      only = props.only,
+      smDown = props.smDown,
+      smUp = props.smUp,
+      width = props.width,
+      xlDown = props.xlDown,
       xlUp = props.xlUp,
       xsDown = props.xsDown,
-      smDown = props.smDown,
-      mdDown = props.mdDown,
-      lgDown = props.lgDown,
-      xlDown = props.xlDown,
-      width = props.width,
-      other = (0, _objectWithoutProperties3.default)(props, ['children', 'only', 'xsUp', 'smUp', 'mdUp', 'lgUp', 'xlUp', 'xsDown', 'smDown', 'mdDown', 'lgDown', 'xlDown', 'width']);
+      xsUp = props.xsUp,
+      other = (0, _objectWithoutProperties3.default)(props, ['children', 'lgDown', 'lgUp', 'mdDown', 'mdUp', 'only', 'smDown', 'smUp', 'width', 'xlDown', 'xlUp', 'xsDown', 'xsUp']);
 
 
   'development' !== "production" ? (0, _warning2.default)((0, _keys2.default)(other).length === 0, 'Material-UI: unsupported properties received ' + (0, _stringify2.default)(other) + ' by `<Hidden />`.') : void 0;
@@ -46783,6 +46111,83 @@ function HiddenJs(props) {
   return children;
 }
 
+HiddenJs.propTypes = {
+  /**
+   * The content of the component.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * Specify which implementation to use.  'js' is the default, 'css' works better for server
+   * side rendering.
+   */
+  implementation: _propTypes2.default.oneOf(['js', 'css']),
+  /**
+   * You can use this property when choosing the `js` implementation with server side rendering.
+   *
+   * As `window.innerWidth` is unavailable on the server,
+   * we default to rendering an empty componenent during the first mount.
+   * In some situation you might want to use an heristic to approximate
+   * the screen width of the client browser screen width.
+   *
+   * For instance, you could be using the user-agent or the client-hints.
+   * http://caniuse.com/#search=client%20hint
+   */
+  initialWidth: _propTypes2.default.number,
+  /**
+   * If true, screens this size and down will be hidden.
+   */
+  lgDown: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and up will be hidden.
+   */
+  lgUp: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and down will be hidden.
+   */
+  mdDown: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and up will be hidden.
+   */
+  mdUp: _propTypes2.default.bool,
+  /**
+   * Hide the given breakpoint(s).
+   */
+  only: _propTypes2.default.oneOfType([_propTypes2.default.oneOf(['xs', 'sm', 'md', 'lg', 'xl']), _propTypes2.default.arrayOf(_propTypes2.default.oneOf(['xs', 'sm', 'md', 'lg', 'xl']))]),
+  /**
+   * If true, screens this size and down will be hidden.
+   */
+  smDown: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and up will be hidden.
+   */
+  smUp: _propTypes2.default.bool,
+  /**
+   * @ignore
+   * width prop provided by withWidth decorator.
+   */
+  width: _propTypes2.default.string.isRequired,
+  /**
+   * If true, screens this size and down will be hidden.
+   */
+  xlDown: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and up will be hidden.
+   */
+  xlUp: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and down will be hidden.
+   */
+  xsDown: _propTypes2.default.bool,
+  /**
+   * If true, screens this size and up will be hidden.
+   */
+  xsUp: _propTypes2.default.bool
+};
+
 exports.default = (0, _withWidth2.default)()(HiddenJs);
   })();
 });
@@ -46818,79 +46223,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   })();
 });
 
-require.register("material-ui/Hidden/types.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-// IMPORTANT: this must be identical to Hidden.js Props.
-// This is here because docgen can't yet import type definitions across files.
-var babelPluginFlowReactPropTypes_proptype_Breakpoint = require('../styles/createBreakpoints').babelPluginFlowReactPropTypes_proptype_Breakpoint || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_HiddenProps = {
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * Hide the given breakpoint(s).
-   */
-  only: require('prop-types').oneOfType([typeof babelPluginFlowReactPropTypes_proptype_Breakpoint === 'function' ? babelPluginFlowReactPropTypes_proptype_Breakpoint : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Breakpoint), require('prop-types').arrayOf(typeof babelPluginFlowReactPropTypes_proptype_Breakpoint === 'function' ? babelPluginFlowReactPropTypes_proptype_Breakpoint : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Breakpoint))]),
-
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  xsUp: require('prop-types').bool,
-
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  smUp: require('prop-types').bool,
-
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  mdUp: require('prop-types').bool,
-
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  lgUp: require('prop-types').bool,
-
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  xlUp: require('prop-types').bool,
-
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  xsDown: require('prop-types').bool,
-
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  smDown: require('prop-types').bool,
-
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  mdDown: require('prop-types').bool,
-
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  lgDown: require('prop-types').bool,
-
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  xlDown: require('prop-types').bool
-};
-  })();
-});
-
 require.register("material-ui/Icon/Icon.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "material-ui");
   (function() {
@@ -46913,11 +46245,13 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -46930,8 +46264,6 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 var _helpers = require('../utils/helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
 
 var styles = exports.styles = function styles(theme) {
   return {
@@ -46959,31 +46291,6 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Color = require('prop-types').oneOf(['inherit', 'accent', 'action', 'contrast', 'disabled', 'error', 'primary']);
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The name of the icon font ligature.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The color of the component. It's using the theme palette when that makes sense.
-   */
-  color: require('prop-types').oneOf(['inherit', 'accent', 'action', 'contrast', 'disabled', 'error', 'primary'])
-};
-
-
 function Icon(props) {
   var children = props.children,
       classes = props.classes,
@@ -47001,11 +46308,25 @@ function Icon(props) {
   );
 }
 
-Icon.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  color: require('prop-types').oneOf(['inherit', 'accent', 'action', 'contrast', 'disabled', 'error', 'primary']).isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'color', require('prop-types').oneOf(['inherit', 'accent', 'action', 'contrast', 'disabled', 'error', 'primary'])), _ref) : {};
+Icon.propTypes = 'development' !== "production" ? {
+  /**
+   * The name of the icon font ligature.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The color of the component. It's using the theme palette when that makes sense.
+   */
+  color: _propTypes2.default.oneOf(['inherit', 'accent', 'action', 'contrast', 'disabled', 'error', 'primary'])
+} : {};
+
 Icon.defaultProps = {
   color: 'inherit'
 };
@@ -47060,12 +46381,13 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref; //  weak
-// @inheritedComponent ButtonBase
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -47085,14 +46407,13 @@ var _Icon = require('../Icon');
 
 var _Icon2 = _interopRequireDefault(_Icon);
 
-require('../SvgIcon');
-
 var _reactHelpers = require('../utils/reactHelpers');
+
+require('../SvgIcon');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any; // Ensure CSS specificity
-
+// Ensure CSS specificity
 
 var styles = exports.styles = function styles(theme) {
   return {
@@ -47140,54 +46461,12 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * Use that property to pass a ref callback to the native button component.
-   */
-  buttonRef: require('prop-types').func,
-
-  /**
-   * The icon element.
-   * If a string is provided, it will be used as an icon font ligature.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The color of the component. It's using the theme palette when that makes sense.
-   */
-  color: require('prop-types').oneOf(['default', 'inherit', 'primary', 'contrast', 'accent']),
-
-  /**
-   * If `true`, the button will be disabled.
-   */
-  disabled: require('prop-types').bool,
-
-  /**
-   * If `true`, the ripple will be disabled.
-   */
-  disableRipple: require('prop-types').bool,
-
-  /**
-   * Use that property to pass a ref callback to the root component.
-   */
-  rootRef: require('prop-types').func
-};
-
-
 /**
  * Refer to the [Icons](/style/icons) section of the documentation
  * regarding the available icon options.
  */
+// @inheritedComponent ButtonBase
+
 function IconButton(props) {
   var _classNames;
 
@@ -47207,11 +46486,10 @@ function IconButton(props) {
       className: (0, _classnames2.default)(classes.root, (_classNames = {}, (0, _defineProperty3.default)(_classNames, classes['color' + (0, _helpers.capitalizeFirstLetter)(color)], color !== 'default'), (0, _defineProperty3.default)(_classNames, classes.disabled, disabled), _classNames), className),
       centerRipple: true,
       keyboardFocusedClassName: classes.keyboardFocused,
-      disabled: disabled
-    }, other, {
+      disabled: disabled,
       rootRef: buttonRef,
       ref: rootRef
-    }),
+    }, other),
     _react2.default.createElement(
       'span',
       { className: classes.label },
@@ -47232,11 +46510,42 @@ function IconButton(props) {
   );
 }
 
-IconButton.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  buttonRef: require('prop-types').func,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'color', require('prop-types').oneOf(['default', 'inherit', 'primary', 'contrast', 'accent'])), (0, _defineProperty3.default)(_ref, 'disabled', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'disableRipple', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'rootRef', require('prop-types').func), _ref) : {};
+IconButton.propTypes = 'development' !== "production" ? {
+  /**
+   * Use that property to pass a ref callback to the native button component.
+   */
+  buttonRef: _propTypes2.default.func,
+  /**
+   * The icon element.
+   * If a string is provided, it will be used as an icon font ligature.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The color of the component. It's using the theme palette when that makes sense.
+   */
+  color: _propTypes2.default.oneOf(['default', 'inherit', 'primary', 'contrast', 'accent']),
+  /**
+   * If `true`, the button will be disabled.
+   */
+  disabled: _propTypes2.default.bool,
+  /**
+   * If `true`, the ripple will be disabled.
+   */
+  disableRipple: _propTypes2.default.bool,
+  /**
+   * Use that property to pass a ref callback to the root component.
+   */
+  rootRef: _propTypes2.default.func
+} : {};
+
 IconButton.defaultProps = {
   color: 'default',
   disabled: false,
@@ -47339,10 +46648,6 @@ var _Textarea2 = _interopRequireDefault(_Textarea);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_ComponentType = require('prop-types').func; //  weak
-
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
 // Supports determination of isControlled().
 // Controlled input accepts its current value as a prop.
 //
@@ -47350,7 +46655,7 @@ var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFl
 // @param value
 // @returns {boolean} true if string (including '') or number (including zero)
 function hasValue(value) {
-  return value !== undefined && value !== null && !(Array.isArray(value) && value.length === 0);
+  return value != null && !(Array.isArray(value) && value.length === 0);
 }
 
 // Determine if field is dirty (a.k.a. filled).
@@ -47435,54 +46740,10 @@ var styles = exports.styles = function styles(theme) {
         transform: 'scaleX(1)' // error is always underlined in red
       }
     },
-    input: {
-      font: 'inherit',
-      color: 'currentColor',
-      // slight alteration to spec spacing to match visual spec result
-      padding: theme.spacing.unit - 1 + 'px 0 ' + (theme.spacing.unit + 1) + 'px',
-      border: 0,
-      boxSizing: 'content-box',
-      verticalAlign: 'middle',
-      background: 'none',
-      margin: 0, // Reset for Safari
-      // Remove grey highlight
-      WebkitTapHighlightColor: theme.palette.common.transparent,
-      display: 'block',
-      width: '100%',
-      '&::-webkit-input-placeholder': placeholder,
-      '&::-moz-placeholder': placeholder, // Firefox 19+
-      '&:-ms-input-placeholder': placeholder, // IE 11
-      '&::-ms-input-placeholder': placeholder, // Edge
-      '&:focus': {
-        outline: 0
-      },
-      // Reset Firefox invalid required input style
-      '&:invalid': {
-        boxShadow: 'none'
-      },
-      '&::-webkit-search-decoration': {
-        // Remove the padding when type=search.
-        appearance: 'none'
-      },
-      // Show and hide the placeholder logic
-      'label[data-shrink=false] + $formControl &': {
-        '&::-webkit-input-placeholder': placeholderHidden,
-        '&::-moz-placeholder': placeholderHidden, // Firefox 19+
-        '&:-ms-input-placeholder': placeholderHidden, // IE 11
-        '&::-ms-input-placeholder': placeholderHidden, // Edge
-        '&:focus::-webkit-input-placeholder': placeholderVisible,
-        '&:focus::-moz-placeholder': placeholderVisible, // Firefox 19+
-        '&:focus:-ms-input-placeholder': placeholderVisible, // IE 11
-        '&:focus::-ms-input-placeholder': placeholderVisible // Edge
-      }
-    },
-    inputDense: {
-      paddingTop: theme.spacing.unit / 2
-    },
+    focused: {},
     disabled: {
       color: theme.palette.text.disabled
     },
-    focused: {},
     underline: {
       '&:before': {
         backgroundColor: theme.palette.input.bottomLine,
@@ -47514,190 +46775,95 @@ var styles = exports.styles = function styles(theme) {
     multiline: {
       padding: theme.spacing.unit - 2 + 'px 0 ' + (theme.spacing.unit - 1) + 'px'
     },
+    fullWidth: {
+      width: '100%'
+    },
+    input: {
+      font: 'inherit',
+      color: 'currentColor',
+      padding: theme.spacing.unit - 2 + 'px 0 ' + (theme.spacing.unit - 1) + 'px',
+      border: 0,
+      boxSizing: 'content-box',
+      verticalAlign: 'middle',
+      background: 'none',
+      margin: 0, // Reset for Safari
+      // Remove grey highlight
+      WebkitTapHighlightColor: theme.palette.common.transparent,
+      display: 'block',
+      // Make the flex item shrink with Firefox
+      minWidth: 0,
+      width: '100%',
+      '&::-webkit-input-placeholder': placeholder,
+      '&::-moz-placeholder': placeholder, // Firefox 19+
+      '&:-ms-input-placeholder': placeholder, // IE 11
+      '&::-ms-input-placeholder': placeholder, // Edge
+      '&:focus': {
+        outline: 0
+      },
+      // Reset Firefox invalid required input style
+      '&:invalid': {
+        boxShadow: 'none'
+      },
+      '&::-webkit-search-decoration': {
+        // Remove the padding when type=search.
+        appearance: 'none'
+      },
+      // Show and hide the placeholder logic
+      'label[data-shrink=false] + $formControl &': {
+        '&::-webkit-input-placeholder': placeholderHidden,
+        '&::-moz-placeholder': placeholderHidden, // Firefox 19+
+        '&:-ms-input-placeholder': placeholderHidden, // IE 11
+        '&::-ms-input-placeholder': placeholderHidden, // Edge
+        '&:focus::-webkit-input-placeholder': placeholderVisible,
+        '&:focus::-moz-placeholder': placeholderVisible, // Firefox 19+
+        '&:focus:-ms-input-placeholder': placeholderVisible, // IE 11
+        '&:focus::-ms-input-placeholder': placeholderVisible // Edge
+      }
+    },
+    inputDense: {
+      paddingTop: theme.spacing.unit / 2 - 1
+    },
     inputDisabled: {
       opacity: 1 // Reset iOS opacity
     },
     inputSingleline: {
-      height: '1em'
-    },
-    inputSearch: {
-      appearance: 'textfield' // Improve type search style.
+      height: '1.1875em' // Reset (19px)
     },
     inputMultiline: {
       resize: 'none',
       padding: 0
     },
-    fullWidth: {
-      width: '100%'
+    inputSearch: {
+      appearance: 'textfield' // Improve type search style.
     }
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * This property helps users to fill forms faster, especially on mobile devices.
-   * The name can be confusing, it's more like an autofill.
-   * You can learn more about it in this article
-   * https://developers.google.com/web/updates/2015/06/checkout-faster-with-autofill
-   */
-  autoComplete: require('prop-types').string,
+function formControlState(props, context) {
+  var disabled = props.disabled;
+  var error = props.error;
+  var margin = props.margin;
 
-  /**
-   * If `true`, the input will be focused during the first mount.
-   */
-  autoFocus: require('prop-types').bool,
+  if (context.muiFormControl) {
+    if (typeof disabled === 'undefined') {
+      disabled = context.muiFormControl.disabled;
+    }
 
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
+    if (typeof error === 'undefined') {
+      error = context.muiFormControl.error;
+    }
 
-  /**
-   * The CSS class name of the wrapper element.
-   */
-  className: require('prop-types').string,
+    if (typeof margin === 'undefined') {
+      margin = context.muiFormControl.margin;
+    }
+  }
 
-  /**
-   * The default input value, useful when not controlling the component.
-   */
-  defaultValue: require('prop-types').oneOfType([require('prop-types').string, require('prop-types').number]),
-
-  /**
-   * If `true`, the input will be disabled.
-   */
-  disabled: require('prop-types').bool,
-
-  /**
-   * If `true`, the input will not have an underline.
-   */
-  disableUnderline: require('prop-types').bool,
-
-  /**
-   * End `InputAdornment` for this component.
-   */
-  endAdornment: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * If `true`, the input will indicate an error. This is normally obtained via context from
-   * FormControl.
-   */
-  error: require('prop-types').bool,
-
-  /**
-   * If `true`, the input will take up the full width of its container.
-   */
-  fullWidth: require('prop-types').bool,
-
-  /**
-   * The id of the `input` element.
-   */
-  id: require('prop-types').string,
-
-  /**
-   * The component used for the input node.
-   * Either a string to use a DOM element or a component.
-   * It's an `input` by default.
-   */
-  inputComponent: require('prop-types').oneOfType([require('prop-types').string, typeof babelPluginFlowReactPropTypes_proptype_ComponentType === 'function' ? babelPluginFlowReactPropTypes_proptype_ComponentType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ComponentType)]),
-
-  /**
-   * Properties applied to the `input` element.
-   */
-  inputProps: require('prop-types').object,
-
-  /**
-   * Use that property to pass a ref callback to the native input component.
-   */
-  inputRef: require('prop-types').func,
-
-  /**
-   * If `dense`, will adjust vertical spacing. This is normally obtained via context from
-   * FormControl.
-   */
-  margin: require('prop-types').oneOf(['dense', 'none']),
-
-  /**
-   * If `true`, a textarea element will be rendered.
-   */
-  multiline: require('prop-types').bool,
-
-  /**
-   * Name attribute of the `input` element.
-   */
-  name: require('prop-types').string,
-
-  /**
-   * @ignore
-   */
-  readOnly: require('prop-types').bool,
-
-  /**
-   * @ignore
-   */
-  onBlur: require('prop-types').func,
-
-  /**
-   * Callback fired when the value is changed.
-   *
-   * @param {object} event The event source of the callback
-   */
-  onChange: require('prop-types').func,
-
-  /**
-   * TODO
-   */
-  onClean: require('prop-types').func,
-
-  /**
-   * TODO
-   */
-  onDirty: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  onFocus: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  onKeyDown: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  onKeyUp: require('prop-types').func,
-
-  /**
-   * The short hint displayed in the input before the user enters a value.
-   */
-  placeholder: require('prop-types').string,
-
-  /**
-   * Number of rows to display when multiline option is set to true.
-   */
-  rows: require('prop-types').oneOfType([require('prop-types').string, require('prop-types').number]),
-
-  /**
-   * Maximum number of rows to display when multiline option is set to true.
-   */
-  rowsMax: require('prop-types').oneOfType([require('prop-types').string, require('prop-types').number]),
-
-  /**
-   * Start `InputAdornment` for this component.
-   */
-  startAdornment: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Type of the input element. It should be a valid HTML5 input type.
-   */
-  type: require('prop-types').string,
-
-  /**
-   * The input value, required for a controlled component.
-   */
-  value: require('prop-types').oneOfType([require('prop-types').string, require('prop-types').number, require('prop-types').arrayOf(require('prop-types').oneOfType([require('prop-types').string, require('prop-types').number]))])
-};
+  return {
+    disabled: disabled,
+    error: error,
+    margin: margin
+  };
+}
 
 var Input = function (_React$Component) {
   (0, _inherits3.default)(Input, _React$Component);
@@ -47716,6 +46882,13 @@ var Input = function (_React$Component) {
     return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = Input.__proto__ || (0, _getPrototypeOf2.default)(Input)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
       focused: false
     }, _this.input = null, _this.handleFocus = function (event) {
+      // Fix an bug with IE11 where the focus/blur events are triggered
+      // while the input is disabled.
+      if (formControlState(_this.props, _this.context).disabled) {
+        event.stopPropagation();
+        return;
+      }
+
       _this.setState({ focused: true });
       if (_this.props.onFocus) {
         _this.props.onFocus(event);
@@ -47726,7 +46899,7 @@ var Input = function (_React$Component) {
         _this.props.onBlur(event);
       }
     }, _this.handleChange = function (event) {
-      if (!_this.isControlled()) {
+      if (!_this.isControlled) {
         _this.checkDirty(_this.input);
       }
 
@@ -47747,23 +46920,25 @@ var Input = function (_React$Component) {
   (0, _createClass3.default)(Input, [{
     key: 'componentWillMount',
     value: function componentWillMount() {
-      if (this.isControlled()) {
+      this.isControlled = this.props.value != null;
+
+      if (this.isControlled) {
         this.checkDirty(this.props);
       }
     }
   }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
-      if (!this.isControlled()) {
+      if (!this.isControlled) {
         this.checkDirty(this.input);
       }
     }
   }, {
     key: 'componentWillReceiveProps',
-    value: function componentWillReceiveProps(nextProps) {
+    value: function componentWillReceiveProps(nextProps, nextContext) {
       // The blur won't fire when the disabled state is set on a focused input.
       // We need to book keep the focused state manually.
-      if (!this.props.disabled && nextProps.disabled) {
+      if (!formControlState(this.props, this.context).disabled && formControlState(nextProps, nextContext).disabled) {
         this.setState({
           focused: false
         });
@@ -47771,13 +46946,13 @@ var Input = function (_React$Component) {
     }
   }, {
     key: 'componentWillUpdate',
-    value: function componentWillUpdate(nextProps) {
-      if (this.isControlled(nextProps)) {
+    value: function componentWillUpdate(nextProps, nextState, nextContext) {
+      if (this.isControlled) {
         this.checkDirty(nextProps);
       } // else performed in the onChange
 
       // Book keep the focused state.
-      if (!this.props.disabled && nextProps.disabled) {
+      if (!formControlState(this.props, this.context).disabled && formControlState(nextProps, nextContext).disabled) {
         var muiFormControl = this.context.muiFormControl;
 
         if (muiFormControl && muiFormControl.onBlur) {
@@ -47788,19 +46963,6 @@ var Input = function (_React$Component) {
 
     // Holds the input reference
 
-  }, {
-    key: 'isControlled',
-
-
-    // A controlled input accepts its current value as a prop.
-    //
-    // @see https://facebook.github.io/react/docs/forms.html#controlled-components
-    // @returns {boolean} true if string (including '') or number (including zero)
-    value: function isControlled() {
-      var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : this.props;
-
-      return hasValue(props.value);
-    }
   }, {
     key: 'checkDirty',
     value: function checkDirty(obj) {
@@ -47849,45 +47011,32 @@ var Input = function (_React$Component) {
           inputRef = _props.inputRef,
           marginProp = _props.margin,
           multiline = _props.multiline,
+          name = _props.name,
           onBlur = _props.onBlur,
-          onFocus = _props.onFocus,
           onChange = _props.onChange,
           onClean = _props.onClean,
           onDirty = _props.onDirty,
+          onFocus = _props.onFocus,
           onKeyDown = _props.onKeyDown,
           onKeyUp = _props.onKeyUp,
           placeholder = _props.placeholder,
-          name = _props.name,
           readOnly = _props.readOnly,
           rows = _props.rows,
           rowsMax = _props.rowsMax,
           startAdornment = _props.startAdornment,
           type = _props.type,
           value = _props.value,
-          other = (0, _objectWithoutProperties3.default)(_props, ['autoComplete', 'autoFocus', 'classes', 'className', 'defaultValue', 'disabled', 'disableUnderline', 'endAdornment', 'error', 'fullWidth', 'id', 'inputComponent', 'inputProps', 'inputRef', 'margin', 'multiline', 'onBlur', 'onFocus', 'onChange', 'onClean', 'onDirty', 'onKeyDown', 'onKeyUp', 'placeholder', 'name', 'readOnly', 'rows', 'rowsMax', 'startAdornment', 'type', 'value']);
+          other = (0, _objectWithoutProperties3.default)(_props, ['autoComplete', 'autoFocus', 'classes', 'className', 'defaultValue', 'disabled', 'disableUnderline', 'endAdornment', 'error', 'fullWidth', 'id', 'inputComponent', 'inputProps', 'inputRef', 'margin', 'multiline', 'name', 'onBlur', 'onChange', 'onClean', 'onDirty', 'onFocus', 'onKeyDown', 'onKeyUp', 'placeholder', 'readOnly', 'rows', 'rowsMax', 'startAdornment', 'type', 'value']);
       var muiFormControl = this.context.muiFormControl;
 
-      var disabled = disabledProp;
-      var error = errorProp;
-      var margin = marginProp;
-
-      if (muiFormControl) {
-        if (typeof disabled === 'undefined') {
-          disabled = muiFormControl.disabled;
-        }
-
-        if (typeof error === 'undefined') {
-          error = muiFormControl.error;
-        }
-
-        if (typeof margin === 'undefined') {
-          margin = muiFormControl.margin;
-        }
-      }
+      var _formControlState = formControlState(this.props, this.context),
+          disabled = _formControlState.disabled,
+          error = _formControlState.error,
+          margin = _formControlState.margin;
 
       var className = (0, _classnames2.default)(classes.root, (_classNames = {}, (0, _defineProperty3.default)(_classNames, classes.disabled, disabled), (0, _defineProperty3.default)(_classNames, classes.error, error), (0, _defineProperty3.default)(_classNames, classes.fullWidth, fullWidth), (0, _defineProperty3.default)(_classNames, classes.focused, this.state.focused), (0, _defineProperty3.default)(_classNames, classes.formControl, muiFormControl), (0, _defineProperty3.default)(_classNames, classes.inkbar, !disableUnderline), (0, _defineProperty3.default)(_classNames, classes.multiline, multiline), (0, _defineProperty3.default)(_classNames, classes.underline, !disableUnderline), _classNames), classNameProp);
 
-      var inputClassName = (0, _classnames2.default)(classes.input, (_classNames2 = {}, (0, _defineProperty3.default)(_classNames2, classes.inputDisabled, disabled), (0, _defineProperty3.default)(_classNames2, classes.inputSingleline, !multiline), (0, _defineProperty3.default)(_classNames2, classes.inputSearch, type === 'search'), (0, _defineProperty3.default)(_classNames2, classes.inputMultiline, multiline), (0, _defineProperty3.default)(_classNames2, classes.inputDense, margin === 'dense'), _classNames2), inputPropsClassName);
+      var inputClassName = (0, _classnames2.default)(classes.input, (_classNames2 = {}, (0, _defineProperty3.default)(_classNames2, classes.inputDisabled, disabled), (0, _defineProperty3.default)(_classNames2, classes.inputSingleline, !multiline), (0, _defineProperty3.default)(_classNames2, classes.inputMultiline, multiline), (0, _defineProperty3.default)(_classNames2, classes.inputSearch, type === 'search'), (0, _defineProperty3.default)(_classNames2, classes.inputDense, margin === 'dense'), _classNames2), inputPropsClassName);
 
       var required = muiFormControl && muiFormControl.required === true;
 
@@ -47940,7 +47089,9 @@ var Input = function (_React$Component) {
           placeholder: placeholder,
           type: type,
           readOnly: readOnly,
-          rows: rows
+          rows: rows,
+          'aria-required': required,
+          'aria-invalid': error
         }, inputProps)),
         endAdornment
       );
@@ -47949,14 +47100,149 @@ var Input = function (_React$Component) {
   return Input;
 }(_react2.default.Component);
 
+Input.propTypes = 'development' !== "production" ? {
+  /**
+   * This property helps users to fill forms faster, especially on mobile devices.
+   * The name can be confusing, it's more like an autofill.
+   * You can learn more about it in this article
+   * https://developers.google.com/web/updates/2015/06/checkout-faster-with-autofill
+   */
+  autoComplete: _propTypes2.default.string,
+  /**
+   * If `true`, the input will be focused during the first mount.
+   */
+  autoFocus: _propTypes2.default.bool,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * The CSS class name of the wrapper element.
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The default input value, useful when not controlling the component.
+   */
+  defaultValue: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number]),
+  /**
+   * If `true`, the input will be disabled.
+   */
+  disabled: _propTypes2.default.bool,
+  /**
+   * If `true`, the input will not have an underline.
+   */
+  disableUnderline: _propTypes2.default.bool,
+  /**
+   * End `InputAdornment` for this component.
+   */
+  endAdornment: _propTypes2.default.node,
+  /**
+   * If `true`, the input will indicate an error. This is normally obtained via context from
+   * FormControl.
+   */
+  error: _propTypes2.default.bool,
+  /**
+   * If `true`, the input will take up the full width of its container.
+   */
+  fullWidth: _propTypes2.default.bool,
+  /**
+   * The id of the `input` element.
+   */
+  id: _propTypes2.default.string,
+  /**
+   * The component used for the native input.
+   * Either a string to use a DOM element or a component.
+   */
+  inputComponent: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * Properties applied to the `input` element.
+   */
+  inputProps: _propTypes2.default.object,
+  /**
+   * Use that property to pass a ref callback to the native input component.
+   */
+  inputRef: _propTypes2.default.func,
+  /**
+   * If `dense`, will adjust vertical spacing. This is normally obtained via context from
+   * FormControl.
+   */
+  margin: _propTypes2.default.oneOf(['dense', 'none']),
+  /**
+   * If `true`, a textarea element will be rendered.
+   */
+  multiline: _propTypes2.default.bool,
+  /**
+   * Name attribute of the `input` element.
+   */
+  name: _propTypes2.default.string,
+  /**
+   * @ignore
+   */
+  onBlur: _propTypes2.default.func,
+  /**
+   * Callback fired when the value is changed.
+   *
+   * @param {object} event The event source of the callback
+   */
+  onChange: _propTypes2.default.func,
+  /**
+   * TODO
+   */
+  onClean: _propTypes2.default.func,
+  /**
+   * TODO
+   */
+  onDirty: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onFocus: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onKeyDown: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onKeyUp: _propTypes2.default.func,
+  /**
+   * The short hint displayed in the input before the user enters a value.
+   */
+  placeholder: _propTypes2.default.string,
+  /**
+   * @ignore
+   */
+  readOnly: _propTypes2.default.bool,
+  /**
+   * Number of rows to display when multiline option is set to true.
+   */
+  rows: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number]),
+  /**
+   * Maximum number of rows to display when multiline option is set to true.
+   */
+  rowsMax: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number]),
+  /**
+   * Start `InputAdornment` for this component.
+   */
+  startAdornment: _propTypes2.default.node,
+  /**
+   * Type of the input element. It should be a valid HTML5 input type.
+   */
+  type: _propTypes2.default.string,
+  /**
+   * The input value, required for a controlled component.
+   */
+  value: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number, _propTypes2.default.arrayOf(_propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number]))])
+} : {};
+
 Input.muiName = 'Input';
+
 Input.defaultProps = {
   disableUnderline: false,
   fullWidth: false,
   multiline: false,
   type: 'text'
 };
-
 
 Input.contextTypes = {
   muiFormControl: _propTypes2.default.object
@@ -47988,11 +47274,13 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -48008,15 +47296,13 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: {
       'label + div > &': {
-        marginTop: -theme.spacing.unit * 2
+        marginTop: -theme.spacing.unit * 2,
+        height: 26,
+        display: 'flex'
       }
     },
     positionStart: {
@@ -48027,40 +47313,6 @@ var styles = exports.styles = function styles(theme) {
     }
   };
 };
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component, normally an `IconButton` or string.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType),
-
-  /**
-   * If children is a string then disable wrapping in a Typography component.
-   */
-  disableTypography: require('prop-types').bool,
-
-  /**
-   * The position this adornment should appear relative to the `Input`.
-   */
-  position: require('prop-types').oneOf(['start', 'end']).isRequired
-};
-
 
 function InputAdornment(props) {
   var _classNames;
@@ -48087,12 +47339,34 @@ function InputAdornment(props) {
   );
 }
 
-InputAdornment.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType.isRequired ? babelPluginFlowReactPropTypes_proptype_ElementType.isRequired : babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType).isRequired,
-  disableTypography: require('prop-types').bool.isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'component', typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType)), (0, _defineProperty3.default)(_ref, 'disableTypography', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'position', require('prop-types').oneOf(['start', 'end']).isRequired), _ref) : {};
+InputAdornment.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component, normally an `IconButton` or string.
+   */
+  children: _propTypes2.default.node.isRequired,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * If children is a string then disable wrapping in a Typography component.
+   */
+  disableTypography: _propTypes2.default.bool,
+  /**
+   * The position this adornment should appear relative to the `Input`.
+   */
+  position: _propTypes2.default.oneOf(['start', 'end'])
+} : {};
+
 InputAdornment.defaultProps = {
   component: 'div',
   disableTypography: false
@@ -48124,8 +47398,6 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
@@ -48145,8 +47417,6 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 var _Form = require('../Form');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
 
 var styles = exports.styles = function styles(theme) {
   return {
@@ -48180,77 +47450,18 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The contents of the `InputLabel`.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * If `true`, the transition animation is disabled.
-   */
-  disableAnimation: require('prop-types').bool,
-
-  /**
-   * If `true`, apply disabled class.
-   */
-  disabled: require('prop-types').bool,
-
-  /**
-   * If `true`, the label will be displayed in an error state.
-   */
-  error: require('prop-types').bool,
-
-  /**
-   * `classes` property applied to the `FormControl` element.
-   */
-  FormControlClasses: require('prop-types').object,
-
-  /**
-   * If `true`, the input of this label is focused.
-   */
-  focused: require('prop-types').bool,
-
-  /**
-   * If `dense`, will adjust vertical spacing. This is normally obtained via context from
-   * FormControl.
-   */
-  margin: require('prop-types').oneOf(['dense']),
-
-  /**
-   * if `true`, the label will indicate that the input is required.
-   */
-  required: require('prop-types').bool,
-
-  /**
-   * If `true`, the label is shrunk.
-   */
-  shrink: require('prop-types').bool
-};
-
-
 function InputLabel(props, context) {
   var _classNames;
 
-  var disabled = props.disabled,
-      disableAnimation = props.disableAnimation,
-      children = props.children,
+  var children = props.children,
       classes = props.classes,
       classNameProp = props.className,
+      disableAnimation = props.disableAnimation,
+      disabled = props.disabled,
       FormControlClasses = props.FormControlClasses,
-      shrinkProp = props.shrink,
       marginProp = props.margin,
-      other = (0, _objectWithoutProperties3.default)(props, ['disabled', 'disableAnimation', 'children', 'classes', 'className', 'FormControlClasses', 'shrink', 'margin']);
+      shrinkProp = props.shrink,
+      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'className', 'disableAnimation', 'disabled', 'FormControlClasses', 'margin', 'shrink']);
   var muiFormControl = context.muiFormControl;
 
   var shrink = shrinkProp;
@@ -48273,12 +47484,54 @@ function InputLabel(props, context) {
   );
 }
 
-InputLabel.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  disabled: require('prop-types').bool.isRequired,
-  disableAnimation: require('prop-types').bool.isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'disableAnimation', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'disabled', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'error', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'FormControlClasses', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'focused', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'margin', require('prop-types').oneOf(['dense'])), (0, _defineProperty3.default)(_ref, 'required', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'shrink', require('prop-types').bool), _ref) : {};
+InputLabel.propTypes = 'development' !== "production" ? {
+  /**
+   * The contents of the `InputLabel`.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * If `true`, the transition animation is disabled.
+   */
+  disableAnimation: _propTypes2.default.bool,
+  /**
+   * If `true`, apply disabled class.
+   */
+  disabled: _propTypes2.default.bool,
+  /**
+   * If `true`, the label will be displayed in an error state.
+   */
+  error: _propTypes2.default.bool,
+  /**
+   * If `true`, the input of this label is focused.
+   */
+  focused: _propTypes2.default.bool,
+  /**
+   * `classes` property applied to the `FormControl` element.
+   */
+  FormControlClasses: _propTypes2.default.object,
+  /**
+   * If `dense`, will adjust vertical spacing. This is normally obtained via context from
+   * FormControl.
+   */
+  margin: _propTypes2.default.oneOf(['dense']),
+  /**
+   * if `true`, the label will indicate that the input is required.
+   */
+  required: _propTypes2.default.bool,
+  /**
+   * If `true`, the label is shrunk.
+   */
+  shrink: _propTypes2.default.bool
+} : {};
+
 InputLabel.defaultProps = {
   disabled: false,
   disableAnimation: false
@@ -48334,6 +47587,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _classnames = require('classnames');
 
 var _classnames2 = _interopRequireDefault(_classnames);
@@ -48352,7 +47609,7 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var rowsHeight = 24;
+var ROWS_HEIGHT = 24;
 
 var styles = exports.styles = {
   root: {
@@ -48385,56 +47642,10 @@ var styles = exports.styles = {
   }
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * @ignore
-   */
-  defaultValue: require('prop-types').oneOfType([require('prop-types').string, require('prop-types').number]),
-
-  /**
-   * @ignore
-   */
-  disabled: require('prop-types').bool,
-
-  /**
-   * @ignore
-   */
-  onChange: require('prop-types').func,
-
-  /**
-   * Number of rows to display when multiline option is set to true.
-   */
-  rows: require('prop-types').oneOfType([require('prop-types').string, require('prop-types').number]),
-
-  /**
-   * Maximum number of rows to display when multiline option is set to true.
-   */
-  rowsMax: require('prop-types').oneOfType([require('prop-types').string, require('prop-types').number]),
-
-  /**
-   * Use that property to pass a ref callback to the native textarea element.
-   */
-  textareaRef: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  value: require('prop-types').oneOfType([require('prop-types').string, require('prop-types').number])
-};
-
 /**
  * @ignore - internal component.
  */
+
 var Textarea = function (_React$Component) {
   (0, _inherits3.default)(Textarea, _React$Component);
 
@@ -48451,7 +47662,7 @@ var Textarea = function (_React$Component) {
 
     return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = Textarea.__proto__ || (0, _getPrototypeOf2.default)(Textarea)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
       height: null
-    }, _this.handleResize = (0, _debounce2.default)(function (event) {
+    }, _this.shadow = null, _this.singlelineShadow = null, _this.input = null, _this.value = null, _this.handleResize = (0, _debounce2.default)(function (event) {
       _this.syncHeightWithShadow(event);
     }, 166), _this.handleRefInput = function (node) {
       _this.input = node;
@@ -48484,7 +47695,7 @@ var Textarea = function (_React$Component) {
       // so that it can check whether they are dirty
       this.value = this.props.value || this.props.defaultValue || '';
       this.setState({
-        height: Number(this.props.rows) * rowsHeight
+        height: Number(this.props.rows) * ROWS_HEIGHT
       });
     }
   }, {
@@ -48580,19 +47791,58 @@ var Textarea = function (_React$Component) {
           className: (0, _classnames2.default)(classes.textarea, className),
           defaultValue: defaultValue,
           value: value,
-          onChange: this.handleChange
-        }, other, {
+          onChange: this.handleChange,
           ref: this.handleRefInput
-        }))
+        }, other))
       );
     }
   }]);
   return Textarea;
 }(_react2.default.Component);
 
+Textarea.propTypes = 'development' !== "production" ? {
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * @ignore
+   */
+  defaultValue: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number]),
+  /**
+   * @ignore
+   */
+  disabled: _propTypes2.default.bool,
+  /**
+   * @ignore
+   */
+  onChange: _propTypes2.default.func,
+  /**
+   * Number of rows to display when multiline option is set to true.
+   */
+  rows: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number]),
+  /**
+   * Maximum number of rows to display when multiline option is set to true.
+   */
+  rowsMax: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number]),
+  /**
+   * Use that property to pass a ref callback to the native textarea element.
+   */
+  textareaRef: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  value: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number])
+} : {};
+
 Textarea.defaultProps = {
   rows: 1
 };
+
 exports.default = (0, _withStyles2.default)(styles, { name: 'MuiTextarea' })(Textarea);
   })();
 });
@@ -48697,10 +47947,6 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: {
@@ -48724,51 +47970,6 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType),
-
-  /**
-   * If `true`, compact vertical padding designed for keyboard and mouse input will be used for
-   * the list and list items. The property is available to descendant components as the
-   * `dense` context.
-   */
-  dense: require('prop-types').bool,
-
-  /**
-   * If `true`, vertical padding will be removed from the list.
-   */
-  disablePadding: require('prop-types').bool,
-
-  /**
-   * Use that property to pass a ref callback to the root component.
-   */
-  rootRef: require('prop-types').func,
-
-  /**
-   * The content of the component, normally `ListItem`.
-   */
-  subheader: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-};
-
 var List = function (_React$Component) {
   (0, _inherits3.default)(List, _React$Component);
 
@@ -48790,21 +47991,20 @@ var List = function (_React$Component) {
       var _classNames;
 
       var _props = this.props,
+          children = _props.children,
           classes = _props.classes,
           classNameProp = _props.className,
           ComponentProp = _props.component,
-          disablePadding = _props.disablePadding,
-          children = _props.children,
           dense = _props.dense,
+          disablePadding = _props.disablePadding,
           subheader = _props.subheader,
-          rootRef = _props.rootRef,
-          other = (0, _objectWithoutProperties3.default)(_props, ['classes', 'className', 'component', 'disablePadding', 'children', 'dense', 'subheader', 'rootRef']);
+          other = (0, _objectWithoutProperties3.default)(_props, ['children', 'classes', 'className', 'component', 'dense', 'disablePadding', 'subheader']);
 
       var className = (0, _classnames2.default)(classes.root, (_classNames = {}, (0, _defineProperty3.default)(_classNames, classes.dense, dense && !disablePadding), (0, _defineProperty3.default)(_classNames, classes.padding, !disablePadding), (0, _defineProperty3.default)(_classNames, classes.subheader, subheader), _classNames), classNameProp);
 
       return _react2.default.createElement(
         ComponentProp,
-        (0, _extends3.default)({ className: className }, other, { ref: rootRef }),
+        (0, _extends3.default)({ className: className }, other),
         subheader,
         children
       );
@@ -48813,12 +48013,45 @@ var List = function (_React$Component) {
   return List;
 }(_react2.default.Component);
 
+List.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * If `true`, compact vertical padding designed for keyboard and mouse input will be used for
+   * the list and list items. The property is available to descendant components as the
+   * `dense` context.
+   */
+  dense: _propTypes2.default.bool,
+  /**
+   * If `true`, vertical padding will be removed from the list.
+   */
+  disablePadding: _propTypes2.default.bool,
+  /**
+   * The content of the subheader, normally `ListSubheader`.
+   */
+  subheader: _propTypes2.default.node
+} : {};
+
 List.defaultProps = {
   component: 'ul',
   dense: false,
   disablePadding: false
 };
-
 
 List.childContextTypes = {
   dense: _propTypes2.default.bool
@@ -48894,10 +48127,6 @@ var _reactHelpers = require('../utils/reactHelpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: {
@@ -48911,7 +48140,7 @@ var styles = exports.styles = function styles(theme) {
       position: 'relative'
     },
     keyboardFocused: {
-      background: theme.palette.text.divider
+      backgroundColor: theme.palette.text.divider
     },
     default: {
       paddingTop: 12,
@@ -48955,54 +48184,6 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * If `true`, the ListItem will be a button.
-   */
-  button: require('prop-types').bool,
-
-  /**
-   * The content of the component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType),
-
-  /**
-   * If `true`, compact vertical padding designed for keyboard and mouse input will be used.
-   */
-  dense: require('prop-types').bool,
-
-  /**
-   * @ignore
-   */
-  disabled: require('prop-types').bool,
-
-  /**
-   * If `true`, the left and right padding is removed.
-   */
-  disableGutters: require('prop-types').bool,
-
-  /**
-   * If `true`, a 1px light border is added to the bottom of the list item.
-   */
-  divider: require('prop-types').bool
-};
-
 var ListItem = function (_React$Component) {
   (0, _inherits3.default)(ListItem, _React$Component);
 
@@ -49031,9 +48212,9 @@ var ListItem = function (_React$Component) {
           componentProp = _props.component,
           dense = _props.dense,
           disabled = _props.disabled,
-          divider = _props.divider,
           disableGutters = _props.disableGutters,
-          other = (0, _objectWithoutProperties3.default)(_props, ['button', 'children', 'classes', 'className', 'component', 'dense', 'disabled', 'divider', 'disableGutters']);
+          divider = _props.divider,
+          other = (0, _objectWithoutProperties3.default)(_props, ['button', 'children', 'classes', 'className', 'component', 'dense', 'disabled', 'disableGutters', 'divider']);
 
       var isDense = dense || this.context.dense || false;
       var children = _react2.default.Children.toArray(childrenProp);
@@ -49050,7 +48231,7 @@ var ListItem = function (_React$Component) {
 
       if (button) {
         ComponentMain = _ButtonBase2.default;
-        listItemProps.component = componentProp || 'li';
+        listItemProps.component = componentProp;
         listItemProps.keyboardFocusedClassName = classes.keyboardFocused;
       }
 
@@ -49077,6 +48258,46 @@ var ListItem = function (_React$Component) {
   return ListItem;
 }(_react2.default.Component);
 
+ListItem.propTypes = 'development' !== "production" ? {
+  /**
+   * If `true`, the ListItem will be a button.
+   */
+  button: _propTypes2.default.bool,
+  /**
+   * The content of the component.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * If `true`, compact vertical padding designed for keyboard and mouse input will be used.
+   */
+  dense: _propTypes2.default.bool,
+  /**
+   * @ignore
+   */
+  disabled: _propTypes2.default.bool,
+  /**
+   * If `true`, the left and right padding is removed.
+   */
+  disableGutters: _propTypes2.default.bool,
+  /**
+   * If `true`, a 1px light border is added to the bottom of the list item.
+   */
+  divider: _propTypes2.default.bool
+} : {};
+
 ListItem.defaultProps = {
   button: false,
   component: 'li',
@@ -49085,7 +48306,6 @@ ListItem.defaultProps = {
   disableGutters: false,
   divider: false
 };
-
 
 ListItem.contextTypes = {
   dense: _propTypes2.default.bool
@@ -49143,8 +48363,6 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Element = require('react').babelPluginFlowReactPropTypes_proptype_Element || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: {
@@ -49161,44 +48379,41 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component, normally `Avatar`.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Element === 'function' ? babelPluginFlowReactPropTypes_proptype_Element.isRequired ? babelPluginFlowReactPropTypes_proptype_Element.isRequired : babelPluginFlowReactPropTypes_proptype_Element : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Element).isRequired,
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string
-};
-
-
 /**
  * It's a simple wrapper to apply the `dense` mode styles to `Avatar`.
  */
 function ListItemAvatar(props, context) {
-  if (context.dense === undefined) {
-    'development' !== "production" ? (0, _warning2.default)(false, 'Material-UI: <ListItemAvatar> is a simple wrapper to apply the dense styles\n      to <Avatar>. You do not need it unless you are controlling the <List> dense property.') : void 0;
-    return props.children;
-  }
-
   var children = props.children,
       classes = props.classes,
       classNameProp = props.className,
       other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'className']);
 
 
+  if (context.dense === undefined) {
+    'development' !== "production" ? (0, _warning2.default)(false, 'Material-UI: <ListItemAvatar> is a simple wrapper to apply the dense styles\n      to <Avatar>. You do not need it unless you are controlling the <List> dense property.') : void 0;
+    return props.children;
+  }
+
   return _react2.default.cloneElement(children, (0, _extends3.default)({
     className: (0, _classnames2.default)((0, _defineProperty3.default)({}, classes.root, context.dense), classNameProp, children.props.className),
     childrenClassName: (0, _classnames2.default)((0, _defineProperty3.default)({}, classes.icon, context.dense), children.props.childrenClassName)
   }, other));
 }
+
+ListItemAvatar.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component, normally `Avatar`.
+   */
+  children: _propTypes2.default.element.isRequired,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string
+} : {};
 
 ListItemAvatar.contextTypes = {
   dense: _propTypes2.default.bool
@@ -49232,6 +48447,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _classnames = require('classnames');
 
 var _classnames2 = _interopRequireDefault(_classnames);
@@ -49241,8 +48460,6 @@ var _withStyles = require('../styles/withStyles');
 var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var babelPluginFlowReactPropTypes_proptype_Element = require('react').babelPluginFlowReactPropTypes_proptype_Element || require('prop-types').any;
 
 var styles = exports.styles = function styles(theme) {
   return {
@@ -49255,25 +48472,6 @@ var styles = exports.styles = function styles(theme) {
     }
   };
 };
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component, normally `Icon`, `SvgIcon`,
-   * or a `material-ui-icons` SVG icon component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Element === 'function' ? babelPluginFlowReactPropTypes_proptype_Element.isRequired ? babelPluginFlowReactPropTypes_proptype_Element.isRequired : babelPluginFlowReactPropTypes_proptype_Element : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Element).isRequired,
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string
-};
-
 
 /**
  * A simple wrapper to apply `List` styles to an `Icon` or `SvgIcon`.
@@ -49290,6 +48488,22 @@ function ListItemIcon(props) {
   }, other));
 }
 
+ListItemIcon.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component, normally `Icon`, `SvgIcon`,
+   * or a `material-ui-icons` SVG icon component.
+   */
+  children: _propTypes2.default.element.isRequired,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string
+} : {};
+
 exports.default = (0, _withStyles2.default)(styles, { name: 'MuiListItemIcon' })(ListItemIcon);
   })();
 });
@@ -49304,15 +48518,21 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.styles = undefined;
 
-var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
+var _extends2 = require('babel-runtime/helpers/extends');
 
-var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+var _extends3 = _interopRequireDefault(_extends2);
 
-var _ref; //  weak
+var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
+
+var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -49323,8 +48543,6 @@ var _withStyles = require('../styles/withStyles');
 var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
 
 var styles = exports.styles = function styles(theme) {
   return {
@@ -49337,41 +48555,35 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component, normally an `IconButton` or selection control.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string
-};
-
-
 function ListItemSecondaryAction(props) {
   var children = props.children,
       classes = props.classes,
-      className = props.className;
+      className = props.className,
+      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'className']);
 
 
   return _react2.default.createElement(
     'div',
-    { className: (0, _classnames2.default)(classes.root, className) },
+    (0, _extends3.default)({ className: (0, _classnames2.default)(classes.root, className) }, other),
     children
   );
 }
 
-ListItemSecondaryAction.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), _ref) : {};
+ListItemSecondaryAction.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component, normally an `IconButton` or selection control.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string
+} : {};
+
 ListItemSecondaryAction.muiName = 'ListItemSecondaryAction';
 
 exports.default = (0, _withStyles2.default)(styles, { name: 'MuiListItemSecondaryAction' })(ListItemSecondaryAction);
@@ -49400,8 +48612,6 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref; //  weak
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
@@ -49424,12 +48634,11 @@ var _Typography2 = _interopRequireDefault(_Typography);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: {
       flex: '1 1 auto',
+      minWidth: 0,
       padding: '0 16px',
       '&:first-child': {
         paddingLeft: 0
@@ -49450,43 +48659,16 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * If `true`, the children won't be wrapped by a typography component.
-   * For instance, that can be useful to can render an h4 instead of a
-   */
-  disableTypography: require('prop-types').bool,
-
-  /**
-   * If `true`, the children will be indented.
-   * This should be used if there is no left avatar or left icon.
-   */
-  inset: require('prop-types').bool,
-  primary: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-  secondary: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-};
-
-
 function ListItemText(props, context) {
   var _classNames;
 
   var classes = props.classes,
       classNameProp = props.className,
       disableTypography = props.disableTypography,
+      inset = props.inset,
       primary = props.primary,
       secondary = props.secondary,
-      inset = props.inset,
-      other = (0, _objectWithoutProperties3.default)(props, ['classes', 'className', 'disableTypography', 'primary', 'secondary', 'inset']);
+      other = (0, _objectWithoutProperties3.default)(props, ['classes', 'className', 'disableTypography', 'inset', 'primary', 'secondary']);
   var dense = context.dense;
 
   var className = (0, _classnames2.default)(classes.root, (_classNames = {}, (0, _defineProperty3.default)(_classNames, classes.dense, dense), (0, _defineProperty3.default)(_classNames, classes.inset, inset), _classNames), classNameProp);
@@ -49514,14 +48696,34 @@ function ListItemText(props, context) {
   );
 }
 
-ListItemText.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'disableTypography', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'inset', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'primary', typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)), (0, _defineProperty3.default)(_ref, 'secondary', typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)), _ref) : {};
+ListItemText.propTypes = 'development' !== "production" ? {
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * If `true`, the children won't be wrapped by a typography component.
+   * For instance, that can be useful to can render an h4 instead of a
+   */
+  disableTypography: _propTypes2.default.bool,
+  /**
+   * If `true`, the children will be indented.
+   * This should be used if there is no left avatar or left icon.
+   */
+  inset: _propTypes2.default.bool,
+  primary: _propTypes2.default.node,
+  secondary: _propTypes2.default.node
+} : {};
+
 ListItemText.defaultProps = {
   disableTypography: false,
+  inset: false,
   primary: false,
-  secondary: false,
-  inset: false
+  secondary: false
 };
 
 ListItemText.contextTypes = {
@@ -49554,11 +48756,13 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref; //  weak
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -49571,10 +48775,6 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 var _helpers = require('../utils/helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
 
 var styles = exports.styles = function styles(theme) {
   return {
@@ -49607,57 +48807,17 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   * The default value is a `button`.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType),
-
-  /**
-   * The color of the component. It's using the theme palette when that makes sense.
-   */
-  color: require('prop-types').oneOf(['default', 'primary', 'inherit']),
-
-  /**
-   * If `true`, the List Subheader will not stick to the top during scroll.
-   */
-  disableSticky: require('prop-types').bool,
-
-  /**
-   * If `true`, the List Subheader will be indented.
-   */
-  inset: require('prop-types').bool
-};
-
-
 function ListSubheader(props) {
   var _classNames;
 
   var children = props.children,
       classes = props.classes,
       classNameProp = props.className,
-      ComponentProp = props.component,
       color = props.color,
+      ComponentProp = props.component,
       disableSticky = props.disableSticky,
       inset = props.inset,
-      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'className', 'component', 'color', 'disableSticky', 'inset']);
+      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'className', 'color', 'component', 'disableSticky', 'inset']);
 
   var className = (0, _classnames2.default)(classes.root, (_classNames = {}, (0, _defineProperty3.default)(_classNames, classes['color' + (0, _helpers.capitalizeFirstLetter)(color)], color !== 'default'), (0, _defineProperty3.default)(_classNames, classes.inset, inset), (0, _defineProperty3.default)(_classNames, classes.sticky, !disableSticky), _classNames), classNameProp);
 
@@ -49668,14 +48828,41 @@ function ListSubheader(props) {
   );
 }
 
-ListSubheader.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType.isRequired ? babelPluginFlowReactPropTypes_proptype_ElementType.isRequired : babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType).isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'component', typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType)), (0, _defineProperty3.default)(_ref, 'color', require('prop-types').oneOf(['default', 'primary', 'inherit'])), (0, _defineProperty3.default)(_ref, 'disableSticky', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'inset', require('prop-types').bool), _ref) : {};
+ListSubheader.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The color of the component. It's using the theme palette when that makes sense.
+   */
+  color: _propTypes2.default.oneOf(['default', 'primary', 'inherit']),
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * If `true`, the List Subheader will not stick to the top during scroll.
+   */
+  disableSticky: _propTypes2.default.bool,
+  /**
+   * If `true`, the List Subheader will be indented.
+   */
+  inset: _propTypes2.default.bool
+} : {};
+
 ListSubheader.defaultProps = {
-  component: 'li',
   color: 'default',
+  component: 'li',
   disableSticky: false,
   inset: false
 };
@@ -49804,6 +48991,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _reactDom = require('react-dom');
 
 var _scrollbarSize = require('dom-helpers/util/scrollbarSize');
@@ -49824,105 +49015,12 @@ var _MenuList2 = _interopRequireDefault(_MenuList);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-// @inheritedComponent Popover
-
-var babelPluginFlowReactPropTypes_proptype_TransitionCallback = require('../internal/transition').babelPluginFlowReactPropTypes_proptype_TransitionCallback || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The DOM element used to set the position of the menu.
-   */
-  anchorEl: typeof HTMLElement === 'function' ? require('prop-types').instanceOf(HTMLElement) : require('prop-types').any,
-  // match Popover
-  /**
-   * Menu contents, normally `MenuItem`s.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * Properties applied to the `MenuList` element.
-   */
-  MenuListProps: require('prop-types').object,
-
-  /**
-   * Callback fired before the Menu enters.
-   */
-  onEnter: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the Menu is entering.
-   */
-  onEntering: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the Menu has entered.
-   */
-  onEntered: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired before the Menu exits.
-   */
-  onExit: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the Menu is exiting.
-   */
-  onExiting: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the Menu has exited.
-   */
-  onExited: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the component requests to be closed.
-   *
-   * @param {object} event The event source of the callback
-   */
-  onRequestClose: require('prop-types').func,
-
-  /**
-   * If `true`, the menu is visible.
-   */
-  open: require('prop-types').bool,
-
-  /**
-   * @ignore
-   */
-  PaperProps: require('prop-types').object,
-
-  /**
-   * `classes` property applied to the `Popover` element.
-   */
-  PopoverClasses: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  theme: require('prop-types').object,
-
-  /**
-   * The length of the transition in `ms`, or 'auto'
-   */
-  transitionDuration: require('prop-types').oneOfType([require('prop-types').number, require('prop-types').shape({
-    enter: require('prop-types').number,
-    exit: require('prop-types').number
-  }), require('prop-types').oneOf(['auto'])])
-};
-
-
-var rtlOrigin = {
+var RTL_ORIGIN = {
   vertical: 'top',
   horizontal: 'right'
-};
+}; // @inheritedComponent Popover
 
-var ltrOrigin = {
+var LTR_ORIGIN = {
   vertical: 'top',
   horizontal: 'left'
 };
@@ -49954,26 +49052,22 @@ var Menu = function (_React$Component) {
 
     return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = Menu.__proto__ || (0, _getPrototypeOf2.default)(Menu)).call.apply(_ref, [this].concat(args))), _this), _this.getContentAnchorEl = function () {
       if (!_this.menuList || !_this.menuList.selectedItem) {
-        // $FlowFixMe
         return (0, _reactDom.findDOMNode)(_this.menuList).firstChild;
       }
 
       return (0, _reactDom.findDOMNode)(_this.menuList.selectedItem);
     }, _this.menuList = undefined, _this.focus = function () {
       if (_this.menuList && _this.menuList.selectedItem) {
-        // $FlowFixMe
         (0, _reactDom.findDOMNode)(_this.menuList.selectedItem).focus();
         return;
       }
 
       var menuList = (0, _reactDom.findDOMNode)(_this.menuList);
       if (menuList && menuList.firstChild) {
-        // $FlowFixMe
         menuList.firstChild.focus();
       }
     }, _this.handleEnter = function (element) {
       var theme = _this.props.theme;
-
 
       var menuList = (0, _reactDom.findDOMNode)(_this.menuList);
 
@@ -49982,12 +49076,9 @@ var Menu = function (_React$Component) {
 
       // Let's ignore that piece of logic if users are already overriding the width
       // of the menu.
-      // $FlowFixMe
       if (menuList && element.clientHeight < menuList.clientHeight && !menuList.style.width) {
         var size = (0, _scrollbarSize2.default)() + 'px';
-        // $FlowFixMe
         menuList.style[theme.direction === 'rtl' ? 'paddingLeft' : 'paddingRight'] = size;
-        // $FlowFixMe
         menuList.style.width = 'calc(100% + ' + size + ')';
       }
 
@@ -49998,8 +49089,8 @@ var Menu = function (_React$Component) {
       if (key === 'tab') {
         event.preventDefault();
 
-        if (_this.props.onRequestClose) {
-          _this.props.onRequestClose(event);
+        if (_this.props.onClose) {
+          _this.props.onClose(event);
         }
       }
     }, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
@@ -50009,15 +49100,6 @@ var Menu = function (_React$Component) {
     key: 'componentDidMount',
     value: function componentDidMount() {
       if (this.props.open) {
-        this.focus();
-      }
-    }
-  }, {
-    key: 'componentDidUpdate',
-    value: function componentDidUpdate(prevProps) {
-      if (!prevProps.open && this.props.open) {
-        // Needs to refocus as when a menu is rendered into another Modal,
-        // the first modal might change the focus to prevent any leak.
         this.focus();
       }
     }
@@ -50038,14 +49120,15 @@ var Menu = function (_React$Component) {
           other = (0, _objectWithoutProperties3.default)(_props, ['children', 'classes', 'MenuListProps', 'onEnter', 'PaperProps', 'PopoverClasses', 'theme']);
 
 
+      var themeDirection = theme && theme.direction;
       return _react2.default.createElement(
         _Popover2.default,
         (0, _extends3.default)({
           getContentAnchorEl: this.getContentAnchorEl,
           classes: PopoverClasses,
           onEnter: this.handleEnter,
-          anchorOrigin: theme.direction === 'rtl' ? rtlOrigin : ltrOrigin,
-          transformOrigin: theme.direction === 'rtl' ? rtlOrigin : ltrOrigin,
+          anchorOrigin: themeDirection === 'rtl' ? RTL_ORIGIN : LTR_ORIGIN,
+          transformOrigin: themeDirection === 'rtl' ? RTL_ORIGIN : LTR_ORIGIN,
           PaperProps: (0, _extends3.default)({}, PaperProps, {
             classes: (0, _extends3.default)({}, PaperProps.classes, {
               root: classes.paper
@@ -50070,11 +49153,80 @@ var Menu = function (_React$Component) {
   return Menu;
 }(_react2.default.Component);
 
+Menu.propTypes = 'development' !== "production" ? {
+  /**
+   * The DOM element used to set the position of the menu.
+   */
+  anchorEl: _propTypes2.default.object,
+  /**
+   * Menu contents, normally `MenuItem`s.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * Properties applied to the `MenuList` element.
+   */
+  MenuListProps: _propTypes2.default.object,
+  /**
+   * Callback fired when the component requests to be closed.
+   *
+   * @param {object} event The event source of the callback
+   */
+  onClose: _propTypes2.default.func,
+  /**
+   * Callback fired before the Menu enters.
+   */
+  onEnter: _propTypes2.default.func,
+  /**
+   * Callback fired when the Menu has entered.
+   */
+  onEntered: _propTypes2.default.func,
+  /**
+   * Callback fired when the Menu is entering.
+   */
+  onEntering: _propTypes2.default.func,
+  /**
+   * Callback fired before the Menu exits.
+   */
+  onExit: _propTypes2.default.func,
+  /**
+   * Callback fired when the Menu has exited.
+   */
+  onExited: _propTypes2.default.func,
+  /**
+   * Callback fired when the Menu is exiting.
+   */
+  onExiting: _propTypes2.default.func,
+  /**
+   * If `true`, the menu is visible.
+   */
+  open: _propTypes2.default.bool.isRequired,
+  /**
+   * @ignore
+   */
+  PaperProps: _propTypes2.default.object,
+  /**
+   * `classes` property applied to the `Popover` element.
+   */
+  PopoverClasses: _propTypes2.default.object,
+  /**
+   * @ignore
+   */
+  theme: _propTypes2.default.object.isRequired,
+  /**
+   * The length of the transition in `ms`, or 'auto'
+   */
+  transitionDuration: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.shape({ enter: _propTypes2.default.number, exit: _propTypes2.default.number }), _propTypes2.default.oneOf(['auto'])])
+} : {};
+
 Menu.defaultProps = {
-  open: false,
   transitionDuration: 'auto'
 };
-exports.default = (0, _withStyles2.default)(styles, { withTheme: true, name: 'MuiMenu' })(Menu);
+
+exports.default = (0, _withStyles2.default)(styles, { name: 'MuiMenu', withTheme: true })(Menu);
   })();
 });
 
@@ -50100,12 +49252,13 @@ var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
 
-var _ref;
-// @inheritedComponent ListItem
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -50121,65 +49274,24 @@ var _ListItem2 = _interopRequireDefault(_ListItem);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: (0, _extends3.default)({}, theme.typography.subheading, {
-      height: 24,
+      height: theme.spacing.unit * 3,
       boxSizing: 'content-box',
-      background: 'none',
       overflow: 'hidden',
       textOverflow: 'ellipsis',
       whiteSpace: 'nowrap',
-      '&:focus': {
-        background: theme.palette.text.divider
-      },
       '&:hover': {
+        backgroundColor: theme.palette.text.lightDivider
+      },
+      '&$selected': {
         backgroundColor: theme.palette.text.divider
       }
     }),
-    selected: {
-      backgroundColor: theme.palette.text.divider
-    }
+    selected: {}
   };
-};
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * Menu item contents.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType),
-
-  /**
-   * @ignore
-   */
-  role: require('prop-types').string,
-
-  /**
-   * Use to apply selected styling.
-   */
-  selected: require('prop-types').bool
-};
-
+}; // @inheritedComponent ListItem
 
 function MenuItem(props) {
   var classes = props.classes,
@@ -50201,12 +49313,34 @@ function MenuItem(props) {
   }, other));
 }
 
-MenuItem.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  role: require('prop-types').string.isRequired,
-  selected: require('prop-types').bool.isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'component', typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType)), (0, _defineProperty3.default)(_ref, 'role', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'selected', require('prop-types').bool), _ref) : {};
+MenuItem.propTypes = 'development' !== "production" ? {
+  /**
+   * Menu item contents.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * @ignore
+   */
+  role: _propTypes2.default.string,
+  /**
+   * Use to apply selected styling.
+   */
+  selected: _propTypes2.default.bool
+} : {};
+
 MenuItem.defaultProps = {
   role: 'menuitem',
   selected: false
@@ -50261,6 +49395,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _reactDom = require('react-dom');
 
 var _keycode = require('keycode');
@@ -50285,30 +49423,7 @@ var _List2 = _interopRequireDefault(_List);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
 // @inheritedComponent List
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * MenuList contents, normally `MenuItem`s.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * @ignore
-   */
-  onBlur: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  onKeyDown: require('prop-types').func
-};
 
 var MenuList = function (_React$Component) {
   (0, _inherits3.default)(MenuList, _React$Component);
@@ -50347,10 +49462,8 @@ var MenuList = function (_React$Component) {
 
       if ((key === 'up' || key === 'down') && (!currentFocus || currentFocus && !(0, _contains2.default)(list, currentFocus))) {
         if (_this.selectedItem) {
-          // $FlowFixMe
           (0, _reactDom.findDOMNode)(_this.selectedItem).focus();
         } else {
-          // $FlowFixMe
           list.firstChild.focus();
         }
       } else if (key === 'down') {
@@ -50371,9 +49484,7 @@ var MenuList = function (_React$Component) {
     }, _this.handleItemFocus = function (event) {
       var list = (0, _reactDom.findDOMNode)(_this.list);
       if (list) {
-        // $FlowFixMe
         for (var i = 0; i < list.children.length; i += 1) {
-          // $FlowFixMe
           if (list.children[i] === event.currentTarget) {
             _this.setTabIndex(i);
             break;
@@ -50409,10 +49520,8 @@ var MenuList = function (_React$Component) {
       }
 
       if (currentTabIndex && currentTabIndex >= 0) {
-        // $FlowFixMe
         list.children[currentTabIndex].focus();
       } else {
-        // $FlowFixMe
         list.firstChild.focus();
       }
     }
@@ -50421,7 +49530,6 @@ var MenuList = function (_React$Component) {
     value: function resetTabIndex() {
       var list = (0, _reactDom.findDOMNode)(this.list);
       var currentFocus = (0, _activeElement2.default)((0, _ownerDocument2.default)(list));
-      // $FlowFixMe
       var items = [].concat((0, _toConsumableArray3.default)(list.children));
       var currentFocusIndex = items.indexOf(currentFocus);
 
@@ -50452,7 +49560,7 @@ var MenuList = function (_React$Component) {
         _List2.default,
         (0, _extends3.default)({
           role: 'menu',
-          rootRef: function rootRef(node) {
+          ref: function ref(node) {
             _this2.list = node;
           },
           className: className,
@@ -50479,11 +49587,24 @@ var MenuList = function (_React$Component) {
 }(_react2.default.Component);
 
 MenuList.propTypes = 'development' !== "production" ? {
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-  className: require('prop-types').string,
-  onBlur: require('prop-types').func,
-  onKeyDown: require('prop-types').func
+  /**
+   * MenuList contents, normally `MenuItem`s.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * @ignore
+   */
+  onBlur: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onKeyDown: _propTypes2.default.func
 } : {};
+
 exports.default = MenuList;
   })();
 });
@@ -50550,11 +49671,13 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -50564,9 +49687,11 @@ var _withStyles = require('../styles/withStyles');
 
 var _withStyles2 = _interopRequireDefault(_withStyles);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _Fade = require('../transitions/Fade');
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
+var _Fade2 = _interopRequireDefault(_Fade);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var styles = exports.styles = function styles(theme) {
   return {
@@ -50579,10 +49704,8 @@ var styles = exports.styles = function styles(theme) {
       left: 0,
       // Remove grey highlight
       WebkitTapHighlightColor: theme.palette.common.transparent,
-      backgroundColor: theme.palette.common.lightBlack,
-      transition: theme.transitions.create('opacity'),
       willChange: 'opacity',
-      opacity: 0
+      backgroundColor: theme.palette.common.lightBlack
     },
     invisible: {
       backgroundColor: theme.palette.common.transparent
@@ -50590,53 +49713,44 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * Can be used, for instance, to render a letter inside the avatar.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * If `true`, the backdrop is invisible.
-   */
-  invisible: require('prop-types').bool
-};
-
-
-/**
- * @ignore - internal component.
- */
 function Backdrop(props) {
-  var children = props.children,
-      classes = props.classes,
-      className = props.className,
+  var classes = props.classes,
       invisible = props.invisible,
-      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'className', 'invisible']);
+      open = props.open,
+      transitionDuration = props.transitionDuration,
+      other = (0, _objectWithoutProperties3.default)(props, ['classes', 'invisible', 'open', 'transitionDuration']);
 
 
-  var backdropClass = (0, _classnames2.default)(classes.root, (0, _defineProperty3.default)({}, classes.invisible, invisible), className);
+  var className = (0, _classnames2.default)(classes.root, (0, _defineProperty3.default)({}, classes.invisible, invisible));
 
   return _react2.default.createElement(
-    'div',
-    (0, _extends3.default)({ className: backdropClass, 'aria-hidden': 'true' }, other),
-    children
+    _Fade2.default,
+    (0, _extends3.default)({ appear: true, 'in': open, timeout: transitionDuration }, other),
+    _react2.default.createElement('div', { className: className, 'aria-hidden': 'true' })
   );
 }
 
-Backdrop.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'invisible', require('prop-types').bool), _ref) : {};
+Backdrop.propTypes = 'development' !== "production" ? {
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * If `true`, the backdrop is invisible.
+   * It can be used when rendering a popover or a custom select component.
+   */
+  invisible: _propTypes2.default.bool,
+  /**
+   * If `true`, the backdrop is open.
+   */
+  open: _propTypes2.default.bool.isRequired,
+  /**
+   * The duration for the transition, in milliseconds.
+   * You may specify a single timeout for all transitions, or individually with an object.
+   */
+  transitionDuration: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.shape({ enter: _propTypes2.default.number, exit: _propTypes2.default.number })])
+} : {};
+
 Backdrop.defaultProps = {
   invisible: false
 };
@@ -50655,21 +49769,17 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.styles = undefined;
 
+var _extends2 = require('babel-runtime/helpers/extends');
+
+var _extends3 = _interopRequireDefault(_extends2);
+
 var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
 
 var _defineProperty3 = _interopRequireDefault(_defineProperty2);
 
-var _keys = require('babel-runtime/core-js/object/keys');
-
-var _keys2 = _interopRequireDefault(_keys);
-
 var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
-
-var _extends2 = require('babel-runtime/helpers/extends');
-
-var _extends3 = _interopRequireDefault(_extends2);
 
 var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
 
@@ -50699,6 +49809,10 @@ var _reactDom = require('react-dom');
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _classnames = require('classnames');
 
 var _classnames2 = _interopRequireDefault(_classnames);
@@ -50711,21 +49825,29 @@ var _keycode = require('keycode');
 
 var _keycode2 = _interopRequireDefault(_keycode);
 
-var _inDOM = require('dom-helpers/util/inDOM');
+var _activeElement = require('dom-helpers/activeElement');
 
-var _inDOM2 = _interopRequireDefault(_inDOM);
+var _activeElement2 = _interopRequireDefault(_activeElement);
 
 var _contains = require('dom-helpers/query/contains');
 
 var _contains2 = _interopRequireDefault(_contains);
 
-var _activeElement = require('dom-helpers/activeElement');
+var _inDOM = require('dom-helpers/util/inDOM');
 
-var _activeElement2 = _interopRequireDefault(_activeElement);
+var _inDOM2 = _interopRequireDefault(_inDOM);
 
 var _ownerDocument = require('dom-helpers/ownerDocument');
 
 var _ownerDocument2 = _interopRequireDefault(_ownerDocument);
+
+var _RefHolder = require('../internal/RefHolder');
+
+var _RefHolder2 = _interopRequireDefault(_RefHolder);
+
+var _Portal = require('../Portal');
+
+var _Portal2 = _interopRequireDefault(_Portal);
 
 var _addEventListener = require('../utils/addEventListener');
 
@@ -50733,39 +49855,32 @@ var _addEventListener2 = _interopRequireDefault(_addEventListener);
 
 var _helpers = require('../utils/helpers');
 
-var _Fade = require('../transitions/Fade');
-
-var _Fade2 = _interopRequireDefault(_Fade);
-
 var _withStyles = require('../styles/withStyles');
 
 var _withStyles2 = _interopRequireDefault(_withStyles);
 
-var _modalManager = require('./modalManager');
+var _ModalManager = require('./ModalManager');
 
-var _modalManager2 = _interopRequireDefault(_modalManager);
+var _ModalManager2 = _interopRequireDefault(_ModalManager);
 
 var _Backdrop = require('./Backdrop');
 
 var _Backdrop2 = _interopRequireDefault(_Backdrop);
 
-var _Portal = require('../internal/Portal');
-
-var _Portal2 = _interopRequireDefault(_Portal);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
+function getContainer(container, defaultContainer) {
+  container = typeof container === 'function' ? container() : container;
+  return _reactDom2.default.findDOMNode(container) || defaultContainer;
+} // @inheritedComponent Portal
 
-var babelPluginFlowReactPropTypes_proptype_Element = require('react').babelPluginFlowReactPropTypes_proptype_Element || require('prop-types').any;
+function getOwnerDocument(element) {
+  return (0, _ownerDocument2.default)(_reactDom2.default.findDOMNode(element));
+}
 
-// Modals don't open on the server so this won't break concurrency.
-// Could also put this on context.
-var babelPluginFlowReactPropTypes_proptype_TransitionCallback = require('../internal/transition').babelPluginFlowReactPropTypes_proptype_TransitionCallback || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_TransitionDuration = require('../internal/transition').babelPluginFlowReactPropTypes_proptype_TransitionDuration || require('prop-types').any;
-
-var modalManager = (0, _modalManager2.default)();
+function getHasTransition(props) {
+  return props.children ? props.children.props.hasOwnProperty('in') : false;
+}
 
 var styles = exports.styles = function styles(theme) {
   return {
@@ -50774,7 +49889,7 @@ var styles = exports.styles = function styles(theme) {
       width: '100%',
       height: '100%',
       position: 'fixed',
-      zIndex: theme.zIndex.dialog,
+      zIndex: theme.zIndex.modal,
       top: 0,
       left: 0
     },
@@ -50784,363 +49899,263 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The CSS class name of the backdrop element.
-   */
-  BackdropClassName: require('prop-types').string,
-
-  /**
-   * Pass a component class to use as the backdrop.
-   */
-  BackdropComponent: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType),
-
-  /**
-   * If `true`, the backdrop is invisible.
-   */
-  BackdropInvisible: require('prop-types').bool,
-
-  /**
-   * The duration for the backdrop transition, in milliseconds.
-   * You may specify a single timeout for all transitions, or individually with an object.
-   */
-  BackdropTransitionDuration: typeof babelPluginFlowReactPropTypes_proptype_TransitionDuration === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionDuration : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionDuration),
-
-  /**
-   * A single child content element.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Element === 'function' ? babelPluginFlowReactPropTypes_proptype_Element : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Element),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * Always keep the children in the DOM.
-   * This property can be useful in SEO situation or
-   * when you want to maximize the responsiveness of the Modal.
-   */
-  keepMounted: require('prop-types').bool,
-
-  /**
-   * If `true`, the backdrop is disabled.
-   */
-  disableBackdrop: require('prop-types').bool,
-
-  /**
-   * If `true`, clicking the backdrop will not fire the `onRequestClose` callback.
-   */
-  ignoreBackdropClick: require('prop-types').bool,
-
-  /**
-   * If `true`, hitting escape will not fire the `onRequestClose` callback.
-   */
-  ignoreEscapeKeyUp: require('prop-types').bool,
-
-  /**
-   * @ignore
-   */
-  modalManager: require('prop-types').object,
-
-  /**
-   * Callback fires when the backdrop is clicked on.
-   */
-  onBackdropClick: require('prop-types').func,
-
-  /**
-   * Callback fired before the modal is entering.
-   */
-  onEnter: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the modal is entering.
-   */
-  onEntering: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the modal has entered.
-   */
-  onEntered: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fires when the escape key is pressed and the modal is in focus.
-   */
-  onEscapeKeyUp: require('prop-types').func,
-
-  /**
-   * Callback fired before the modal is exiting.
-   */
-  onExit: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the modal is exiting.
-   */
-  onExiting: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the modal has exited.
-   */
-  onExited: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the component requests to be closed.
-   *
-   * @param {object} event The event source of the callback
-   */
-  onRequestClose: require('prop-types').func,
-
-  /**
-   * If `true`, the Modal is visible.
-   */
-  show: require('prop-types').bool.isRequired
-};
-
-/**
- * The modal component provides a solid foundation for creating dialogs,
- * popovers, or whatever else.
- * The component renders its `children` node in front of a backdrop component.
- *
- * The `Modal` offers a few helpful features over using just a `Portal` component and some styles:
- * - Manages dialog stacking when one-at-a-time just isn't enough.
- * - Creates a backdrop, for disabling interaction below the modal.
- * - It properly manages focus; moving to the modal content,
- *   and keeping it there until the modal is closed.
- * - It disables scrolling of the page content while open.
- * - Adds the appropriate ARIA roles are automatically.
- *
- * This component shares many concepts with [react-overlays](https://react-bootstrap.github.io/react-overlays/#modals).
- */
 var Modal = function (_React$Component) {
   (0, _inherits3.default)(Modal, _React$Component);
 
-  function Modal() {
-    var _ref;
-
-    var _temp, _this, _ret;
-
+  function Modal(props, context) {
     (0, _classCallCheck3.default)(this, Modal);
 
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
+    var _this = (0, _possibleConstructorReturn3.default)(this, (Modal.__proto__ || (0, _getPrototypeOf2.default)(Modal)).call(this, props, context));
 
-    return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = Modal.__proto__ || (0, _getPrototypeOf2.default)(Modal)).call.apply(_ref, [this].concat(args))), _this), _initialiseProps.call(_this), _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
+    _this.dialogNode = null;
+    _this.modalNode = null;
+    _this.mounted = false;
+    _this.mountNode = null;
+
+    _this.handleRendered = function () {
+      _this.autoFocus();
+
+      if (_this.props.onRendered) {
+        _this.props.onRendered();
+      }
+    };
+
+    _this.handleOpen = function () {
+      var doc = getOwnerDocument(_this);
+      var container = getContainer(_this.props.container, doc.body);
+
+      _this.props.manager.add(_this, container);
+      _this.onDocumentKeydownListener = (0, _addEventListener2.default)(doc, 'keydown', _this.handleDocumentKeyDown);
+      _this.onFocusinListener = (0, _addEventListener2.default)(document, 'focus', _this.enforceFocus, true);
+    };
+
+    _this.handleClose = function () {
+      _this.props.manager.remove(_this);
+      _this.onDocumentKeydownListener.remove();
+      _this.onFocusinListener.remove();
+      _this.restoreLastFocus();
+    };
+
+    _this.handleExited = function () {
+      _this.setState({ exited: true });
+      _this.handleClose();
+    };
+
+    _this.handleBackdropClick = function (event) {
+      if (event.target !== event.currentTarget) {
+        return;
+      }
+
+      if (_this.props.onBackdropClick) {
+        _this.props.onBackdropClick(event);
+      }
+
+      if (!_this.props.disableBackdropClick && _this.props.onClose) {
+        _this.props.onClose(event, 'backdropClick');
+      }
+    };
+
+    _this.handleDocumentKeyDown = function (event) {
+      if (!_this.isTopModal() || (0, _keycode2.default)(event) !== 'esc') {
+        return;
+      }
+
+      if (_this.props.onEscapeKeyDown) {
+        _this.props.onEscapeKeyDown(event);
+      }
+
+      if (!_this.props.disableEscapeKeyDown && _this.props.onClose) {
+        _this.props.onClose(event, 'escapeKeyDown');
+      }
+    };
+
+    _this.checkForFocus = function () {
+      if (_inDOM2.default) {
+        _this.lastFocus = (0, _activeElement2.default)();
+      }
+    };
+
+    _this.enforceFocus = function () {
+      if (_this.props.disableEnforceFocus || !_this.mounted || !_this.isTopModal()) {
+        return;
+      }
+
+      var dialogElement = _this.getDialogElement();
+      var currentActiveElement = (0, _activeElement2.default)(getOwnerDocument(_this));
+
+      if (dialogElement && !(0, _contains2.default)(dialogElement, currentActiveElement)) {
+        dialogElement.focus();
+      }
+    };
+
+    _this.state = {
+      exited: !_this.props.open
+    };
+    return _this;
   }
 
   (0, _createClass3.default)(Modal, [{
-    key: 'componentWillMount',
-    value: function componentWillMount() {
-      if (!this.props.show) {
-        this.setState({ exited: true });
-      }
-    }
-  }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
       this.mounted = true;
-      if (this.props.show) {
-        this.handleShow();
+      if (this.props.open) {
+        this.handleOpen();
       }
     }
   }, {
     key: 'componentWillReceiveProps',
     value: function componentWillReceiveProps(nextProps) {
-      if (nextProps.show && this.state.exited) {
+      if (nextProps.open) {
         this.setState({ exited: false });
+      } else if (!getHasTransition(nextProps)) {
+        // Otherwise let handleExited take care of marking exited.
+        this.setState({ exited: true });
       }
     }
   }, {
     key: 'componentWillUpdate',
     value: function componentWillUpdate(nextProps) {
-      if (!this.props.show && nextProps.show) {
+      if (!this.props.open && nextProps.open) {
         this.checkForFocus();
       }
     }
   }, {
     key: 'componentDidUpdate',
     value: function componentDidUpdate(prevProps) {
-      if (!prevProps.show && this.props.show) {
-        this.handleShow();
+      if (prevProps.open && !this.props.open && !getHasTransition(this.props)) {
+        // Otherwise handleExited will call this.
+        this.handleClose();
+      } else if (!prevProps.open && this.props.open) {
+        this.handleOpen();
       }
-      // We are waiting for the onExited callback to call handleHide.
     }
   }, {
     key: 'componentWillUnmount',
     value: function componentWillUnmount() {
-      if (this.props.show || !this.state.exited) {
-        this.handleHide();
-      }
       this.mounted = false;
+
+      if (this.props.open || getHasTransition(this.props) && !this.state.exited) {
+        this.handleClose();
+      }
     }
   }, {
-    key: 'checkForFocus',
-    value: function checkForFocus() {
-      if (_inDOM2.default) {
-        this.lastFocus = (0, _activeElement2.default)();
+    key: 'getDialogElement',
+    value: function getDialogElement() {
+      return _reactDom2.default.findDOMNode(this.dialogNode);
+    }
+  }, {
+    key: 'autoFocus',
+    value: function autoFocus() {
+      if (this.props.disableAutoFocus) {
+        return;
+      }
+
+      var dialogElement = this.getDialogElement();
+      var currentActiveElement = (0, _activeElement2.default)(getOwnerDocument(this));
+
+      if (dialogElement && !(0, _contains2.default)(dialogElement, currentActiveElement)) {
+        this.lastFocus = currentActiveElement;
+
+        if (!dialogElement.hasAttribute('tabIndex')) {
+          'development' !== "production" ? (0, _warning2.default)(false, ['Material-UI: the modal content node does not accept focus.', 'For the benefit of assistive technologies, ' + 'the tabIndex of the node is being set to "-1".'].join('\n')) : void 0;
+          dialogElement.setAttribute('tabIndex', -1);
+        }
+
+        dialogElement.focus();
       }
     }
   }, {
     key: 'restoreLastFocus',
     value: function restoreLastFocus() {
-      if (this.lastFocus && this.lastFocus.focus) {
+      if (this.props.disableRestoreFocus) {
+        return;
+      }
+
+      if (this.lastFocus) {
         this.lastFocus.focus();
-        this.lastFocus = undefined;
+        this.lastFocus = null;
       }
     }
   }, {
-    key: 'handleShow',
-    value: function handleShow() {
-      var doc = (0, _ownerDocument2.default)(_reactDom2.default.findDOMNode(this));
-      this.props.modalManager.add(this);
-      this.onDocumentKeyUpListener = (0, _addEventListener2.default)(doc, 'keyup', this.handleDocumentKeyUp);
-      this.onFocusListener = (0, _addEventListener2.default)(doc, 'focus', this.handleFocusListener, true);
-      this.focus();
-    }
-  }, {
-    key: 'focus',
-    value: function focus() {
-      var currentFocus = (0, _activeElement2.default)((0, _ownerDocument2.default)(_reactDom2.default.findDOMNode(this)));
-      var modalContent = this.modal && this.modal.lastChild;
-      var focusInModal = currentFocus && (0, _contains2.default)(modalContent, currentFocus);
-
-      if (modalContent && !focusInModal) {
-        if (!modalContent.hasAttribute('tabIndex')) {
-          modalContent.setAttribute('tabIndex', -1);
-          'development' !== "production" ? (0, _warning2.default)(false, 'Material-UI: the modal content node does not accept focus. ' + 'For the benefit of assistive technologies, ' + 'the tabIndex of the node is being set to "-1".') : void 0;
-        }
-
-        modalContent.focus();
-      }
-    }
-  }, {
-    key: 'handleHide',
-    value: function handleHide() {
-      this.props.modalManager.remove(this);
-      if (this.onDocumentKeyUpListener) this.onDocumentKeyUpListener.remove();
-      if (this.onFocusListener) this.onFocusListener.remove();
-      this.restoreLastFocus();
-    }
-  }, {
-    key: 'renderBackdrop',
-    value: function renderBackdrop() {
-      var other = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-      var _props = this.props,
-          BackdropComponent = _props.BackdropComponent,
-          BackdropClassName = _props.BackdropClassName,
-          BackdropTransitionDuration = _props.BackdropTransitionDuration,
-          BackdropInvisible = _props.BackdropInvisible,
-          show = _props.show;
-
-
-      return _react2.default.createElement(
-        _Fade2.default,
-        (0, _extends3.default)({ appear: true, 'in': show, timeout: BackdropTransitionDuration }, other),
-        _react2.default.createElement(BackdropComponent, {
-          invisible: BackdropInvisible,
-          className: BackdropClassName,
-          onClick: this.handleBackdropClick
-        })
-      );
+    key: 'isTopModal',
+    value: function isTopModal() {
+      return this.props.manager.isTopModal(this);
     }
   }, {
     key: 'render',
     value: function render() {
       var _this2 = this;
 
-      var _props2 = this.props,
-          disableBackdrop = _props2.disableBackdrop,
-          BackdropComponent = _props2.BackdropComponent,
-          BackdropClassName = _props2.BackdropClassName,
-          BackdropTransitionDuration = _props2.BackdropTransitionDuration,
-          BackdropInvisible = _props2.BackdropInvisible,
-          ignoreBackdropClick = _props2.ignoreBackdropClick,
-          ignoreEscapeKeyUp = _props2.ignoreEscapeKeyUp,
-          children = _props2.children,
-          classes = _props2.classes,
-          className = _props2.className,
-          keepMounted = _props2.keepMounted,
-          modalManagerProp = _props2.modalManager,
-          onBackdropClick = _props2.onBackdropClick,
-          onEscapeKeyUp = _props2.onEscapeKeyUp,
-          onRequestClose = _props2.onRequestClose,
-          onEnter = _props2.onEnter,
-          onEntering = _props2.onEntering,
-          onEntered = _props2.onEntered,
-          onExit = _props2.onExit,
-          onExiting = _props2.onExiting,
-          onExited = _props2.onExited,
-          show = _props2.show,
-          other = (0, _objectWithoutProperties3.default)(_props2, ['disableBackdrop', 'BackdropComponent', 'BackdropClassName', 'BackdropTransitionDuration', 'BackdropInvisible', 'ignoreBackdropClick', 'ignoreEscapeKeyUp', 'children', 'classes', 'className', 'keepMounted', 'modalManager', 'onBackdropClick', 'onEscapeKeyUp', 'onRequestClose', 'onEnter', 'onEntering', 'onEntered', 'onExit', 'onExiting', 'onExited', 'show']);
+      var _props = this.props,
+          BackdropComponent = _props.BackdropComponent,
+          BackdropProps = _props.BackdropProps,
+          children = _props.children,
+          classes = _props.classes,
+          className = _props.className,
+          container = _props.container,
+          disableAutoFocus = _props.disableAutoFocus,
+          disableBackdropClick = _props.disableBackdropClick,
+          disableEnforceFocus = _props.disableEnforceFocus,
+          disableEscapeKeyDown = _props.disableEscapeKeyDown,
+          disableRestoreFocus = _props.disableRestoreFocus,
+          hideBackdrop = _props.hideBackdrop,
+          keepMounted = _props.keepMounted,
+          onBackdropClick = _props.onBackdropClick,
+          onClose = _props.onClose,
+          onEscapeKeyDown = _props.onEscapeKeyDown,
+          onRendered = _props.onRendered,
+          open = _props.open,
+          manager = _props.manager,
+          other = (0, _objectWithoutProperties3.default)(_props, ['BackdropComponent', 'BackdropProps', 'children', 'classes', 'className', 'container', 'disableAutoFocus', 'disableBackdropClick', 'disableEnforceFocus', 'disableEscapeKeyDown', 'disableRestoreFocus', 'hideBackdrop', 'keepMounted', 'onBackdropClick', 'onClose', 'onEscapeKeyDown', 'onRendered', 'open', 'manager']);
+      var exited = this.state.exited;
 
+      var hasTransition = getHasTransition(this.props);
+      var childProps = {};
 
-      if (!keepMounted && !show && this.state.exited) {
+      if (!keepMounted && !open && (!hasTransition || exited)) {
         return null;
       }
 
-      var transitionCallbacks = {
-        onEnter: onEnter,
-        onEntering: onEntering,
-        onEntered: onEntered,
-        onExit: onExit,
-        onExiting: onExiting,
-        onExited: this.handleTransitionExited
-      };
-
-      var modalChild = _react2.default.Children.only(children);
-      var _modalChild$props = modalChild.props,
-          role = _modalChild$props.role,
-          tabIndex = _modalChild$props.tabIndex;
-
-      var childProps = {};
-
-      if (role === undefined) {
-        childProps.role = role === undefined ? 'document' : role;
-      }
-
-      if (tabIndex === undefined) {
-        childProps.tabIndex = tabIndex == null ? -1 : tabIndex;
-      }
-
-      var backdropProps = void 0;
-
       // It's a Transition like component
-      if (modalChild.props.hasOwnProperty('in')) {
-        (0, _keys2.default)(transitionCallbacks).forEach(function (key) {
-          childProps[key] = (0, _helpers.createChainedFunction)(transitionCallbacks[key], modalChild.props[key]);
-        });
-      } else {
-        backdropProps = transitionCallbacks;
+      if (hasTransition) {
+        childProps.onExited = (0, _helpers.createChainedFunction)(this.handleExited, children.props.onExited);
       }
 
-      if ((0, _keys2.default)(childProps).length) {
-        modalChild = _react2.default.cloneElement(modalChild, childProps);
+      if (children.props.role === undefined) {
+        childProps.role = children.props.role || 'document';
+      }
+
+      if (children.props.tabIndex === undefined) {
+        childProps.tabIndex = children.props.tabIndex || '-1';
       }
 
       return _react2.default.createElement(
         _Portal2.default,
         {
-          open: true,
           ref: function ref(node) {
-            _this2.mountNode = node ? node.getLayer() : null;
-          }
+            _this2.mountNode = node ? node.getMountNode() : node;
+          },
+          container: container,
+          onRendered: this.handleRendered
         },
         _react2.default.createElement(
           'div',
           (0, _extends3.default)({
-            className: (0, _classnames2.default)(classes.root, className, (0, _defineProperty3.default)({}, classes.hidden, this.state.exited))
-          }, other, {
             ref: function ref(node) {
-              _this2.modal = node;
-            }
-          }),
-          !disableBackdrop && (!keepMounted || show || !this.state.exited) && this.renderBackdrop(backdropProps),
-          modalChild
+              _this2.modalNode = node;
+            },
+            className: (0, _classnames2.default)(classes.root, className, (0, _defineProperty3.default)({}, classes.hidden, exited))
+          }, other),
+          hideBackdrop ? null : _react2.default.createElement(BackdropComponent, (0, _extends3.default)({ open: open, onClick: this.handleBackdropClick }, BackdropProps)),
+          _react2.default.createElement(
+            _RefHolder2.default,
+            {
+              ref: function ref(node) {
+                _this2.dialogNode = node;
+              }
+            },
+            _react2.default.cloneElement(children, childProps)
+          )
         )
       );
     }
@@ -51148,100 +50163,320 @@ var Modal = function (_React$Component) {
   return Modal;
 }(_react2.default.Component);
 
+Modal.propTypes = 'development' !== "production" ? {
+  /**
+   * A backdrop component. Useful for custom backdrop rendering.
+   */
+  BackdropComponent: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * Properties applied to the `Backdrop` element.
+   */
+  BackdropProps: _propTypes2.default.object,
+  /**
+   * A single child content element.
+   */
+  children: _propTypes2.default.element,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * A node, component instance, or function that returns either.
+   * The `container` will have the portal children appended to it.
+   */
+  container: _propTypes2.default.oneOfType([_propTypes2.default.object, _propTypes2.default.func]),
+  /**
+   * If `true`, the modal will not automatically shift focus to itself when it opens, and
+   * replace it to the last focused element when it closes.
+   * This also works correctly with any modal children that have the `disableAutoFocus` prop.
+   *
+   * Generally this should never be set to `true` as it makes the modal less
+   * accessible to assistive technologies, like screen readers.
+   */
+  disableAutoFocus: _propTypes2.default.bool,
+  /**
+   * If `true`, clicking the backdrop will not fire any callback.
+   */
+  disableBackdropClick: _propTypes2.default.bool,
+  /**
+   * If `true`, the modal will not prevent focus from leaving the modal while open.
+   *
+   * Generally this should never be set to `true` as it makes the modal less
+   * accessible to assistive technologies, like screen readers.
+   */
+  disableEnforceFocus: _propTypes2.default.bool,
+  /**
+   * If `true`, hitting escape will not fire any callback.
+   */
+  disableEscapeKeyDown: _propTypes2.default.bool,
+  /**
+   * If `true`, the modal will not restore focus to previously focused element once
+   * modal is hidden.
+   */
+  disableRestoreFocus: _propTypes2.default.bool,
+  /**
+   * If `true`, the backdrop is not rendered.
+   */
+  hideBackdrop: _propTypes2.default.bool,
+  /**
+   * Always keep the children in the DOM.
+   * This property can be useful in SEO situation or
+   * when you want to maximize the responsiveness of the Modal.
+   */
+  keepMounted: _propTypes2.default.bool,
+  /**
+   * A modal manager used to track and manage the state of open
+   * Modals. Useful when customizing how modals interact within a container.
+   */
+  manager: _propTypes2.default.object.isRequired,
+  /**
+   * Callback fired when the backdrop is clicked.
+   */
+  onBackdropClick: _propTypes2.default.func,
+  /**
+   * Callback fired when the component requests to be closed.
+   * The `reason` parameter can optionally be used to control the response to `onClose`.
+   *
+   * @param {object} event The event source of the callback
+   * @param {string} reason Can be:`"escapeKeyDown"`, `"backdropClick"`
+   */
+  onClose: _propTypes2.default.func,
+  /**
+   * Callback fired when the escape key is pressed,
+   * `disableEscapeKeyDown` is false and the modal is in focus.
+   */
+  onEscapeKeyDown: _propTypes2.default.func,
+  /**
+   * Callback fired once the children has been mounted into the `container`.
+   * It signals that the `open={true}` property took effect.
+   */
+  onRendered: _propTypes2.default.func,
+  /**
+   * If `true`, the modal is open.
+   */
+  open: _propTypes2.default.bool.isRequired
+} : {};
+
 Modal.defaultProps = {
-  BackdropComponent: _Backdrop2.default,
-  BackdropTransitionDuration: 300,
-  BackdropInvisible: false,
+  disableAutoFocus: false,
+  disableBackdropClick: false,
+  disableEnforceFocus: false,
+  disableEscapeKeyDown: false,
+  disableRestoreFocus: false,
+  hideBackdrop: false,
   keepMounted: false,
-  disableBackdrop: false,
-  ignoreBackdropClick: false,
-  ignoreEscapeKeyUp: false,
-  modalManager: modalManager
-};
-
-var _initialiseProps = function _initialiseProps() {
-  var _this3 = this;
-
-  this.state = {
-    exited: false
-  };
-  this.onDocumentKeyUpListener = null;
-  this.onFocusListener = null;
-  this.mounted = false;
-  this.lastFocus = undefined;
-  this.modal = null;
-  this.mountNode = null;
-
-  this.handleFocusListener = function () {
-    if (!_this3.mounted || !_this3.props.modalManager.isTopModal(_this3)) {
-      return;
-    }
-
-    var currentFocus = (0, _activeElement2.default)((0, _ownerDocument2.default)(_reactDom2.default.findDOMNode(_this3)));
-    var modalContent = _this3.modal && _this3.modal.lastChild;
-
-    if (modalContent && modalContent !== currentFocus && !(0, _contains2.default)(modalContent, currentFocus)) {
-      modalContent.focus();
-    }
-  };
-
-  this.handleDocumentKeyUp = function (event) {
-    if (!_this3.mounted || !_this3.props.modalManager.isTopModal(_this3)) {
-      return;
-    }
-
-    if ((0, _keycode2.default)(event) !== 'esc') {
-      return;
-    }
-
-    var _props3 = _this3.props,
-        onEscapeKeyUp = _props3.onEscapeKeyUp,
-        onRequestClose = _props3.onRequestClose,
-        ignoreEscapeKeyUp = _props3.ignoreEscapeKeyUp;
-
-
-    if (onEscapeKeyUp) {
-      onEscapeKeyUp(event);
-    }
-
-    if (onRequestClose && !ignoreEscapeKeyUp) {
-      onRequestClose(event);
-    }
-  };
-
-  this.handleBackdropClick = function (event) {
-    if (event.target !== event.currentTarget) {
-      return;
-    }
-
-    var _props4 = _this3.props,
-        onBackdropClick = _props4.onBackdropClick,
-        onRequestClose = _props4.onRequestClose,
-        ignoreBackdropClick = _props4.ignoreBackdropClick;
-
-
-    if (onBackdropClick) {
-      onBackdropClick(event);
-    }
-
-    if (onRequestClose && !ignoreBackdropClick) {
-      onRequestClose(event);
-    }
-  };
-
-  this.handleTransitionExited = function () {
-    if (_this3.props.onExited) {
-      var _props5;
-
-      (_props5 = _this3.props).onExited.apply(_props5, arguments);
-    }
-
-    _this3.setState({ exited: true });
-    _this3.handleHide();
-  };
+  // Modals don't open on the server so this won't conflict with concurrent requests.
+  manager: new _ModalManager2.default(),
+  BackdropComponent: _Backdrop2.default
 };
 
 exports.default = (0, _withStyles2.default)(styles, { flip: false, name: 'MuiModal' })(Modal);
+  })();
+});
+
+require.register("material-ui/Modal/ModalManager.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _keys = require('babel-runtime/core-js/object/keys');
+
+var _keys2 = _interopRequireDefault(_keys);
+
+var _style = require('dom-helpers/style');
+
+var _style2 = _interopRequireDefault(_style);
+
+var _scrollbarSize = require('dom-helpers/util/scrollbarSize');
+
+var _scrollbarSize2 = _interopRequireDefault(_scrollbarSize);
+
+var _isOverflowing = require('./isOverflowing');
+
+var _isOverflowing2 = _interopRequireDefault(_isOverflowing);
+
+var _manageAriaHidden = require('./manageAriaHidden');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function findIndexOf(data, callback) {
+  var idx = -1;
+  data.some(function (item, index) {
+    if (callback(item)) {
+      idx = index;
+      return true;
+    }
+    return false;
+  });
+  return idx;
+}
+
+function findContainer(data, modal) {
+  return findIndexOf(data, function (item) {
+    return item.modals.indexOf(modal) !== -1;
+  });
+}
+
+function getPaddingRight(node) {
+  return parseInt((0, _style2.default)(node, 'paddingRight') || 0, 10);
+}
+
+function setContainerStyle(data, container) {
+  var style = { overflow: 'hidden' };
+
+  // We are only interested in the actual `style` here because we will override it.
+  data.style = {
+    overflow: container.style.overflow,
+    paddingRight: container.style.paddingRight
+  };
+
+  if (data.overflowing) {
+    var scrollbarSize = (0, _scrollbarSize2.default)();
+
+    // Use computed style, here to get the real padding to add our scrollbar width.
+    style.paddingRight = getPaddingRight(container) + scrollbarSize + 'px';
+
+    // .mui-fixed is a global helper.
+    var fixedNodes = document.querySelectorAll('.mui-fixed');
+    for (var i = 0; i < fixedNodes.length; i += 1) {
+      var paddingRight = getPaddingRight(fixedNodes[i]);
+      data.prevPaddings.push(paddingRight);
+      fixedNodes[i].style.paddingRight = paddingRight + scrollbarSize + 'px';
+    }
+  }
+
+  (0, _keys2.default)(style).forEach(function (key) {
+    container.style[key] = style[key];
+  });
+}
+
+function removeContainerStyle(data, container) {
+  (0, _keys2.default)(data.style).forEach(function (key) {
+    container.style[key] = data.style[key];
+  });
+
+  var fixedNodes = document.querySelectorAll('.mui-fixed');
+  for (var i = 0; i < fixedNodes.length; i += 1) {
+    fixedNodes[i].style.paddingRight = data.prevPaddings[i] + 'px';
+  }
+}
+/**
+ * @ignore - do not document.
+ *
+ * Proper state managment for containers and the modals in those containers.
+ * Simplified, but inspired by react-overlay's ModalManager class
+ * Used by the Modal to ensure proper styling of containers.
+ */
+
+var ModalManager = function ModalManager() {
+  var _this = this;
+
+  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+      _ref$hideSiblingNodes = _ref.hideSiblingNodes,
+      hideSiblingNodes = _ref$hideSiblingNodes === undefined ? true : _ref$hideSiblingNodes,
+      _ref$handleContainerO = _ref.handleContainerOverflow,
+      handleContainerOverflow = _ref$handleContainerO === undefined ? true : _ref$handleContainerO;
+
+  (0, _classCallCheck3.default)(this, ModalManager);
+
+  this.add = function (modal, container) {
+    var modalIdx = _this.modals.indexOf(modal);
+    var containerIdx = _this.containers.indexOf(container);
+
+    if (modalIdx !== -1) {
+      return modalIdx;
+    }
+
+    modalIdx = _this.modals.length;
+    _this.modals.push(modal);
+
+    if (_this.hideSiblingNodes) {
+      (0, _manageAriaHidden.hideSiblings)(container, modal.mountNode);
+    }
+
+    if (containerIdx !== -1) {
+      _this.data[containerIdx].modals.push(modal);
+      return modalIdx;
+    }
+
+    var data = {
+      modals: [modal],
+      overflowing: (0, _isOverflowing2.default)(container),
+      prevPaddings: []
+    };
+
+    if (_this.handleContainerOverflow) {
+      setContainerStyle(data, container);
+    }
+
+    _this.containers.push(container);
+    _this.data.push(data);
+
+    return modalIdx;
+  };
+
+  this.remove = function (modal) {
+    var modalIdx = _this.modals.indexOf(modal);
+
+    if (modalIdx === -1) {
+      return modalIdx;
+    }
+
+    var containerIdx = findContainer(_this.data, modal);
+    var data = _this.data[containerIdx];
+    var container = _this.containers[containerIdx];
+
+    data.modals.splice(data.modals.indexOf(modal), 1);
+    _this.modals.splice(modalIdx, 1);
+
+    // If that was the last modal in a container, clean up the container.
+    if (data.modals.length === 0) {
+      if (_this.handleContainerOverflow) {
+        removeContainerStyle(data, container);
+      }
+
+      if (_this.hideSiblingNodes) {
+        (0, _manageAriaHidden.showSiblings)(container, modal.mountNode);
+      }
+      _this.containers.splice(containerIdx, 1);
+      _this.data.splice(containerIdx, 1);
+    } else if (_this.hideSiblingNodes) {
+      // Otherwise make sure the next top modal is visible to a SR.
+      (0, _manageAriaHidden.ariaHidden)(false, data.modals[data.modals.length - 1].mountNode);
+    }
+
+    return modalIdx;
+  };
+
+  this.isTopModal = function (modal) {
+    return !!_this.modals.length && _this.modals[_this.modals.length - 1] === modal;
+  };
+
+  this.hideSiblingNodes = hideSiblingNodes;
+  this.handleContainerOverflow = handleContainerOverflow;
+  // this.modals[modalIdx] = modal
+  this.modals = [];
+  // this.containers[containerIdx] = container
+  this.containers = [];
+  // this.data[containerIdx] = {
+  //   modals: [],
+  // }
+  this.data = [];
+};
+
+exports.default = ModalManager;
   })();
 });
 
@@ -51263,11 +50498,29 @@ Object.defineProperty(exports, 'default', {
   }
 });
 
+var _Backdrop = require('./Backdrop');
+
+Object.defineProperty(exports, 'Backdrop', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_Backdrop).default;
+  }
+});
+
+var _ModalManager = require('./ModalManager');
+
+Object.defineProperty(exports, 'ModalManager', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_ModalManager).default;
+  }
+});
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   })();
 });
 
-require.register("material-ui/Modal/modalManager.js", function(exports, require, module) {
+require.register("material-ui/Modal/isOverflowing.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "material-ui");
   (function() {
     'use strict';
@@ -51275,10 +50528,8 @@ require.register("material-ui/Modal/modalManager.js", function(exports, require,
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _warning = require('warning');
-
-var _warning2 = _interopRequireDefault(_warning);
+exports.isBody = isBody;
+exports.default = isOverflowing;
 
 var _isWindow = require('dom-helpers/query/isWindow');
 
@@ -51288,28 +50539,21 @@ var _ownerDocument = require('dom-helpers/ownerDocument');
 
 var _ownerDocument2 = _interopRequireDefault(_ownerDocument);
 
-var _inDOM = require('dom-helpers/util/inDOM');
-
-var _inDOM2 = _interopRequireDefault(_inDOM);
-
-var _scrollbarSize = require('dom-helpers/util/scrollbarSize');
-
-var _scrollbarSize2 = _interopRequireDefault(_scrollbarSize);
-
-var _manageAriaHidden = require('../utils/manageAriaHidden');
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// Taken from https://github.com/react-bootstrap/react-overlays/blob/master/src/ModalManager.js
-
-function getPaddingRight(node) {
-  return parseInt(node.style.paddingRight || 0, 10);
+function isBody(node) {
+  return node && node.tagName.toLowerCase() === 'body';
 }
 
 // Do we have a scroll bar?
-function bodyIsOverflowing(node) {
-  var doc = (0, _ownerDocument2.default)(node);
+function isOverflowing(container) {
+  var doc = (0, _ownerDocument2.default)(container);
   var win = (0, _isWindow2.default)(doc);
+
+  /* istanbul ignore next */
+  if (!win && !isBody(container)) {
+    return container.scrollHeight > container.clientHeight;
+  }
 
   // Takes in account potential non zero margin on the body.
   var style = window.getComputedStyle(doc.body);
@@ -51318,109 +50562,57 @@ function bodyIsOverflowing(node) {
 
   return marginLeft + doc.body.clientWidth + marginRight < win.innerWidth;
 }
+  })();
+});
 
-// The container shouldn't be used on the server.
-var defaultContainer = _inDOM2.default ? window.document.body : {};
+require.register("material-ui/Modal/manageAriaHidden.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
 
-/**
- * State management helper for modals/layers.
- * Simplified, but inspired by react-overlay's ModalManager class
- *
- * @internal Used by the Modal to ensure proper focus management.
- */
-function createModalManager() {
-  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref$container = _ref.container,
-      container = _ref$container === undefined ? defaultContainer : _ref$container,
-      _ref$hideSiblingNodes = _ref.hideSiblingNodes,
-      hideSiblingNodes = _ref$hideSiblingNodes === undefined ? true : _ref$hideSiblingNodes;
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.ariaHidden = ariaHidden;
+exports.hideSiblings = hideSiblings;
+exports.showSiblings = showSiblings;
+var BLACKLIST = ['template', 'script', 'style'];
 
-  'development' !== "production" ? (0, _warning2.default)(container !== null, '\nMaterial-UI: you are most likely evaluating the code before the\nbrowser has a chance to reach the <body>.\nPlease move the import at the end of the <body>.\n  ') : void 0;
-
-  var modals = [];
-
-  var prevOverflow = void 0;
-  var prevPaddings = [];
-
-  function add(modal) {
-    var modalIdx = modals.indexOf(modal);
-
-    if (modalIdx !== -1) {
-      return modalIdx;
-    }
-
-    modalIdx = modals.length;
-    modals.push(modal);
-
-    if (hideSiblingNodes) {
-      (0, _manageAriaHidden.hideSiblings)(container, modal.mountNode);
-    }
-
-    if (modals.length === 1) {
-      // Save our current overflow so we can revert
-      // back to it when all modals are closed!
-      prevOverflow = container.style.overflow;
-
-      if (bodyIsOverflowing(container)) {
-        prevPaddings = [getPaddingRight(container)];
-        var scrollbarSize = (0, _scrollbarSize2.default)();
-        container.style.paddingRight = prevPaddings[0] + scrollbarSize + 'px';
-
-        var fixedNodes = document.querySelectorAll('.mui-fixed');
-        for (var i = 0; i < fixedNodes.length; i += 1) {
-          var paddingRight = getPaddingRight(fixedNodes[i]);
-          prevPaddings.push(paddingRight);
-          fixedNodes[i].style.paddingRight = paddingRight + scrollbarSize + 'px';
-        }
-      }
-
-      container.style.overflow = 'hidden';
-    }
-
-    return modalIdx;
-  }
-
-  function remove(modal) {
-    var modalIdx = modals.indexOf(modal);
-
-    if (modalIdx === -1) {
-      return modalIdx;
-    }
-
-    modals.splice(modalIdx, 1);
-
-    if (modals.length === 0) {
-      container.style.overflow = prevOverflow;
-      container.style.paddingRight = prevPaddings[0];
-
-      var fixedNodes = document.querySelectorAll('.mui-fixed');
-      for (var i = 0; i < fixedNodes.length; i += 1) {
-        fixedNodes[i].style.paddingRight = prevPaddings[i + 1] + 'px';
-      }
-
-      prevOverflow = undefined;
-      prevPaddings = [];
-      if (hideSiblingNodes) {
-        (0, _manageAriaHidden.showSiblings)(container, modal.mountNode);
-      }
-    } else if (hideSiblingNodes) {
-      // otherwise make sure the next top modal is visible to a SR
-      (0, _manageAriaHidden.ariaHidden)(false, modals[modals.length - 1].mountNode);
-    }
-
-    return modalIdx;
-  }
-
-  function isTopModal(modal) {
-    return !!modals.length && modals[modals.length - 1] === modal;
-  }
-
-  var modalManager = { add: add, remove: remove, isTopModal: isTopModal };
-
-  return modalManager;
+function isHidable(node) {
+  return node.nodeType === 1 && BLACKLIST.indexOf(node.tagName.toLowerCase()) === -1;
 }
 
-exports.default = createModalManager;
+function siblings(container, mount, callback) {
+  mount = [].concat(mount); // eslint-disable-line no-param-reassign
+  [].forEach.call(container.children, function (node) {
+    if (mount.indexOf(node) === -1 && isHidable(node)) {
+      callback(node);
+    }
+  });
+}
+
+function ariaHidden(show, node) {
+  if (!node) {
+    return;
+  }
+  if (show) {
+    node.setAttribute('aria-hidden', 'true');
+  } else {
+    node.removeAttribute('aria-hidden');
+  }
+}
+
+function hideSiblings(container, mountNode) {
+  siblings(container, mountNode, function (node) {
+    return ariaHidden(true, node);
+  });
+}
+
+function showSiblings(container, mountNode) {
+  siblings(container, mountNode, function (node) {
+    return ariaHidden(false, node);
+  });
+}
   })();
 });
 
@@ -51446,11 +50638,13 @@ var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -51466,11 +50660,8 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   var shadows = {};
-
   theme.shadows.forEach(function (shadow, index) {
     shadows['shadow' + index] = {
       boxShadow: shadow
@@ -51486,36 +50677,6 @@ var styles = exports.styles = function styles(theme) {
     }
   }, shadows);
 };
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType),
-
-  /**
-   * Shadow depth, corresponds to `dp` in the spec.
-   * It's accepting values between 0 and 24 inclusive.
-   */
-  elevation: require('prop-types').number,
-
-  /**
-   * If `true`, rounded corners are disabled.
-   */
-  square: require('prop-types').bool
-};
-
 
 function Paper(props) {
   var classes = props.classes,
@@ -51533,12 +50694,35 @@ function Paper(props) {
   return _react2.default.createElement(ComponentProp, (0, _extends3.default)({ className: className }, other));
 }
 
-Paper.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType.isRequired ? babelPluginFlowReactPropTypes_proptype_ElementType.isRequired : babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType).isRequired,
-  elevation: require('prop-types').number.isRequired,
-  square: require('prop-types').bool.isRequired
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'component', typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType)), (0, _defineProperty3.default)(_ref, 'elevation', require('prop-types').number), (0, _defineProperty3.default)(_ref, 'square', require('prop-types').bool), _ref) : {};
+Paper.propTypes = 'development' !== "production" ? {
+  /**
+   * @ignore
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * Shadow depth, corresponds to `dp` in the spec.
+   * It's accepting values between 0 and 24 inclusive.
+   */
+  elevation: _propTypes2.default.number,
+  /**
+   * If `true`, rounded corners are disabled.
+   */
+  square: _propTypes2.default.bool
+} : {};
+
 Paper.defaultProps = {
   component: 'div',
   elevation: 2,
@@ -51613,6 +50797,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _reactDom = require('react-dom');
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
@@ -51651,13 +50839,6 @@ var _Paper2 = _interopRequireDefault(_Paper);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-// @inheritedComponent Modal
-
-var babelPluginFlowReactPropTypes_proptype_TransitionClasses = require('../internal/transition').babelPluginFlowReactPropTypes_proptype_TransitionClasses || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_TransitionCallback = require('../internal/transition').babelPluginFlowReactPropTypes_proptype_TransitionCallback || require('prop-types').any;
-
 function getOffsetTop(rect, vertical) {
   var offset = 0;
 
@@ -51670,7 +50851,7 @@ function getOffsetTop(rect, vertical) {
   }
 
   return offset;
-}
+} // @inheritedComponent Modal
 
 function getOffsetLeft(rect, horizontal) {
   var offset = 0;
@@ -51721,162 +50902,6 @@ var styles = exports.styles = {
   }
 };
 
-var babelPluginFlowReactPropTypes_proptype_Origin = {
-  horizontal: require('prop-types').oneOfType([require('prop-types').oneOf(['left']), require('prop-types').oneOf(['center']), require('prop-types').oneOf(['right']), require('prop-types').number]).isRequired,
-  vertical: require('prop-types').oneOfType([require('prop-types').oneOf(['top']), require('prop-types').oneOf(['center']), require('prop-types').oneOf(['bottom']), require('prop-types').number]).isRequired
-};
-var babelPluginFlowReactPropTypes_proptype_Position = {
-  top: require('prop-types').number.isRequired,
-  left: require('prop-types').number.isRequired
-};
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * This is the DOM element that may be used
-   * to set the position of the popover.
-   */
-  anchorEl: typeof HTMLElement === 'function' ? require('prop-types').instanceOf(HTMLElement) : require('prop-types').any,
-
-  /**
-   * This is the position that may be used
-   * to set the position of the popover.
-   * The coordinates are relative to
-   * the application's client area.
-   */
-  anchorPosition: require('prop-types').shape({
-    top: require('prop-types').number.isRequired,
-    left: require('prop-types').number.isRequired
-  }),
-
-  /*
-   * This determines which anchor prop to refer to to set
-   * the position of the popover.
-   */
-  anchorReference: require('prop-types').oneOf(['anchorEl', 'anchorPosition']),
-
-  /**
-   * This is the point on the anchor where the popover's
-   * `anchorEl` will attach to. This is not used when the
-   * anchorReference is 'anchorPosition'.
-   *
-   * Options:
-   * vertical: [top, center, bottom];
-   * horizontal: [left, center, right].
-   */
-  anchorOrigin: require('prop-types').shape({
-    horizontal: require('prop-types').oneOfType([require('prop-types').oneOf(['left']), require('prop-types').oneOf(['center']), require('prop-types').oneOf(['right']), require('prop-types').number]).isRequired,
-    vertical: require('prop-types').oneOfType([require('prop-types').oneOf(['top']), require('prop-types').oneOf(['center']), require('prop-types').oneOf(['bottom']), require('prop-types').number]).isRequired
-  }),
-
-  /**
-   * The content of the component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired,
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * The elevation of the popover.
-   */
-  elevation: require('prop-types').number,
-
-  /**
-   * This function is called in order to retrieve the content anchor element.
-   * It's the opposite of the `anchorEl` property.
-   * The content anchor element should be an element inside the popover.
-   * It's used to correctly scroll and set the position of the popover.
-   * The positioning strategy tries to make the content anchor element just above the
-   * anchor element.
-   */
-  getContentAnchorEl: require('prop-types').func,
-
-  /**
-   * Specifies how close to the edge of the window the popover can appear.
-   */
-  marginThreshold: require('prop-types').number,
-
-  /**
-   * Callback fired before the component is entering.
-   */
-  onEnter: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the component is entering.
-   */
-  onEntering: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the component has entered.
-   */
-  onEntered: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired before the component is exiting.
-   */
-  onExit: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the component is exiting.
-   */
-  onExiting: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the component has exited.
-   */
-  onExited: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the component requests to be closed.
-   *
-   * @param {object} event The event source of the callback.
-   */
-  onRequestClose: require('prop-types').func,
-
-  /**
-   * If `true`, the popover is visible.
-   */
-  open: require('prop-types').bool.isRequired,
-
-  /**
-   * Properties applied to the `Paper` element.
-   */
-  PaperProps: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  role: require('prop-types').string,
-
-  /**
-   * This is the point on the popover which
-   * will attach to the anchor's origin.
-   *
-   * Options:
-   * vertical: [top, center, bottom, x(px)];
-   * horizontal: [left, center, right, x(px)].
-   */
-  transformOrigin: require('prop-types').shape({
-    horizontal: require('prop-types').oneOfType([require('prop-types').oneOf(['left']), require('prop-types').oneOf(['center']), require('prop-types').oneOf(['right']), require('prop-types').number]).isRequired,
-    vertical: require('prop-types').oneOfType([require('prop-types').oneOf(['top']), require('prop-types').oneOf(['center']), require('prop-types').oneOf(['bottom']), require('prop-types').number]).isRequired
-  }),
-
-  /**
-   * The animation classNames applied to the component as it enters or exits.
-   * This property is a direct binding to [`CSSTransition.classNames`](https://reactcommunity.org/react-transition-group/#CSSTransition-prop-classNames).
-   */
-  transitionClasses: typeof babelPluginFlowReactPropTypes_proptype_TransitionClasses === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionClasses : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionClasses),
-
-  /**
-   * Set to 'auto' to automatically calculate transition time based on height.
-   */
-  transitionDuration: require('prop-types').oneOfType([require('prop-types').number, require('prop-types').shape({
-    enter: require('prop-types').number,
-    exit: require('prop-types').number
-  }), require('prop-types').oneOf(['auto'])])
-};
-
 var Popover = function (_React$Component) {
   (0, _inherits3.default)(Popover, _React$Component);
 
@@ -51896,7 +50921,6 @@ var Popover = function (_React$Component) {
     }, _this.setPositioningStyles = function (element) {
       if (element && element.style) {
         var positioning = _this.getPositioningStyle(element);
-
         element.style.top = positioning.top;
         element.style.left = positioning.left;
         element.style.transformOrigin = positioning.transformOrigin;
@@ -51969,13 +50993,21 @@ var Popover = function (_React$Component) {
   }
 
   (0, _createClass3.default)(Popover, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      if (this.props.action) {
+        this.props.action({
+          updatePosition: this.handleResize
+        });
+      }
+    }
+  }, {
     key: 'getAnchorOffset',
 
 
     // Returns the top/left offset of the position
     // to attach to on the anchor element (or body if none is provided)
     value: function getAnchorOffset(contentAnchorOffset) {
-      // $FlowFixMe
       var _props = this.props,
           anchorEl = _props.anchorEl,
           anchorOrigin = _props.anchorOrigin,
@@ -52017,7 +51049,7 @@ var Popover = function (_React$Component) {
         }
 
         // != the default value
-        'development' !== "production" ? (0, _warning2.default)(this.props.anchorOrigin.vertical === 'top', ['Material-UI: you can not change the default `anchorOrigin.vertical` value when also ', 'providing the `getContentAnchorEl` property to the popover component.', 'Only use one of the two properties', 'Set `getContentAnchorEl` to null or left `anchorOrigin.vertical` unchanged'].join()) : void 0;
+        'development' !== "production" ? (0, _warning2.default)(this.props.anchorOrigin.vertical === 'top', ['Material-UI: you can not change the default `anchorOrigin.vertical` value ', 'when also providing the `getContentAnchorEl` property to the popover component.', 'Only use one of the two properties.', 'Set `getContentAnchorEl` to null or left `anchorOrigin.vertical` unchanged.'].join('\n')) : void 0;
       }
 
       return contentAnchorOffset;
@@ -52044,54 +51076,61 @@ var Popover = function (_React$Component) {
 
       var _props3 = this.props,
           anchorEl = _props3.anchorEl,
-          anchorReference = _props3.anchorReference,
-          anchorPosition = _props3.anchorPosition,
           anchorOrigin = _props3.anchorOrigin,
+          anchorPosition = _props3.anchorPosition,
+          anchorReference = _props3.anchorReference,
           children = _props3.children,
           classes = _props3.classes,
           elevation = _props3.elevation,
           getContentAnchorEl = _props3.getContentAnchorEl,
           marginThreshold = _props3.marginThreshold,
           onEnter = _props3.onEnter,
-          onEntering = _props3.onEntering,
           onEntered = _props3.onEntered,
+          onEntering = _props3.onEntering,
           onExit = _props3.onExit,
-          onExiting = _props3.onExiting,
           onExited = _props3.onExited,
+          onExiting = _props3.onExiting,
           open = _props3.open,
           PaperProps = _props3.PaperProps,
           role = _props3.role,
           transformOrigin = _props3.transformOrigin,
-          transitionClasses = _props3.transitionClasses,
+          TransitionProp = _props3.transition,
           transitionDuration = _props3.transitionDuration,
-          other = (0, _objectWithoutProperties3.default)(_props3, ['anchorEl', 'anchorReference', 'anchorPosition', 'anchorOrigin', 'children', 'classes', 'elevation', 'getContentAnchorEl', 'marginThreshold', 'onEnter', 'onEntering', 'onEntered', 'onExit', 'onExiting', 'onExited', 'open', 'PaperProps', 'role', 'transformOrigin', 'transitionClasses', 'transitionDuration']);
+          action = _props3.action,
+          other = (0, _objectWithoutProperties3.default)(_props3, ['anchorEl', 'anchorOrigin', 'anchorPosition', 'anchorReference', 'children', 'classes', 'elevation', 'getContentAnchorEl', 'marginThreshold', 'onEnter', 'onEntered', 'onEntering', 'onExit', 'onExited', 'onExiting', 'open', 'PaperProps', 'role', 'transformOrigin', 'transition', 'transitionDuration', 'action']);
 
+
+      var transitionProps = {};
+
+      // The provided transition might not support the auto timeout value.
+      if (TransitionProp === _Grow2.default) {
+        transitionProps.timeout = transitionDuration;
+      }
 
       return _react2.default.createElement(
         _Modal2.default,
-        (0, _extends3.default)({ show: open, BackdropInvisible: true }, other),
+        (0, _extends3.default)({ open: open, BackdropProps: { invisible: true } }, other),
         _react2.default.createElement(
-          _Grow2.default,
-          {
+          TransitionProp,
+          (0, _extends3.default)({
             appear: true,
             'in': open,
             onEnter: this.handleEnter,
-            onEntering: onEntering,
             onEntered: onEntered,
+            onEntering: onEntering,
             onExit: onExit,
-            onExiting: onExiting,
             onExited: onExited,
+            onExiting: onExiting,
             role: role,
-            transitionClasses: transitionClasses,
-            timeout: transitionDuration,
-            rootRef: function rootRef(node) {
+            ref: function ref(node) {
               _this2.transitionEl = node;
             }
-          },
+          }, transitionProps),
           _react2.default.createElement(
             _Paper2.default,
             (0, _extends3.default)({
               className: classes.paper,
+
               elevation: elevation
             }, PaperProps),
             _react2.default.createElement(_reactEventListener2.default, { target: 'window', onResize: this.handleResize }),
@@ -52104,20 +51143,154 @@ var Popover = function (_React$Component) {
   return Popover;
 }(_react2.default.Component);
 
+Popover.propTypes = 'development' !== "production" ? {
+  /**
+   * This is callback property. It's called by the component on mount.
+   * This is useful when you want to trigger an action programmatically.
+   * It currently only supports updatePosition() action.
+   *
+   * @param {object} actions This object contains all posible actions
+   * that can be triggered programmatically.
+   */
+  action: _propTypes2.default.func,
+  /**
+   * This is the DOM element that may be used
+   * to set the position of the popover.
+   */
+  anchorEl: _propTypes2.default.object,
+  /**
+   * This is the point on the anchor where the popover's
+   * `anchorEl` will attach to. This is not used when the
+   * anchorReference is 'anchorPosition'.
+   *
+   * Options:
+   * vertical: [top, center, bottom];
+   * horizontal: [left, center, right].
+   */
+  anchorOrigin: _propTypes2.default.shape({
+    horizontal: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.oneOf(['left', 'center', 'right'])]),
+    vertical: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.oneOf(['top', 'center', 'bottom'])])
+  }),
+  /**
+   * This is the position that may be used
+   * to set the position of the popover.
+   * The coordinates are relative to
+   * the application's client area.
+   */
+  anchorPosition: _propTypes2.default.shape({
+    top: _propTypes2.default.number,
+    left: _propTypes2.default.number
+  }),
+  /*
+   * This determines which anchor prop to refer to to set
+   * the position of the popover.
+   */
+  anchorReference: _propTypes2.default.oneOf(['anchorEl', 'anchorPosition']),
+  /**
+   * The content of the component.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * The elevation of the popover.
+   */
+  elevation: _propTypes2.default.number,
+  /**
+   * This function is called in order to retrieve the content anchor element.
+   * It's the opposite of the `anchorEl` property.
+   * The content anchor element should be an element inside the popover.
+   * It's used to correctly scroll and set the position of the popover.
+   * The positioning strategy tries to make the content anchor element just above the
+   * anchor element.
+   */
+  getContentAnchorEl: _propTypes2.default.func,
+  /**
+   * Specifies how close to the edge of the window the popover can appear.
+   */
+  marginThreshold: _propTypes2.default.number,
+  /**
+   * Callback fired when the component requests to be closed.
+   *
+   * @param {object} event The event source of the callback.
+   */
+  onClose: _propTypes2.default.func,
+  /**
+   * Callback fired before the component is entering.
+   */
+  onEnter: _propTypes2.default.func,
+  /**
+   * Callback fired when the component has entered.
+   */
+  onEntered: _propTypes2.default.func,
+  /**
+   * Callback fired when the component is entering.
+   */
+  onEntering: _propTypes2.default.func,
+  /**
+   * Callback fired before the component is exiting.
+   */
+  onExit: _propTypes2.default.func,
+  /**
+   * Callback fired when the component has exited.
+   */
+  onExited: _propTypes2.default.func,
+  /**
+   * Callback fired when the component is exiting.
+   */
+  onExiting: _propTypes2.default.func,
+  /**
+   * If `true`, the popover is visible.
+   */
+  open: _propTypes2.default.bool.isRequired,
+  /**
+   * Properties applied to the `Paper` element.
+   */
+  PaperProps: _propTypes2.default.object,
+  /**
+   * @ignore
+   */
+  role: _propTypes2.default.string,
+  /**
+   * This is the point on the popover which
+   * will attach to the anchor's origin.
+   *
+   * Options:
+   * vertical: [top, center, bottom, x(px)];
+   * horizontal: [left, center, right, x(px)].
+   */
+  transformOrigin: _propTypes2.default.shape({
+    horizontal: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.oneOf(['left', 'center', 'right'])]),
+    vertical: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.oneOf(['top', 'center', 'bottom'])])
+  }),
+  /**
+   * Transition component.
+   */
+  transition: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * Set to 'auto' to automatically calculate transition time based on height.
+   */
+  transitionDuration: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.shape({ enter: _propTypes2.default.number, exit: _propTypes2.default.number }), _propTypes2.default.oneOf(['auto'])])
+} : {};
+
 Popover.defaultProps = {
   anchorReference: 'anchorEl',
   anchorOrigin: {
     vertical: 'top',
     horizontal: 'left'
   },
+  elevation: 8,
+  marginThreshold: 16,
   transformOrigin: {
     vertical: 'top',
     horizontal: 'left'
   },
-  transitionDuration: 'auto',
-  elevation: 8,
-  marginThreshold: 16
+  transition: _Grow2.default,
+  transitionDuration: 'auto'
 };
+
 exports.default = (0, _withStyles2.default)(styles, { name: 'MuiPopover' })(Popover);
   })();
 });
@@ -52144,6 +51317,345 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   })();
 });
 
+require.register("material-ui/Portal/LegacyPortal.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
+
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require('babel-runtime/helpers/createClass');
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _possibleConstructorReturn2 = require('babel-runtime/helpers/possibleConstructorReturn');
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _inherits2 = require('babel-runtime/helpers/inherits');
+
+var _inherits3 = _interopRequireDefault(_inherits2);
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactDom = require('react-dom');
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+var _ownerDocument = require('dom-helpers/ownerDocument');
+
+var _ownerDocument2 = _interopRequireDefault(_ownerDocument);
+
+var _exactProp = require('../utils/exactProp');
+
+var _exactProp2 = _interopRequireDefault(_exactProp);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function getContainer(container, defaultContainer) {
+  container = typeof container === 'function' ? container() : container;
+  return _reactDom2.default.findDOMNode(container) || defaultContainer;
+}
+
+function getOwnerDocument(element) {
+  return (0, _ownerDocument2.default)(_reactDom2.default.findDOMNode(element));
+}
+
+/**
+ * @ignore - internal component.
+ *
+ * This module will soon be gone. We should drop it as soon as React@15.x support stop.
+ */
+
+var LegacyPortal = function (_React$Component) {
+  (0, _inherits3.default)(LegacyPortal, _React$Component);
+
+  function LegacyPortal() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
+    (0, _classCallCheck3.default)(this, LegacyPortal);
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = LegacyPortal.__proto__ || (0, _getPrototypeOf2.default)(LegacyPortal)).call.apply(_ref, [this].concat(args))), _this), _this.getMountNode = function () {
+      return _this.mountNode;
+    }, _this.mountOverlayTarget = function () {
+      if (!_this.overlayTarget) {
+        _this.overlayTarget = document.createElement('div');
+        _this.mountNode = getContainer(_this.props.container, getOwnerDocument(_this).body);
+        _this.mountNode.appendChild(_this.overlayTarget);
+      }
+    }, _this.unmountOverlayTarget = function () {
+      if (_this.overlayTarget) {
+        _this.mountNode.removeChild(_this.overlayTarget);
+        _this.overlayTarget = null;
+      }
+      _this.mountNode = null;
+    }, _this.unrenderOverlay = function () {
+      if (_this.overlayTarget) {
+        _reactDom2.default.unmountComponentAtNode(_this.overlayTarget);
+        _this.overlayInstance = null;
+      }
+    }, _this.renderOverlay = function () {
+      var overlay = _this.props.children;
+      _this.mountOverlayTarget();
+      var initialRender = !_this.overlayInstance;
+      _this.overlayInstance = _reactDom2.default.unstable_renderSubtreeIntoContainer(_this, overlay, _this.overlayTarget, function () {
+        if (initialRender && _this.props.onRendered) {
+          _this.props.onRendered();
+        }
+      });
+    }, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
+  }
+
+  (0, _createClass3.default)(LegacyPortal, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.mounted = true;
+      this.renderOverlay();
+    }
+  }, {
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(nextProps) {
+      if (this.overlayTarget && nextProps.container !== this.props.container) {
+        this.mountNode.removeChild(this.overlayTarget);
+        this.mountNode = getContainer(nextProps.container, getOwnerDocument(this).body);
+        this.mountNode.appendChild(this.overlayTarget);
+      }
+    }
+  }, {
+    key: 'componentDidUpdate',
+    value: function componentDidUpdate() {
+      this.renderOverlay();
+    }
+  }, {
+    key: 'componentWillUnmount',
+    value: function componentWillUnmount() {
+      this.mounted = false;
+      this.unrenderOverlay();
+      this.unmountOverlayTarget();
+    }
+
+    /**
+     * @public
+     */
+
+  }, {
+    key: 'render',
+    value: function render() {
+      return null;
+    }
+  }]);
+  return LegacyPortal;
+}(_react2.default.Component);
+
+LegacyPortal.propTypes = 'development' !== "production" ? {
+  children: _propTypes2.default.element.isRequired,
+  container: _propTypes2.default.oneOfType([_propTypes2.default.object, _propTypes2.default.func]),
+  onRendered: _propTypes2.default.func
+} : {};
+
+LegacyPortal.propTypes = 'development' !== "production" ? (0, _exactProp2.default)(LegacyPortal.propTypes, 'LegacyPortal') : {};
+
+exports.default = LegacyPortal;
+  })();
+});
+
+require.register("material-ui/Portal/Portal.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
+
+var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
+
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require('babel-runtime/helpers/createClass');
+
+var _createClass3 = _interopRequireDefault(_createClass2);
+
+var _possibleConstructorReturn2 = require('babel-runtime/helpers/possibleConstructorReturn');
+
+var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
+
+var _inherits2 = require('babel-runtime/helpers/inherits');
+
+var _inherits3 = _interopRequireDefault(_inherits2);
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactDom = require('react-dom');
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+var _ownerDocument = require('dom-helpers/ownerDocument');
+
+var _ownerDocument2 = _interopRequireDefault(_ownerDocument);
+
+var _exactProp = require('../utils/exactProp');
+
+var _exactProp2 = _interopRequireDefault(_exactProp);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function getContainer(container, defaultContainer) {
+  container = typeof container === 'function' ? container() : container;
+  return _reactDom2.default.findDOMNode(container) || defaultContainer;
+}
+
+function getOwnerDocument(element) {
+  return (0, _ownerDocument2.default)(_reactDom2.default.findDOMNode(element));
+}
+
+/**
+ * This component shares many concepts with
+ * [react-overlays](https://react-bootstrap.github.io/react-overlays/#portals)
+ * But has been fork in order to fix some bugs, reduce the number of dependencies
+ * and take the control of our destiny.
+ */
+
+var Portal = function (_React$Component) {
+  (0, _inherits3.default)(Portal, _React$Component);
+
+  function Portal() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
+    (0, _classCallCheck3.default)(this, Portal);
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = Portal.__proto__ || (0, _getPrototypeOf2.default)(Portal)).call.apply(_ref, [this].concat(args))), _this), _this.getMountNode = function () {
+      return _this.mountNode;
+    }, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
+  }
+
+  (0, _createClass3.default)(Portal, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.setContainer(this.props.container);
+      this.forceUpdate(this.props.onRendered);
+    }
+  }, {
+    key: 'componentWillReceiveProps',
+    value: function componentWillReceiveProps(nextProps) {
+      if (nextProps.container !== this.props.container) {
+        this.setContainer(nextProps.container);
+      }
+    }
+  }, {
+    key: 'componentWillUnmount',
+    value: function componentWillUnmount() {
+      this.mountNode = null;
+    }
+  }, {
+    key: 'setContainer',
+    value: function setContainer(container) {
+      this.mountNode = getContainer(container, getOwnerDocument(this).body);
+    }
+
+    /**
+     * @public
+     */
+
+  }, {
+    key: 'render',
+    value: function render() {
+      var children = this.props.children;
+
+
+      return this.mountNode ? _reactDom2.default.createPortal(children, this.mountNode) : null;
+    }
+  }]);
+  return Portal;
+}(_react2.default.Component);
+
+Portal.propTypes = 'development' !== "production" ? {
+  /**
+   * The children to render into the `container`.
+   */
+  children: _propTypes2.default.node.isRequired,
+  /**
+   * A node, component instance, or function that returns either.
+   * The `container` will have the portal children appended to it.
+   */
+  container: _propTypes2.default.oneOfType([_propTypes2.default.object, _propTypes2.default.func]),
+  /**
+   * Callback fired once the children has been mounted into the `container`.
+   */
+  onRendered: _propTypes2.default.func
+} : {};
+
+Portal.propTypes = 'development' !== "production" ? (0, _exactProp2.default)(Portal.propTypes, 'Portal') : {};
+
+exports.default = Portal;
+  })();
+});
+
+require.register("material-ui/Portal/index.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _reactDom = require('react-dom');
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
+
+var _Portal = require('./Portal');
+
+var _Portal2 = _interopRequireDefault(_Portal);
+
+var _LegacyPortal = require('./LegacyPortal');
+
+var _LegacyPortal2 = _interopRequireDefault(_LegacyPortal);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+exports.default = _reactDom2.default.createPortal ? _Portal2.default : _LegacyPortal2.default;
+  })();
+});
+
 require.register("material-ui/Progress/CircularProgress.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "material-ui");
   (function() {
@@ -52166,11 +51678,13 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -52238,79 +51752,20 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Color = require('prop-types').oneOf(['primary', 'accent', 'inherit']);
-
-var babelPluginFlowReactPropTypes_proptype_Mode = require('prop-types').oneOf(['determinate', 'indeterminate']);
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The color of the component. It's using the theme palette when that makes sense.
-   */
-  color: require('prop-types').oneOf(['primary', 'accent', 'inherit']),
-
-  /**
-   * The max value of progress in determinate mode.
-   */
-  max: require('prop-types').number,
-
-  /**
-   * The min value of progress in determinate mode.
-   */
-  min: require('prop-types').number,
-
-  /**
-   * The mode of show your progress. Indeterminate
-   * for when there is no value for progress.
-   * Determinate for controlled progress value.
-   */
-  mode: require('prop-types').oneOf(['determinate', 'indeterminate']),
-
-  /**
-   * The size of the circle.
-   */
-  size: require('prop-types').number,
-
-  /**
-   * @ignore
-   */
-  style: require('prop-types').object,
-
-  /**
-   * The thickness of the circle.
-   */
-  thickness: require('prop-types').number,
-
-  /**
-   * The value of progress in determinate mode.
-   */
-  value: require('prop-types').number
-};
-
-
 function CircularProgress(props) {
   var _classNames;
 
   var classes = props.classes,
       className = props.className,
       color = props.color,
+      max = props.max,
+      min = props.min,
+      mode = props.mode,
       size = props.size,
       style = props.style,
       thickness = props.thickness,
-      mode = props.mode,
       value = props.value,
-      min = props.min,
-      max = props.max,
-      other = (0, _objectWithoutProperties3.default)(props, ['classes', 'className', 'color', 'size', 'style', 'thickness', 'mode', 'value', 'min', 'max']);
+      other = (0, _objectWithoutProperties3.default)(props, ['classes', 'className', 'color', 'max', 'min', 'mode', 'size', 'style', 'thickness', 'value']);
 
 
   var rootProps = {};
@@ -52354,26 +51809,62 @@ function CircularProgress(props) {
   );
 }
 
-CircularProgress.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  color: require('prop-types').oneOf(['primary', 'accent', 'inherit']).isRequired,
-  size: require('prop-types').number.isRequired,
-  mode: require('prop-types').oneOf(['determinate', 'indeterminate']).isRequired,
-  value: require('prop-types').number.isRequired,
-  min: require('prop-types').number.isRequired,
-  max: require('prop-types').number.isRequired
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'color', require('prop-types').oneOf(['primary', 'accent', 'inherit'])), (0, _defineProperty3.default)(_ref, 'max', require('prop-types').number), (0, _defineProperty3.default)(_ref, 'min', require('prop-types').number), (0, _defineProperty3.default)(_ref, 'mode', require('prop-types').oneOf(['determinate', 'indeterminate'])), (0, _defineProperty3.default)(_ref, 'size', require('prop-types').number), (0, _defineProperty3.default)(_ref, 'style', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'thickness', require('prop-types').number), (0, _defineProperty3.default)(_ref, 'value', require('prop-types').number), _ref) : {};
+CircularProgress.propTypes = 'development' !== "production" ? {
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The color of the component. It's using the theme palette when that makes sense.
+   */
+  color: _propTypes2.default.oneOf(['primary', 'accent', 'inherit']),
+  /**
+   * The max value of progress in determinate mode.
+   */
+  max: _propTypes2.default.number,
+  /**
+   * The min value of progress in determinate mode.
+   */
+  min: _propTypes2.default.number,
+  /**
+   * The mode of show your progress. Indeterminate
+   * for when there is no value for progress.
+   * Determinate for controlled progress value.
+   */
+  mode: _propTypes2.default.oneOf(['determinate', 'indeterminate']),
+  /**
+   * The size of the circle.
+   */
+  size: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.string]),
+  /**
+   * @ignore
+   */
+  style: _propTypes2.default.object,
+  /**
+   * The thickness of the circle.
+   */
+  thickness: _propTypes2.default.number,
+  /**
+   * The value of progress in determinate mode.
+   */
+  value: _propTypes2.default.number
+} : {};
+
 CircularProgress.defaultProps = {
   color: 'primary',
+  max: 100,
+  min: 0,
+  mode: 'indeterminate',
   size: 40,
   thickness: 3.6,
-  mode: 'indeterminate',
-  value: 0,
-  min: 0,
-  max: 100
+  value: 0
 };
 
-exports.default = (0, _withStyles2.default)(styles, { name: 'MuiCircularProgress' })(CircularProgress);
+exports.default = (0, _withStyles2.default)(styles, { name: 'MuiCircularProgress', flip: false })(CircularProgress);
   })();
 });
 
@@ -52399,11 +51890,13 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -52555,42 +52048,6 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The color of the component. It's using the theme palette when that makes sense.
-   */
-  color: require('prop-types').oneOf(['primary', 'accent']),
-
-  /**
-   * The mode of show your progress, indeterminate
-   * for when there is no value for progress.
-   */
-  mode: require('prop-types').oneOf(['determinate', 'indeterminate', 'buffer', 'query']),
-
-  /**
-   * The value of progress, only works in determinate and buffer mode.
-   * Value between 0 and 100.
-   */
-  value: require('prop-types').number,
-
-  /**
-   * The value of buffer, only works in buffer mode.
-   * Value between 0 and 100.
-   */
-  valueBuffer: require('prop-types').number
-};
-
-
 function LinearProgress(props) {
   var _classNames, _classNames2, _classNames3, _classNames4;
 
@@ -52623,7 +52080,7 @@ function LinearProgress(props) {
       inlineStyles.primary.transform = 'scaleX(' + value / 100 + ')';
       inlineStyles.secondary.transform = 'scaleX(' + (valueBuffer || 0) / 100 + ')';
     } else {
-      'development' !== "production" ? (0, _warning2.default)(false, 'Material-UI: you need to provide a value property when LinearProgress is in buffer mode.') : void 0;
+      'development' !== "production" ? (0, _warning2.default)(false, 'Material-UI: you need to provide a value property when LinearProgress is ' + 'in buffer mode.') : void 0;
     }
   }
 
@@ -52636,9 +52093,36 @@ function LinearProgress(props) {
   );
 }
 
-LinearProgress.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'color', require('prop-types').oneOf(['primary', 'accent'])), (0, _defineProperty3.default)(_ref, 'mode', require('prop-types').oneOf(['determinate', 'indeterminate', 'buffer', 'query'])), (0, _defineProperty3.default)(_ref, 'value', require('prop-types').number), (0, _defineProperty3.default)(_ref, 'valueBuffer', require('prop-types').number), _ref) : {};
+LinearProgress.propTypes = 'development' !== "production" ? {
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The color of the component. It's using the theme palette when that makes sense.
+   */
+  color: _propTypes2.default.oneOf(['primary', 'accent']),
+  /**
+   * The mode of show your progress, indeterminate
+   * for when there is no value for progress.
+   */
+  mode: _propTypes2.default.oneOf(['determinate', 'indeterminate', 'buffer', 'query']),
+  /**
+   * The value of progress, only works in determinate and buffer mode.
+   * Value between 0 and 100.
+   */
+  value: _propTypes2.default.number,
+  /**
+   * The value of buffer, only works in buffer mode.
+   * Value between 0 and 100.
+   */
+  valueBuffer: _propTypes2.default.number
+} : {};
+
 LinearProgress.defaultProps = {
   color: 'primary',
   mode: 'indeterminate'
@@ -52701,6 +52185,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _warning = require('warning');
 
 var _warning2 = _interopRequireDefault(_warning);
@@ -52720,12 +52208,6 @@ var _Input2 = _interopRequireDefault(_Input);
 var _reactHelpers = require('../utils/reactHelpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var babelPluginFlowReactPropTypes_proptype_Element = require('react').babelPluginFlowReactPropTypes_proptype_Element || require('prop-types').any;
-// @inheritedComponent Input
-
-var babelPluginFlowReactPropTypes_proptype_ChildrenArray = require('react').babelPluginFlowReactPropTypes_proptype_ChildrenArray || require('prop-types').any; // Import to enforce the CSS injection order
-
 
 var styles = exports.styles = function styles(theme) {
   return {
@@ -52775,73 +52257,11 @@ var styles = exports.styles = function styles(theme) {
       right: 0,
       top: 4,
       color: theme.palette.text.secondary,
-      'pointer-events': 'none' // Don't block pinter events on the select under the icon.
+      'pointer-events': 'none' // Don't block pointer events on the select under the icon.
     }
   };
-};
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * If true, the width of the popover will automatically be set according to the items inside the
-   * menu, otherwise it will be at least the width of the select input.
-   */
-  autoWidth: require('prop-types').bool,
-
-  /**
-   * The option elements to populate the select with.
-   * Can be some `MenuItem` when `native` is false and `option` when `native` is true.
-   */
-  children: typeof $ReadOnlyArray === 'function' ? require('prop-types').instanceOf($ReadOnlyArray).isRequired : require('prop-types').any.isRequired,
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * If `true`, the selected item is displayed even if its value is empty.
-   * You can only use it when the `native` property is `false` (default).
-   */
-  displayEmpty: require('prop-types').bool,
-
-  /**
-   * An `Input` element; does not have to be a material-ui specific `Input`.
-   */
-  input: typeof babelPluginFlowReactPropTypes_proptype_Element === 'function' ? babelPluginFlowReactPropTypes_proptype_Element : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Element),
-
-  /**
-   * `classes` property applied to the `Input` element.
-   */
-  InputClasses: require('prop-types').object,
-
-  /**
-   * If `true`, the component will be using a native `select` element.
-   */
-  native: require('prop-types').bool,
-
-  /**
-   * If true, `value` must be an array and the menu will support multiple selections.
-   * You can only use it when the `native` property is `false` (default).
-   */
-  multiple: require('prop-types').bool,
-
-  /**
-   * Properties applied to the `Menu` element.
-   */
-  MenuProps: require('prop-types').object,
-
-  /**
-   * Render the selected value.
-   * You can only use it when the `native` property is `false` (default).
-   */
-  renderValue: require('prop-types').func,
-
-  /**
-   * The input value, required for a controlled component.
-   */
-  value: require('prop-types').oneOfType([typeof $ReadOnlyArray === 'function' ? require('prop-types').instanceOf($ReadOnlyArray) : require('prop-types').any, require('prop-types').string, require('prop-types').number])
-};
-
+}; // Import to enforce the CSS injection order
+// @inheritedComponent Input
 
 function Select(props) {
   var autoWidth = props.autoWidth,
@@ -52849,12 +52269,11 @@ function Select(props) {
       classes = props.classes,
       displayEmpty = props.displayEmpty,
       input = props.input,
-      InputClasses = props.InputClasses,
-      native = props.native,
-      multiple = props.multiple,
       MenuProps = props.MenuProps,
+      multiple = props.multiple,
+      native = props.native,
       renderValue = props.renderValue,
-      other = (0, _objectWithoutProperties3.default)(props, ['autoWidth', 'children', 'classes', 'displayEmpty', 'input', 'InputClasses', 'native', 'multiple', 'MenuProps', 'renderValue']);
+      other = (0, _objectWithoutProperties3.default)(props, ['autoWidth', 'children', 'classes', 'displayEmpty', 'input', 'MenuProps', 'multiple', 'native', 'renderValue']);
 
   // Instead of `Element<typeof Input>` to have more flexibility.
 
@@ -52863,8 +52282,7 @@ function Select(props) {
   return _react2.default.cloneElement(input, (0, _extends3.default)({
     // Most of the logic is implemented in `SelectInput`.
     // The `Select` component is a simple API wrapper to expose something better to play with.
-    inputComponent: _SelectInput2.default,
-    classes: InputClasses
+    inputComponent: _SelectInput2.default
   }, other, {
     inputProps: (0, _extends3.default)({}, input ? input.props.inputProps : {}, {
       autoWidth: autoWidth,
@@ -52879,12 +52297,60 @@ function Select(props) {
   }));
 }
 
+Select.propTypes = 'development' !== "production" ? {
+  /**
+   * If true, the width of the popover will automatically be set according to the items inside the
+   * menu, otherwise it will be at least the width of the select input.
+   */
+  autoWidth: _propTypes2.default.bool,
+  /**
+   * The option elements to populate the select with.
+   * Can be some `MenuItem` when `native` is false and `option` when `native` is true.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * If `true`, the selected item is displayed even if its value is empty.
+   * You can only use it when the `native` property is `false` (default).
+   */
+  displayEmpty: _propTypes2.default.bool,
+  /**
+   * An `Input` element; does not have to be a material-ui specific `Input`.
+   */
+  input: _propTypes2.default.element,
+  /**
+   * Properties applied to the `Menu` element.
+   */
+  MenuProps: _propTypes2.default.object,
+  /**
+   * If true, `value` must be an array and the menu will support multiple selections.
+   * You can only use it when the `native` property is `false` (default).
+   */
+  multiple: _propTypes2.default.bool,
+  /**
+   * If `true`, the component will be using a native `select` element.
+   */
+  native: _propTypes2.default.bool,
+  /**
+   * Render the selected value.
+   * You can only use it when the `native` property is `false` (default).
+   */
+  renderValue: _propTypes2.default.func,
+  /**
+   * The input value, required for a controlled component.
+   */
+  value: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number, _propTypes2.default.arrayOf(_propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number]))])
+} : {};
+
 Select.defaultProps = {
   autoWidth: false,
   displayEmpty: false,
   input: _react2.default.createElement(_Input2.default, null),
-  native: false,
-  multiple: false
+  multiple: false,
+  native: false
 };
 
 Select.muiName = 'Select';
@@ -52942,6 +52408,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _classnames = require('classnames');
 
 var _classnames2 = _interopRequireDefault(_classnames);
@@ -52954,116 +52424,17 @@ var _warning = require('warning');
 
 var _warning2 = _interopRequireDefault(_warning);
 
+var _ArrowDropDown = require('../internal/svg-icons/ArrowDropDown');
+
+var _ArrowDropDown2 = _interopRequireDefault(_ArrowDropDown);
+
 var _Menu = require('../Menu/Menu');
 
 var _Menu2 = _interopRequireDefault(_Menu);
 
 var _Input = require('../Input/Input');
 
-var _ArrowDropDown = require('../svg-icons/ArrowDropDown');
-
-var _ArrowDropDown2 = _interopRequireDefault(_ArrowDropDown);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Element = require('react').babelPluginFlowReactPropTypes_proptype_Element || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * If true, the width of the popover will automatically be set according to the items inside the
-   * menu, otherwise it will be at least the width of the select input.
-   */
-  autoWidth: require('prop-types').bool.isRequired,
-
-  /**
-   * The option elements to populate the select with.
-   * Can be some `MenuItem` when `native` is false and `option` when `native` is true.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired,
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * The CSS class name of the select element.
-   */
-  className: require('prop-types').string,
-
-  /**
-   * If `true`, the select will be disabled.
-   */
-  disabled: require('prop-types').bool,
-
-  /**
-   * If `true`, the selected item is displayed even if its value is empty.
-   * You can only use it when the `native` property is `false` (default).
-   */
-  displayEmpty: require('prop-types').bool.isRequired,
-
-  /**
-   * If `true`, the component will be using a native `select` element.
-   */
-  native: require('prop-types').bool.isRequired,
-
-  /**
-   * If true, `value` must be an array and the menu will support multiple selections.
-   * You can only use it when the `native` property is `false` (default).
-   */
-  multiple: require('prop-types').bool.isRequired,
-
-  /**
-   * Properties applied to the `Menu` element.
-   */
-  MenuProps: require('prop-types').object,
-
-  /**
-   * Name attribute of the `select` or hidden `input` element.
-   */
-  name: require('prop-types').string,
-
-  /**
-   * @ignore
-   */
-  onBlur: require('prop-types').func,
-
-  /**
-   * Callback function fired when a menu item is selected.
-   *
-   * @param {object} event The event source of the callback
-   * @param {object} child The react element that was selected
-   */
-  onChange: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  onFocus: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  readOnly: require('prop-types').bool,
-
-  /**
-   * Render the selected value.
-   * You can only use it when the `native` property is `false` (default).
-   */
-  renderValue: require('prop-types').func,
-
-  /**
-   * Use that property to pass a ref callback to the native select element.
-   */
-  selectRef: require('prop-types').func,
-
-  /**
-   * The value of the component, required for a controlled component.
-   */
-  value: require('prop-types').oneOfType([require('prop-types').string, require('prop-types').number, typeof $ReadOnlyArray === 'function' ? require('prop-types').instanceOf($ReadOnlyArray) : require('prop-types').any])
-};
 
 /**
  * @ignore - internal component.
@@ -53092,7 +52463,7 @@ var SelectInput = function (_React$Component) {
         open: true,
         anchorEl: event.currentTarget
       });
-    }, _this.handleRequestClose = function () {
+    }, _this.handleClose = function () {
       _this.setState({
         open: false
       });
@@ -53105,31 +52476,33 @@ var SelectInput = function (_React$Component) {
         }
 
         if (_this.props.onChange) {
-          var _onChange = _this.props.onChange;
+          var _this$props = _this.props,
+              onChange = _this$props.onChange,
+              name = _this$props.name;
 
-          var _value = void 0;
-          var _target = void 0;
+          var value = void 0;
+          var target = void 0;
 
           if (event.target) {
-            _target = event.target;
+            target = event.target;
           }
 
           if (_this.props.multiple) {
-            _value = Array.isArray(_this.props.value) ? [].concat((0, _toConsumableArray3.default)(_this.props.value)) : [];
-            var itemIndex = _value.indexOf(child.props.value);
+            value = Array.isArray(_this.props.value) ? [].concat((0, _toConsumableArray3.default)(_this.props.value)) : [];
+            var itemIndex = value.indexOf(child.props.value);
             if (itemIndex === -1) {
-              _value.push(child.props.value);
+              value.push(child.props.value);
             } else {
-              _value.splice(itemIndex, 1);
+              value.splice(itemIndex, 1);
             }
           } else {
-            _value = child.props.value;
+            value = child.props.value;
           }
 
           event.persist();
-          event.target = (0, _extends3.default)({}, _target, { value: _value });
+          event.target = (0, _extends3.default)({}, target, { value: value, name: name });
 
-          _onChange(event, child);
+          onChange(event, child);
         }
       };
     }, _this.handleBlur = function (event) {
@@ -53178,15 +52551,15 @@ var SelectInput = function (_React$Component) {
       var _props = this.props,
           autoWidth = _props.autoWidth,
           children = _props.children,
-          classNameProp = _props.className,
           classes = _props.classes,
+          classNameProp = _props.className,
           disabled = _props.disabled,
           displayEmpty = _props.displayEmpty,
-          name = _props.name,
-          native = _props.native,
-          multiple = _props.multiple,
           _props$MenuProps = _props.MenuProps,
           MenuProps = _props$MenuProps === undefined ? {} : _props$MenuProps,
+          multiple = _props.multiple,
+          name = _props.name,
+          native = _props.native,
           onBlur = _props.onBlur,
           onChange = _props.onChange,
           onFocus = _props.onFocus,
@@ -53194,7 +52567,7 @@ var SelectInput = function (_React$Component) {
           renderValue = _props.renderValue,
           selectRef = _props.selectRef,
           value = _props.value,
-          other = (0, _objectWithoutProperties3.default)(_props, ['autoWidth', 'children', 'className', 'classes', 'disabled', 'displayEmpty', 'name', 'native', 'multiple', 'MenuProps', 'onBlur', 'onChange', 'onFocus', 'readOnly', 'renderValue', 'selectRef', 'value']);
+          other = (0, _objectWithoutProperties3.default)(_props, ['autoWidth', 'children', 'classes', 'className', 'disabled', 'displayEmpty', 'MenuProps', 'multiple', 'name', 'native', 'onBlur', 'onChange', 'onFocus', 'readOnly', 'renderValue', 'selectRef', 'value']);
 
 
       if (native) {
@@ -53215,10 +52588,9 @@ var SelectInput = function (_React$Component) {
               onChange: onChange,
               onFocus: onFocus,
               value: value,
-              readOnly: readOnly
-            }, other, {
+              readOnly: readOnly,
               ref: selectRef
-            }),
+            }, other),
             children
           ),
           _react2.default.createElement(_ArrowDropDown2.default, { className: classes.icon })
@@ -53301,9 +52673,9 @@ var SelectInput = function (_React$Component) {
         _react2.default.createElement('input', (0, _extends3.default)({
           value: Array.isArray(value) ? value.join(',') : value,
           name: name,
-          readOnly: readOnly
+          readOnly: readOnly,
+          ref: this.handleSelectRef
         }, other, {
-          ref: this.handleSelectRef,
           type: 'hidden'
         })),
         _react2.default.createElement(_ArrowDropDown2.default, { className: classes.icon }),
@@ -53313,7 +52685,7 @@ var SelectInput = function (_React$Component) {
             id: 'menu-' + (name || ''),
             anchorEl: this.state.anchorEl,
             open: this.state.open,
-            onRequestClose: this.handleRequestClose
+            onClose: this.handleClose
           }, MenuProps, {
             MenuListProps: (0, _extends3.default)({}, MenuProps.MenuListProps, {
               role: 'listbox'
@@ -53332,7 +52704,87 @@ var SelectInput = function (_React$Component) {
   return SelectInput;
 }(_react2.default.Component);
 
+SelectInput.propTypes = 'development' !== "production" ? {
+  /**
+   * If true, the width of the popover will automatically be set according to the items inside the
+   * menu, otherwise it will be at least the width of the select input.
+   */
+  autoWidth: _propTypes2.default.bool,
+  /**
+   * The option elements to populate the select with.
+   * Can be some `MenuItem` when `native` is false and `option` when `native` is true.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * The CSS class name of the select element.
+   */
+  className: _propTypes2.default.string,
+  /**
+   * If `true`, the select will be disabled.
+   */
+  disabled: _propTypes2.default.bool,
+  /**
+   * If `true`, the selected item is displayed even if its value is empty.
+   * You can only use it when the `native` property is `false` (default).
+   */
+  displayEmpty: _propTypes2.default.bool,
+  /**
+   * Properties applied to the `Menu` element.
+   */
+  MenuProps: _propTypes2.default.object,
+  /**
+   * If true, `value` must be an array and the menu will support multiple selections.
+   * You can only use it when the `native` property is `false` (default).
+   */
+  multiple: _propTypes2.default.bool,
+  /**
+   * Name attribute of the `select` or hidden `input` element.
+   */
+  name: _propTypes2.default.string,
+  /**
+   * If `true`, the component will be using a native `select` element.
+   */
+  native: _propTypes2.default.bool,
+  /**
+   * @ignore
+   */
+  onBlur: _propTypes2.default.func,
+  /**
+   * Callback function fired when a menu item is selected.
+   *
+   * @param {object} event The event source of the callback
+   * @param {object} child The react element that was selected
+   */
+  onChange: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onFocus: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  readOnly: _propTypes2.default.bool,
+  /**
+   * Render the selected value.
+   * You can only use it when the `native` property is `false` (default).
+   */
+  renderValue: _propTypes2.default.func,
+  /**
+   * Use that property to pass a ref callback to the native select element.
+   */
+  selectRef: _propTypes2.default.func,
+  /**
+   * The value of the component, required for a controlled component.
+   */
+  value: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number, _propTypes2.default.arrayOf(_propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number]))])
+} : {};
+
 SelectInput.muiName = 'SelectInput';
+
 exports.default = SelectInput;
   })();
 });
@@ -53369,10 +52821,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.styles = undefined;
 
-var _extends2 = require('babel-runtime/helpers/extends');
-
-var _extends3 = _interopRequireDefault(_extends2);
-
 var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
@@ -53401,9 +52849,17 @@ var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
 
 var _defineProperty3 = _interopRequireDefault(_defineProperty2);
 
+var _extends8 = require('babel-runtime/helpers/extends');
+
+var _extends9 = _interopRequireDefault(_extends8);
+
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -53435,16 +52891,6 @@ var _SnackbarContent2 = _interopRequireDefault(_SnackbarContent);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Element = require('react').babelPluginFlowReactPropTypes_proptype_Element || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_ComponentType = require('prop-types').func;
-
-var babelPluginFlowReactPropTypes_proptype_TransitionCallback = require('../internal/transition').babelPluginFlowReactPropTypes_proptype_TransitionCallback || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_TransitionDuration = require('../internal/transition').babelPluginFlowReactPropTypes_proptype_TransitionDuration || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   var gutter = theme.spacing.unit * 3;
   var top = { top: 0 };
@@ -53471,182 +52917,21 @@ var styles = exports.styles = function styles(theme) {
       justifyContent: 'center',
       alignItems: 'center'
     },
-    anchorTopCenter: (0, _defineProperty3.default)({
-      extend: [top]
-    }, theme.breakpoints.up('md'), {
-      extend: [center]
-    }),
-    anchorBottomCenter: (0, _defineProperty3.default)({
-      extend: [bottom]
-    }, theme.breakpoints.up('md'), {
-      extend: [center]
-    }),
-    anchorTopRight: (0, _defineProperty3.default)({
-      extend: [top, right]
-    }, theme.breakpoints.up('md'), {
-      left: 'auto',
-      extend: [topSpace, rightSpace]
-    }),
-    anchorBottomRight: (0, _defineProperty3.default)({
-      extend: [bottom, right]
-    }, theme.breakpoints.up('md'), {
-      left: 'auto',
-      extend: [bottomSpace, rightSpace]
-    }),
-    anchorTopLeft: (0, _defineProperty3.default)({
-      extend: [top, left]
-    }, theme.breakpoints.up('md'), {
-      right: 'auto',
-      extend: [topSpace, leftSpace]
-    }),
-    anchorBottomLeft: (0, _defineProperty3.default)({
-      extend: [bottom, left]
-    }, theme.breakpoints.up('md'), {
-      right: 'auto',
-      extend: [bottomSpace, leftSpace]
-    })
+    anchorTopCenter: (0, _extends9.default)({}, top, (0, _defineProperty3.default)({}, theme.breakpoints.up('md'), (0, _extends9.default)({}, center))),
+    anchorBottomCenter: (0, _extends9.default)({}, bottom, (0, _defineProperty3.default)({}, theme.breakpoints.up('md'), (0, _extends9.default)({}, center))),
+    anchorTopRight: (0, _extends9.default)({}, top, right, (0, _defineProperty3.default)({}, theme.breakpoints.up('md'), (0, _extends9.default)({
+      left: 'auto'
+    }, topSpace, rightSpace))),
+    anchorBottomRight: (0, _extends9.default)({}, bottom, right, (0, _defineProperty3.default)({}, theme.breakpoints.up('md'), (0, _extends9.default)({
+      left: 'auto'
+    }, bottomSpace, rightSpace))),
+    anchorTopLeft: (0, _extends9.default)({}, top, left, (0, _defineProperty3.default)({}, theme.breakpoints.up('md'), (0, _extends9.default)({
+      right: 'auto'
+    }, topSpace, leftSpace))),
+    anchorBottomLeft: (0, _extends9.default)({}, bottom, left, (0, _defineProperty3.default)({}, theme.breakpoints.up('md'), (0, _extends9.default)({
+      right: 'auto'
+    }, bottomSpace, leftSpace)))
   };
-};
-
-var babelPluginFlowReactPropTypes_proptype_Origin = {
-  horizontal: require('prop-types').oneOfType([require('prop-types').oneOf(['left']), require('prop-types').oneOf(['center']), require('prop-types').oneOf(['right']), require('prop-types').number]),
-  vertical: require('prop-types').oneOfType([require('prop-types').oneOf(['top']), require('prop-types').oneOf(['center']), require('prop-types').oneOf(['bottom']), require('prop-types').number])
-};
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The action to display.
-   */
-  action: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * The anchor of the `Snackbar`.
-   */
-  anchorOrigin: require('prop-types').shape({
-    horizontal: require('prop-types').oneOfType([require('prop-types').oneOf(['left']), require('prop-types').oneOf(['center']), require('prop-types').oneOf(['right']), require('prop-types').number]),
-    vertical: require('prop-types').oneOfType([require('prop-types').oneOf(['top']), require('prop-types').oneOf(['center']), require('prop-types').oneOf(['bottom']), require('prop-types').number])
-  }),
-
-  /**
-   * The number of milliseconds to wait before automatically dismissing.
-   * This behavior is disabled by default with the `null` value.
-   */
-  autoHideDuration: require('prop-types').number,
-
-  /**
-   * The number of milliseconds to wait before dismissing after user interaction.
-   * If `autoHideDuration` property isn't specified, it does nothing.
-   * If `autoHideDuration` property is specified but `resumeHideDuration` isn't,
-   * we default to `autoHideDuration / 2` ms.
-   */
-  resumeHideDuration: require('prop-types').number,
-
-  /**
-   * If you wish the take control over the children of the component you can use that property.
-   * When using it, no `SnackbarContent` component will be rendered.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Element === 'function' ? babelPluginFlowReactPropTypes_proptype_Element : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Element),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * When displaying multiple consecutive Snackbars from a parent rendering a single
-   * <Snackbar/>, add the key property to ensure independent treatment of each message.
-   * e.g. <Snackbar key={message} />, otherwise, the message may update-in-place and
-   * features such as autoHideDuration may be canceled.
-   */
-  key: function key(props, propName, componentName) {
-    if (!Object.prototype.hasOwnProperty.call(props, propName)) {
-      throw new Error('Prop `' + propName + '` has type \'any\', but was not provided to `' + componentName + '`. Pass undefined or any other value.');
-    }
-  },
-
-  /**
-   * The message to display.
-   */
-  message: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Callback fired before the transition is entering.
-   */
-  onEnter: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the transition is entering.
-   */
-  onEntering: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the transition has entered.
-   */
-  onEntered: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired before the transition is exiting.
-   */
-  onExit: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the transition is exiting.
-   */
-  onExiting: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Callback fired when the transition has exited.
-   */
-  onExited: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * @ignore
-   */
-  onMouseEnter: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  onMouseLeave: require('prop-types').func,
-
-  /**
-   * Callback fired when the component requests to be closed.
-   *
-   * Typically `onRequestClose` is used to set state in the parent component,
-   * which is used to control the `Snackbar` `open` prop.
-   *
-   * The `reason` parameter can optionally be used to control the response to `onRequestClose`,
-   * for example ignoring `clickaway`.
-   *
-   * @param {object} event The event source of the callback
-   * @param {string} reason Can be:`"timeout"` (`autoHideDuration` expired) or: `"clickaway"`
-   */
-  onRequestClose: require('prop-types').func,
-
-  /**
-   * If true, `Snackbar` is open.
-   */
-  open: require('prop-types').bool.isRequired,
-
-  /**
-   * Properties applied to the `SnackbarContent` element.
-   */
-  SnackbarContentProps: require('prop-types').object,
-
-  /**
-   * Transition component.
-   */
-  transition: typeof babelPluginFlowReactPropTypes_proptype_ComponentType === 'function' ? babelPluginFlowReactPropTypes_proptype_ComponentType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ComponentType),
-
-  /**
-   * The duration for the transition, in milliseconds.
-   * You may specify a single timeout for all transitions, or individually with an object.
-   */
-  transitionDuration: typeof babelPluginFlowReactPropTypes_proptype_TransitionDuration === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionDuration : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionDuration)
 };
 
 var Snackbar = function (_React$Component) {
@@ -53677,8 +52962,8 @@ var Snackbar = function (_React$Component) {
       }
       _this.handleResume();
     }, _this.handleClickAway = function (event) {
-      if (_this.props.onRequestClose) {
-        _this.props.onRequestClose(event, 'clickaway');
+      if (_this.props.onClose) {
+        _this.props.onClose(event, 'clickaway');
       }
     }, _this.handlePause = function () {
       clearTimeout(_this.timerAutoHide);
@@ -53690,7 +52975,7 @@ var Snackbar = function (_React$Component) {
         }
         _this.setAutoHideTimer((_this.props.autoHideDuration || 0) * 0.5);
       }
-    }, _this.handleTransitionExited = function () {
+    }, _this.handleExited = function () {
       _this.setState({ exited: true });
     }, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
   }
@@ -53712,7 +52997,7 @@ var Snackbar = function (_React$Component) {
   }, {
     key: 'componentWillReceiveProps',
     value: function componentWillReceiveProps(nextProps) {
-      if (nextProps.open && this.state.exited) {
+      if (nextProps.open) {
         this.setState({ exited: false });
       }
     }
@@ -53742,17 +53027,17 @@ var Snackbar = function (_React$Component) {
 
       var autoHideDuration = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 
-      if (!this.props.onRequestClose || this.props.autoHideDuration == null) {
+      if (!this.props.onClose || this.props.autoHideDuration == null) {
         return;
       }
 
       clearTimeout(this.timerAutoHide);
       this.timerAutoHide = setTimeout(function () {
-        if (!_this2.props.onRequestClose || _this2.props.autoHideDuration == null) {
+        if (!_this2.props.onClose || _this2.props.autoHideDuration == null) {
           return;
         }
 
-        _this2.props.onRequestClose(null, 'timeout');
+        _this2.props.onClose(null, 'timeout');
       }, autoHideDuration || this.props.autoHideDuration || 0);
     }
 
@@ -53772,57 +53057,36 @@ var Snackbar = function (_React$Component) {
           vertical = _props$anchorOrigin.vertical,
           horizontal = _props$anchorOrigin.horizontal,
           autoHideDuration = _props.autoHideDuration,
-          resumeHideDuration = _props.resumeHideDuration,
           children = _props.children,
           classes = _props.classes,
           className = _props.className,
-          transitionDuration = _props.transitionDuration,
           message = _props.message,
+          onClose = _props.onClose,
           onEnter = _props.onEnter,
-          onEntering = _props.onEntering,
           onEntered = _props.onEntered,
+          onEntering = _props.onEntering,
           onExit = _props.onExit,
-          onExiting = _props.onExiting,
           onExited = _props.onExited,
+          onExiting = _props.onExiting,
           onMouseEnter = _props.onMouseEnter,
           onMouseLeave = _props.onMouseLeave,
-          onRequestClose = _props.onRequestClose,
           open = _props.open,
+          resumeHideDuration = _props.resumeHideDuration,
           SnackbarContentProps = _props.SnackbarContentProps,
           TransitionProp = _props.transition,
-          other = (0, _objectWithoutProperties3.default)(_props, ['action', 'anchorOrigin', 'autoHideDuration', 'resumeHideDuration', 'children', 'classes', 'className', 'transitionDuration', 'message', 'onEnter', 'onEntering', 'onEntered', 'onExit', 'onExiting', 'onExited', 'onMouseEnter', 'onMouseLeave', 'onRequestClose', 'open', 'SnackbarContentProps', 'transition']);
+          transitionDuration = _props.transitionDuration,
+          other = (0, _objectWithoutProperties3.default)(_props, ['action', 'anchorOrigin', 'autoHideDuration', 'children', 'classes', 'className', 'message', 'onClose', 'onEnter', 'onEntered', 'onEntering', 'onExit', 'onExited', 'onExiting', 'onMouseEnter', 'onMouseLeave', 'open', 'resumeHideDuration', 'SnackbarContentProps', 'transition', 'transitionDuration']);
 
 
       if (!open && this.state.exited) {
         return null;
       }
 
-      var transitionProps = {
-        in: open,
-        appear: true,
-        timeout: transitionDuration,
-        onEnter: onEnter,
-        onEntering: onEntering,
-        onEntered: onEntered,
-        onExit: onExit,
-        onExiting: onExiting,
-        onExited: (0, _helpers.createChainedFunction)(this.handleTransitionExited, onExited)
-      };
-      var transitionContent = children || _react2.default.createElement(_SnackbarContent2.default, (0, _extends3.default)({ message: message, action: action }, SnackbarContentProps));
+      var transitionProps = {};
 
-      var transition = void 0;
-      if (TransitionProp) {
-        transition = _react2.default.createElement(
-          TransitionProp,
-          transitionProps,
-          transitionContent
-        );
-      } else {
-        transition = _react2.default.createElement(
-          _Slide2.default,
-          (0, _extends3.default)({ direction: vertical === 'top' ? 'down' : 'up' }, transitionProps),
-          transitionContent
-        );
+      // The provided transition might not support the direction property.
+      if (TransitionProp === _Slide2.default) {
+        transitionProps.direction = vertical === 'top' ? 'down' : 'up';
       }
 
       return _react2.default.createElement(
@@ -53833,12 +53097,26 @@ var Snackbar = function (_React$Component) {
           { onClickAway: this.handleClickAway },
           _react2.default.createElement(
             'div',
-            (0, _extends3.default)({
+            (0, _extends9.default)({
               className: (0, _classnames2.default)(classes.root, classes['anchor' + (0, _helpers.capitalizeFirstLetter)(vertical) + (0, _helpers.capitalizeFirstLetter)(horizontal)], className),
               onMouseEnter: this.handleMouseEnter,
               onMouseLeave: this.handleMouseLeave
             }, other),
-            transition
+            _react2.default.createElement(
+              TransitionProp,
+              (0, _extends9.default)({
+                appear: true,
+                'in': open,
+                onEnter: onEnter,
+                onEntered: onEntered,
+                onEntering: onEntering,
+                onExit: onExit,
+                onExited: (0, _helpers.createChainedFunction)(this.handleExited, onExited),
+                onExiting: onExiting,
+                timeout: transitionDuration
+              }, transitionProps),
+              children || _react2.default.createElement(_SnackbarContent2.default, (0, _extends9.default)({ message: message, action: action }, SnackbarContentProps))
+            )
           )
         )
       );
@@ -53847,13 +53125,130 @@ var Snackbar = function (_React$Component) {
   return Snackbar;
 }(_react2.default.Component);
 
+Snackbar.propTypes = 'development' !== "production" ? {
+  /**
+   * The action to display.
+   */
+  action: _propTypes2.default.node,
+  /**
+   * The anchor of the `Snackbar`.
+   */
+  anchorOrigin: _propTypes2.default.shape({
+    horizontal: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.oneOf(['left', 'center', 'right'])]),
+    vertical: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.oneOf(['top', 'center', 'bottom'])])
+  }),
+  /**
+   * The number of milliseconds to wait before automatically calling the
+   * `onClose` function. `onClose` should then set the state of the `open`
+   * prop to hide the Snackbar. This behavior is disabled by default with
+   * the `null` value.
+   */
+  autoHideDuration: _propTypes2.default.number,
+  /**
+   * If you wish the take control over the children of the component you can use this property.
+   * When used, you replace the `SnackbarContent` component with the children.
+   */
+  children: _propTypes2.default.element,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * When displaying multiple consecutive Snackbars from a parent rendering a single
+   * <Snackbar/>, add the key property to ensure independent treatment of each message.
+   * e.g. <Snackbar key={message} />, otherwise, the message may update-in-place and
+   * features such as autoHideDuration may be canceled.
+   */
+  key: _propTypes2.default.any,
+  /**
+   * The message to display.
+   */
+  message: _propTypes2.default.node,
+  /**
+   * Callback fired when the component requests to be closed.
+   * Typically `onClose` is used to set state in the parent component,
+   * which is used to control the `Snackbar` `open` prop.
+   * The `reason` parameter can optionally be used to control the response to `onClose`,
+   * for example ignoring `clickaway`.
+   *
+   * @param {object} event The event source of the callback
+   * @param {string} reason Can be:`"timeout"` (`autoHideDuration` expired) or: `"clickaway"`
+   */
+  onClose: _propTypes2.default.func,
+  /**
+   * Callback fired before the transition is entering.
+   */
+  onEnter: _propTypes2.default.func,
+  /**
+   * Callback fired when the transition has entered.
+   */
+  onEntered: _propTypes2.default.func,
+  /**
+   * Callback fired when the transition is entering.
+   */
+  onEntering: _propTypes2.default.func,
+  /**
+   * Callback fired before the transition is exiting.
+   */
+  onExit: _propTypes2.default.func,
+  /**
+   * Callback fired when the transition has exited.
+   */
+  onExited: _propTypes2.default.func,
+  /**
+   * Callback fired when the transition is exiting.
+   */
+  onExiting: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onMouseEnter: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onMouseLeave: _propTypes2.default.func,
+  /**
+   * If true, `Snackbar` is open.
+   */
+  open: _propTypes2.default.bool,
+  /**
+   * The number of milliseconds to wait before dismissing after user interaction.
+   * If `autoHideDuration` property isn't specified, it does nothing.
+   * If `autoHideDuration` property is specified but `resumeHideDuration` isn't,
+   * we default to `autoHideDuration / 2` ms.
+   */
+  resumeHideDuration: _propTypes2.default.number,
+  /**
+   * Properties applied to the `SnackbarContent` element.
+   */
+  SnackbarContentProps: _propTypes2.default.object,
+  /**
+   * Transition component.
+   */
+  transition: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * The duration for the transition, in milliseconds.
+   * You may specify a single timeout for all transitions, or individually with an object.
+   */
+  transitionDuration: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.shape({ enter: _propTypes2.default.number, exit: _propTypes2.default.number })])
+} : {};
+
 Snackbar.defaultProps = {
-  anchorOrigin: { vertical: 'bottom', horizontal: 'center' },
+  anchorOrigin: {
+    vertical: 'bottom',
+    horizontal: 'center'
+  },
+  transition: _Slide2.default,
   transitionDuration: {
     enter: _transitions.duration.enteringScreen,
     exit: _transitions.duration.leavingScreen
   }
 };
+
 exports.default = (0, _withStyles2.default)(styles, { flip: false, name: 'MuiSnackbar' })(Snackbar);
   })();
 });
@@ -53880,12 +53275,13 @@ var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
 
 var _defineProperty3 = _interopRequireDefault(_defineProperty2);
 
-var _ref;
-// @inheritedComponent Paper
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -53905,13 +53301,13 @@ var _Typography2 = _interopRequireDefault(_Typography);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
+// @inheritedComponent Paper
 
 var styles = exports.styles = function styles(theme) {
   var _root;
 
-  var type = theme.palette.type === 'light' ? 'dark' : 'light';
-  var backgroundColor = theme.palette.shades[type].background.default;
+  var reverseType = theme.palette.type === 'light' ? 'dark' : 'light';
+  var backgroundColor = theme.palette.shades[reverseType].background.default;
 
   return {
     root: (_root = {
@@ -53926,7 +53322,7 @@ var styles = exports.styles = function styles(theme) {
       minWidth: 288,
       maxWidth: 568,
       borderRadius: 2
-    }), (0, _defineProperty3.default)(_root, theme.breakpoints.down('md'), {
+    }), (0, _defineProperty3.default)(_root, theme.breakpoints.down('sm'), {
       flexGrow: 1
     }), _root),
     message: {
@@ -53941,29 +53337,6 @@ var styles = exports.styles = function styles(theme) {
     }
   };
 };
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The action to display.
-   */
-  action: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The message to display.
-   */
-  message: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired
-};
-
 
 function SnackbarContent(props) {
   var action = props.action,
@@ -53998,10 +53371,25 @@ function SnackbarContent(props) {
   );
 }
 
-SnackbarContent.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  action: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'message', typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired), _ref) : {};
+SnackbarContent.propTypes = 'development' !== "production" ? {
+  /**
+   * The action to display.
+   */
+  action: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The message to display.
+   */
+  message: _propTypes2.default.node
+} : {};
+
 exports.default = (0, _withStyles2.default)(styles, { name: 'MuiSnackbarContent' })(SnackbarContent);
   })();
 });
@@ -54047,23 +53435,25 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.styles = undefined;
 
-var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
-
-var _defineProperty3 = _interopRequireDefault(_defineProperty2);
-
 var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
+
+var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
+
+var _defineProperty3 = _interopRequireDefault(_defineProperty2);
 
 var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -54073,9 +53463,9 @@ var _withStyles = require('../styles/withStyles');
 
 var _withStyles2 = _interopRequireDefault(_withStyles);
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+var _helpers = require('../utils/helpers');
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var styles = exports.styles = function styles(theme) {
   return {
@@ -54089,58 +53479,48 @@ var styles = exports.styles = function styles(theme) {
       transition: theme.transitions.create('fill', {
         duration: theme.transitions.duration.shorter
       })
+    },
+    colorAccent: {
+      color: theme.palette.secondary.A200
+    },
+    colorAction: {
+      color: theme.palette.action.active
+    },
+    colorContrast: {
+      color: theme.palette.getContrastText(theme.palette.primary[500])
+    },
+    colorDisabled: {
+      color: theme.palette.action.disabled
+    },
+    colorError: {
+      color: theme.palette.error[500]
+    },
+    colorPrimary: {
+      color: theme.palette.primary[500]
     }
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * Elements passed into the SVG Icon.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired,
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * Provides a human-readable title for the element that contains it.
-   * https://www.w3.org/TR/SVG-access/#Equivalent
-   */
-  titleAccess: require('prop-types').string,
-
-  /**
-   * Allows you to redefine what the coordinates without units mean inside an svg element.
-   * For example, if the SVG element is 500 (width) by 200 (height),
-   * and you pass viewBox="0 0 50 20",
-   * this means that the coordinates inside the svg will go from the top left corner (0,0)
-   * to bottom right (50,20) and each unit will be worth 10px.
-   */
-  viewBox: require('prop-types').string
-};
-
-
 function SvgIcon(props) {
   var children = props.children,
       classes = props.classes,
-      className = props.className,
+      classNameProp = props.className,
+      color = props.color,
+      nativeColor = props.nativeColor,
       titleAccess = props.titleAccess,
       viewBox = props.viewBox,
-      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'className', 'titleAccess', 'viewBox']);
+      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'className', 'color', 'nativeColor', 'titleAccess', 'viewBox']);
 
+
+  var className = (0, _classnames2.default)(classes.root, (0, _defineProperty3.default)({}, classes['color' + (0, _helpers.capitalizeFirstLetter)(color)], color !== 'inherit'), classNameProp);
 
   return _react2.default.createElement(
     'svg',
     (0, _extends3.default)({
-      className: (0, _classnames2.default)(classes.root, className),
+      className: className,
       focusable: 'false',
       viewBox: viewBox,
+      color: nativeColor,
       'aria-hidden': titleAccess ? 'false' : 'true'
     }, other),
     titleAccess ? _react2.default.createElement(
@@ -54152,11 +53532,45 @@ function SvgIcon(props) {
   );
 }
 
-SvgIcon.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'titleAccess', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'viewBox', require('prop-types').string), _ref) : {};
+SvgIcon.propTypes = 'development' !== "production" ? {
+  /**
+   * Node passed into the SVG element.
+   */
+  children: _propTypes2.default.node.isRequired,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The color of the component. It's using the theme palette when that makes sense.
+   * You can use the `nativeColor` property to apply a color attribute to the SVG element.
+   */
+  color: _propTypes2.default.oneOf(['inherit', 'accent', 'action', 'contrast', 'disabled', 'error', 'primary']),
+  /**
+   * Applies a color attribute to the SVG element.
+   */
+  nativeColor: _propTypes2.default.string,
+  /**
+   * Provides a human-readable title for the element that contains it.
+   * https://www.w3.org/TR/SVG-access/#Equivalent
+   */
+  titleAccess: _propTypes2.default.string,
+  /**
+   * Allows you to redefine what the coordinates without units mean inside an SVG element.
+   * For example, if the SVG element is 500 (width) by 200 (height),
+   * and you pass viewBox="0 0 50 20",
+   * this means that the coordinates inside the SVG will go from the top left corner (0,0)
+   * to bottom right (50,20) and each unit will be worth 10px.
+   */
+  viewBox: _propTypes2.default.string
+} : {};
+
 SvgIcon.defaultProps = {
+  color: 'inherit',
   viewBox: '0 0 24 24'
 };
 
@@ -54198,10 +53612,6 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.styles = undefined;
 
-var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
-
-var _defineProperty3 = _interopRequireDefault(_defineProperty2);
-
 var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
@@ -54210,11 +53620,13 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref; //  weak
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -54230,15 +53642,15 @@ var _SwitchBase2 = _interopRequireDefault(_SwitchBase);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: {
       display: 'inline-flex',
       width: 62,
       position: 'relative',
-      flexShrink: 0
+      flexShrink: 0,
+      // For correct alignment with the text.
+      verticalAlign: 'middle'
     },
     bar: {
       borderRadius: 7,
@@ -54289,97 +53701,17 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var SwitchBase = (0, _SwitchBase2.default)();
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * If `true`, the component is checked.
-   */
-  checked: require('prop-types').oneOfType([require('prop-types').bool, require('prop-types').string]),
-
-  /**
-   * The icon to display when the component is checked.
-   * If a string is provided, it will be used as a font ligature.
-   */
-  checkedIcon: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * @ignore
-   */
-  defaultChecked: require('prop-types').bool,
-
-  /**
-   * If `true`, the switch will be disabled.
-   */
-  disabled: require('prop-types').bool,
-
-  /**
-   * If `true`, the ripple effect will be disabled.
-   */
-  disableRipple: require('prop-types').bool,
-
-  /**
-   * The icon to display when the component is unchecked.
-   * If a string is provided, it will be used as a font ligature.
-   */
-  icon: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Properties applied to the `input` element.
-   */
-  inputProps: require('prop-types').object,
-
-  /**
-   * Use that property to pass a ref callback to the native input component.
-   */
-  inputRef: require('prop-types').func,
-
-  /*
-   * @ignore
-   */
-  name: require('prop-types').string,
-
-  /**
-   * Callback fired when the state is changed.
-   *
-   * @param {object} event The event source of the callback
-   * @param {boolean} checked The `checked` value of the switch
-   */
-  onChange: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  tabIndex: require('prop-types').oneOfType([require('prop-types').number, require('prop-types').string]),
-
-  /**
-   * The value of the component.
-   */
-  value: require('prop-types').string
-};
-
-
 function Switch(props) {
   var classes = props.classes,
       className = props.className,
       other = (0, _objectWithoutProperties3.default)(props, ['classes', 'className']);
 
-  var icon = _react2.default.createElement('div', { className: classes.icon });
+  var icon = _react2.default.createElement('span', { className: classes.icon });
 
   return _react2.default.createElement(
-    'div',
+    'span',
     { className: (0, _classnames2.default)(classes.root, className) },
-    _react2.default.createElement(SwitchBase, (0, _extends3.default)({
+    _react2.default.createElement(_SwitchBase2.default, (0, _extends3.default)({
       icon: icon,
       classes: {
         default: classes.default,
@@ -54388,15 +53720,78 @@ function Switch(props) {
       },
       checkedIcon: icon
     }, other)),
-    _react2.default.createElement('div', { className: classes.bar })
+    _react2.default.createElement('span', { className: classes.bar })
   );
 }
 
-Switch.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  checked: require('prop-types').oneOfType([require('prop-types').bool, require('prop-types').string]),
-  checkedIcon: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'defaultChecked', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'disabled', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'disableRipple', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'icon', typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)), (0, _defineProperty3.default)(_ref, 'inputProps', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'inputRef', require('prop-types').func), (0, _defineProperty3.default)(_ref, 'name', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'onChange', require('prop-types').func), (0, _defineProperty3.default)(_ref, 'tabIndex', require('prop-types').oneOfType([require('prop-types').number, require('prop-types').string])), (0, _defineProperty3.default)(_ref, 'value', require('prop-types').string), _ref) : {};
+Switch.propTypes = 'development' !== "production" ? {
+  /**
+   * If `true`, the component is checked.
+   */
+  checked: _propTypes2.default.oneOfType([_propTypes2.default.bool, _propTypes2.default.string]),
+  /**
+   * The icon to display when the component is checked.
+   * If a string is provided, it will be used as a font ligature.
+   */
+  checkedIcon: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * @ignore
+   */
+  defaultChecked: _propTypes2.default.bool,
+  /**
+   * If `true`, the switch will be disabled.
+   */
+  disabled: _propTypes2.default.bool,
+  /**
+   * If `true`, the ripple effect will be disabled.
+   */
+  disableRipple: _propTypes2.default.bool,
+  /**
+   * The icon to display when the component is unchecked.
+   * If a string is provided, it will be used as a font ligature.
+   */
+  icon: _propTypes2.default.node,
+  /**
+   * Properties applied to the `input` element.
+   */
+  inputProps: _propTypes2.default.object,
+  /**
+   * Use that property to pass a ref callback to the native input component.
+   */
+  inputRef: _propTypes2.default.func,
+  /**
+   * The input component property `type`.
+   */
+  inputType: _propTypes2.default.string,
+  /*
+   * @ignore
+   */
+  name: _propTypes2.default.string,
+  /**
+   * Callback fired when the state is changed.
+   *
+   * @param {object} event The event source of the callback
+   * @param {boolean} checked The `checked` value of the switch
+   */
+  onChange: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  tabIndex: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.string]),
+  /**
+   * The value of the component.
+   */
+  value: _propTypes2.default.string
+} : {};
+
 exports.default = (0, _withStyles2.default)(styles, { name: 'MuiSwitch' })(Switch);
   })();
 });
@@ -54479,10 +53874,6 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: {
@@ -54493,29 +53884,6 @@ var styles = exports.styles = function styles(theme) {
       overflow: 'hidden'
     }
   };
-};
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the table, normally `TableHeader` and `TableBody`.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType)
 };
 
 var Table = function (_React$Component) {
@@ -54544,11 +53912,10 @@ var Table = function (_React$Component) {
           ComponentProp = _props.component,
           other = (0, _objectWithoutProperties3.default)(_props, ['classes', 'className', 'children', 'component']);
 
-      var className = (0, _classnames2.default)(classes.root, classNameProp);
 
       return _react2.default.createElement(
         ComponentProp,
-        (0, _extends3.default)({ className: className }, other),
+        (0, _extends3.default)({ className: (0, _classnames2.default)(classes.root, classNameProp) }, other),
         children
       );
     }
@@ -54556,10 +53923,29 @@ var Table = function (_React$Component) {
   return Table;
 }(_react2.default.Component);
 
+Table.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the table, normally `TableHeader` and `TableBody`.
+   */
+  children: _propTypes2.default.node.isRequired,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func])
+} : {};
+
 Table.defaultProps = {
   component: 'table'
 };
-
 
 Table.childContextTypes = {
   table: _propTypes2.default.object
@@ -54625,10 +54011,6 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: {
@@ -54636,29 +54018,6 @@ var styles = exports.styles = function styles(theme) {
       color: theme.palette.text.primary
     }
   };
-};
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component, normally `TableRow`.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType)
 };
 
 var TableBody = function (_React$Component) {
@@ -54683,11 +54042,11 @@ var TableBody = function (_React$Component) {
     key: 'render',
     value: function render() {
       var _props = this.props,
+          children = _props.children,
           classes = _props.classes,
           classNameProp = _props.className,
-          children = _props.children,
           ComponentProp = _props.component,
-          other = (0, _objectWithoutProperties3.default)(_props, ['classes', 'className', 'children', 'component']);
+          other = (0, _objectWithoutProperties3.default)(_props, ['children', 'classes', 'className', 'component']);
 
       var className = (0, _classnames2.default)(classes.root, classNameProp);
 
@@ -54701,10 +54060,29 @@ var TableBody = function (_React$Component) {
   return TableBody;
 }(_react2.default.Component);
 
+TableBody.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component, normally `TableRow`.
+   */
+  children: _propTypes2.default.node.isRequired,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func])
+} : {};
+
 TableBody.defaultProps = {
   component: 'tbody'
 };
-
 
 TableBody.childContextTypes = {
   table: _propTypes2.default.object
@@ -54736,8 +54114,6 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
@@ -54756,54 +54132,16 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 
 var _helpers = require('../utils/helpers');
 
+var _colorManipulator = require('../styles/colorManipulator');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Context = {
-  table: require('prop-types').object.isRequired
-};
-
-var babelPluginFlowReactPropTypes_proptype_Padding = require('prop-types').oneOf(['default', 'checkbox', 'dense', 'none']);
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The table cell contents.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType),
-
-  /**
-   * If `true`, content will align to the right.
-   */
-  numeric: require('prop-types').bool,
-
-  /**
-   * Sets the padding applied to the cell.
-   */
-  padding: require('prop-types').oneOf(['default', 'checkbox', 'dense', 'none'])
-};
 var styles = exports.styles = function styles(theme) {
   return {
     root: {
-      borderBottom: '1px solid ' + theme.palette.text.lightDivider,
+      // Workaround for a rendering bug with spanned columns in Chrome 62.0.
+      // Removes the alpha (sets it to 1), and lightens or darkens the theme color.
+      borderBottom: '1px solid\n    ' + (theme.palette.type === 'light' ? (0, _colorManipulator.lighten)((0, _colorManipulator.fade)(theme.palette.text.lightDivider, 1), 0.925) : (0, _colorManipulator.darken)((0, _colorManipulator.fade)(theme.palette.text.lightDivider, 1), 0.685)),
       textAlign: 'left'
     },
     numeric: {
@@ -54835,13 +54173,14 @@ var styles = exports.styles = function styles(theme) {
 function TableCell(props, context) {
   var _classNames;
 
-  var classes = props.classes,
+  var children = props.children,
+      classes = props.classes,
       classNameProp = props.className,
-      children = props.children,
+      component = props.component,
+      sortDirection = props.sortDirection,
       numeric = props.numeric,
       padding = props.padding,
-      component = props.component,
-      other = (0, _objectWithoutProperties3.default)(props, ['classes', 'className', 'children', 'numeric', 'padding', 'component']);
+      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'className', 'component', 'sortDirection', 'numeric', 'padding']);
   var table = context.table;
 
   var Component = void 0;
@@ -54853,19 +54192,50 @@ function TableCell(props, context) {
 
   var className = (0, _classnames2.default)(classes.root, (_classNames = {}, (0, _defineProperty3.default)(_classNames, classes.numeric, numeric), (0, _defineProperty3.default)(_classNames, classes['padding' + (0, _helpers.capitalizeFirstLetter)(padding)], padding !== 'none' && padding !== 'default'), (0, _defineProperty3.default)(_classNames, classes.paddingDefault, padding !== 'none'), (0, _defineProperty3.default)(_classNames, classes.head, table && table.head), (0, _defineProperty3.default)(_classNames, classes.footer, table && table.footer), _classNames), classNameProp);
 
+  var ariaSort = null;
+  if (sortDirection) {
+    ariaSort = sortDirection === 'asc' ? 'ascending' : 'descending';
+  }
+
   return _react2.default.createElement(
     Component,
-    (0, _extends3.default)({ className: className }, other),
+    (0, _extends3.default)({ className: className, 'aria-sort': ariaSort }, other),
     children
   );
 }
 
-TableCell.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  padding: require('prop-types').oneOf(['default', 'checkbox', 'dense', 'none']).isRequired,
-  numeric: require('prop-types').bool.isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'component', typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType)), (0, _defineProperty3.default)(_ref, 'numeric', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'padding', require('prop-types').oneOf(['default', 'checkbox', 'dense', 'none'])), _ref) : {};
+TableCell.propTypes = 'development' !== "production" ? {
+  /**
+   * The table cell contents.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * If `true`, content will align to the right.
+   */
+  numeric: _propTypes2.default.bool,
+  /**
+   * Sets the padding applied to the cell.
+   */
+  padding: _propTypes2.default.oneOf(['default', 'checkbox', 'dense', 'none']),
+  /**
+   * Set aria-sort direction.
+   */
+  sortDirection: _propTypes2.default.oneOf(['asc', 'desc', false])
+} : {};
+
 TableCell.defaultProps = {
   numeric: false,
   padding: 'default'
@@ -54935,10 +54305,6 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: {
@@ -54946,29 +54312,6 @@ var styles = exports.styles = function styles(theme) {
       color: theme.palette.text.secondary
     }
   };
-};
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component, normally `TableRow`.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType)
 };
 
 var TableFooter = function (_React$Component) {
@@ -54993,11 +54336,11 @@ var TableFooter = function (_React$Component) {
     key: 'render',
     value: function render() {
       var _props = this.props,
+          children = _props.children,
           classes = _props.classes,
           classNameProp = _props.className,
-          children = _props.children,
           ComponentProp = _props.component,
-          other = (0, _objectWithoutProperties3.default)(_props, ['classes', 'className', 'children', 'component']);
+          other = (0, _objectWithoutProperties3.default)(_props, ['children', 'classes', 'className', 'component']);
 
 
       return _react2.default.createElement(
@@ -55010,10 +54353,29 @@ var TableFooter = function (_React$Component) {
   return TableFooter;
 }(_react2.default.Component);
 
+TableFooter.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component, normally `TableRow`.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func])
+} : {};
+
 TableFooter.defaultProps = {
   component: 'tfoot'
 };
-
 
 TableFooter.childContextTypes = {
   table: _propTypes2.default.object
@@ -55079,10 +54441,6 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: {
@@ -55091,29 +54449,6 @@ var styles = exports.styles = function styles(theme) {
       color: theme.palette.text.secondary
     }
   };
-};
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content of the component, normally `TableRow`.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType)
 };
 
 var TableHead = function (_React$Component) {
@@ -55138,17 +54473,16 @@ var TableHead = function (_React$Component) {
     key: 'render',
     value: function render() {
       var _props = this.props,
+          children = _props.children,
           classes = _props.classes,
           classNameProp = _props.className,
-          children = _props.children,
           ComponentProp = _props.component,
-          other = (0, _objectWithoutProperties3.default)(_props, ['classes', 'className', 'children', 'component']);
+          other = (0, _objectWithoutProperties3.default)(_props, ['children', 'classes', 'className', 'component']);
 
-      var className = (0, _classnames2.default)(classes.root, classNameProp);
 
       return _react2.default.createElement(
         ComponentProp,
-        (0, _extends3.default)({ className: className }, other),
+        (0, _extends3.default)({ className: (0, _classnames2.default)(classes.root, classNameProp) }, other),
         children
       );
     }
@@ -55156,10 +54490,29 @@ var TableHead = function (_React$Component) {
   return TableHead;
 }(_react2.default.Component);
 
+TableHead.propTypes = 'development' !== "production" ? {
+  /**
+   * The content of the component, normally `TableRow`.
+   */
+  children: _propTypes2.default.node.isRequired,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func])
+} : {};
+
 TableHead.defaultProps = {
   component: 'thead'
 };
-
 
 TableHead.childContextTypes = {
   table: _propTypes2.default.object
@@ -55211,6 +54564,18 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+var _KeyboardArrowLeft = require('../internal/svg-icons/KeyboardArrowLeft');
+
+var _KeyboardArrowLeft2 = _interopRequireDefault(_KeyboardArrowLeft);
+
+var _KeyboardArrowRight = require('../internal/svg-icons/KeyboardArrowRight');
+
+var _KeyboardArrowRight2 = _interopRequireDefault(_KeyboardArrowRight);
+
 var _withStyles = require('../styles/withStyles');
 
 var _withStyles2 = _interopRequireDefault(_withStyles);
@@ -55241,20 +54606,9 @@ var _Typography = require('../Typography');
 
 var _Typography2 = _interopRequireDefault(_Typography);
 
-var _KeyboardArrowLeft = require('../svg-icons/KeyboardArrowLeft');
-
-var _KeyboardArrowLeft2 = _interopRequireDefault(_KeyboardArrowLeft);
-
-var _KeyboardArrowRight = require('../svg-icons/KeyboardArrowRight');
-
-var _KeyboardArrowRight2 = _interopRequireDefault(_KeyboardArrowRight);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
 // @inheritedComponent TableCell
-
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
 
 var styles = exports.styles = function styles(theme) {
   return {
@@ -55276,7 +54630,8 @@ var styles = exports.styles = function styles(theme) {
       flexShrink: 0
     },
     input: {
-      fontSize: 'inherit'
+      fontSize: 'inherit',
+      flexShrink: 0
     },
     selectRoot: {
       marginRight: theme.spacing.unit * 4
@@ -55298,91 +54653,18 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_LabelDisplayedRowsArgs = {
-  from: require('prop-types').number.isRequired,
-  to: require('prop-types').number.isRequired,
-  count: require('prop-types').number.isRequired,
-  page: require('prop-types').number.isRequired
-};
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType),
-
-  /**
-   * @ignore
-   */
-  colSpan: require('prop-types').number,
-
-  /**
-   * The total number of rows.
-   */
-  count: require('prop-types').number.isRequired,
-
-  /**
-   * Useful to customize the displayed rows label.
-   */
-  labelDisplayedRows: require('prop-types').func,
-
-  /**
-   * Useful to customize the rows per page label. Invoked with a `{ from, to, count, page }`
-   * object.
-   */
-  labelRowsPerPage: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Callback fired when the page is changed. Invoked with two arguments: the event and the
-   * page to show.
-   */
-  onChangePage: require('prop-types').func.isRequired,
-
-  /**
-   * Callback fired when the number of rows per page is changed. Invoked with two arguments: the
-   * event.
-   */
-  onChangeRowsPerPage: require('prop-types').func.isRequired,
-
-  /**
-   * The zero-based index of the current page.
-   */
-  page: require('prop-types').number.isRequired,
-
-  /**
-   * The number of rows per page.
-   */
-  rowsPerPage: require('prop-types').number.isRequired,
-
-  /**
-   * Customizes the options of the rows per page select field.
-   */
-  rowsPerPageOptions: require('prop-types').arrayOf(require('prop-types').number),
-
-  /**
-   * @ignore
-   */
-  theme: require('prop-types').object
-};
-
-var _ref3 = _react2.default.createElement(_Input2.default, { disableUnderline: true });
-
-var _ref4 = _react2.default.createElement(_KeyboardArrowRight2.default, null);
-
-var _ref5 = _react2.default.createElement(_KeyboardArrowLeft2.default, null);
-
-var _ref6 = _react2.default.createElement(_KeyboardArrowLeft2.default, null);
-
-var _ref7 = _react2.default.createElement(_KeyboardArrowRight2.default, null);
-
 /**
- * A `TableRow` based component for placing inside `TableFooter` for pagination.
+ * A `TableCell` based component for placing inside `TableFooter` for pagination.
  */
+
+var _ref2 = _react2.default.createElement(_KeyboardArrowRight2.default, null);
+
+var _ref3 = _react2.default.createElement(_KeyboardArrowLeft2.default, null);
+
+var _ref4 = _react2.default.createElement(_KeyboardArrowLeft2.default, null);
+
+var _ref5 = _react2.default.createElement(_KeyboardArrowRight2.default, null);
+
 var TablePagination = function (_React$Component) {
   (0, _inherits3.default)(TablePagination, _React$Component);
 
@@ -55406,10 +54688,10 @@ var TablePagination = function (_React$Component) {
 
   (0, _createClass3.default)(TablePagination, [{
     key: 'componentWillReceiveProps',
-    value: function componentWillReceiveProps(_ref2) {
-      var count = _ref2.count,
-          onChangePage = _ref2.onChangePage,
-          rowsPerPage = _ref2.rowsPerPage;
+    value: function componentWillReceiveProps(nextProps) {
+      var count = nextProps.count,
+          onChangePage = nextProps.onChangePage,
+          rowsPerPage = nextProps.rowsPerPage;
 
       var newLastPage = Math.max(0, Math.ceil(count / rowsPerPage) - 1);
       if (this.props.page > newLastPage) {
@@ -55420,19 +54702,21 @@ var TablePagination = function (_React$Component) {
     key: 'render',
     value: function render() {
       var _props = this.props,
+          backIconButtonProps = _props.backIconButtonProps,
           classes = _props.classes,
-          Component = _props.component,
           colSpanProp = _props.colSpan,
+          Component = _props.component,
           count = _props.count,
           labelDisplayedRows = _props.labelDisplayedRows,
           labelRowsPerPage = _props.labelRowsPerPage,
+          nextIconButtonProps = _props.nextIconButtonProps,
           onChangePage = _props.onChangePage,
           onChangeRowsPerPage = _props.onChangeRowsPerPage,
           page = _props.page,
           rowsPerPage = _props.rowsPerPage,
           rowsPerPageOptions = _props.rowsPerPageOptions,
           theme = _props.theme,
-          other = (0, _objectWithoutProperties3.default)(_props, ['classes', 'component', 'colSpan', 'count', 'labelDisplayedRows', 'labelRowsPerPage', 'onChangePage', 'onChangeRowsPerPage', 'page', 'rowsPerPage', 'rowsPerPageOptions', 'theme']);
+          other = (0, _objectWithoutProperties3.default)(_props, ['backIconButtonProps', 'classes', 'colSpan', 'component', 'count', 'labelDisplayedRows', 'labelRowsPerPage', 'nextIconButtonProps', 'onChangePage', 'onChangeRowsPerPage', 'page', 'rowsPerPage', 'rowsPerPageOptions', 'theme']);
 
 
       var colSpan = void 0;
@@ -55441,6 +54725,8 @@ var TablePagination = function (_React$Component) {
         colSpan = colSpanProp || 1000; // col-span over everything
       }
 
+      var themeDirection = theme && theme.direction;
+
       return _react2.default.createElement(
         Component,
         (0, _extends3.default)({ className: classes.root, colSpan: colSpan }, other),
@@ -55448,19 +54734,21 @@ var TablePagination = function (_React$Component) {
           _Toolbar2.default,
           { className: classes.toolbar },
           _react2.default.createElement('div', { className: classes.spacer }),
-          _react2.default.createElement(
+          rowsPerPageOptions.length > 1 && _react2.default.createElement(
             _Typography2.default,
             { type: 'caption', className: classes.caption },
             labelRowsPerPage
           ),
-          _react2.default.createElement(
+          rowsPerPageOptions.length > 1 && _react2.default.createElement(
             _Select2.default,
             {
               classes: { root: classes.selectRoot, select: classes.select },
-              InputClasses: {
-                root: classes.input
-              },
-              input: _ref3,
+              input: _react2.default.createElement(_Input2.default, {
+                classes: {
+                  root: classes.input
+                },
+                disableUnderline: true
+              }),
               value: rowsPerPage,
               onChange: onChangeRowsPerPage
             },
@@ -55487,16 +54775,19 @@ var TablePagination = function (_React$Component) {
             { className: classes.actions },
             _react2.default.createElement(
               _IconButton2.default,
-              { onClick: this.handleBackButtonClick, disabled: page === 0 },
-              theme.direction === 'rtl' ? _ref4 : _ref5
+              (0, _extends3.default)({
+                onClick: this.handleBackButtonClick,
+                disabled: page === 0
+              }, backIconButtonProps),
+              themeDirection === 'rtl' ? _ref2 : _ref3
             ),
             _react2.default.createElement(
               _IconButton2.default,
-              {
+              (0, _extends3.default)({
                 onClick: this.handleNextButtonClick,
                 disabled: page >= Math.ceil(count / rowsPerPage) - 1
-              },
-              theme.direction === 'rtl' ? _ref6 : _ref7
+              }, nextIconButtonProps),
+              themeDirection === 'rtl' ? _ref4 : _ref5
             )
           )
         )
@@ -55506,18 +54797,86 @@ var TablePagination = function (_React$Component) {
   return TablePagination;
 }(_react2.default.Component);
 
+TablePagination.propTypes = 'development' !== "production" ? {
+  /**
+   * Properties applied to the back arrow `IconButton` component.
+   */
+  backIconButtonProps: _propTypes2.default.object,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  colSpan: _propTypes2.default.number,
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * The total number of rows.
+   */
+  count: _propTypes2.default.number.isRequired,
+  /**
+   * Useful to customize the displayed rows label.
+   */
+  labelDisplayedRows: _propTypes2.default.func,
+  /**
+   * Useful to customize the rows per page label. Invoked with a `{ from, to, count, page }`
+   * object.
+   */
+  labelRowsPerPage: _propTypes2.default.node,
+  /**
+   * Properties applied to the next arrow `IconButton` component.
+   */
+  nextIconButtonProps: _propTypes2.default.object,
+  /**
+   * Callback fired when the page is changed.
+   *
+   * @param {object} event The event source of the callback
+   * @param {number} page The page selected
+   */
+  onChangePage: _propTypes2.default.func.isRequired,
+  /**
+   * Callback fired when the number of rows per page is changed.
+   *
+   * @param {object} event The event source of the callback
+   */
+  onChangeRowsPerPage: _propTypes2.default.func,
+  /**
+   * The zero-based index of the current page.
+   */
+  page: _propTypes2.default.number.isRequired,
+  /**
+   * The number of rows per page.
+   */
+  rowsPerPage: _propTypes2.default.number.isRequired,
+  /**
+   * Customizes the options of the rows per page select field. If less than two options are
+   * available, no select field will be displayed.
+   */
+  rowsPerPageOptions: _propTypes2.default.array,
+  /**
+   * @ignore
+   */
+  theme: _propTypes2.default.object.isRequired
+} : {};
+
 TablePagination.defaultProps = {
   component: _TableCell2.default,
-  labelRowsPerPage: 'Rows per page:',
-  labelDisplayedRows: function labelDisplayedRows(_ref8) {
-    var from = _ref8.from,
-        to = _ref8.to,
-        count = _ref8.count;
+  labelDisplayedRows: function labelDisplayedRows(_ref6) {
+    var from = _ref6.from,
+        to = _ref6.to,
+        count = _ref6.count;
     return from + '-' + to + ' of ' + count;
   },
+  labelRowsPerPage: 'Rows per page:',
   rowsPerPageOptions: [5, 10, 25]
 };
-exports.default = (0, _withStyles2.default)(styles, { withTheme: true, name: 'MuiTablePagination' })(TablePagination);
+
+exports.default = (0, _withStyles2.default)(styles, { name: 'MuiTablePagination', withTheme: true })(TablePagination);
   })();
 });
 
@@ -55543,8 +54902,6 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
@@ -55562,10 +54919,6 @@ var _withStyles = require('../styles/withStyles');
 var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
 
 var styles = exports.styles = function styles(theme) {
   return {
@@ -55586,51 +54939,14 @@ var styles = exports.styles = function styles(theme) {
     },
     hover: {
       '&:hover': {
-        background: theme.palette.background.contentFrame
+        backgroundColor: theme.palette.background.contentFrame
       }
     },
     selected: {
-      background: theme.palette.background.appBar
+      backgroundColor: theme.palette.background.appBar
     }
   };
 };
-
-var babelPluginFlowReactPropTypes_proptype_Context = {
-  table: require('prop-types').object.isRequired
-};
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * Should be valid `<tr>` children such as `TableCell`.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType),
-
-  /**
-   * If `true`, the table row will shade on hover.
-   */
-  hover: require('prop-types').bool,
-
-  /**
-   * If `true`, the table row will have the selected shading.
-   */
-  selected: require('prop-types').bool
-};
-
 
 /**
  * Will automatically set dynamic row height
@@ -55639,13 +54955,13 @@ var babelPluginFlowReactPropTypes_proptype_Props = {
 function TableRow(props, context) {
   var _classNames;
 
-  var classes = props.classes,
+  var children = props.children,
+      classes = props.classes,
       classNameProp = props.className,
-      children = props.children,
       Component = props.component,
       hover = props.hover,
       selected = props.selected,
-      other = (0, _objectWithoutProperties3.default)(props, ['classes', 'className', 'children', 'component', 'hover', 'selected']);
+      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'className', 'component', 'hover', 'selected']);
   var table = context.table;
 
 
@@ -55658,17 +54974,38 @@ function TableRow(props, context) {
   );
 }
 
-TableRow.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType.isRequired ? babelPluginFlowReactPropTypes_proptype_ElementType.isRequired : babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType).isRequired,
-  hover: require('prop-types').bool.isRequired,
-  selected: require('prop-types').bool.isRequired,
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'component', typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType)), (0, _defineProperty3.default)(_ref, 'hover', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'selected', require('prop-types').bool), _ref) : {};
+TableRow.propTypes = 'development' !== "production" ? {
+  /**
+   * Should be valid `<tr>` children such as `TableCell`.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * If `true`, the table row will shade on hover.
+   */
+  hover: _propTypes2.default.bool,
+  /**
+   * If `true`, the table row will have the selected shading.
+   */
+  selected: _propTypes2.default.bool
+} : {};
+
 TableRow.defaultProps = {
+  component: 'tr',
   hover: false,
-  selected: false,
-  component: 'tr'
+  selected: false
 };
 
 TableRow.contextTypes = {
@@ -55701,16 +55038,21 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-// @inheritedComponent ButtonBase
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _classnames = require('classnames');
 
 var _classnames2 = _interopRequireDefault(_classnames);
+
+var _ArrowDownward = require('../internal/svg-icons/ArrowDownward');
+
+var _ArrowDownward2 = _interopRequireDefault(_ArrowDownward);
 
 var _withStyles = require('../styles/withStyles');
 
@@ -55720,13 +55062,9 @@ var _ButtonBase = require('../ButtonBase');
 
 var _ButtonBase2 = _interopRequireDefault(_ButtonBase);
 
-var _ArrowDownward = require('../svg-icons/ArrowDownward');
-
-var _ArrowDownward2 = _interopRequireDefault(_ArrowDownward);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
+// @inheritedComponent ButtonBase
 
 var styles = exports.styles = function styles(theme) {
   return {
@@ -55769,36 +55107,6 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Direction = require('prop-types').oneOf(['asc', 'desc']);
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * If `true`, the label will have the active styling (should be true for the sorted column).
-   */
-  active: require('prop-types').bool,
-
-  /**
-   * Label contents, the arrow will be appended automatically.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The current sort direction.
-   */
-  direction: require('prop-types').oneOf(['asc', 'desc'])
-};
-
-
 /**
  * A button based label for placing inside `TableCell` for column sorting.
  */
@@ -55822,11 +55130,29 @@ function TableSortLabel(props) {
   );
 }
 
-TableSortLabel.propTypes = 'development' !== "production" ? (_ref = {
-  active: require('prop-types').bool.isRequired,
-  classes: require('prop-types').object.isRequired,
-  direction: require('prop-types').oneOf(['asc', 'desc']).isRequired
-}, (0, _defineProperty3.default)(_ref, 'active', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'children', typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)), (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'direction', require('prop-types').oneOf(['asc', 'desc'])), _ref) : {};
+TableSortLabel.propTypes = 'development' !== "production" ? {
+  /**
+   * If `true`, the label will have the active styling (should be true for the sorted column).
+   */
+  active: _propTypes2.default.bool,
+  /**
+   * Label contents, the arrow will be appended automatically.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The current sort direction.
+   */
+  direction: _propTypes2.default.oneOf(['asc', 'desc'])
+} : {};
+
 TableSortLabel.defaultProps = {
   active: false,
   direction: 'desc'
@@ -55946,6 +55272,10 @@ var _warning = require('warning');
 
 var _warning2 = _interopRequireDefault(_warning);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _Input = require('../Input');
 
 var _Input2 = _interopRequireDefault(_Input);
@@ -55964,186 +55294,34 @@ var _Select2 = _interopRequireDefault(_Select);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// @inheritedComponent FormControl
-
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_ChildrenArray = require('react').babelPluginFlowReactPropTypes_proptype_ChildrenArray || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * This property helps users to fill forms faster, especially on mobile devices.
-   * The name can be confusion, it's more like an autofill.
-   * You can learn about it with that article
-   * https://developers.google.com/web/updates/2015/06/checkout-faster-with-autofill
-   */
-  autoComplete: require('prop-types').string,
-
-  /**
-   * If `true`, the input will be focused during the first mount.
-   */
-  autoFocus: require('prop-types').bool,
-
-  /**
-   * @ignore
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_ChildrenArray === 'function' ? babelPluginFlowReactPropTypes_proptype_ChildrenArray : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ChildrenArray),
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The default value of the `Input` element.
-   */
-  defaultValue: require('prop-types').string,
-
-  /**
-   * If `true`, the input will be disabled.
-   */
-  disabled: require('prop-types').bool,
-
-  /**
-   * If `true`, the label will be displayed in an error state.
-   */
-  error: require('prop-types').bool,
-
-  /**
-   * Properties applied to the `FormHelperText` element.
-   */
-  FormHelperTextProps: require('prop-types').object,
-
-  /**
-   * If `true`, the input will take up the full width of its container.
-   */
-  fullWidth: require('prop-types').bool,
-
-  /**
-   * The helper text content.
-   */
-  helperText: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * The CSS class name of the helper text element.
-   */
-  helperTextClassName: require('prop-types').string,
-
-  /**
-   * The id of the `input` element.
-   */
-  id: require('prop-types').string,
-
-  /**
-   * The CSS class name of the `input` element.
-   */
-  inputClassName: require('prop-types').string,
-
-  /**
-   * The CSS class name of the `Input` element.
-   */
-  InputClassName: require('prop-types').string,
-
-  /**
-   * Properties applied to the `InputLabel` element.
-   */
-  InputLabelProps: require('prop-types').object,
-
-  /**
-   * Properties applied to the `input` element.
-   */
-  inputProps: require('prop-types').object,
-
-  /**
-   * Properties applied to the `Input` element.
-   */
-  InputProps: require('prop-types').object,
-
-  /**
-   * Use that property to pass a ref callback to the native input component.
-   */
-  inputRef: require('prop-types').func,
-
-  /**
-   * The label content.
-   */
-  label: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * The CSS class name of the label element.
-   */
-  labelClassName: require('prop-types').string,
-
-  /**
-   * If `true`, a textarea element will be rendered instead of an input.
-   */
-  multiline: require('prop-types').bool,
-
-  /**
-   * Name attribute of the `input` element.
-   */
-  name: require('prop-types').string,
-
-  /**
-   * Callback fired when the value is changed.
-   *
-   * @param {object} event The event source of the callback
-   */
-  onChange: require('prop-types').func,
-
-  /**
-   * The short hint displayed in the input before the user enters a value.
-   */
-  placeholder: require('prop-types').string,
-
-  /**
-   * If `true`, the label is displayed as required.
-   */
-  required: require('prop-types').bool,
-
-  /**
-   * Use that property to pass a ref callback to the root component.
-   */
-  rootRef: require('prop-types').func,
-
-  /**
-   * Number of rows to display when multiline option is set to true.
-   */
-  rows: require('prop-types').oneOfType([require('prop-types').string, require('prop-types').number]),
-
-  /**
-   * Maximum number of rows to display when multiline option is set to true.
-   */
-  rowsMax: require('prop-types').oneOfType([require('prop-types').string, require('prop-types').number]),
-
-  /**
-   * Render a `Select` element while passing the `Input` element to `Select` as `input` parameter.
-   * If this option is set you must pass the options of the select as children.
-   */
-  select: require('prop-types').bool,
-
-  /**
-   * Properties applied to the `Select` element.
-   */
-  SelectProps: require('prop-types').object,
-
-  /**
-   * Type attribute of the `Input` element. It should be a valid HTML5 input type.
-   */
-  type: require('prop-types').string,
-
-  /**
-   * The value of the `Input` element, required for a controlled component.
-   */
-  value: require('prop-types').oneOfType([require('prop-types').string, require('prop-types').number]),
-
-  /**
-   * If `dense` or `normal`, will adjust vertical spacing of this and contained components.
-   */
-  margin: require('prop-types').oneOf(['none', 'dense', 'normal'])
-};
-
-
+/**
+ * The `TextField` is a convenience wrapper for the most common cases (80%).
+ * It cannot be all things to all people, otherwise the API would grow out of control.
+ *
+ * ## Advanced Configuration
+ *
+ * It's important to understand that the text field is a simple abstraction
+ * on top of the following components:
+ * - [FormControl](/api/form-control)
+ * - [InputLabel](/api/input-label)
+ * - [Input](/api/input)
+ * - [FormHelperText](/api/form-helper-text)
+ *
+ * If you wish to alter the properties applied to the native input, you can do as follow:
+ *
+ * ```jsx
+ * const inputProps = {
+ *   step: 300,
+ * };
+ *
+ * return <TextField id="time" type="time" inputProps={inputProps} />;
+ * ```
+ *
+ * For advanced cases, please look at the source of TextField by clicking on the
+ * "Edit this page" button above. Consider either:
+ * - using the upper case props for passing values direct to the components.
+ * - using the underlying components directly as shown in the demos.
+ */
 function TextField(props) {
   var autoComplete = props.autoComplete,
       autoFocus = props.autoFocus,
@@ -56152,48 +55330,38 @@ function TextField(props) {
       defaultValue = props.defaultValue,
       disabled = props.disabled,
       error = props.error,
+      FormHelperTextProps = props.FormHelperTextProps,
+      fullWidth = props.fullWidth,
+      helperText = props.helperText,
+      helperTextClassName = props.helperTextClassName,
       id = props.id,
-      inputClassName = props.inputClassName,
-      InputClassName = props.InputClassName,
-      inputPropsProp = props.inputProps,
+      InputLabelProps = props.InputLabelProps,
+      inputProps = props.inputProps,
       InputProps = props.InputProps,
       inputRef = props.inputRef,
       label = props.label,
       labelClassName = props.labelClassName,
-      InputLabelProps = props.InputLabelProps,
-      helperText = props.helperText,
-      helperTextClassName = props.helperTextClassName,
-      FormHelperTextProps = props.FormHelperTextProps,
-      fullWidth = props.fullWidth,
-      required = props.required,
-      type = props.type,
       multiline = props.multiline,
       name = props.name,
       onChange = props.onChange,
       placeholder = props.placeholder,
+      required = props.required,
       rootRef = props.rootRef,
       rows = props.rows,
       rowsMax = props.rowsMax,
       select = props.select,
       SelectProps = props.SelectProps,
+      type = props.type,
       value = props.value,
-      other = (0, _objectWithoutProperties3.default)(props, ['autoComplete', 'autoFocus', 'children', 'className', 'defaultValue', 'disabled', 'error', 'id', 'inputClassName', 'InputClassName', 'inputProps', 'InputProps', 'inputRef', 'label', 'labelClassName', 'InputLabelProps', 'helperText', 'helperTextClassName', 'FormHelperTextProps', 'fullWidth', 'required', 'type', 'multiline', 'name', 'onChange', 'placeholder', 'rootRef', 'rows', 'rowsMax', 'select', 'SelectProps', 'value']);
+      other = (0, _objectWithoutProperties3.default)(props, ['autoComplete', 'autoFocus', 'children', 'className', 'defaultValue', 'disabled', 'error', 'FormHelperTextProps', 'fullWidth', 'helperText', 'helperTextClassName', 'id', 'InputLabelProps', 'inputProps', 'InputProps', 'inputRef', 'label', 'labelClassName', 'multiline', 'name', 'onChange', 'placeholder', 'required', 'rootRef', 'rows', 'rowsMax', 'select', 'SelectProps', 'type', 'value']);
 
-
-  var inputProps = inputPropsProp;
-
-  if (inputClassName) {
-    inputProps = (0, _extends3.default)({
-      className: inputClassName
-    }, inputProps);
-  }
 
   'development' !== "production" ? (0, _warning2.default)(!select || Boolean(children), 'Material-UI: `children` must be passed when using the `TextField` component with `select`.') : void 0;
 
+  var helperTextId = helperText && id ? id + '-helper-text' : undefined;
   var InputComponent = _react2.default.createElement(_Input2.default, (0, _extends3.default)({
     autoComplete: autoComplete,
     autoFocus: autoFocus,
-    className: InputClassName,
     defaultValue: defaultValue,
     disabled: disabled,
     multiline: multiline,
@@ -56203,22 +55371,22 @@ function TextField(props) {
     type: type,
     value: value,
     id: id,
-    inputProps: inputProps,
     inputRef: inputRef,
     onChange: onChange,
-    placeholder: placeholder
+    placeholder: placeholder,
+    inputProps: inputProps
   }, InputProps));
 
   return _react2.default.createElement(
     _FormControl2.default,
     (0, _extends3.default)({
-      fullWidth: fullWidth,
+      'aria-describedby': helperTextId,
       className: className,
       error: error,
+      fullWidth: fullWidth,
+      ref: rootRef,
       required: required
-    }, other, {
-      ref: rootRef
-    }),
+    }, other),
     label && _react2.default.createElement(
       _Input.InputLabel,
       (0, _extends3.default)({ htmlFor: id, className: labelClassName }, InputLabelProps),
@@ -56226,18 +55394,151 @@ function TextField(props) {
     ),
     select ? _react2.default.createElement(
       _Select2.default,
-      (0, _extends3.default)({ input: InputComponent }, SelectProps),
+      (0, _extends3.default)({ value: value, input: InputComponent }, SelectProps),
       children
     ) : InputComponent,
     helperText && _react2.default.createElement(
       _FormHelperText2.default,
-      (0, _extends3.default)({ className: helperTextClassName }, FormHelperTextProps),
+      (0, _extends3.default)({ className: helperTextClassName, id: helperTextId }, FormHelperTextProps),
       helperText
     )
   );
-}
+} // @inheritedComponent FormControl
 
-TextField.propTypes = 'development' !== "production" ? babelPluginFlowReactPropTypes_proptype_Props : {};
+TextField.propTypes = 'development' !== "production" ? {
+  /**
+   * This property helps users to fill forms faster, especially on mobile devices.
+   * The name can be confusion, it's more like an autofill.
+   * You can learn about it with that article
+   * https://developers.google.com/web/updates/2015/06/checkout-faster-with-autofill
+   */
+  autoComplete: _propTypes2.default.string,
+  /**
+   * If `true`, the input will be focused during the first mount.
+   */
+  autoFocus: _propTypes2.default.bool,
+  /**
+   * @ignore
+   */
+  children: _propTypes2.default.node,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The default value of the `Input` element.
+   */
+  defaultValue: _propTypes2.default.string,
+  /**
+   * If `true`, the input will be disabled.
+   */
+  disabled: _propTypes2.default.bool,
+  /**
+   * If `true`, the label will be displayed in an error state.
+   */
+  error: _propTypes2.default.bool,
+  /**
+   * Properties applied to the `FormHelperText` element.
+   */
+  FormHelperTextProps: _propTypes2.default.object,
+  /**
+   * If `true`, the input will take up the full width of its container.
+   */
+  fullWidth: _propTypes2.default.bool,
+  /**
+   * The helper text content.
+   */
+  helperText: _propTypes2.default.node,
+  /**
+   * The CSS class name of the helper text element.
+   */
+  helperTextClassName: _propTypes2.default.string,
+  /**
+   * The id of the `input` element.
+   * Use that property to make `label` and `helperText` accessible for screen readers.
+   */
+  id: _propTypes2.default.string,
+  /**
+   * Properties applied to the `InputLabel` element.
+   */
+  InputLabelProps: _propTypes2.default.object,
+  /**
+   * Properties applied to the `Input` element.
+   */
+  InputProps: _propTypes2.default.object,
+  /**
+   * Properties applied to the native `input` element.
+   */
+  inputProps: _propTypes2.default.object,
+  /**
+   * Use that property to pass a ref callback to the native input component.
+   */
+  inputRef: _propTypes2.default.func,
+  /**
+   * The label content.
+   */
+  label: _propTypes2.default.node,
+  /**
+   * The CSS class name of the label element.
+   */
+  labelClassName: _propTypes2.default.string,
+  /**
+   * If `dense` or `normal`, will adjust vertical spacing of this and contained components.
+   */
+  margin: _propTypes2.default.oneOf(['none', 'dense', 'normal']),
+  /**
+   * If `true`, a textarea element will be rendered instead of an input.
+   */
+  multiline: _propTypes2.default.bool,
+  /**
+   * Name attribute of the `input` element.
+   */
+  name: _propTypes2.default.string,
+  /**
+   * Callback fired when the value is changed.
+   *
+   * @param {object} event The event source of the callback
+   */
+  onChange: _propTypes2.default.func,
+  /**
+   * The short hint displayed in the input before the user enters a value.
+   */
+  placeholder: _propTypes2.default.string,
+  /**
+   * If `true`, the label is displayed as required.
+   */
+  required: _propTypes2.default.bool,
+  /**
+   * Use that property to pass a ref callback to the root component.
+   */
+  rootRef: _propTypes2.default.func,
+  /**
+   * Number of rows to display when multiline option is set to true.
+   */
+  rows: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number]),
+  /**
+   * Maximum number of rows to display when multiline option is set to true.
+   */
+  rowsMax: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number]),
+  /**
+   * Render a `Select` element while passing the `Input` element to `Select` as `input` parameter.
+   * If this option is set you must pass the options of the select as children.
+   */
+  select: _propTypes2.default.bool,
+  /**
+   * Properties applied to the `Select` element.
+   */
+  SelectProps: _propTypes2.default.object,
+  /**
+   * Type attribute of the `Input` element. It should be a valid HTML5 input type.
+   */
+  type: _propTypes2.default.string,
+  /**
+   * The value of the `Input` element, required for a controlled component.
+   */
+  value: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number, _propTypes2.default.arrayOf(_propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.number]))])
+} : {};
+
 TextField.defaultProps = {
   required: false,
   select: false
@@ -56291,11 +55592,13 @@ var _extends2 = require('babel-runtime/helpers/extends');
 
 var _extends3 = _interopRequireDefault(_extends2);
 
-var _ref; //  weak
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -56307,8 +55610,6 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: (0, _extends3.default)({
@@ -56319,29 +55620,6 @@ var styles = exports.styles = function styles(theme) {
     gutters: theme.mixins.gutters({})
   };
 };
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * Toolbar children, usually a mixture of `IconButton`, `Button` and `Typography`.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * If `true`, disables gutter padding.
-   */
-  disableGutters: require('prop-types').bool
-};
-
 
 function Toolbar(props) {
   var children = props.children,
@@ -56360,9 +55638,25 @@ function Toolbar(props) {
   );
 }
 
-Toolbar.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'children', typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'disableGutters', require('prop-types').bool), _ref) : {};
+Toolbar.propTypes = 'development' !== "production" ? {
+  /**
+   * Toolbar children, usually a mixture of `IconButton`, `Button` and `Typography`.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * If `true`, disables gutter padding.
+   */
+  disableGutters: _propTypes2.default.bool
+} : {};
+
 Toolbar.defaultProps = {
   disableGutters: false
 };
@@ -56411,10 +55705,6 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
-
-var _defineProperty3 = _interopRequireDefault(_defineProperty2);
-
 var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
 
 var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
@@ -56435,9 +55725,17 @@ var _inherits2 = require('babel-runtime/helpers/inherits');
 
 var _inherits3 = _interopRequireDefault(_inherits2);
 
+var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
+
+var _defineProperty3 = _interopRequireDefault(_defineProperty2);
+
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _reactDom = require('react-dom');
 
@@ -56461,6 +55759,10 @@ var _reactPopper = require('react-popper');
 
 var _helpers = require('../utils/helpers');
 
+var _RefHolder = require('../internal/RefHolder');
+
+var _RefHolder2 = _interopRequireDefault(_RefHolder);
+
 var _common = require('../colors/common');
 
 var _common2 = _interopRequireDefault(_common);
@@ -56475,29 +55777,6 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any; /* eslint-disable react/no-multi-comp, no-underscore-dangle */
-
-
-var babelPluginFlowReactPropTypes_proptype_Element = require('react').babelPluginFlowReactPropTypes_proptype_Element || require('prop-types').any;
-
-// Use a class component so we can get a reference.
-var TargetChildren = function (_React$Component) {
-  (0, _inherits3.default)(TargetChildren, _React$Component);
-
-  function TargetChildren() {
-    (0, _classCallCheck3.default)(this, TargetChildren);
-    return (0, _possibleConstructorReturn3.default)(this, (TargetChildren.__proto__ || (0, _getPrototypeOf2.default)(TargetChildren)).apply(this, arguments));
-  }
-
-  (0, _createClass3.default)(TargetChildren, [{
-    key: 'render',
-    value: function render() {
-      return this.props.element;
-    }
-  }]);
-  return TargetChildren;
-}(_react2.default.Component);
-
 var styles = exports.styles = function styles(theme) {
   return {
     root: {
@@ -56511,24 +55790,23 @@ var styles = exports.styles = function styles(theme) {
       pointerEvents: 'none'
     },
     tooltip: (0, _defineProperty3.default)({
-      background: _grey2.default[700],
+      backgroundColor: _grey2.default[700],
       borderRadius: 2,
       color: _common2.default.fullWhite,
       fontFamily: theme.typography.fontFamily,
-      fontSize: theme.typography.pxToRem(14),
-      minHeight: theme.spacing.unit * 4,
-      lineHeight: '32px',
       opacity: 0,
-      padding: '0 ' + theme.spacing.unit + 'px',
       transform: 'scale(0)',
       transition: theme.transitions.create(['opacity', 'transform'], {
         duration: theme.transitions.duration.shortest
-      })
+      }),
+      minHeight: 0,
+      padding: theme.spacing.unit,
+      fontSize: theme.typography.pxToRem(14),
+      lineHeight: theme.typography.round(16 / 14) + 'em'
     }, theme.breakpoints.up('sm'), {
-      minHeight: 22,
-      lineHeight: '22px',
-      padding: '0 ' + theme.spacing.unit + 'px',
-      fontSize: theme.typography.pxToRem(10)
+      padding: theme.spacing.unit / 2 + 'px ' + theme.spacing.unit + 'px',
+      fontSize: theme.typography.pxToRem(10),
+      lineHeight: theme.typography.round(14 / 10) + 'em'
     }),
     tooltipLeft: (0, _defineProperty3.default)({
       transformOrigin: 'right center',
@@ -56559,9 +55837,7 @@ var styles = exports.styles = function styles(theme) {
       transform: 'scale(1)'
     }
   };
-};
-
-var babelPluginFlowReactPropTypes_proptype_Placement = require('prop-types').oneOf(['bottom-end', 'bottom-start', 'bottom', 'left-end', 'left-start', 'left', 'right-end', 'right-start', 'right', 'top-end', 'top-start', 'top']);
+}; /* eslint-disable react/no-multi-comp, no-underscore-dangle */
 
 function flipPlacement(placement) {
   switch (placement) {
@@ -56578,100 +55854,13 @@ function flipPlacement(placement) {
   }
 }
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * Tooltip reference component.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Element === 'function' ? babelPluginFlowReactPropTypes_proptype_Element.isRequired ? babelPluginFlowReactPropTypes_proptype_Element.isRequired : babelPluginFlowReactPropTypes_proptype_Element : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Element).isRequired,
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * Do not respond to focus events.
-   */
-  disableTriggerFocus: require('prop-types').bool,
-
-  /**
-   * Do not respond to hover events.
-   */
-  disableTriggerHover: require('prop-types').bool,
-
-  /**
-   * Do not respond to long press touch events.
-   */
-  disableTriggerTouch: require('prop-types').bool,
-
-  /**
-   * The relationship between the tooltip and the wrapper componnet is not clear from the DOM.
-   * By providind this property, we can use aria-describedby to solve the accessibility issue.
-   */
-  id: require('prop-types').string,
-
-  /**
-   * Callback fired when the tooltip requests to be closed.
-   *
-   * @param {object} event The event source of the callback
-   */
-  onRequestClose: require('prop-types').func,
-
-  /**
-   * Callback fired when the tooltip requests to be open.
-   *
-   * @param {object} event The event source of the callback
-   */
-  onRequestOpen: require('prop-types').func,
-
-  /**
-   * If `true`, the tooltip is shown.
-   */
-  open: require('prop-types').bool,
-
-  /**
-   * Tooltip title.
-   */
-  title: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired,
-
-  /**
-   * The number of milliseconds to wait before showing the tooltip.
-   */
-  enterDelay: require('prop-types').number,
-
-  /**
-   * The number of milliseconds to wait before hidding the tooltip.
-   */
-  leaveDelay: require('prop-types').number,
-
-  /**
-   * Tooltip placement
-   */
-  placement: require('prop-types').oneOf(['bottom-end', 'bottom-start', 'bottom', 'left-end', 'left-start', 'left', 'right-end', 'right-start', 'right', 'top-end', 'top-start', 'top']),
-
-  /**
-   * Properties applied to the `Popper` element.
-   */
-  PopperProps: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  theme: require('prop-types').object
-};
-
-var Tooltip = function (_React$Component2) {
-  (0, _inherits3.default)(Tooltip, _React$Component2);
+var Tooltip = function (_React$Component) {
+  (0, _inherits3.default)(Tooltip, _React$Component);
 
   function Tooltip() {
     var _ref;
 
-    var _temp, _this2, _ret;
+    var _temp, _this, _ret;
 
     (0, _classCallCheck3.default)(this, Tooltip);
 
@@ -56679,113 +55868,105 @@ var Tooltip = function (_React$Component2) {
       args[_key] = arguments[_key];
     }
 
-    return _ret = (_temp = (_this2 = (0, _possibleConstructorReturn3.default)(this, (_ref = Tooltip.__proto__ || (0, _getPrototypeOf2.default)(Tooltip)).call.apply(_ref, [this].concat(args))), _this2), _this2.state = {}, _this2.enterTimer = null, _this2.leaveTimer = null, _this2.touchTimer = null, _this2.isControlled = null, _this2.popper = null, _this2.children = null, _this2.ignoreNonTouchEvents = false, _this2.handleResize = (0, _debounce2.default)(function () {
-      if (_this2.popper) {
-        _this2.popper._popper.scheduleUpdate();
+    return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = Tooltip.__proto__ || (0, _getPrototypeOf2.default)(Tooltip)).call.apply(_ref, [this].concat(args))), _this), _this.state = {}, _this.enterTimer = null, _this.leaveTimer = null, _this.touchTimer = null, _this.isControlled = null, _this.popper = null, _this.children = null, _this.ignoreNonTouchEvents = false, _this.handleResize = (0, _debounce2.default)(function () {
+      if (_this.popper) {
+        _this.popper._popper.scheduleUpdate();
       }
-    }, 166), _this2.handleRequestOpen = function (event) {
-      var children = _this2.props.children;
+    }, 166), _this.handleRequestOpen = function (event) {
+      var children = _this.props.children;
 
-      if (typeof children !== 'string') {
-        var childrenProps = _react.Children.only(children).props;
+      var childrenProps = children.props;
 
-        if (event.type === 'focus' && childrenProps.onFocus) {
-          childrenProps.onFocus(event);
-        }
-
-        if (event.type === 'mouseover' && childrenProps.onMouseOver) {
-          childrenProps.onMouseOver(event);
-        }
+      if (event.type === 'focus' && childrenProps.onFocus) {
+        childrenProps.onFocus(event);
       }
 
-      if (_this2.ignoreNonTouchEvents && event.type !== 'touchstart') {
+      if (event.type === 'mouseover' && childrenProps.onMouseOver) {
+        childrenProps.onMouseOver(event);
+      }
+
+      if (_this.ignoreNonTouchEvents && event.type !== 'touchstart') {
         return;
       }
 
-      clearTimeout(_this2.leaveTimer);
-      if (_this2.props.enterDelay > 0) {
-        _this2.leaveTimer = setTimeout(function () {
-          _this2.requestOpen(event);
-        }, _this2.props.enterDelay);
+      clearTimeout(_this.leaveTimer);
+      if (_this.props.enterDelay > 0) {
+        _this.leaveTimer = setTimeout(function () {
+          _this.requestOpen(event);
+        }, _this.props.enterDelay);
       } else {
-        _this2.requestOpen(event);
+        _this.requestOpen(event);
       }
-    }, _this2.requestOpen = function (event) {
-      if (!_this2.isControlled) {
-        _this2.setState({ open: true });
-      }
-
-      if (_this2.props.onRequestOpen) {
-        _this2.props.onRequestOpen(event, true);
-      }
-    }, _this2.handleRequestClose = function (event) {
-      var children = _this2.props.children;
-
-      if (typeof children !== 'string') {
-        var childrenProps = _react.Children.only(children).props;
-
-        if (event.type === 'blur' && childrenProps.onBlur) {
-          childrenProps.onBlur(event);
-        }
-
-        if (event.type === 'mouseleave' && childrenProps.onMouseLeave) {
-          childrenProps.onMouseLeave(event);
-        }
+    }, _this.requestOpen = function (event) {
+      if (!_this.isControlled) {
+        _this.setState({ open: true });
       }
 
-      clearTimeout(_this2.leaveTimer);
-      if (_this2.props.leaveDelay) {
-        _this2.leaveTimer = setTimeout(function () {
-          _this2.requestClose(event);
-        }, _this2.props.leaveDelay);
+      if (_this.props.onOpen) {
+        _this.props.onOpen(event, true);
+      }
+    }, _this.handleClose = function (event) {
+      var children = _this.props.children;
+
+      var childrenProps = children.props;
+
+      if (event.type === 'blur' && childrenProps.onBlur) {
+        childrenProps.onBlur(event);
+      }
+
+      if (event.type === 'mouseleave' && childrenProps.onMouseLeave) {
+        childrenProps.onMouseLeave(event);
+      }
+
+      clearTimeout(_this.leaveTimer);
+      if (_this.props.leaveDelay) {
+        _this.leaveTimer = setTimeout(function () {
+          _this.requestClose(event);
+        }, _this.props.leaveDelay);
       } else {
-        _this2.requestClose(event);
+        _this.requestClose(event);
       }
-    }, _this2.requestClose = function (event) {
-      _this2.ignoreNonTouchEvents = false;
+    }, _this.requestClose = function (event) {
+      _this.ignoreNonTouchEvents = false;
 
-      if (!_this2.isControlled) {
-        _this2.setState({ open: false });
-      }
-
-      if (_this2.props.onRequestClose) {
-        _this2.props.onRequestClose(event, false);
-      }
-    }, _this2.handleTouchStart = function (event) {
-      _this2.ignoreNonTouchEvents = true;
-      var children = _this2.props.children;
-
-      if (typeof children !== 'string') {
-        var childrenProps = _react.Children.only(children).props;
-
-        if (childrenProps.onTouchStart) {
-          childrenProps.onTouchStart(event);
-        }
+      if (!_this.isControlled) {
+        _this.setState({ open: false });
       }
 
-      clearTimeout(_this2.touchTimer);
+      if (_this.props.onClose) {
+        _this.props.onClose(event, false);
+      }
+    }, _this.handleTouchStart = function (event) {
+      _this.ignoreNonTouchEvents = true;
+      var children = _this.props.children;
+
+      var childrenProps = children.props;
+
+      if (childrenProps.onTouchStart) {
+        childrenProps.onTouchStart(event);
+      }
+
+      clearTimeout(_this.touchTimer);
       event.persist();
-      _this2.touchTimer = setTimeout(function () {
-        _this2.handleRequestOpen(event);
+      _this.touchTimer = setTimeout(function () {
+        _this.handleRequestOpen(event);
       }, 1e3);
-    }, _this2.handleTouchEnd = function (event) {
-      var children = _this2.props.children;
+    }, _this.handleTouchEnd = function (event) {
+      var children = _this.props.children;
 
-      if (typeof children !== 'string') {
-        var childrenProps = _react.Children.only(children).props;
+      var childrenProps = children.props;
 
-        if (childrenProps.onTouchEnd) {
-          childrenProps.onTouchEnd(event);
-        }
+      if (childrenProps.onTouchEnd) {
+        childrenProps.onTouchEnd(event);
       }
 
-      clearTimeout(_this2.touchTimer);
-      clearTimeout(_this2.leaveTimer);
+      clearTimeout(_this.touchTimer);
+      clearTimeout(_this.leaveTimer);
       event.persist();
-      _this2.leaveTimer = setTimeout(function () {
-        _this2.requestClose(event);
-      }, 1500 + _this2.props.leaveDelay);
-    }, _temp), (0, _possibleConstructorReturn3.default)(_this2, _ret);
+      _this.leaveTimer = setTimeout(function () {
+        _this.requestClose(event);
+      }, 1500 + _this.props.leaveDelay);
+    }, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
   }
 
   (0, _createClass3.default)(Tooltip, [{
@@ -56794,7 +55975,7 @@ var Tooltip = function (_React$Component2) {
       var props = this.props;
 
 
-      this.isControlled = props.open !== undefined;
+      this.isControlled = props.open != null;
 
       if (!this.isControlled) {
         // not controlled, use internal state
@@ -56806,9 +55987,7 @@ var Tooltip = function (_React$Component2) {
   }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
-      'development' !== "production" ? (0, _warning2.default)(!this.children || !this.children.disabled ||
-      // $FlowFixMe
-      !this.children.tagName.toLowerCase() === 'button', ['Material-UI: you are providing a disabled button children to the Tooltip component.', 'A disabled element do not fire events.', 'But the Tooltip needs to listen to the children element events to display the title.', '', 'Place a `div` over top of the element.'].join('\n')) : void 0;
+      'development' !== "production" ? (0, _warning2.default)(!this.children || !this.children.disabled || !this.children.tagName.toLowerCase() === 'button', ['Material-UI: you are providing a disabled button children to the Tooltip component.', 'A disabled element do not fire events.', 'But the Tooltip needs to listen to the children element events to display the title.', '', 'Place a `div` over top of the element.'].join('\n')) : void 0;
     }
   }, {
     key: 'componentWillUnmount',
@@ -56820,7 +55999,7 @@ var Tooltip = function (_React$Component2) {
   }, {
     key: 'render',
     value: function render() {
-      var _this3 = this;
+      var _this2 = this;
 
       var _props = this.props,
           childrenProp = _props.children,
@@ -56832,20 +56011,21 @@ var Tooltip = function (_React$Component2) {
           enterDelay = _props.enterDelay,
           id = _props.id,
           leaveDelay = _props.leaveDelay,
+          onClose = _props.onClose,
+          onOpen = _props.onOpen,
           openProp = _props.open,
-          onRequestClose = _props.onRequestClose,
-          onRequestOpen = _props.onRequestOpen,
-          theme = _props.theme,
-          title = _props.title,
           rawPlacement = _props.placement,
           _props$PopperProps = _props.PopperProps;
       _props$PopperProps = _props$PopperProps === undefined ? {} : _props$PopperProps;
       var PopperClassName = _props$PopperProps.PopperClassName,
           PopperOther = (0, _objectWithoutProperties3.default)(_props$PopperProps, ['PopperClassName']),
-          other = (0, _objectWithoutProperties3.default)(_props, ['children', 'classes', 'className', 'disableTriggerFocus', 'disableTriggerHover', 'disableTriggerTouch', 'enterDelay', 'id', 'leaveDelay', 'open', 'onRequestClose', 'onRequestOpen', 'theme', 'title', 'placement', 'PopperProps']);
+          theme = _props.theme,
+          title = _props.title,
+          other = (0, _objectWithoutProperties3.default)(_props, ['children', 'classes', 'className', 'disableTriggerFocus', 'disableTriggerHover', 'disableTriggerTouch', 'enterDelay', 'id', 'leaveDelay', 'onClose', 'onOpen', 'open', 'placement', 'PopperProps', 'theme', 'title']);
 
 
-      var placement = theme.direction === 'rtl' ? flipPlacement(rawPlacement) : rawPlacement;
+      var themeDirection = theme && theme.direction;
+      var placement = themeDirection === 'rtl' ? flipPlacement(rawPlacement) : rawPlacement;
       var open = this.isControlled ? openProp : this.state.open;
       var childrenProps = {};
 
@@ -56858,17 +56038,15 @@ var Tooltip = function (_React$Component2) {
 
       if (!disableTriggerHover) {
         childrenProps.onMouseOver = this.handleRequestOpen;
-        childrenProps.onMouseLeave = this.handleRequestClose;
+        childrenProps.onMouseLeave = this.handleClose;
       }
 
       if (!disableTriggerFocus) {
         childrenProps.onFocus = this.handleRequestOpen;
-        childrenProps.onBlur = this.handleRequestClose;
+        childrenProps.onBlur = this.handleClose;
       }
 
-      if (typeof childrenProp !== 'string' && childrenProp.props) {
-        'development' !== "production" ? (0, _warning2.default)(!childrenProp.props.title, ['Material-UI: you have been providing a `title` property to the child of <Tooltip />.', 'Remove this title property `' + childrenProp.props.title + '` or the Tooltip component.'].join('\n')) : void 0;
-      }
+      'development' !== "production" ? (0, _warning2.default)(!childrenProp.props.title, ['Material-UI: you have been providing a `title` property to the child of <Tooltip />.', 'Remove this title property `' + childrenProp.props.title + '` or the Tooltip component.'].join('\n')) : void 0;
 
       return _react2.default.createElement(
         _reactEventListener2.default,
@@ -56881,13 +56059,16 @@ var Tooltip = function (_React$Component2) {
             null,
             function (_ref2) {
               var targetProps = _ref2.targetProps;
-              return _react2.default.createElement(TargetChildren, {
-                element: typeof childrenProp !== 'string' ? _react2.default.cloneElement(childrenProp, childrenProps) : childrenProp,
-                ref: function ref(node) {
-                  _this3.children = (0, _reactDom.findDOMNode)(node);
-                  targetProps.ref(_this3.children);
-                }
-              });
+              return _react2.default.createElement(
+                _RefHolder2.default,
+                {
+                  ref: function ref(node) {
+                    _this2.children = (0, _reactDom.findDOMNode)(node);
+                    targetProps.ref(_this2.children);
+                  }
+                },
+                _react2.default.cloneElement(childrenProp, childrenProps)
+              );
             }
           ),
           _react2.default.createElement(
@@ -56898,19 +56079,31 @@ var Tooltip = function (_React$Component2) {
               className: (0, _classnames2.default)(classes.popper, (0, _defineProperty3.default)({}, classes.popperClose, !open), PopperClassName)
             }, PopperOther, {
               ref: function ref(node) {
-                _this3.popper = node;
+                _this2.popper = node;
               }
             }),
-            _react2.default.createElement(
-              'div',
-              {
-                id: id,
-                role: 'tooltip',
-                'aria-hidden': !open,
-                className: (0, _classnames2.default)(classes.tooltip, (0, _defineProperty3.default)({}, classes.tooltipOpen, open), classes['tooltip' + (0, _helpers.capitalizeFirstLetter)(placement.split('-')[0])])
-              },
-              title
-            )
+            function (_ref3) {
+              var popperProps = _ref3.popperProps,
+                  restProps = _ref3.restProps;
+              return _react2.default.createElement(
+                'div',
+                (0, _extends3.default)({}, popperProps, restProps, {
+                  style: (0, _extends3.default)({}, popperProps.style, {
+                    left: popperProps.style.left || 0
+                  }, restProps.style)
+                }),
+                _react2.default.createElement(
+                  'div',
+                  {
+                    id: id,
+                    role: 'tooltip',
+                    'aria-hidden': !open,
+                    className: (0, _classnames2.default)(classes.tooltip, (0, _defineProperty3.default)({}, classes.tooltipOpen, open), classes['tooltip' + (0, _helpers.capitalizeFirstLetter)(placement.split('-')[0])])
+                  },
+                  title
+                )
+              );
+            }
           )
         )
       );
@@ -56918,6 +56111,78 @@ var Tooltip = function (_React$Component2) {
   }]);
   return Tooltip;
 }(_react2.default.Component);
+
+Tooltip.propTypes = 'development' !== "production" ? {
+  /**
+   * Tooltip reference element.
+   */
+  children: _propTypes2.default.element.isRequired,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * Do not respond to focus events.
+   */
+  disableTriggerFocus: _propTypes2.default.bool,
+  /**
+   * Do not respond to hover events.
+   */
+  disableTriggerHover: _propTypes2.default.bool,
+  /**
+   * Do not respond to long press touch events.
+   */
+  disableTriggerTouch: _propTypes2.default.bool,
+  /**
+   * The number of milliseconds to wait before showing the tooltip.
+   */
+  enterDelay: _propTypes2.default.number,
+  /**
+   * The relationship between the tooltip and the wrapper component is not clear from the DOM.
+   * By providing this property, we can use aria-describedby to solve the accessibility issue.
+   */
+  id: _propTypes2.default.string,
+  /**
+   * The number of milliseconds to wait before hidding the tooltip.
+   */
+  leaveDelay: _propTypes2.default.number,
+  /**
+   * Callback fired when the tooltip requests to be closed.
+   *
+   * @param {object} event The event source of the callback
+   */
+  onClose: _propTypes2.default.func,
+  /**
+   * Callback fired when the tooltip requests to be open.
+   *
+   * @param {object} event The event source of the callback
+   */
+  onOpen: _propTypes2.default.func,
+  /**
+   * If `true`, the tooltip is shown.
+   */
+  open: _propTypes2.default.bool,
+  /**
+   * Tooltip placement
+   */
+  placement: _propTypes2.default.oneOf(['bottom-end', 'bottom-start', 'bottom', 'left-end', 'left-start', 'left', 'right-end', 'right-start', 'right', 'top-end', 'top-start', 'top']),
+  /**
+   * Properties applied to the `Popper` element.
+   */
+  PopperProps: _propTypes2.default.object,
+  /**
+   * @ignore
+   */
+  theme: _propTypes2.default.object.isRequired,
+  /**
+   * Tooltip title.
+   */
+  title: _propTypes2.default.node.isRequired
+} : {};
 
 Tooltip.defaultProps = {
   disableTriggerFocus: false,
@@ -56927,6 +56192,7 @@ Tooltip.defaultProps = {
   leaveDelay: 0,
   placement: 'bottom'
 };
+
 exports.default = (0, _withStyles2.default)(styles, { name: 'MuiTooltip', withTheme: true })(Tooltip);
   })();
 });
@@ -56975,11 +56241,13 @@ var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProp
 
 var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
 
-var _ref;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _classnames = require('classnames');
 
@@ -56992,10 +56260,6 @@ var _withStyles2 = _interopRequireDefault(_withStyles);
 var _helpers = require('../utils/helpers');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_ElementType = require('react').babelPluginFlowReactPropTypes_proptype_ElementType || require('prop-types').any;
 
 var styles = exports.styles = function styles(theme) {
   return {
@@ -57055,63 +56319,6 @@ var styles = exports.styles = function styles(theme) {
   };
 };
 
-var babelPluginFlowReactPropTypes_proptype_Type = require('prop-types').oneOf(['display4', 'display3', 'display2', 'display1', 'headline', 'title', 'subheading', 'body2', 'body1', 'caption', 'button']);
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  align: require('prop-types').oneOf(['inherit', 'left', 'center', 'right', 'justify']),
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  className: require('prop-types').string,
-
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   * By default we map the type to a good default headline component.
-   */
-  component: typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType),
-
-  /**
-   * The color of the component. It's using the theme palette when that makes sense.
-   */
-  color: require('prop-types').oneOf(['inherit', 'primary', 'secondary', 'accent', 'error', 'default']),
-
-  /**
-   * If `true`, the text will have a bottom margin.
-   */
-  gutterBottom: require('prop-types').bool,
-
-  /**
-   * We are empirically mapping the type property to a range of different DOM element type.
-   * For instance, h1 to h6. If you wish to change that mapping, you can provide your own.
-   * Alternatively, you can use the `component` property.
-   */
-  headlineMapping: require('prop-types').shape({}),
-
-  /**
-   * If `true`, the text will not wrap, but instead will truncate with an ellipsis.
-   */
-  noWrap: require('prop-types').bool,
-
-  /**
-   * If `true`, the text will have a bottom margin.
-   */
-  paragraph: require('prop-types').bool,
-
-  /**
-   * Applies the theme typography styles.
-   */
-  type: require('prop-types').oneOf(['display4', 'display3', 'display2', 'display1', 'headline', 'title', 'subheading', 'body2', 'body1', 'caption', 'button'])
-};
-
-
 function Typography(props) {
   var _classNames;
 
@@ -57135,13 +56342,57 @@ function Typography(props) {
   return _react2.default.createElement(Component, (0, _extends3.default)({ className: className }, other));
 }
 
-Typography.propTypes = 'development' !== "production" ? (_ref = {
-  classes: require('prop-types').object.isRequired,
-  headlineMapping: require('prop-types').shape({}).isRequired,
-  type: require('prop-types').oneOf(['display4', 'display3', 'display2', 'display1', 'headline', 'title', 'subheading', 'body2', 'body1', 'caption', 'button']).isRequired,
-  align: require('prop-types').oneOf(['inherit', 'left', 'center', 'right', 'justify']),
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node)
-}, (0, _defineProperty3.default)(_ref, 'classes', require('prop-types').object), (0, _defineProperty3.default)(_ref, 'className', require('prop-types').string), (0, _defineProperty3.default)(_ref, 'component', typeof babelPluginFlowReactPropTypes_proptype_ElementType === 'function' ? babelPluginFlowReactPropTypes_proptype_ElementType : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_ElementType)), (0, _defineProperty3.default)(_ref, 'color', require('prop-types').oneOf(['inherit', 'primary', 'secondary', 'accent', 'error', 'default'])), (0, _defineProperty3.default)(_ref, 'gutterBottom', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'headlineMapping', require('prop-types').shape({})), (0, _defineProperty3.default)(_ref, 'noWrap', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'paragraph', require('prop-types').bool), (0, _defineProperty3.default)(_ref, 'type', require('prop-types').oneOf(['display4', 'display3', 'display2', 'display1', 'headline', 'title', 'subheading', 'body2', 'body1', 'caption', 'button'])), _ref) : {};
+Typography.propTypes = 'development' !== "production" ? {
+  /**
+   * Set the text-align on the component.
+   */
+  align: _propTypes2.default.oneOf(['inherit', 'left', 'center', 'right', 'justify']),
+  /**
+   * The content of the component.
+   */
+  children: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * The color of the component. It's using the theme palette when that makes sense.
+   */
+  color: _propTypes2.default.oneOf(['inherit', 'primary', 'secondary', 'accent', 'error', 'default']),
+  /**
+   * The component used for the root node.
+   * Either a string to use a DOM element or a component.
+   * By default we map the type to a good default headline component.
+   */
+  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
+  /**
+   * If `true`, the text will have a bottom margin.
+   */
+  gutterBottom: _propTypes2.default.bool,
+  /**
+   * We are empirically mapping the type property to a range of different DOM element type.
+   * For instance, h1 to h6. If you wish to change that mapping, you can provide your own.
+   * Alternatively, you can use the `component` property.
+   */
+  headlineMapping: _propTypes2.default.object,
+  /**
+   * If `true`, the text will not wrap, but instead will truncate with an ellipsis.
+   */
+  noWrap: _propTypes2.default.bool,
+  /**
+   * If `true`, the text will have a bottom margin.
+   */
+  paragraph: _propTypes2.default.bool,
+  /**
+   * Applies the theme typography styles.
+   */
+  type: _propTypes2.default.oneOf(['display4', 'display3', 'display2', 'display1', 'headline', 'title', 'subheading', 'body2', 'body1', 'caption', 'button'])
+} : {};
+
 Typography.defaultProps = {
   align: 'inherit',
   color: 'default',
@@ -57196,9 +56447,6 @@ require.register("material-ui/colors/amber.js", function(exports, require, modul
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var amber = {
   50: '#fff8e1',
   100: '#ffecb3',
@@ -57229,9 +56477,6 @@ require.register("material-ui/colors/blue.js", function(exports, require, module
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var blue = {
   50: '#e3f2fd',
   100: '#bbdefb',
@@ -57262,9 +56507,6 @@ require.register("material-ui/colors/blueGrey.js", function(exports, require, mo
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var blueGrey = {
   50: '#eceff1',
   100: '#cfd8dc',
@@ -57295,9 +56537,6 @@ require.register("material-ui/colors/brown.js", function(exports, require, modul
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var brown = {
   50: '#efebe9',
   100: '#d7ccc8',
@@ -57354,9 +56593,6 @@ require.register("material-ui/colors/cyan.js", function(exports, require, module
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var cyan = {
   50: '#e0f7fa',
   100: '#b2ebf2',
@@ -57387,9 +56623,6 @@ require.register("material-ui/colors/deepOrange.js", function(exports, require, 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var deepOrange = {
   50: '#fbe9e7',
   100: '#ffccbc',
@@ -57420,9 +56653,6 @@ require.register("material-ui/colors/deepPurple.js", function(exports, require, 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var deepPurple = {
   50: '#ede7f6',
   100: '#d1c4e9',
@@ -57453,9 +56683,6 @@ require.register("material-ui/colors/green.js", function(exports, require, modul
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var green = {
   50: '#e8f5e9',
   100: '#c8e6c9',
@@ -57486,9 +56713,6 @@ require.register("material-ui/colors/grey.js", function(exports, require, module
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var grey = {
   50: '#fafafa',
   100: '#f5f5f5',
@@ -57712,9 +56936,6 @@ require.register("material-ui/colors/indigo.js", function(exports, require, modu
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var indigo = {
   50: '#e8eaf6',
   100: '#c5cae9',
@@ -57745,9 +56966,6 @@ require.register("material-ui/colors/lightBlue.js", function(exports, require, m
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var lightBlue = {
   50: '#e1f5fe',
   100: '#b3e5fc',
@@ -57778,9 +56996,6 @@ require.register("material-ui/colors/lightGreen.js", function(exports, require, 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var lightGreen = {
   50: '#f1f8e9',
   100: '#dcedc8',
@@ -57811,9 +57026,6 @@ require.register("material-ui/colors/lime.js", function(exports, require, module
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var lime = {
   50: '#f9fbe7',
   100: '#f0f4c3',
@@ -57844,9 +57056,6 @@ require.register("material-ui/colors/orange.js", function(exports, require, modu
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var orange = {
   50: '#fff3e0',
   100: '#ffe0b2',
@@ -57877,9 +57086,6 @@ require.register("material-ui/colors/pink.js", function(exports, require, module
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var pink = {
   50: '#fce4ec',
   100: '#f8bbd0',
@@ -57910,9 +57116,6 @@ require.register("material-ui/colors/purple.js", function(exports, require, modu
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var purple = {
   50: '#f3e5f5',
   100: '#e1bee7',
@@ -57943,9 +57146,6 @@ require.register("material-ui/colors/red.js", function(exports, require, module)
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var red = {
   50: '#ffebee',
   100: '#ffcdd2',
@@ -57976,9 +57176,6 @@ require.register("material-ui/colors/teal.js", function(exports, require, module
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var teal = {
   50: '#e0f2f1',
   100: '#b2dfdb',
@@ -58009,9 +57206,6 @@ require.register("material-ui/colors/yellow.js", function(exports, require, modu
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-// Wait https://github.com/facebook/flow/issues/380 to be fixed
-/* eslint-disable flowtype/require-valid-file-annotation */
-
 var yellow = {
   50: '#fffde7',
   100: '#fff9c4',
@@ -58034,7 +57228,7 @@ exports.default = yellow;
   })();
 });
 
-require.register("material-ui/internal/Portal.js", function(exports, require, module) {
+require.register("material-ui/internal/RefHolder.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "material-ui");
   (function() {
     'use strict';
@@ -58067,156 +57261,40 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactDom = require('react-dom');
+var _propTypes = require('prop-types');
 
-var _reactDom2 = _interopRequireDefault(_reactDom);
-
-var _inDOM = require('dom-helpers/util/inDOM');
-
-var _inDOM2 = _interopRequireDefault(_inDOM);
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * The content to portal in order to escape the parent DOM node.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
-  /**
-   * If `true` the children will be mounted into the DOM.
-   */
-  open: require('prop-types').bool
-};
-
 /**
  * @ignore - internal component.
+ *
+ * Internal helper component to allow attaching a ref to a
+ * child element that may not accept refs (functional component).
  */
-var Portal = function (_React$Component) {
-  (0, _inherits3.default)(Portal, _React$Component);
+var RefHolder = function (_React$Component) {
+  (0, _inherits3.default)(RefHolder, _React$Component);
 
-  function Portal() {
-    var _ref;
-
-    var _temp, _this, _ret;
-
-    (0, _classCallCheck3.default)(this, Portal);
-
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = Portal.__proto__ || (0, _getPrototypeOf2.default)(Portal)).call.apply(_ref, [this].concat(args))), _this), _this.layer = null, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
+  function RefHolder() {
+    (0, _classCallCheck3.default)(this, RefHolder);
+    return (0, _possibleConstructorReturn3.default)(this, (RefHolder.__proto__ || (0, _getPrototypeOf2.default)(RefHolder)).apply(this, arguments));
   }
 
-  (0, _createClass3.default)(Portal, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
-      // Support react@15.x, will be removed at some point
-      if (!_reactDom2.default.createPortal) {
-        this.renderLayer();
-      }
-    }
-  }, {
-    key: 'componentDidUpdate',
-    value: function componentDidUpdate() {
-      // Support react@15.x, will be removed at some point
-      if (!_reactDom2.default.createPortal) {
-        this.renderLayer();
-      }
-    }
-  }, {
-    key: 'componentWillUnmount',
-    value: function componentWillUnmount() {
-      this.unrenderLayer();
-    }
-  }, {
-    key: 'getLayer',
-    value: function getLayer() {
-      if (!this.layer) {
-        this.layer = document.createElement('div');
-        this.layer.setAttribute('data-mui-portal', 'true');
-        if (document.body && this.layer) {
-          document.body.appendChild(this.layer);
-        }
-      }
-
-      return this.layer;
-    }
-  }, {
-    key: 'unrenderLayer',
-    value: function unrenderLayer() {
-      if (!this.layer) {
-        return;
-      }
-
-      // Support react@15.x, will be removed at some point
-      if (!_reactDom2.default.createPortal) {
-        _reactDom2.default.unmountComponentAtNode(this.layer);
-      }
-
-      if (document.body) {
-        document.body.removeChild(this.layer);
-      }
-      this.layer = null;
-    }
-  }, {
-    key: 'renderLayer',
-    value: function renderLayer() {
-      var _props = this.props,
-          children = _props.children,
-          open = _props.open;
-
-
-      if (open) {
-        // By calling this method in componentDidMount() and
-        // componentDidUpdate(), you're effectively creating a "wormhole" that
-        // funnels React's hierarchical updates through to a DOM node on an
-        // entirely different part of the page.
-        var layerElement = _react2.default.Children.only(children);
-        _reactDom2.default.unstable_renderSubtreeIntoContainer(this, layerElement, this.getLayer());
-      } else {
-        this.unrenderLayer();
-      }
-    }
-  }, {
+  (0, _createClass3.default)(RefHolder, [{
     key: 'render',
     value: function render() {
-      var _props2 = this.props,
-          children = _props2.children,
-          open = _props2.open;
-
-      // Support react@15.x, will be removed at some point
-
-      if (!_reactDom2.default.createPortal) {
-        return null;
-      }
-
-      // Can't be rendered server-side.
-      if (_inDOM2.default) {
-        if (open) {
-          return _reactDom2.default.createPortal(children, this.getLayer());
-        }
-
-        this.unrenderLayer();
-      }
-
-      return null;
+      return this.props.children;
     }
   }]);
-  return Portal;
+  return RefHolder;
 }(_react2.default.Component);
 
-Portal.defaultProps = {
-  open: false
-};
-Portal.propTypes = 'development' !== "production" ? {
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-  open: require('prop-types').bool
+RefHolder.propTypes = 'development' !== "production" ? {
+  children: _propTypes2.default.node
 } : {};
-exports.default = Portal;
+
+exports.default = RefHolder;
   })();
 });
 
@@ -58262,8 +57340,6 @@ var _inherits2 = require('babel-runtime/helpers/inherits');
 
 var _inherits3 = _interopRequireDefault(_inherits2);
 
-exports.default = createSwitch;
-
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
@@ -58276,6 +57352,14 @@ var _classnames = require('classnames');
 
 var _classnames2 = _interopRequireDefault(_classnames);
 
+var _CheckBoxOutlineBlank = require('../internal/svg-icons/CheckBoxOutlineBlank');
+
+var _CheckBoxOutlineBlank2 = _interopRequireDefault(_CheckBoxOutlineBlank);
+
+var _CheckBox = require('../internal/svg-icons/CheckBox');
+
+var _CheckBox2 = _interopRequireDefault(_CheckBox);
+
 var _withStyles = require('../styles/withStyles');
 
 var _withStyles2 = _interopRequireDefault(_withStyles);
@@ -58284,23 +57368,11 @@ var _IconButton = require('../IconButton');
 
 var _IconButton2 = _interopRequireDefault(_IconButton);
 
-var _CheckBoxOutlineBlank = require('../svg-icons/CheckBoxOutlineBlank');
-
-var _CheckBoxOutlineBlank2 = _interopRequireDefault(_CheckBoxOutlineBlank);
-
-var _CheckBox = require('../svg-icons/CheckBox');
-
-var _CheckBox2 = _interopRequireDefault(_CheckBox);
-
 var _Icon = require('../Icon');
 
 var _Icon2 = _interopRequireDefault(_Icon);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var babelPluginFlowReactPropTypes_proptype_Element = require('react').babelPluginFlowReactPropTypes_proptype_Element || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
 
 var styles = exports.styles = {
   root: {
@@ -58324,275 +57396,701 @@ var styles = exports.styles = {
   disabled: {}
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
+/**
+ * @ignore - internal component.
+ */
+
+var SwitchBase = function (_React$Component) {
+  (0, _inherits3.default)(SwitchBase, _React$Component);
+
+  function SwitchBase() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
+    (0, _classCallCheck3.default)(this, SwitchBase);
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = SwitchBase.__proto__ || (0, _getPrototypeOf2.default)(SwitchBase)).call.apply(_ref, [this].concat(args))), _this), _this.state = {}, _this.input = null, _this.isControlled = null, _this.handleInputChange = function (event) {
+      var checked = event.target.checked;
+
+      if (!_this.isControlled) {
+        _this.setState({ checked: checked });
+      }
+
+      if (_this.props.onChange) {
+        _this.props.onChange(event, checked);
+      }
+    }, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
+  }
+
+  (0, _createClass3.default)(SwitchBase, [{
+    key: 'componentWillMount',
+    value: function componentWillMount() {
+      var props = this.props;
+
+
+      this.isControlled = props.checked != null;
+
+      if (!this.isControlled) {
+        // not controlled, use internal state
+        this.setState({
+          checked: props.defaultChecked !== undefined ? props.defaultChecked : false
+        });
+      }
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _classNames;
+
+      var _props = this.props,
+          checkedProp = _props.checked,
+          checkedIcon = _props.checkedIcon,
+          classes = _props.classes,
+          classNameProp = _props.className,
+          disabledProp = _props.disabled,
+          iconProp = _props.icon,
+          inputProps = _props.inputProps,
+          inputRef = _props.inputRef,
+          inputType = _props.inputType,
+          name = _props.name,
+          onChange = _props.onChange,
+          tabIndex = _props.tabIndex,
+          value = _props.value,
+          other = (0, _objectWithoutProperties3.default)(_props, ['checked', 'checkedIcon', 'classes', 'className', 'disabled', 'icon', 'inputProps', 'inputRef', 'inputType', 'name', 'onChange', 'tabIndex', 'value']);
+      var muiFormControl = this.context.muiFormControl;
+
+      var disabled = disabledProp;
+
+      if (muiFormControl) {
+        if (typeof disabled === 'undefined') {
+          disabled = muiFormControl.disabled;
+        }
+      }
+
+      var checked = this.isControlled ? checkedProp : this.state.checked;
+      var className = (0, _classnames2.default)(classes.root, classes.default, classNameProp, (_classNames = {}, (0, _defineProperty3.default)(_classNames, classes.checked, checked), (0, _defineProperty3.default)(_classNames, classes.disabled, disabled), _classNames));
+
+      var icon = checked ? checkedIcon : iconProp;
+
+      if (typeof icon === 'string') {
+        icon = _react2.default.createElement(
+          _Icon2.default,
+          null,
+          icon
+        );
+      }
+
+      return _react2.default.createElement(
+        _IconButton2.default,
+        (0, _extends3.default)({
+          component: 'span',
+          className: className,
+          disabled: disabled,
+          tabIndex: null,
+          role: undefined
+        }, other),
+        icon,
+        _react2.default.createElement('input', (0, _extends3.default)({
+          type: inputType,
+          name: name,
+          checked: this.isControlled ? checkedProp : undefined,
+          onChange: this.handleInputChange,
+          className: classes.input,
+          disabled: disabled,
+          tabIndex: tabIndex,
+          value: value,
+          ref: inputRef
+        }, inputProps))
+      );
+    }
+  }]);
+  return SwitchBase;
+}(_react2.default.Component);
+
+// NB: If changed, please update Checkbox, Switch and Radio
+// so that the API documentation is updated.
+
+
+SwitchBase.propTypes = 'development' !== "production" ? {
   /**
    * If `true`, the component is checked.
    */
-  checked: require('prop-types').oneOfType([require('prop-types').bool, require('prop-types').string]),
-
+  checked: _propTypes2.default.oneOfType([_propTypes2.default.bool, _propTypes2.default.string]),
   /**
    * The icon to display when the component is checked.
    * If a string is provided, it will be used as a font ligature.
    */
-  checkedIcon: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
+  checkedIcon: _propTypes2.default.node,
   /**
    * Useful to extend the style applied to components.
    */
-  classes: require('prop-types').object,
-
+  classes: _propTypes2.default.object.isRequired,
   /**
    * @ignore
    */
-  className: require('prop-types').string,
-
+  className: _propTypes2.default.string,
   /**
    * @ignore
    */
-  defaultChecked: require('prop-types').bool,
-
+  defaultChecked: _propTypes2.default.bool,
   /**
    * If `true`, the switch will be disabled.
    */
-  disabled: require('prop-types').bool,
-
+  disabled: _propTypes2.default.bool,
   /**
    * If `true`, the ripple effect will be disabled.
    */
-  disableRipple: require('prop-types').bool,
-
+  disableRipple: _propTypes2.default.bool,
   /**
    * The icon to display when the component is unchecked.
    * If a string is provided, it will be used as a font ligature.
    */
-  icon: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
+  icon: _propTypes2.default.node,
   /**
    * If `true`, the component appears indeterminate.
    */
-  indeterminate: require('prop-types').bool,
-
+  indeterminate: _propTypes2.default.bool,
   /**
    * The icon to display when the component is indeterminate.
    * If a string is provided, it will be used as a font ligature.
    */
-  indeterminateIcon: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node),
-
+  indeterminateIcon: _propTypes2.default.node,
   /**
    * Properties applied to the `input` element.
    */
-  inputProps: require('prop-types').object,
-
+  inputProps: _propTypes2.default.object,
   /**
    * Use that property to pass a ref callback to the native input component.
    */
-  inputRef: require('prop-types').func,
-
+  inputRef: _propTypes2.default.func,
+  /**
+   * The input component property `type`.
+   */
+  inputType: _propTypes2.default.string,
   /*
    * @ignore
    */
-  name: require('prop-types').string,
-
+  name: _propTypes2.default.string,
   /**
    * Callback fired when the state is changed.
    *
    * @param {object} event The event source of the callback
    * @param {boolean} checked The `checked` value of the switch
    */
-  onChange: require('prop-types').func,
-
+  onChange: _propTypes2.default.func,
   /**
    * @ignore
    */
-  tabIndex: require('prop-types').oneOfType([require('prop-types').number, require('prop-types').string]),
-
+  tabIndex: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.string]),
   /**
    * The value of the component.
    */
-  value: require('prop-types').string
+  value: _propTypes2.default.string
+} : {};
+
+SwitchBase.defaultProps = {
+  checkedIcon: _react2.default.createElement(_CheckBox2.default, null),
+  disableRipple: false,
+  icon: _react2.default.createElement(_CheckBoxOutlineBlank2.default, null),
+  inputType: 'checkbox'
 };
 
-// NB: If changed, please update Checkbox, Switch and Radio
-// so that the API documentation is updated.
-
-var babelPluginFlowReactPropTypes_proptype_Options = {
-  defaultIcon: typeof babelPluginFlowReactPropTypes_proptype_Element === 'function' ? babelPluginFlowReactPropTypes_proptype_Element.isRequired ? babelPluginFlowReactPropTypes_proptype_Element.isRequired : babelPluginFlowReactPropTypes_proptype_Element : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Element).isRequired,
-  defaultCheckedIcon: typeof babelPluginFlowReactPropTypes_proptype_Element === 'function' ? babelPluginFlowReactPropTypes_proptype_Element.isRequired ? babelPluginFlowReactPropTypes_proptype_Element.isRequired : babelPluginFlowReactPropTypes_proptype_Element : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Element).isRequired,
-  inputType: require('prop-types').string
+SwitchBase.contextTypes = {
+  muiFormControl: _propTypes2.default.object
 };
 
-var _ref2 = _react2.default.createElement(_CheckBoxOutlineBlank2.default, null);
-
-var _ref3 = _react2.default.createElement(_CheckBox2.default, null);
-
-function createSwitch() {
-  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
-      _ref$defaultIcon = _ref.defaultIcon,
-      defaultIcon = _ref$defaultIcon === undefined ? _ref2 : _ref$defaultIcon,
-      _ref$defaultCheckedIc = _ref.defaultCheckedIcon,
-      defaultCheckedIcon = _ref$defaultCheckedIc === undefined ? _ref3 : _ref$defaultCheckedIc,
-      _ref$inputType = _ref.inputType,
-      inputType = _ref$inputType === undefined ? 'checkbox' : _ref$inputType;
-
-  /**
-   * @ignore - internal component.
-   */
-  var SwitchBase = function (_React$Component) {
-    (0, _inherits3.default)(SwitchBase, _React$Component);
-
-    function SwitchBase() {
-      var _ref4;
-
-      var _temp, _this, _ret;
-
-      (0, _classCallCheck3.default)(this, SwitchBase);
-
-      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref4 = SwitchBase.__proto__ || (0, _getPrototypeOf2.default)(SwitchBase)).call.apply(_ref4, [this].concat(args))), _this), _this.state = {}, _this.input = null, _this.button = null, _this.isControlled = null, _this.handleInputChange = function (event) {
-        var checked = event.target.checked;
-
-        if (!_this.isControlled) {
-          _this.setState({ checked: checked });
-        }
-
-        if (_this.props.onChange) {
-          _this.props.onChange(event, checked);
-        }
-      }, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
-    }
-
-    (0, _createClass3.default)(SwitchBase, [{
-      key: 'componentWillMount',
-      value: function componentWillMount() {
-        var props = this.props;
-
-
-        this.isControlled = props.checked !== undefined;
-
-        if (!this.isControlled) {
-          // not controlled, use internal state
-          this.setState({
-            checked: props.defaultChecked !== undefined ? props.defaultChecked : false
-          });
-        }
-      }
-    }, {
-      key: 'render',
-      value: function render() {
-        var _classNames,
-            _this2 = this;
-
-        var _props = this.props,
-            checkedProp = _props.checked,
-            classes = _props.classes,
-            classNameProp = _props.className,
-            checkedIcon = _props.checkedIcon,
-            disabledProp = _props.disabled,
-            iconProp = _props.icon,
-            inputProps = _props.inputProps,
-            inputRef = _props.inputRef,
-            name = _props.name,
-            onChange = _props.onChange,
-            tabIndex = _props.tabIndex,
-            value = _props.value,
-            other = (0, _objectWithoutProperties3.default)(_props, ['checked', 'classes', 'className', 'checkedIcon', 'disabled', 'icon', 'inputProps', 'inputRef', 'name', 'onChange', 'tabIndex', 'value']);
-        var muiFormControl = this.context.muiFormControl;
-
-        var disabled = disabledProp;
-
-        if (muiFormControl) {
-          if (typeof disabled === 'undefined') {
-            disabled = muiFormControl.disabled;
-          }
-        }
-
-        var checked = this.isControlled ? checkedProp : this.state.checked;
-        var className = (0, _classnames2.default)(classes.root, classes.default, classNameProp, (_classNames = {}, (0, _defineProperty3.default)(_classNames, classes.checked, checked), (0, _defineProperty3.default)(_classNames, classes.disabled, disabled), _classNames));
-
-        var icon = checked ? checkedIcon : iconProp;
-
-        if (typeof icon === 'string') {
-          icon = _react2.default.createElement(
-            _Icon2.default,
-            null,
-            icon
-          );
-        }
-
-        return _react2.default.createElement(
-          _IconButton2.default,
-          (0, _extends3.default)({
-            component: 'span',
-            className: className,
-            disabled: disabled,
-            tabIndex: null,
-            role: undefined,
-            rootRef: function rootRef(node) {
-              _this2.button = node;
-            }
-          }, other),
-          icon,
-          _react2.default.createElement('input', (0, _extends3.default)({
-            type: inputType,
-            name: name,
-            checked: this.isControlled ? checkedProp : undefined,
-            onChange: this.handleInputChange,
-            className: classes.input,
-            disabled: disabled,
-            tabIndex: tabIndex,
-            value: value
-          }, inputProps, {
-            ref: function ref(node) {
-              _this2.input = node;
-              if (inputRef) {
-                inputRef(node);
-              }
-            }
-          }))
-        );
-      }
-    }]);
-    return SwitchBase;
-  }(_react2.default.Component);
-
-  SwitchBase.defaultProps = {
-    checkedIcon: defaultCheckedIcon,
-    disableRipple: false,
-    icon: defaultIcon
-  };
-  SwitchBase.contextTypes = {
-    muiFormControl: _propTypes2.default.object
-  };
-
-
-  return (0, _withStyles2.default)(styles, { name: 'MuiSwitchBase' })(SwitchBase);
-}
+exports.default = (0, _withStyles2.default)(styles, { name: 'MuiSwitchBase' })(SwitchBase);
   })();
 });
 
-require.register("material-ui/internal/transition.js", function(exports, require, module) {
+require.register("material-ui/internal/svg-icons/ArrowDownward.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "material-ui");
   (function() {
-    "use strict";
+    'use strict';
 
-var babelPluginFlowReactPropTypes_proptype_TransitionDuration = require("prop-types").oneOfType([require("prop-types").number, require("prop-types").shape({
-  enter: require("prop-types").number.isRequired,
-  exit: require("prop-types").number.isRequired
-})]);
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 
-var babelPluginFlowReactPropTypes_proptype_TransitionCallback = require("prop-types").func;
+var _react = require('react');
 
-var babelPluginFlowReactPropTypes_proptype_TransitionClasses = {
-  appear: require("prop-types").string,
-  appearActive: require("prop-types").string,
-  enter: require("prop-types").string,
-  enterActive: require("prop-types").string,
-  exit: require("prop-types").string,
-  exitActive: require("prop-types").string
+var _react2 = _interopRequireDefault(_react);
+
+var _pure = require('recompose/pure');
+
+var _pure2 = _interopRequireDefault(_pure);
+
+var _SvgIcon = require('../../SvgIcon');
+
+var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @ignore - internal component.
+ */
+var _ref = _react2.default.createElement('path', { d: 'M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z' });
+
+var ArrowDownward = function ArrowDownward(props) {
+  return _react2.default.createElement(
+    _SvgIcon2.default,
+    props,
+    _ref
+  );
 };
+
+ArrowDownward = (0, _pure2.default)(ArrowDownward);
+ArrowDownward.muiName = 'SvgIcon';
+
+exports.default = ArrowDownward;
+  })();
+});
+
+require.register("material-ui/internal/svg-icons/ArrowDropDown.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _pure = require('recompose/pure');
+
+var _pure2 = _interopRequireDefault(_pure);
+
+var _SvgIcon = require('../../SvgIcon');
+
+var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @ignore - internal component.
+ */
+var _ref = _react2.default.createElement('path', { d: 'M7 10l5 5 5-5z' });
+
+var ArrowDropDown = function ArrowDropDown(props) {
+  return _react2.default.createElement(
+    _SvgIcon2.default,
+    props,
+    _ref
+  );
+};
+
+ArrowDropDown = (0, _pure2.default)(ArrowDropDown);
+ArrowDropDown.muiName = 'SvgIcon';
+
+exports.default = ArrowDropDown;
+  })();
+});
+
+require.register("material-ui/internal/svg-icons/CheckBox.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _pure = require('recompose/pure');
+
+var _pure2 = _interopRequireDefault(_pure);
+
+var _SvgIcon = require('../../SvgIcon');
+
+var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @ignore - internal component.
+ */
+var _ref = _react2.default.createElement('path', { d: 'M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z' });
+
+var CheckBox = function CheckBox(props) {
+  return _react2.default.createElement(
+    _SvgIcon2.default,
+    props,
+    _ref
+  );
+};
+CheckBox = (0, _pure2.default)(CheckBox);
+CheckBox.muiName = 'SvgIcon';
+
+exports.default = CheckBox;
+  })();
+});
+
+require.register("material-ui/internal/svg-icons/CheckBoxOutlineBlank.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _pure = require('recompose/pure');
+
+var _pure2 = _interopRequireDefault(_pure);
+
+var _SvgIcon = require('../../SvgIcon');
+
+var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @ignore - internal component.
+ */
+var _ref = _react2.default.createElement('path', { d: 'M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z' });
+
+var CheckBoxOutlineBlank = function CheckBoxOutlineBlank(props) {
+  return _react2.default.createElement(
+    _SvgIcon2.default,
+    props,
+    _ref
+  );
+};
+CheckBoxOutlineBlank = (0, _pure2.default)(CheckBoxOutlineBlank);
+CheckBoxOutlineBlank.muiName = 'SvgIcon';
+
+exports.default = CheckBoxOutlineBlank;
+  })();
+});
+
+require.register("material-ui/internal/svg-icons/KeyboardArrowLeft.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _pure = require('recompose/pure');
+
+var _pure2 = _interopRequireDefault(_pure);
+
+var _SvgIcon = require('../../SvgIcon');
+
+var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @ignore - internal component.
+ */
+var _ref = _react2.default.createElement('path', { d: 'M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z' });
+
+var KeyboardArrowLeft = function KeyboardArrowLeft(props) {
+  return _react2.default.createElement(
+    _SvgIcon2.default,
+    props,
+    _ref
+  );
+};
+KeyboardArrowLeft = (0, _pure2.default)(KeyboardArrowLeft);
+KeyboardArrowLeft.muiName = 'SvgIcon';
+
+exports.default = KeyboardArrowLeft;
+  })();
+});
+
+require.register("material-ui/internal/svg-icons/KeyboardArrowRight.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _pure = require('recompose/pure');
+
+var _pure2 = _interopRequireDefault(_pure);
+
+var _SvgIcon = require('../../SvgIcon');
+
+var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @ignore - internal component.
+ */
+var _ref = _react2.default.createElement('path', { d: 'M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z' });
+
+var KeyboardArrowRight = function KeyboardArrowRight(props) {
+  return _react2.default.createElement(
+    _SvgIcon2.default,
+    props,
+    _ref
+  );
+};
+KeyboardArrowRight = (0, _pure2.default)(KeyboardArrowRight);
+KeyboardArrowRight.muiName = 'SvgIcon';
+
+exports.default = KeyboardArrowRight;
+  })();
+});
+
+require.register("material-ui/node_modules/jss-default-unit/lib/defaultUnits.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui/node_modules/jss-default-unit");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/**
+ * Generated jss-default-unit CSS property units
+ *
+ * @type object
+ */
+exports['default'] = {
+  'animation-delay': 'ms',
+  'animation-duration': 'ms',
+  'background-position': 'px',
+  'background-position-x': 'px',
+  'background-position-y': 'px',
+  'background-size': 'px',
+  border: 'px',
+  'border-bottom': 'px',
+  'border-bottom-left-radius': 'px',
+  'border-bottom-right-radius': 'px',
+  'border-bottom-width': 'px',
+  'border-left': 'px',
+  'border-left-width': 'px',
+  'border-radius': 'px',
+  'border-right': 'px',
+  'border-right-width': 'px',
+  'border-spacing': 'px',
+  'border-top': 'px',
+  'border-top-left-radius': 'px',
+  'border-top-right-radius': 'px',
+  'border-top-width': 'px',
+  'border-width': 'px',
+  'border-after-width': 'px',
+  'border-before-width': 'px',
+  'border-end-width': 'px',
+  'border-horizontal-spacing': 'px',
+  'border-start-width': 'px',
+  'border-vertical-spacing': 'px',
+  bottom: 'px',
+  'box-shadow': 'px',
+  'column-gap': 'px',
+  'column-rule': 'px',
+  'column-rule-width': 'px',
+  'column-width': 'px',
+  'flex-basis': 'px',
+  'font-size': 'px',
+  'font-size-delta': 'px',
+  height: 'px',
+  left: 'px',
+  'letter-spacing': 'px',
+  'logical-height': 'px',
+  'logical-width': 'px',
+  margin: 'px',
+  'margin-after': 'px',
+  'margin-before': 'px',
+  'margin-bottom': 'px',
+  'margin-left': 'px',
+  'margin-right': 'px',
+  'margin-top': 'px',
+  'max-height': 'px',
+  'max-width': 'px',
+  'margin-end': 'px',
+  'margin-start': 'px',
+  'mask-position-x': 'px',
+  'mask-position-y': 'px',
+  'mask-size': 'px',
+  'max-logical-height': 'px',
+  'max-logical-width': 'px',
+  'min-height': 'px',
+  'min-width': 'px',
+  'min-logical-height': 'px',
+  'min-logical-width': 'px',
+  motion: 'px',
+  'motion-offset': 'px',
+  outline: 'px',
+  'outline-offset': 'px',
+  'outline-width': 'px',
+  padding: 'px',
+  'padding-bottom': 'px',
+  'padding-left': 'px',
+  'padding-right': 'px',
+  'padding-top': 'px',
+  'padding-after': 'px',
+  'padding-before': 'px',
+  'padding-end': 'px',
+  'padding-start': 'px',
+  'perspective-origin-x': '%',
+  'perspective-origin-y': '%',
+  perspective: 'px',
+  right: 'px',
+  'shape-margin': 'px',
+  size: 'px',
+  'text-indent': 'px',
+  'text-stroke': 'px',
+  'text-stroke-width': 'px',
+  top: 'px',
+  'transform-origin': '%',
+  'transform-origin-x': '%',
+  'transform-origin-y': '%',
+  'transform-origin-z': '%',
+  'transition-delay': 'ms',
+  'transition-duration': 'ms',
+  'vertical-align': 'px',
+  width: 'px',
+  'word-spacing': 'px',
+  // Not existing properties.
+  // Used to avoid issues with jss-expand intergration.
+  'box-shadow-x': 'px',
+  'box-shadow-y': 'px',
+  'box-shadow-blur': 'px',
+  'box-shadow-spread': 'px',
+  'font-line-height': 'px',
+  'text-shadow-x': 'px',
+  'text-shadow-y': 'px',
+  'text-shadow-blur': 'px'
+};
+  })();
+});
+
+require.register("material-ui/node_modules/jss-default-unit/lib/index.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui/node_modules/jss-default-unit");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+exports['default'] = defaultUnit;
+
+var _defaultUnits = require('./defaultUnits');
+
+var _defaultUnits2 = _interopRequireDefault(_defaultUnits);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+/**
+ * Clones the object and adds a camel cased property version.
+ */
+function addCamelCasedVersion(obj) {
+  var regExp = /(-[a-z])/g;
+  var replace = function replace(str) {
+    return str[1].toUpperCase();
+  };
+  var newObj = {};
+  for (var key in obj) {
+    newObj[key] = obj[key];
+    newObj[key.replace(regExp, replace)] = obj[key];
+  }
+  return newObj;
+}
+
+var units = addCamelCasedVersion(_defaultUnits2['default']);
+
+/**
+ * Recursive deep style passing function
+ *
+ * @param {String} current property
+ * @param {(Object|Array|Number|String)} property value
+ * @param {Object} options
+ * @return {(Object|Array|Number|String)} resulting value
+ */
+function iterate(prop, value, options) {
+  if (!value) return value;
+
+  var convertedValue = value;
+
+  var type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
+  if (type === 'object' && Array.isArray(value)) type = 'array';
+
+  switch (type) {
+    case 'object':
+      if (prop === 'fallbacks') {
+        for (var innerProp in value) {
+          value[innerProp] = iterate(innerProp, value[innerProp], options);
+        }
+        break;
+      }
+      for (var _innerProp in value) {
+        value[_innerProp] = iterate(prop + '-' + _innerProp, value[_innerProp], options);
+      }
+      break;
+    case 'array':
+      for (var i = 0; i < value.length; i++) {
+        value[i] = iterate(prop, value[i], options);
+      }
+      break;
+    case 'number':
+      if (value !== 0) {
+        convertedValue = value + (options[prop] || units[prop] || '');
+      }
+      break;
+    default:
+      break;
+  }
+
+  return convertedValue;
+}
+
+/**
+ * Add unit to numeric values.
+ */
+function defaultUnit() {
+  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+  var camelCasedOptions = addCamelCasedVersion(options);
+
+  function onProcessStyle(style, rule) {
+    if (rule.type !== 'style') return style;
+
+    for (var prop in style) {
+      style[prop] = iterate(prop, style[prop], camelCasedOptions);
+    }
+
+    return style;
+  }
+
+  function onChangeValue(value, prop) {
+    return iterate(prop, value, camelCasedOptions);
+  }
+
+  return { onProcessStyle: onProcessStyle, onChangeValue: onChangeValue };
+}
   })();
 });
 
@@ -58640,6 +58138,10 @@ var _react2 = _interopRequireDefault(_react);
 var _propTypes = require('prop-types');
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
+
+var _warning = require('warning');
+
+var _warning2 = _interopRequireDefault(_warning);
 
 var _brcast = require('brcast');
 
@@ -58725,6 +58227,7 @@ var MuiThemeProvider = function (_React$Component) {
     value: function mergeOuterLocalTheme(localTheme) {
       // To support composition of theme.
       if (typeof localTheme === 'function') {
+        'development' !== "production" ? (0, _warning2.default)(this.outerTheme, ['Material-UI: you are providing a theme function property ' + 'to the MuiThemeProvider component:', '<MuiThemeProvider theme={outerTheme => outerTheme} />', '', 'However, no outer theme is present.', 'Make sure a theme is already injected higher in the React tree ' + 'or provide a theme object.'].join('\n')) : void 0;
         return localTheme(this.outerTheme);
       }
 
@@ -58742,12 +58245,6 @@ var MuiThemeProvider = function (_React$Component) {
   }]);
   return MuiThemeProvider;
 }(_react2.default.Component);
-
-MuiThemeProvider.defaultProps = {
-  disableStylesGeneration: false,
-  sheetsManager: null
-};
-
 
 MuiThemeProvider.propTypes = 'development' !== "production" ? {
   /**
@@ -58775,25 +58272,20 @@ MuiThemeProvider.propTypes = 'development' !== "production" ? {
   theme: _propTypes2.default.oneOfType([_propTypes2.default.object, _propTypes2.default.func]).isRequired
 } : {};
 
+MuiThemeProvider.propTypes = 'development' !== "production" ? (0, _exactProp2.default)(MuiThemeProvider.propTypes, 'MuiThemeProvider') : {};
+
+MuiThemeProvider.defaultProps = {
+  disableStylesGeneration: false,
+  sheetsManager: null
+};
+
 MuiThemeProvider.childContextTypes = (0, _extends3.default)({}, _themeListener2.default.contextTypes, {
   muiThemeProviderOptions: _propTypes2.default.object
 });
 
 MuiThemeProvider.contextTypes = _themeListener2.default.contextTypes;
 
-// Add a wrapper component to generate some helper messages in the development
-// environment.
-// eslint-disable-next-line import/no-mutable-exports
-var MuiThemeProviderWrapper = MuiThemeProvider;
-
-if ('development' !== 'production') {
-  MuiThemeProviderWrapper = function MuiThemeProviderWrapper(props) {
-    return _react2.default.createElement(MuiThemeProvider, props);
-  };
-  MuiThemeProviderWrapper.propTypes = (0, _exactProp2.default)(MuiThemeProvider.propTypes, 'MuiThemeProvider');
-}
-
-exports.default = MuiThemeProviderWrapper;
+exports.default = MuiThemeProvider;
   })();
 });
 
@@ -59063,8 +58555,6 @@ exports.default = createBreakpoints;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Breakpoint = require('prop-types').oneOf(['xs', 'sm', 'md', 'lg', 'xl']);
-
 // Sorted ASC by size. That's important.
 // It can't be configured as it's used statically for propTypes.
 var keys = exports.keys = ['xs', 'sm', 'md', 'lg', 'xl'];
@@ -59073,7 +58563,7 @@ var keys = exports.keys = ['xs', 'sm', 'md', 'lg', 'xl'];
 function createBreakpoints(breakpoints) {
   var _breakpoints$values = breakpoints.values,
       values = _breakpoints$values === undefined ? {
-    xs: 1,
+    xs: 0,
     sm: 600,
     md: 960,
     lg: 1280,
@@ -59087,26 +58577,34 @@ function createBreakpoints(breakpoints) {
 
 
   function up(key) {
-    var value = values[key] || key;
+    var value = typeof values[key] === 'number' ? values[key] : key;
     return '@media (min-width:' + value + unit + ')';
   }
 
   function down(key) {
-    var value = values[key] || key;
+    var endIndex = keys.indexOf(key) + 1;
+    var upperbound = values[keys[endIndex]];
+
+    if (endIndex === keys.length) {
+      // xl down applies to all sizes
+      return up('xs');
+    }
+
+    var value = typeof upperbound === 'number' && endIndex > 0 ? upperbound : key;
     return '@media (max-width:' + (value - step / 100) + unit + ')';
   }
 
   function between(start, end) {
-    var startIndex = keys.indexOf(start);
-    var endIndex = keys.indexOf(end);
-    return '@media (min-width:' + values[keys[startIndex]] + unit + ') and ' + ('(max-width:' + (values[keys[endIndex + 1]] - step / 100) + unit + ')');
+    var endIndex = keys.indexOf(end) + 1;
+
+    if (endIndex === keys.length) {
+      return up(start);
+    }
+
+    return '@media (min-width:' + values[start] + unit + ') and ' + ('(max-width:' + (values[keys[endIndex]] - step / 100) + unit + ')');
   }
 
   function only(key) {
-    var keyIndex = keys.indexOf(key);
-    if (keyIndex === keys.length - 1) {
-      return up(key);
-    }
     return between(key, key);
   }
 
@@ -59143,24 +58641,31 @@ var _warning2 = _interopRequireDefault(_warning);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_StyleSheet = require('jss/lib/StyleSheet').babelPluginFlowReactPropTypes_proptype_StyleSheet || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_generateClassName = require('jss/lib/types').babelPluginFlowReactPropTypes_proptype_generateClassName || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Rule = require('jss/lib/types').babelPluginFlowReactPropTypes_proptype_Rule || require('prop-types').any;
-
 var generatorCounter = 0;
 
 // Returns a function which generates unique class names based on counters.
 // When new generator function is created, rule counter is reset.
 // We need to reset the rule counter for SSR for each request.
 //
-// It's an improved version of
+// It's inspired by
 // https://github.com/cssinjs/jss/blob/4e6a05dd3f7b6572fdd3ab216861d9e446c20331/src/utils/createGenerateClassName.js
 function createGenerateClassName() {
+  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var _options$dangerouslyU = options.dangerouslyUseGlobalCSS,
+      dangerouslyUseGlobalCSS = _options$dangerouslyU === undefined ? false : _options$dangerouslyU,
+      _options$productionPr = options.productionPrefix,
+      productionPrefix = _options$productionPr === undefined ? 'jss' : _options$productionPr;
+
+  var escapeRegex = /([[\].#*$><+~=|^:(),"'`\s])/g;
   var ruleCounter = 0;
 
-  if ('development' === 'production' && typeof window !== 'undefined') {
+  // - HMR can lead to many class name generators being instantiated,
+  // so the warning is only triggered in production.
+  // - We expect a class name generator to be instantiated per new request on the server,
+  // so the warning is only triggered client side.
+  // - You can get away with having multiple class name generators
+  // by modifying the `productionPrefix`.
+  if ('development' === 'production' && typeof window !== 'undefined' && productionPrefix === 'jss') {
     generatorCounter += 1;
 
     if (generatorCounter > 2) {
@@ -59169,21 +58674,43 @@ function createGenerateClassName() {
     }
   }
 
-  return function (rule, sheet) {
+  return function (rule, styleSheet) {
     ruleCounter += 1;
     'development' !== "production" ? (0, _warning2.default)(ruleCounter < 1e10, ['Material-UI: you might have a memory leak.', 'The ruleCounter is not supposed to grow that much.'].join('')) : void 0;
 
-    if ('development' === 'production') {
-      return 'c' + ruleCounter;
+    // Code branch the whole block at the expense of more code.
+    if (dangerouslyUseGlobalCSS) {
+      if (styleSheet && styleSheet.options.classNamePrefix) {
+        var prefix = styleSheet.options.classNamePrefix;
+        // Sanitize the string as will be used to prefix the generated class name.
+        prefix = prefix.replace(escapeRegex, '-');
+
+        if (prefix.match(/^Mui/)) {
+          return prefix + '-' + rule.key;
+        }
+
+        if ('development' !== 'production') {
+          return prefix + '-' + rule.key + '-' + ruleCounter;
+        }
+      }
+
+      if ('development' === 'production') {
+        return '' + productionPrefix + ruleCounter;
+      }
+
+      return rule.key + '-' + ruleCounter;
     }
 
-    if (sheet && sheet.options.meta) {
-      var meta = sheet.options.meta;
-      // Sanitize the string as will be used in development to prefix the generated
-      // class name.
-      meta = meta.replace(new RegExp(/[!"#$%&'()*+,./:; <=>?@[\\\]^`{|}~]/g), '-');
+    if ('development' === 'production') {
+      return '' + productionPrefix + ruleCounter;
+    }
 
-      return meta + '-' + rule.key + '-' + ruleCounter;
+    if (styleSheet && styleSheet.options.classNamePrefix) {
+      var _prefix = styleSheet.options.classNamePrefix;
+      // Sanitize the string as will be used to prefix the generated class name.
+      _prefix = _prefix.replace(escapeRegex, '-');
+
+      return _prefix + '-' + rule.key + '-' + ruleCounter;
     }
 
     return rule.key + '-' + ruleCounter;
@@ -59205,9 +58732,9 @@ var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
 
 var _defineProperty3 = _interopRequireDefault(_defineProperty2);
 
-var _extends2 = require('babel-runtime/helpers/extends');
+var _extends3 = require('babel-runtime/helpers/extends');
 
-var _extends3 = _interopRequireDefault(_extends2);
+var _extends4 = _interopRequireDefault(_extends3);
 
 exports.default = createMixins;
 
@@ -59216,15 +58743,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function createMixins(breakpoints, spacing, mixins) {
   var _toolbar;
 
-  return (0, _extends3.default)({
+  return (0, _extends4.default)({
     gutters: function gutters(styles) {
-      styles.paddingLeft = spacing.unit * 2;
-      styles.paddingRight = spacing.unit * 2;
-      styles[breakpoints.up('sm')] = {
+      return (0, _extends4.default)({
+        paddingLeft: spacing.unit * 2,
+        paddingRight: spacing.unit * 2
+      }, styles, (0, _defineProperty3.default)({}, breakpoints.up('sm'), (0, _extends4.default)({
         paddingLeft: spacing.unit * 3,
         paddingRight: spacing.unit * 3
-      };
-      return styles;
+      }, styles[breakpoints.up('sm')])));
     },
     toolbar: (_toolbar = {
       minHeight: 56
@@ -59413,7 +58940,8 @@ var light = exports.light = {
     default: _grey2.default[50],
     paper: _common2.default.white,
     appBar: _grey2.default[100],
-    contentFrame: _grey2.default[200]
+    contentFrame: _grey2.default[200],
+    chip: _grey2.default[300]
   },
   line: {
     stepper: _grey2.default[400]
@@ -59445,7 +58973,8 @@ var dark = exports.dark = {
     default: '#303030',
     paper: _grey2.default[800],
     appBar: _grey2.default[900],
-    contentFrame: _grey2.default[900]
+    contentFrame: _grey2.default[900],
+    chip: _grey2.default[800]
   },
   line: {
     // TODO: What should the dark theme have for stepper line? Not stated in style guide
@@ -59453,8 +58982,8 @@ var dark = exports.dark = {
   }
 };
 
-function getContrastText(color) {
-  if ((0, _colorManipulator.getContrastRatio)(color, _common2.default.black) < 7) {
+function getContrastText(hue) {
+  if ((0, _colorManipulator.getContrastRatio)(hue, _common2.default.black) < 7) {
     return dark.text.primary;
   }
   return light.text.primary;
@@ -59570,6 +59099,7 @@ function createTypography(palette, typography) {
 
   return (0, _deepmerge2.default)({
     pxToRem: pxToRem,
+    round: round,
     fontFamily: fontFamily,
     fontSize: fontSize,
     fontWeightLight: fontWeightLight,
@@ -59694,8 +59224,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // < 1kb payload overhead when lodash/merge is > 3kb.
 
 function getStylesCreator(stylesOrCreator) {
+  var themingEnabled = typeof stylesOrCreator === 'function';
+
   function create(theme, name) {
-    var styles = typeof stylesOrCreator === 'function' ? stylesOrCreator(theme) : stylesOrCreator;
+    var styles = themingEnabled ? stylesOrCreator(theme) : stylesOrCreator;
 
     if (!theme.overrides || !name || !theme.overrides[name]) {
       return styles;
@@ -59705,9 +59237,7 @@ function getStylesCreator(stylesOrCreator) {
     var stylesWithOverrides = (0, _extends3.default)({}, styles);
 
     (0, _keys2.default)(overrides).forEach(function (key) {
-      'development' !== "production" ? (0, _warning2.default)(stylesWithOverrides[key], ['Material-UI: you are trying to override a style that does not exist.',
-      // $FlowFixMe - flow isn't smart enough
-      'Fix the `' + key + '` key of `theme.overrides.' + name + '`.'].join('\n')) : void 0;
+      'development' !== "production" ? (0, _warning2.default)(stylesWithOverrides[key], ['Material-UI: you are trying to override a style that does not exist.', 'Fix the `' + key + '` key of `theme.overrides.' + name + '`.'].join('\n')) : void 0;
       stylesWithOverrides[key] = (0, _deepmerge2.default)(stylesWithOverrides[key], overrides[key]);
     });
 
@@ -59716,10 +59246,8 @@ function getStylesCreator(stylesOrCreator) {
 
   return {
     create: create,
-    options: {
-      index: undefined
-    },
-    themingEnabled: typeof stylesOrCreator === 'function'
+    options: {},
+    themingEnabled: themingEnabled
   };
 }
 
@@ -59734,6 +59262,33 @@ require.register("material-ui/styles/index.js", function(exports, require, modul
 
 Object.defineProperty(exports, "__esModule", {
   value: true
+});
+
+var _createGenerateClassName = require('./createGenerateClassName');
+
+Object.defineProperty(exports, 'createGenerateClassName', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_createGenerateClassName).default;
+  }
+});
+
+var _createMuiTheme = require('./createMuiTheme');
+
+Object.defineProperty(exports, 'createMuiTheme', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_createMuiTheme).default;
+  }
+});
+
+var _jssPreset = require('./jssPreset');
+
+Object.defineProperty(exports, 'jssPreset', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_jssPreset).default;
+  }
 });
 
 var _MuiThemeProvider = require('./MuiThemeProvider');
@@ -59763,16 +59318,54 @@ Object.defineProperty(exports, 'withTheme', {
   }
 });
 
-var _createMuiTheme = require('./createMuiTheme');
-
-Object.defineProperty(exports, 'createMuiTheme', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_createMuiTheme).default;
-  }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+  })();
 });
 
+require.register("material-ui/styles/jssPreset.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _jssGlobal = require('jss-global');
+
+var _jssGlobal2 = _interopRequireDefault(_jssGlobal);
+
+var _jssNested = require('jss-nested');
+
+var _jssNested2 = _interopRequireDefault(_jssNested);
+
+var _jssCamelCase = require('jss-camel-case');
+
+var _jssCamelCase2 = _interopRequireDefault(_jssCamelCase);
+
+var _jssDefaultUnit = require('jss-default-unit');
+
+var _jssDefaultUnit2 = _interopRequireDefault(_jssDefaultUnit);
+
+var _jssVendorPrefixer = require('jss-vendor-prefixer');
+
+var _jssVendorPrefixer2 = _interopRequireDefault(_jssVendorPrefixer);
+
+var _jssPropsSort = require('jss-props-sort');
+
+var _jssPropsSort2 = _interopRequireDefault(_jssPropsSort);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Subset of jss-preset-default with only the plugins the Material-UI
+// components are using.
+function jssPreset() {
+  return {
+    plugins: [(0, _jssGlobal2.default)(), (0, _jssNested2.default)(), (0, _jssCamelCase2.default)(), (0, _jssDefaultUnit2.default)(), (0, _jssVendorPrefixer2.default)(), (0, _jssPropsSort2.default)()]
+  };
+}
+
+exports.default = jssPreset;
   })();
 });
 
@@ -60048,13 +59641,13 @@ var _hoistNonReactStatics = require('hoist-non-react-statics');
 
 var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
 
-var _wrapDisplayName = require('recompose/wrapDisplayName');
-
-var _wrapDisplayName2 = _interopRequireDefault(_wrapDisplayName);
-
 var _getDisplayName = require('recompose/getDisplayName');
 
 var _getDisplayName2 = _interopRequireDefault(_getDisplayName);
+
+var _wrapDisplayName = require('recompose/wrapDisplayName');
+
+var _wrapDisplayName2 = _interopRequireDefault(_wrapDisplayName);
 
 var _contextTypes = require('react-jss/lib/contextTypes');
 
@@ -60062,13 +59655,13 @@ var _contextTypes2 = _interopRequireDefault(_contextTypes);
 
 var _jss = require('jss');
 
-var _jssPresetDefault = require('jss-preset-default');
-
-var _jssPresetDefault2 = _interopRequireDefault(_jssPresetDefault);
-
 var _ns = require('react-jss/lib/ns');
 
 var ns = _interopRequireWildcard(_ns);
+
+var _jssPreset = require('./jssPreset');
+
+var _jssPreset2 = _interopRequireDefault(_jssPreset);
 
 var _createMuiTheme = require('./createMuiTheme');
 
@@ -60090,10 +59683,8 @@ function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj;
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_HigherOrderComponent = require('react-flow-types').babelPluginFlowReactPropTypes_proptype_HigherOrderComponent || require('prop-types').any; //  weak
-
 // New JSS instance.
-var jss = (0, _jss.create)((0, _jssPresetDefault2.default)());
+var jss = (0, _jss.create)((0, _jssPreset2.default)());
 
 // Use a singleton or the provided one by the context.
 var generateClassName = (0, _createGenerateClassName2.default)();
@@ -60125,24 +59716,6 @@ function getDefaultTheme() {
   return defaultTheme;
 }
 
-var babelPluginFlowReactPropTypes_proptype_RequiredProps = {
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: require('prop-types').object,
-
-  /**
-   * Use that property to pass a ref callback to the decorated component.
-   */
-  innerRef: require('prop-types').func
-};
-var babelPluginFlowReactPropTypes_proptype_InjectedProps = {
-  classes: require('prop-types').object.isRequired,
-  theme: require('prop-types').object.isRequired
-};
-
-// Note, theme is conditionally injected, but flow is static analysis so we need to include it.
-
 // Link a style sheet with a component.
 // It does not modify the component passed to it;
 // instead, it returns a new component, with a `classes` property.
@@ -60151,41 +59724,40 @@ var withStyles = function withStyles(stylesOrCreator) {
   return function (Component) {
     var _options$withTheme = options.withTheme,
         withTheme = _options$withTheme === undefined ? false : _options$withTheme,
-        flip = options.flip,
+        _options$flip = options.flip,
+        flip = _options$flip === undefined ? null : _options$flip,
         name = options.name,
         styleSheetOptions = (0, _objectWithoutProperties3.default)(options, ['withTheme', 'flip', 'name']);
 
     var stylesCreator = (0, _getStylesCreator2.default)(stylesOrCreator);
     var listenToTheme = stylesCreator.themingEnabled || withTheme || typeof name === 'string';
 
-    if (stylesCreator.options.index === undefined) {
-      indexCounter += 1;
-      stylesCreator.options.index = indexCounter;
-    }
+    indexCounter += 1;
+    stylesCreator.options.index = indexCounter;
 
     'development' !== "production" ? (0, _warning2.default)(indexCounter < 0, ['Material-UI: you might have a memory leak.', 'The indexCounter is not supposed to grow that much.'].join(' ')) : void 0;
 
-    var Style = function (_React$Component) {
-      (0, _inherits3.default)(Style, _React$Component);
+    var WithStyles = function (_React$Component) {
+      (0, _inherits3.default)(WithStyles, _React$Component);
 
-      function Style(props, context) {
-        (0, _classCallCheck3.default)(this, Style);
+      function WithStyles(props, context) {
+        (0, _classCallCheck3.default)(this, WithStyles);
 
-        var _this = (0, _possibleConstructorReturn3.default)(this, (Style.__proto__ || (0, _getPrototypeOf2.default)(Style)).call(this, props, context));
+        var _this = (0, _possibleConstructorReturn3.default)(this, (WithStyles.__proto__ || (0, _getPrototypeOf2.default)(WithStyles)).call(this, props, context));
 
         _this.state = {};
-        _this.unsubscribeId = null;
-        _this.jss = null;
-        _this.sheetsManager = sheetsManager;
         _this.disableStylesGeneration = false;
+        _this.jss = null;
+        _this.sheetOptions = null;
+        _this.sheetsManager = sheetsManager;
         _this.stylesCreatorSaved = null;
         _this.theme = null;
-        _this.sheetOptions = null;
-        _this.theme = null;
-        var muiThemeProviderOptions = _this.context.muiThemeProviderOptions;
+        _this.unsubscribeId = null;
 
 
         _this.jss = _this.context[ns.jss] || jss;
+
+        var muiThemeProviderOptions = _this.context.muiThemeProviderOptions;
 
         if (muiThemeProviderOptions) {
           if (muiThemeProviderOptions.sheetsManager) {
@@ -60202,18 +59774,12 @@ var withStyles = function withStyles(stylesOrCreator) {
         _this.sheetOptions = (0, _extends3.default)({
           generateClassName: generateClassName
         }, _this.context[ns.sheetOptions]);
-        // We use || as it's lazy evaluated.
+        // We use || as the function call is lazy evaluated.
         _this.theme = listenToTheme ? _themeListener2.default.initial(context) || getDefaultTheme() : noopTheme;
         return _this;
       }
 
-      // Exposed for test purposes.
-
-
-      // Exposed for tests purposes
-
-
-      (0, _createClass3.default)(Style, [{
+      (0, _createClass3.default)(WithStyles, [{
         key: 'componentWillMount',
         value: function componentWillMount() {
           this.attach(this.theme);
@@ -60287,14 +59853,15 @@ var withStyles = function withStyles(stylesOrCreator) {
 
           if (sheetManagerTheme.refs === 0) {
             var styles = stylesCreatorSaved.create(theme, name);
-            var _meta = void 0;
+            var meta = name;
 
-            if ('development' !== 'production') {
-              _meta = name || (0, _getDisplayName2.default)(Component);
+            if ('development' !== 'production' && !meta) {
+              meta = (0, _getDisplayName2.default)(Component);
             }
 
             var sheet = this.jss.createStyleSheet(styles, (0, _extends3.default)({
-              meta: _meta,
+              meta: meta,
+              classNamePrefix: meta,
               flip: typeof flip === 'boolean' ? flip : theme.direction === 'rtl',
               link: false
             }, this.sheetOptions, stylesCreatorSaved.options, {
@@ -60381,29 +59948,37 @@ var withStyles = function withStyles(stylesOrCreator) {
           return _react2.default.createElement(Component, (0, _extends3.default)({ classes: classes }, more, other, { ref: innerRef }));
         }
       }]);
-      return Style;
+      return WithStyles;
     }(_react2.default.Component);
 
-    Style.contextTypes = (0, _extends3.default)({
-      muiThemeProviderOptions: _propTypes2.default.object
-    }, _contextTypes2.default, listenToTheme ? _themeListener2.default.contextTypes : {});
-    Style.Naked = Component;
-    Style.propTypes = 'development' !== "production" ? {
-      classes: require('prop-types').object,
-      innerRef: require('prop-types').func
+    WithStyles.propTypes = 'development' !== "production" ? {
+      /**
+       * Useful to extend the style applied to components.
+       */
+      classes: _propTypes2.default.object,
+      /**
+       * Use that property to pass a ref callback to the decorated component.
+       */
+      innerRef: _propTypes2.default.func
     } : {};
 
-
-    (0, _hoistNonReactStatics2.default)(Style, Component);
-
-    // Higher specificity
-    Style.options = options;
+    WithStyles.contextTypes = (0, _extends3.default)({
+      muiThemeProviderOptions: _propTypes2.default.object
+    }, _contextTypes2.default, listenToTheme ? _themeListener2.default.contextTypes : {});
 
     if ('development' !== 'production') {
-      Style.displayName = (0, _wrapDisplayName2.default)(Component, 'withStyles');
+      WithStyles.displayName = (0, _wrapDisplayName2.default)(Component, 'WithStyles');
     }
 
-    return Style;
+    (0, _hoistNonReactStatics2.default)(WithStyles, Component);
+
+    if ('development' !== 'production') {
+      // Exposed for test purposes.
+      WithStyles.Naked = Component;
+      WithStyles.options = options;
+    }
+
+    return WithStyles;
   };
 };
 
@@ -60448,6 +60023,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _hoistNonReactStatics = require('hoist-non-react-statics');
+
+var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
+
 var _wrapDisplayName = require('recompose/wrapDisplayName');
 
 var _wrapDisplayName2 = _interopRequireDefault(_wrapDisplayName);
@@ -60462,11 +60041,6 @@ var _themeListener2 = _interopRequireDefault(_themeListener);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-//  weak
-
-// flow sanity check (DO NOT DELETE) https://flow.org/try/#0JYWwDg9gTgLgBAJQKYEMDG8BmUIjgcilQ3wG4AoUSWOGATzCTgG84BhXSAOyS5gBUGTAL5xsuAkXQwy5OQHp5cALSq16jZuVwdccorgB3YDAAW-U0hBMAEgHk25JAA9qWAK5cMwCFyMnzS2sAHgAFHDAAZwAuFmEAPgAKcl12Tl9eGFiOcAy+QUZg1jMrJFi7ACMAKyQMOFEAMjhwiCj4gBpyAEps9J58oTCIyPiWOR00ABsUSMi4AHUAi1K4FxheABM55GkAOhzuTKHWyPaWWiCyuEqauoSx1KIuDaQoRK6H1LgiGHcoP2CBzy8GYuzBZmAkV2YGGohK1gAvMwIVDIjAUOtdvCkKJ5PEKKlhAT6ilvkhfv8FktLuRhAolFpGUy1PolMYzMtrHAAKqRFAAcyQ5CmMzmAEFVs51s9tsQYPs+kdipdytVavBGiwULEuO4QBVXmcKjq9QaoPdmHS0L40XBOUgNkD+vAEf4OZdEmKuhQDPMmBtfPh4DwHbQIHAwKK4MA-AADbGx1YAN14Fwg7n5pjgsYAsnQnZlE0QAI7uYBEOYmXbkYL2x2KvhwFBIgCMogqSIATLj4vSVMyB6lWW7TIsNmY4PZHC43LQhHAAEJSADWkBjLoIzki+DgAB8CJEQDv9-gQBtjwRJvyL-hnJNZOR6IwqePTC0onBXcxSTGTMAUJMY5mAA-LES6oKuEDrp0OjGK+oGLiua58J0dJOK40AeF4MA+H47KjsAr7vJ8mCeN4virFwpgoF4SDHFEsRAW+wxJKSqQFnwvS5M6BR0cwcFmGBSFQShcBgrs76RAkMFwD0aTcZkvH0SMYxsXAIqzFSZhMZK0pbIgcoKgpfDKaM35fGSzyvMR5kWepNogr+OEAUxZwCaYoiuii0LDGpjzkn8AIcSC4neTCJyiO5SL4Ie+A9sShIJSSak-IFWkEa+xJEuMZIUn4vDUbRFBoQYA5leow7uHygrCtMmkLrpmyynswVFO5QkQchMBnNqcC6vqhrGn1pqvBapJPC8bwfLZEwOSw7meRckI+ScKUBZSwQbMASZwHipJ0lac1MQ6wWfiOTHvIkC7esOfpwAGXBBn1SChjA4aRppMbZu5iZICmfhmOmmbZnmwVFkgpblkglbyjWx31sZ8DNswbZwB2zDdrt+JAA
-var babelPluginFlowReactPropTypes_proptype_HigherOrderComponent = require('react-flow-types').babelPluginFlowReactPropTypes_proptype_HigherOrderComponent || require('prop-types').any;
-
 var defaultTheme = void 0;
 
 function getDefaultTheme() {
@@ -60477,11 +60051,6 @@ function getDefaultTheme() {
   defaultTheme = (0, _createMuiTheme2.default)();
   return defaultTheme;
 }
-
-var babelPluginFlowReactPropTypes_proptype_InjectedProps = {
-  theme: require('prop-types').object.isRequired
-};
-
 
 // Provide the theme object as a property to the input component.
 var withTheme = function withTheme() {
@@ -60498,14 +60067,11 @@ var withTheme = function withTheme() {
         _this.unsubscribeId = null;
 
         _this.state = {
-          // We use || as it's lazy evaluated.
+          // We use || as the function call is lazy evaluated.
           theme: _themeListener2.default.initial(context) || getDefaultTheme()
         };
         return _this;
       }
-
-      // Exposed for test purposes.
-
 
       (0, _createClass3.default)(WithTheme, [{
         key: 'componentDidMount',
@@ -60533,9 +60099,17 @@ var withTheme = function withTheme() {
     }(_react2.default.Component);
 
     WithTheme.contextTypes = _themeListener2.default.contextTypes;
-    WithTheme.displayName = (0, _wrapDisplayName2.default)(Component, 'withTheme');
-    WithTheme.Naked = Component;
 
+    if ('development' !== 'production') {
+      WithTheme.displayName = (0, _wrapDisplayName2.default)(Component, 'WithTheme');
+    }
+
+    (0, _hoistNonReactStatics2.default)(WithTheme, Component);
+
+    if ('development' !== 'production') {
+      // Exposed for test purposes.
+      WithTheme.Naked = Component;
+    }
 
     return WithTheme;
   };
@@ -60553,278 +60127,18 @@ require.register("material-ui/styles/zIndex.js", function(exports, require, modu
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-
-// Needed as the zIndex works with absolute values.
+// We need to centralize the zIndex definitions as they work
+// like global values in the browser.
 var zIndex = {
-  mobileStepper: 900,
-  menu: 1000,
+  mobileStepper: 1000,
   appBar: 1100,
-  drawerOverlay: 1200,
-  navDrawer: 1300,
-  dialogOverlay: 1400,
-  dialog: 1500,
-  layer: 2000,
-  popover: 2100,
-  snackbar: 2900,
-  tooltip: 3000
+  drawer: 1200,
+  modal: 1300,
+  snackbar: 1400,
+  tooltip: 1500
 };
 
 exports.default = zIndex;
-  })();
-});
-
-require.register("material-ui/svg-icons/ArrowDownward.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _pure = require('recompose/pure');
-
-var _pure2 = _interopRequireDefault(_pure);
-
-var _SvgIcon = require('../SvgIcon');
-
-var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @ignore - internal component.
- */
-var _ref = _react2.default.createElement('path', { d: 'M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z' });
-
-var ArrowDownward = function ArrowDownward(props) {
-  return _react2.default.createElement(
-    _SvgIcon2.default,
-    props,
-    _ref
-  );
-};
-
-ArrowDownward = (0, _pure2.default)(ArrowDownward);
-ArrowDownward.muiName = 'SvgIcon';
-
-exports.default = ArrowDownward;
-  })();
-});
-
-require.register("material-ui/svg-icons/ArrowDropDown.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _pure = require('recompose/pure');
-
-var _pure2 = _interopRequireDefault(_pure);
-
-var _SvgIcon = require('../SvgIcon');
-
-var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @ignore - internal component.
- */
-var _ref = _react2.default.createElement('path', { d: 'M7 10l5 5 5-5z' });
-
-var ArrowDropDown = function ArrowDropDown(props) {
-  return _react2.default.createElement(
-    _SvgIcon2.default,
-    props,
-    _ref
-  );
-};
-
-ArrowDropDown = (0, _pure2.default)(ArrowDropDown);
-ArrowDropDown.muiName = 'SvgIcon';
-
-exports.default = ArrowDropDown;
-  })();
-});
-
-require.register("material-ui/svg-icons/CheckBox.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _pure = require('recompose/pure');
-
-var _pure2 = _interopRequireDefault(_pure);
-
-var _SvgIcon = require('../SvgIcon');
-
-var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @ignore - internal component.
- */
-var _ref = _react2.default.createElement('path', { d: 'M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.11 0 2-.9 2-2V5c0-1.1-.89-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z' });
-
-var CheckBox = function CheckBox(props) {
-  return _react2.default.createElement(
-    _SvgIcon2.default,
-    props,
-    _ref
-  );
-};
-CheckBox = (0, _pure2.default)(CheckBox);
-CheckBox.muiName = 'SvgIcon';
-
-exports.default = CheckBox;
-  })();
-});
-
-require.register("material-ui/svg-icons/CheckBoxOutlineBlank.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _pure = require('recompose/pure');
-
-var _pure2 = _interopRequireDefault(_pure);
-
-var _SvgIcon = require('../SvgIcon');
-
-var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @ignore - internal component.
- */
-var _ref = _react2.default.createElement('path', { d: 'M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z' });
-
-var CheckBoxOutlineBlank = function CheckBoxOutlineBlank(props) {
-  return _react2.default.createElement(
-    _SvgIcon2.default,
-    props,
-    _ref
-  );
-};
-CheckBoxOutlineBlank = (0, _pure2.default)(CheckBoxOutlineBlank);
-CheckBoxOutlineBlank.muiName = 'SvgIcon';
-
-exports.default = CheckBoxOutlineBlank;
-  })();
-});
-
-require.register("material-ui/svg-icons/KeyboardArrowLeft.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _pure = require('recompose/pure');
-
-var _pure2 = _interopRequireDefault(_pure);
-
-var _SvgIcon = require('../SvgIcon');
-
-var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @ignore - internal component.
- */
-var _ref = _react2.default.createElement('path', { d: 'M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z' });
-
-var KeyboardArrowLeft = function KeyboardArrowLeft(props) {
-  return _react2.default.createElement(
-    _SvgIcon2.default,
-    props,
-    _ref
-  );
-};
-KeyboardArrowLeft = (0, _pure2.default)(KeyboardArrowLeft);
-KeyboardArrowLeft.muiName = 'SvgIcon';
-
-exports.default = KeyboardArrowLeft;
-  })();
-});
-
-require.register("material-ui/svg-icons/KeyboardArrowRight.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _pure = require('recompose/pure');
-
-var _pure2 = _interopRequireDefault(_pure);
-
-var _SvgIcon = require('../SvgIcon');
-
-var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @ignore - internal component.
- */
-var _ref = _react2.default.createElement('path', { d: 'M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z' });
-
-var KeyboardArrowRight = function KeyboardArrowRight(props) {
-  return _react2.default.createElement(
-    _SvgIcon2.default,
-    props,
-    _ref
-  );
-};
-KeyboardArrowRight = (0, _pure2.default)(KeyboardArrowRight);
-KeyboardArrowRight.muiName = 'SvgIcon';
-
-exports.default = KeyboardArrowRight;
   })();
 });
 
@@ -60869,6 +60183,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _Transition = require('react-transition-group/Transition');
 
 var _Transition2 = _interopRequireDefault(_Transition);
@@ -60881,62 +60199,6 @@ var _withTheme2 = _interopRequireDefault(_withTheme);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Element = require('react').babelPluginFlowReactPropTypes_proptype_Element || require('prop-types').any;
-// @inheritedComponent Transition
-
-var babelPluginFlowReactPropTypes_proptype_TransitionCallback = require('../internal/transition').babelPluginFlowReactPropTypes_proptype_TransitionCallback || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_TransitionDuration = require('../internal/transition').babelPluginFlowReactPropTypes_proptype_TransitionDuration || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * @ignore
-   */
-  appear: require('prop-types').bool,
-
-  /**
-   * A single child content element.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Element === 'function' ? babelPluginFlowReactPropTypes_proptype_Element.isRequired ? babelPluginFlowReactPropTypes_proptype_Element.isRequired : babelPluginFlowReactPropTypes_proptype_Element : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Element).isRequired,
-
-  /**
-   * If `true`, the component will transition in.
-   */
-  in: require('prop-types').bool.isRequired,
-
-  /**
-   * @ignore
-   */
-  onEnter: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * @ignore
-   */
-  onEntering: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * @ignore
-   */
-  onExit: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * @ignore
-   */
-  theme: require('prop-types').object,
-
-  /**
-   * @ignore
-   */
-  style: require('prop-types').object,
-
-  /**
-   * The duration for the transition, in milliseconds.
-   * You may specify a single timeout for all transitions, or individually with an object.
-   */
-  timeout: typeof babelPluginFlowReactPropTypes_proptype_TransitionDuration === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionDuration : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionDuration)
-};
-
-
 var reflow = function reflow(node) {
   return node.scrollTop;
 };
@@ -60945,6 +60207,7 @@ var reflow = function reflow(node) {
  * The Fade transition is used by the Modal component.
  * It's using [react-transition-group](https://github.com/reactjs/react-transition-group) internally.
  */
+// @inheritedComponent Transition
 
 var Fade = function (_React$Component) {
   (0, _inherits3.default)(Fade, _React$Component);
@@ -60960,7 +60223,9 @@ var Fade = function (_React$Component) {
       args[_key] = arguments[_key];
     }
 
-    return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = Fade.__proto__ || (0, _getPrototypeOf2.default)(Fade)).call.apply(_ref, [this].concat(args))), _this), _this.handleEnter = function (node) {
+    return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = Fade.__proto__ || (0, _getPrototypeOf2.default)(Fade)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
+      mounted: false
+    }, _this.handleEnter = function (node) {
       node.style.opacity = '0';
       reflow(node);
 
@@ -60975,7 +60240,6 @@ var Fade = function (_React$Component) {
       node.style.transition = theme.transitions.create('opacity', {
         duration: typeof timeout === 'number' ? timeout : timeout.enter
       });
-      // $FlowFixMe - https://github.com/facebook/flow/pull/5161
       node.style.webkitTransition = theme.transitions.create('opacity', {
         duration: typeof timeout === 'number' ? timeout : timeout.enter
       });
@@ -60992,7 +60256,6 @@ var Fade = function (_React$Component) {
       node.style.transition = theme.transitions.create('opacity', {
         duration: typeof timeout === 'number' ? timeout : timeout.exit
       });
-      // $FlowFixMe - https://github.com/facebook/flow/pull/5161
       node.style.webkitTransition = theme.transitions.create('opacity', {
         duration: typeof timeout === 'number' ? timeout : timeout.exit
       });
@@ -61005,6 +60268,11 @@ var Fade = function (_React$Component) {
   }
 
   (0, _createClass3.default)(Fade, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this.setState({ mounted: true }); // eslint-disable-line react/no-did-mount-set-state
+    }
+  }, {
     key: 'render',
     value: function render() {
       var _props = this.props,
@@ -61021,7 +60289,7 @@ var Fade = function (_React$Component) {
       var style = (0, _extends3.default)({}, styleProp);
 
       // For server side rendering.
-      if (!this.props.in || appear) {
+      if (!this.props.in && !this.state.mounted && appear) {
         style.opacity = '0';
       }
 
@@ -61041,6 +60309,46 @@ var Fade = function (_React$Component) {
   return Fade;
 }(_react2.default.Component);
 
+Fade.propTypes = 'development' !== "production" ? {
+  /**
+   * @ignore
+   */
+  appear: _propTypes2.default.bool,
+  /**
+   * A single child content element.
+   */
+  children: _propTypes2.default.element,
+  /**
+   * If `true`, the component will transition in.
+   */
+  in: _propTypes2.default.bool,
+  /**
+   * @ignore
+   */
+  onEnter: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onEntering: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onExit: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  style: _propTypes2.default.object,
+  /**
+   * @ignore
+   */
+  theme: _propTypes2.default.object.isRequired,
+  /**
+   * The duration for the transition, in milliseconds.
+   * You may specify a single timeout for all transitions, or individually with an object.
+   */
+  timeout: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.shape({ enter: _propTypes2.default.number, exit: _propTypes2.default.number })])
+} : {};
+
 Fade.defaultProps = {
   appear: true,
   timeout: {
@@ -61048,6 +60356,7 @@ Fade.defaultProps = {
     exit: _transitions.duration.leavingScreen
   }
 };
+
 exports.default = (0, _withTheme2.default)()(Fade);
   })();
 });
@@ -61095,6 +60404,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _CSSTransition = require('react-transition-group/CSSTransition');
 
 var _CSSTransition2 = _interopRequireDefault(_CSSTransition);
@@ -61105,106 +60418,18 @@ var _withTheme2 = _interopRequireDefault(_withTheme);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Element = require('react').babelPluginFlowReactPropTypes_proptype_Element || require('prop-types').any;
-// @inheritedComponent CSSTransition
-
 // Only exported for tests.
-var babelPluginFlowReactPropTypes_proptype_TransitionClasses = require('../internal/transition').babelPluginFlowReactPropTypes_proptype_TransitionClasses || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_TransitionCallback = require('../internal/transition').babelPluginFlowReactPropTypes_proptype_TransitionCallback || require('prop-types').any;
+// @inheritedComponent CSSTransition
 
 function getScale(value) {
   return 'scale(' + value + ', ' + Math.pow(value, 2) + ')';
 }
 
-var babelPluginFlowReactPropTypes_proptype_TransitionDuration = require('prop-types').oneOfType([require('prop-types').number, require('prop-types').shape({
-  enter: require('prop-types').number,
-  exit: require('prop-types').number
-}), require('prop-types').oneOf(['auto'])]);
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * @ignore
-   */
-  appear: require('prop-types').bool,
-
-  /**
-   * A single child content element.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Element === 'function' ? babelPluginFlowReactPropTypes_proptype_Element.isRequired ? babelPluginFlowReactPropTypes_proptype_Element.isRequired : babelPluginFlowReactPropTypes_proptype_Element : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Element).isRequired,
-
-  /**
-   * If `true`, show the component; triggers the enter or exit animation.
-   */
-  in: require('prop-types').bool.isRequired,
-
-  /**
-   * @ignore
-   */
-  onEnter: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * @ignore
-   */
-  onEntering: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * @ignore
-   */
-  onEntered: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * @ignore
-   */
-  onExit: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * @ignore
-   */
-  onExiting: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * @ignore
-   */
-  onExited: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * Use that property to pass a ref callback to the root component.
-   */
-  rootRef: require('prop-types').func,
-
-  /**
-   * @ignore
-   */
-  style: require('prop-types').object,
-
-  /**
-   * The animation classNames applied to the component as it enters or exits.
-   * This property is a direct binding to [`CSSTransition.classNames`](https://reactcommunity.org/react-transition-group/#CSSTransition-prop-classNames).
-   */
-  transitionClasses: typeof babelPluginFlowReactPropTypes_proptype_TransitionClasses === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionClasses : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionClasses),
-
-  /**
-   * @ignore
-   */
-  theme: require('prop-types').object,
-
-  /**
-   * The duration for the transition, in milliseconds.
-   * You may specify a single timeout for all transitions, or individually with an object.
-   *
-   * Set to 'auto' to automatically calculate transition time based on height.
-   */
-  timeout: require('prop-types').oneOfType([require('prop-types').number, require('prop-types').shape({
-    enter: require('prop-types').number,
-    exit: require('prop-types').number
-  }), require('prop-types').oneOf(['auto'])])
-};
-
 /**
  * The Grow transition is used by the Popover component.
  * It's using [react-transition-group](https://github.com/reactjs/react-transition-group) internally.
  */
+
 var Grow = function (_React$Component) {
   (0, _inherits3.default)(Grow, _React$Component);
 
@@ -61238,7 +60463,7 @@ var Grow = function (_React$Component) {
         _this.autoTimeout = duration;
       } else if (typeof timeout === 'number') {
         duration = timeout;
-      } else if (timeout) {
+      } else if (timeout && typeof timeout.enter === 'number') {
         duration = timeout.enter;
       } else {
         // The propType will warn in this case.
@@ -61268,7 +60493,7 @@ var Grow = function (_React$Component) {
         _this.autoTimeout = duration;
       } else if (typeof timeout === 'number') {
         duration = timeout;
-      } else if (timeout) {
+      } else if (timeout && typeof timeout.exit === 'number') {
         duration = timeout.exit;
       } else {
         // The propType will warn in this case.
@@ -61288,15 +60513,9 @@ var Grow = function (_React$Component) {
         _this.props.onExit(node);
       }
     }, _this.addEndListener = function (node, next) {
-      var timeout = void 0;
-
       if (_this.props.timeout === 'auto') {
-        timeout = _this.autoTimeout || 0;
-      } else {
-        timeout = _this.props.timeout;
+        setTimeout(next, _this.autoTimeout || 0);
       }
-
-      setTimeout(next, timeout);
     }, _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
   }
 
@@ -61309,12 +60528,12 @@ var Grow = function (_React$Component) {
           onEnter = _props.onEnter,
           onEntering = _props.onEntering,
           onExit = _props.onExit,
-          rootRef = _props.rootRef,
           styleProp = _props.style,
-          transitionClasses = _props.transitionClasses,
-          timeout = _props.timeout,
           theme = _props.theme,
-          other = (0, _objectWithoutProperties3.default)(_props, ['appear', 'children', 'onEnter', 'onEntering', 'onExit', 'rootRef', 'style', 'transitionClasses', 'timeout', 'theme']);
+          timeout = _props.timeout,
+          _props$transitionClas = _props.transitionClasses,
+          transitionClasses = _props$transitionClas === undefined ? {} : _props$transitionClas,
+          other = (0, _objectWithoutProperties3.default)(_props, ['appear', 'children', 'onEnter', 'onEntering', 'onExit', 'style', 'theme', 'timeout', 'transitionClasses']);
 
 
       var style = (0, _extends3.default)({}, children.props.style, styleProp);
@@ -61333,10 +60552,9 @@ var Grow = function (_React$Component) {
           onExit: this.handleExit,
           addEndListener: this.addEndListener,
           appear: appear,
-          style: style
-        }, other, {
-          ref: rootRef
-        }),
+          style: style,
+          timeout: timeout === 'auto' ? null : timeout
+        }, other),
         children
       );
     }
@@ -61344,11 +60562,77 @@ var Grow = function (_React$Component) {
   return Grow;
 }(_react2.default.Component);
 
+Grow.propTypes = 'development' !== "production" ? {
+  /**
+   * @ignore
+   */
+  appear: _propTypes2.default.bool,
+  /**
+   * A single child content element.
+   */
+  children: _propTypes2.default.element,
+  /**
+   * If `true`, show the component; triggers the enter or exit animation.
+   */
+  in: _propTypes2.default.bool,
+  /**
+   * @ignore
+   */
+  onEnter: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onEntered: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onEntering: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onExit: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onExited: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onExiting: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  style: _propTypes2.default.object,
+  /**
+   * @ignore
+   */
+  theme: _propTypes2.default.object.isRequired,
+  /**
+   * The duration for the transition, in milliseconds.
+   * You may specify a single timeout for all transitions, or individually with an object.
+   *
+   * Set to 'auto' to automatically calculate transition time based on height.
+   */
+  timeout: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.shape({ enter: _propTypes2.default.number, exit: _propTypes2.default.number }), _propTypes2.default.oneOf(['auto'])]),
+  /**
+   * The animation classNames applied to the component as it enters or exits.
+   * This property is a direct binding to [`CSSTransition.classNames`](https://reactcommunity.org/react-transition-group/#CSSTransition-prop-classNames).
+   */
+  transitionClasses: _propTypes2.default.shape({
+    appear: _propTypes2.default.string,
+    appearActive: _propTypes2.default.string,
+    enter: _propTypes2.default.string,
+    enterActive: _propTypes2.default.string,
+    exit: _propTypes2.default.string,
+    exitActive: _propTypes2.default.string
+  })
+} : {};
+
 Grow.defaultProps = {
   appear: true,
-  timeout: 'auto',
-  transitionClasses: {}
+  timeout: 'auto'
 };
+
 exports.default = (0, _withTheme2.default)()(Grow);
   })();
 });
@@ -61396,6 +60680,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _reactDom = require('react-dom');
 
 var _reactEventListener = require('react-event-listener');
@@ -61418,12 +60706,7 @@ var _transitions = require('../styles/transitions');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Element = require('react').babelPluginFlowReactPropTypes_proptype_Element || require('prop-types').any;
 // @inheritedComponent Transition
-
-var babelPluginFlowReactPropTypes_proptype_TransitionCallback = require('../internal/transition').babelPluginFlowReactPropTypes_proptype_TransitionCallback || require('prop-types').any;
-
-var babelPluginFlowReactPropTypes_proptype_TransitionDuration = require('../internal/transition').babelPluginFlowReactPropTypes_proptype_TransitionDuration || require('prop-types').any;
 
 var GUTTER = 24;
 
@@ -61474,72 +60757,6 @@ function setTranslateValue(props, node) {
   }
 }
 
-var babelPluginFlowReactPropTypes_proptype_Direction = require('prop-types').oneOf(['left', 'right', 'up', 'down']);
-
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  /**
-   * A single child content element.
-   */
-  children: typeof babelPluginFlowReactPropTypes_proptype_Element === 'function' ? babelPluginFlowReactPropTypes_proptype_Element.isRequired ? babelPluginFlowReactPropTypes_proptype_Element.isRequired : babelPluginFlowReactPropTypes_proptype_Element : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Element).isRequired,
-
-  /**
-   * Direction the child node will enter from.
-   */
-  direction: require('prop-types').oneOf(['left', 'right', 'up', 'down']),
-
-  /**
-   * If `true`, show the component; triggers the enter or exit animation.
-   */
-  in: require('prop-types').bool.isRequired,
-
-  /**
-   * @ignore
-   */
-  onEnter: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * @ignore
-   */
-  onEntering: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * @ignore
-   */
-  onEntered: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * @ignore
-   */
-  onExit: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * @ignore
-   */
-  onExiting: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * @ignore
-   */
-  onExited: typeof babelPluginFlowReactPropTypes_proptype_TransitionCallback === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionCallback : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionCallback),
-
-  /**
-   * @ignore
-   */
-  style: require('prop-types').object,
-
-  /**
-   * The duration for the transition, in milliseconds.
-   * You may specify a single timeout for all transitions, or individually with an object.
-   */
-  timeout: typeof babelPluginFlowReactPropTypes_proptype_TransitionDuration === 'function' ? babelPluginFlowReactPropTypes_proptype_TransitionDuration : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_TransitionDuration),
-
-  /**
-   * @ignore
-   */
-  theme: require('prop-types').object
-};
-
-
 var reflow = function reflow(node) {
   return node.scrollTop;
 };
@@ -61559,8 +60776,7 @@ var Slide = function (_React$Component) {
     }
 
     return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = Slide.__proto__ || (0, _getPrototypeOf2.default)(Slide)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
-      // We use this state to handle the server-side rendering.
-      firstMount: true
+      mounted: false
     }, _this.transition = null, _this.handleResize = (0, _debounce2.default)(function () {
       // Skip configuration where the position is screen size invariant.
       if (_this.props.in || _this.props.direction === 'down' || _this.props.direction === 'right') {
@@ -61587,7 +60803,6 @@ var Slide = function (_React$Component) {
         duration: typeof timeout === 'number' ? timeout : timeout.enter,
         easing: theme.transitions.easing.easeOut
       });
-      // $FlowFixMe - https://github.com/facebook/flow/pull/5161
       node.style.webkitTransition = theme.transitions.create('-webkit-transform', {
         duration: typeof timeout === 'number' ? timeout : timeout.enter,
         easing: theme.transitions.easing.easeOut
@@ -61606,7 +60821,6 @@ var Slide = function (_React$Component) {
         duration: typeof timeout === 'number' ? timeout : timeout.exit,
         easing: theme.transitions.easing.sharp
       });
-      // $FlowFixMe - https://github.com/facebook/flow/pull/5161
       node.style.webkitTransition = theme.transitions.create('-webkit-transform', {
         duration: typeof timeout === 'number' ? timeout : timeout.exit,
         easing: theme.transitions.easing.sharp
@@ -61619,7 +60833,6 @@ var Slide = function (_React$Component) {
     }, _this.handleExited = function (node) {
       // No need for transitions when the component is hidden
       node.style.transition = '';
-      // $FlowFixMe - https://github.com/facebook/flow/pull/5161
       node.style.webkitTransition = '';
 
       if (_this.props.onExited) {
@@ -61631,7 +60844,7 @@ var Slide = function (_React$Component) {
   (0, _createClass3.default)(Slide, [{
     key: 'componentDidMount',
     value: function componentDidMount() {
-      // state.firstMount handle SSR, once the component is mounted, we need
+      // state.mounted handle SSR, once the component is mounted, we need
       // to properly hide it.
       if (!this.props.in) {
         // We need to set initial translate values of transition element
@@ -61643,7 +60856,7 @@ var Slide = function (_React$Component) {
     key: 'componentWillReceiveProps',
     value: function componentWillReceiveProps() {
       this.setState({
-        firstMount: false
+        mounted: true
       });
     }
   }, {
@@ -61687,7 +60900,8 @@ var Slide = function (_React$Component) {
 
       var style = (0, _extends3.default)({}, styleProp);
 
-      if (!this.props.in && this.state.firstMount) {
+      // We use this state to handle the server-side rendering.
+      if (!this.props.in && this.state.mounted) {
         style.visibility = 'hidden';
       }
 
@@ -61702,12 +60916,11 @@ var Slide = function (_React$Component) {
             onExit: this.handleExit,
             onExited: this.handleExited,
             appear: true,
-            style: style
-          }, other, {
+            style: style,
             ref: function ref(node) {
               _this2.transition = node;
             }
-          }),
+          }, other),
           children
         )
       );
@@ -61716,13 +60929,65 @@ var Slide = function (_React$Component) {
   return Slide;
 }(_react2.default.Component);
 
+Slide.propTypes = 'development' !== "production" ? {
+  /**
+   * A single child content element.
+   */
+  children: _propTypes2.default.element,
+  /**
+   * Direction the child node will enter from.
+   */
+  direction: _propTypes2.default.oneOf(['left', 'right', 'up', 'down']),
+  /**
+   * If `true`, show the component; triggers the enter or exit animation.
+   */
+  in: _propTypes2.default.bool,
+  /**
+   * @ignore
+   */
+  onEnter: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onEntered: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onEntering: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onExit: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onExited: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  onExiting: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  style: _propTypes2.default.object,
+  /**
+   * @ignore
+   */
+  theme: _propTypes2.default.object.isRequired,
+  /**
+   * The duration for the transition, in milliseconds.
+   * You may specify a single timeout for all transitions, or individually with an object.
+   */
+  timeout: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.shape({ enter: _propTypes2.default.number, exit: _propTypes2.default.number })])
+} : {};
+
 Slide.defaultProps = {
-  direction: 'down',
   timeout: {
     enter: _transitions.duration.enteringScreen,
     exit: _transitions.duration.leavingScreen
   }
 };
+
 exports.default = (0, _withTheme2.default)()(Slide);
   })();
 });
@@ -61760,6 +61025,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _reactDom = require('react-dom');
 
 var _reactEventListener = require('react-event-listener');
@@ -61768,8 +61037,6 @@ var _reactEventListener2 = _interopRequireDefault(_reactEventListener);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-
 var isDescendant = function isDescendant(el, target) {
   if (target !== null && target.parentNode) {
     return el === target || isDescendant(el, target.parentNode);
@@ -61777,14 +61044,10 @@ var isDescendant = function isDescendant(el, target) {
   return false;
 };
 
-var babelPluginFlowReactPropTypes_proptype_Props = {
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired,
-  onClickAway: require('prop-types').func.isRequired
-};
-
 /**
  * Listen for click events that are triggered outside of the component children.
  */
+
 var ClickAwayListener = function (_React$Component) {
   (0, _inherits3.default)(ClickAwayListener, _React$Component);
 
@@ -61844,9 +61107,10 @@ var ClickAwayListener = function (_React$Component) {
 }(_react2.default.Component);
 
 ClickAwayListener.propTypes = 'development' !== "production" ? {
-  children: typeof babelPluginFlowReactPropTypes_proptype_Node === 'function' ? babelPluginFlowReactPropTypes_proptype_Node.isRequired ? babelPluginFlowReactPropTypes_proptype_Node.isRequired : babelPluginFlowReactPropTypes_proptype_Node : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Node).isRequired,
-  onClickAway: require('prop-types').func.isRequired
+  children: _propTypes2.default.node.isRequired,
+  onClickAway: _propTypes2.default.func.isRequired
 } : {};
+
 exports.default = ClickAwayListener;
   })();
 });
@@ -61854,30 +61118,20 @@ exports.default = ClickAwayListener;
 require.register("material-ui/utils/addEventListener.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "material-ui");
   (function() {
-    'use strict';
+    "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
 exports.default = function (node, event, handler, capture) {
-  (0, _on2.default)(node, event, handler, capture);
+  node.addEventListener(event, handler, capture);
   return {
     remove: function remove() {
-      (0, _off2.default)(node, event, handler, capture);
+      node.removeEventListener(event, handler, capture);
     }
   };
 };
-
-var _on = require('dom-helpers/events/on');
-
-var _on2 = _interopRequireDefault(_on);
-
-var _off = require('dom-helpers/events/off');
-
-var _off2 = _interopRequireDefault(_off);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
   })();
 });
 
@@ -62102,61 +61356,6 @@ function listenForFocusKeys() {
   })();
 });
 
-require.register("material-ui/utils/manageAriaHidden.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.ariaHidden = ariaHidden;
-exports.hideSiblings = hideSiblings;
-exports.showSiblings = showSiblings;
-//  weak
-
-var BLACKLIST = ['template', 'script', 'style'];
-
-var isHidable = function isHidable(_ref) {
-  var nodeType = _ref.nodeType,
-      tagName = _ref.tagName;
-  return nodeType === 1 && BLACKLIST.indexOf(tagName.toLowerCase()) === -1;
-};
-
-var siblings = function siblings(container, mount, cb) {
-  mount = [].concat(mount); // eslint-disable-line no-param-reassign
-  [].forEach.call(container.children, function (node) {
-    if (mount.indexOf(node) === -1 && isHidable(node)) {
-      cb(node);
-    }
-  });
-};
-
-function ariaHidden(show, node) {
-  if (!node) {
-    return;
-  }
-  if (show) {
-    node.setAttribute('aria-hidden', 'true');
-  } else {
-    node.removeAttribute('aria-hidden');
-  }
-}
-
-function hideSiblings(container, mountNode) {
-  siblings(container, mountNode, function (node) {
-    return ariaHidden(true, node);
-  });
-}
-
-function showSiblings(container, mountNode) {
-  siblings(container, mountNode, function (node) {
-    return ariaHidden(false, node);
-  });
-}
-  })();
-});
-
 require.register("material-ui/utils/reactHelpers.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "material-ui");
   (function() {
@@ -62171,9 +61370,6 @@ exports.isMuiComponent = isMuiComponent;
 
 var _react = require('react');
 
-var babelPluginFlowReactPropTypes_proptype_Node = require('react').babelPluginFlowReactPropTypes_proptype_Node || require('prop-types').any;
-/* eslint-disable import/prefer-default-export */
-
 function cloneChildrenWithClassName(children, className) {
   return _react.Children.map(children, function (child) {
     return (0, _react.isValidElement)(child) && (0, _react.cloneElement)(child, {
@@ -62181,6 +61377,7 @@ function cloneChildrenWithClassName(children, className) {
     });
   });
 }
+/* eslint-disable import/prefer-default-export */
 
 function isMuiElement(element, muiNames) {
   return (0, _react.isValidElement)(element) && muiNames.indexOf(element.type.muiName) !== -1;
@@ -62263,6 +61460,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _reactEventListener = require('react-event-listener');
 
 var _reactEventListener2 = _interopRequireDefault(_reactEventListener);
@@ -62275,6 +61476,10 @@ var _wrapDisplayName = require('recompose/wrapDisplayName');
 
 var _wrapDisplayName2 = _interopRequireDefault(_wrapDisplayName);
 
+var _hoistNonReactStatics = require('hoist-non-react-statics');
+
+var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
+
 var _withTheme = require('../styles/withTheme');
 
 var _withTheme2 = _interopRequireDefault(_withTheme);
@@ -62283,98 +61488,56 @@ var _createBreakpoints = require('../styles/createBreakpoints');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var babelPluginFlowReactPropTypes_proptype_HigherOrderComponent = require('react-flow-types').babelPluginFlowReactPropTypes_proptype_HigherOrderComponent || require('prop-types').any; //  weak
-
-// flow sanity check (DO NOT DELETE) https://flow.org/try/#0JYWwDg9gTgLgBAJQKYEMDG8BmUIjgcilQ3wG4AoUSWOGATzCTgG84BhXSAOyS5gBUGTAL5xsuAkXQwy5OQHp5cALSq16jZuVwdccorgB3YDAAW-U0hBMAEgHk25JAA9qWAK5cMwCFyMnzS2sAHgAFHDAAZwAuFmEAPgAKcl12Tl9eGFiOcAy+QUZg1jMrJFi7ACMAKyQMOFEAMjhwiCj4gBpyAEps9J58oTCIyPiWOR00ABsUSMi4AHUAi1K4FxheABM55GkAOhzuTKHWyPaWWiCyuEqauoSx1KIuDaQoRK6H1LgiGHcoP2CBzy8GYuzBZmAkV2YGGohK1gAvMwIVDIjAUOtdvCkKJ5PEKKlhAT6ilvkhfv8FktLuRhAolFpGUy1PolMYzMtrHAAKqRFAAcyQ5CmMzmAEFVs51s9tsQYPs+kdipdytVavBGiwULEuO4QBVXmcKjq9QaoPdmHS0L40XBOUgNkD+vAEf4OZdEmKuhQDPMmBtfPh4DwHbQIHAwKK4MA-AADbGx1YAN14Fwg7n5pjgsYAsnQnZlE0QAI7uYBEOYmXbkYL2x2KvhwFBIgCMogqSIATLj4vSVMyB6lWW7TIsNmY4PZHC43LQhHAAEJSADWkBjLoIzki+DgAB8CJEQDv9-gQBtjwRJvyL-hnJNZOR6IwqePTC0onBXcxSTGTMAUJMY5mAA-LES6oKuEDrp0OjGK+oGLiua58J0dJOK40AeF4MA+H47KjsAr7vJ8mCeN4virFwpgoF4SDHFEsRAW+wxJKSqQFnwvS5M6BR0cwcFmGBSFQShcBgrs76RAkMFwD0aTcZkvH0SMYxsXAIqzFSZhMZK0pbIgcoKgpfDKaM35fGSzyvMR5kWepNogr+OEAUxZwCaYoiuii0LDGpjzkn8AIcSC4neTCJyiO5SL4Ie+A9sShIJSSak-IFWkEa+xJEuMZIUn4vDUbRFBoQYA5leow7uHygrCtMmkLrpmyynswVFO5QkQchMBnNqcC6vqhrGn1pqvBapJPC8bwfLZEwOSw7meRckI+ScKUBZSwQbMASZwHipJ0lac1MQ6wWfiOTHvIkC7esOfpwAGXBBn1SChjA4aRppMbZu5iZICmfhmOmmbZnmwVFkgpblkglbyjWx31sZ8DNswbZwB2zDdrt+JAA
-
-
-/**
- * By default, returns true if screen width is the same or greater than the given breakpoint.
- *
- * @param screenWidth
- * @param breakpoint
- * @param inclusive - defaults to true
- */
-var babelPluginFlowReactPropTypes_proptype_Breakpoint = require('../styles/createBreakpoints').babelPluginFlowReactPropTypes_proptype_Breakpoint || require('prop-types').any;
-
-var isWidthUp = exports.isWidthUp = function isWidthUp(breakpoint, screenWidth) {
+// By default, returns true if screen width is the same or greater than the given breakpoint.
+var isWidthUp = exports.isWidthUp = function isWidthUp(breakpoint, width) {
   var inclusive = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
   if (inclusive) {
-    return _createBreakpoints.keys.indexOf(breakpoint) <= _createBreakpoints.keys.indexOf(screenWidth);
+    return _createBreakpoints.keys.indexOf(breakpoint) <= _createBreakpoints.keys.indexOf(width);
   }
-  return _createBreakpoints.keys.indexOf(breakpoint) < _createBreakpoints.keys.indexOf(screenWidth);
+  return _createBreakpoints.keys.indexOf(breakpoint) < _createBreakpoints.keys.indexOf(width);
 };
 
-/**
- * By default, returns true if screen width is the same or less than the given breakpoint.
- *
- * @param screenWidth
- * @param breakpoint
- * @param inclusive - defaults to true
- */
-var isWidthDown = exports.isWidthDown = function isWidthDown(breakpoint, screenWidth) {
+// By default, returns true if screen width is the same or less than the given breakpoint.
+var isWidthDown = exports.isWidthDown = function isWidthDown(breakpoint, width) {
   var inclusive = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
 
   if (inclusive) {
-    return _createBreakpoints.keys.indexOf(screenWidth) <= _createBreakpoints.keys.indexOf(breakpoint);
+    return _createBreakpoints.keys.indexOf(width) <= _createBreakpoints.keys.indexOf(breakpoint);
   }
-  return _createBreakpoints.keys.indexOf(screenWidth) < _createBreakpoints.keys.indexOf(breakpoint);
+  return _createBreakpoints.keys.indexOf(width) < _createBreakpoints.keys.indexOf(breakpoint);
 };
-
-// optional props introduced by this HOC
-var babelPluginFlowReactPropTypes_proptype_HOCProps = {
-  /**
-   * As `window.innerWidth` is unavailable on the server,
-   * we default to rendering an empty componenent during the first mount.
-   * In some situation you might want to use an heristic to approximate
-   * the screen width of the client browser screen width.
-   *
-   * For instance, you could be using the user-agent or the client-hints.
-   * http://caniuse.com/#search=client%20hint
-   */
-  initialWidth: typeof babelPluginFlowReactPropTypes_proptype_Breakpoint === 'function' ? babelPluginFlowReactPropTypes_proptype_Breakpoint : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Breakpoint),
-
-  /**
-   * Bypass the width calculation logic.
-   */
-  width: typeof babelPluginFlowReactPropTypes_proptype_Breakpoint === 'function' ? babelPluginFlowReactPropTypes_proptype_Breakpoint : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Breakpoint)
-};
-var babelPluginFlowReactPropTypes_proptype_InjectedProps = {
-  width: typeof babelPluginFlowReactPropTypes_proptype_Breakpoint === 'function' ? babelPluginFlowReactPropTypes_proptype_Breakpoint.isRequired ? babelPluginFlowReactPropTypes_proptype_Breakpoint.isRequired : babelPluginFlowReactPropTypes_proptype_Breakpoint : require('prop-types').shape(babelPluginFlowReactPropTypes_proptype_Breakpoint).isRequired
-};
-
 
 var withWidth = function withWidth() {
   var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
   return function (Component) {
     var _options$resizeInterv = options.resizeInterval,
-        resizeInterval = _options$resizeInterv === undefined ? 166 : _options$resizeInterv;
+        resizeInterval = _options$resizeInterv === undefined ? 166 : _options$resizeInterv,
+        _options$withTheme = options.withTheme,
+        withThemeOption = _options$withTheme === undefined ? false : _options$withTheme;
 
-    // `theme` is injected below by withTheme
+    var WithWidth = function (_React$Component) {
+      (0, _inherits3.default)(WithWidth, _React$Component);
 
-    var Width = function (_React$Component) {
-      (0, _inherits3.default)(Width, _React$Component);
-
-      function Width() {
+      function WithWidth() {
         var _ref;
 
         var _temp, _this, _ret;
 
-        (0, _classCallCheck3.default)(this, Width);
+        (0, _classCallCheck3.default)(this, WithWidth);
 
         for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
           args[_key] = arguments[_key];
         }
 
-        return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = Width.__proto__ || (0, _getPrototypeOf2.default)(Width)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
+        return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = WithWidth.__proto__ || (0, _getPrototypeOf2.default)(WithWidth)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
           width: undefined
         }, _this.handleResize = (0, _debounce2.default)(function () {
           _this.updateWidth(window.innerWidth);
         }, resizeInterval), _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
       }
 
-      (0, _createClass3.default)(Width, [{
+      (0, _createClass3.default)(WithWidth, [{
         key: 'componentDidMount',
         value: function componentDidMount() {
           this.updateWidth(window.innerWidth);
@@ -62387,37 +61550,35 @@ var withWidth = function withWidth() {
       }, {
         key: 'updateWidth',
         value: function updateWidth(innerWidth) {
-          if (this.props.theme) {
-            var breakpoints = this.props.theme.breakpoints;
-            var _width = null;
+          var breakpoints = this.props.theme.breakpoints;
+          var width = null;
 
-            /**
-             * Start with the slowest value as low end devices often have a small screen.
-             *
-             * innerWidth |0      xs      sm      md      lg      xl
-             *            |-------|-------|-------|-------|-------|------>
-             * width      |  xs   |  xs   |  sm   |  md   |  lg   |  xl
-             */
-            var index = 1;
-            while (_width === null && index < _createBreakpoints.keys.length) {
-              var currentWidth = _createBreakpoints.keys[index];
+          /**
+           * Start with the slowest value as low end devices often have a small screen.
+           *
+           * innerWidth |xs      sm      md      lg      xl
+           *            |-------|-------|-------|-------|------>
+           * width      |  xs   |  sm   |  md   |  lg   |  xl
+           */
+          var index = 1;
+          while (width === null && index < _createBreakpoints.keys.length) {
+            var currentWidth = _createBreakpoints.keys[index];
 
-              // @media are inclusive, so reproduce the behavior here.
-              if (innerWidth < breakpoints.values[currentWidth]) {
-                _width = _createBreakpoints.keys[index - 1];
-                break;
-              }
-
-              index += 1;
+            // @media are inclusive, so reproduce the behavior here.
+            if (innerWidth < breakpoints.values[currentWidth]) {
+              width = _createBreakpoints.keys[index - 1];
+              break;
             }
 
-            _width = _width || 'xl';
+            index += 1;
+          }
 
-            if (_width !== this.state.width) {
-              this.setState({
-                width: _width
-              });
-            }
+          width = width || 'xl';
+
+          if (width !== this.state.width) {
+            this.setState({
+              width: width
+            });
           }
         }
       }, {
@@ -62432,6 +61593,11 @@ var withWidth = function withWidth() {
           var props = (0, _extends3.default)({
             width: width || this.state.width || initialWidth
           }, other);
+          var more = {};
+
+          if (withThemeOption) {
+            more.theme = theme;
+          }
 
           // When rendering the component on the server,
           // we have no idea about the client browser screen width.
@@ -62446,18 +61612,41 @@ var withWidth = function withWidth() {
           return _react2.default.createElement(
             _reactEventListener2.default,
             { target: 'window', onResize: this.handleResize },
-            _react2.default.createElement(Component, props)
+            _react2.default.createElement(Component, (0, _extends3.default)({}, more, props))
           );
         }
       }]);
-      return Width;
+      return WithWidth;
     }(_react2.default.Component);
 
+    WithWidth.propTypes = 'development' !== "production" ? {
+      /**
+       * As `window.innerWidth` is unavailable on the server,
+       * we default to rendering an empty componenent during the first mount.
+       * In some situation you might want to use an heristic to approximate
+       * the screen width of the client browser screen width.
+       *
+       * For instance, you could be using the user-agent or the client-hints.
+       * http://caniuse.com/#search=client%20hint
+       */
+      initialWidth: _propTypes2.default.oneOf(['xs', 'sm', 'md', 'lg', 'xl']),
+      /**
+       * @ignore
+       */
+      theme: _propTypes2.default.object.isRequired,
+      /**
+       * Bypass the width calculation logic.
+       */
+      width: _propTypes2.default.oneOf(['xs', 'sm', 'md', 'lg', 'xl'])
+    } : {};
+
     if ('development' !== 'production') {
-      Width.displayName = (0, _wrapDisplayName2.default)(Component, 'withWidth');
+      WithWidth.displayName = (0, _wrapDisplayName2.default)(Component, 'WithWidth');
     }
 
-    return (0, _withTheme2.default)()(Width);
+    (0, _hoistNonReactStatics2.default)(WithWidth, Component);
+
+    return (0, _withTheme2.default)()(WithWidth);
   };
 };
 
@@ -82701,13 +81890,6 @@ var passiveOption = exports.passiveOption = function () {
   })();
 });
 
-require.register("react-flow-types/index.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "react-flow-types");
-  (function() {
-    
-  })();
-});
-
 require.register("react-intl/lib/index.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {"../locale-data/index":false,"../locale-data/index.js":false}, "react-intl");
   (function() {
@@ -90775,6 +89957,20 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _graphqlTag = require('graphql-tag');
+
+var _graphqlTag2 = _interopRequireDefault(_graphqlTag);
+
+var _reactApollo = require('react-apollo');
+
+var _Button = require('material-ui/Button');
+
+var _Button2 = _interopRequireDefault(_Button);
+
+var _Add = require('material-ui-icons/Add');
+
+var _Add2 = _interopRequireDefault(_Add);
+
 var _orders = require('./orders');
 
 var _orders2 = _interopRequireDefault(_orders);
@@ -90783,11 +89979,9 @@ var _motoboys = require('./motoboys');
 
 var _motoboys2 = _interopRequireDefault(_motoboys);
 
-var _graphqlTag = require('graphql-tag');
+var _new_order_modal = require('./new_order_modal');
 
-var _graphqlTag2 = _interopRequireDefault(_graphqlTag);
-
-var _reactApollo = require('react-apollo');
+var _new_order_modal2 = _interopRequireDefault(_new_order_modal);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -90803,35 +89997,70 @@ var DashboardPage = function (_React$Component) {
   _inherits(DashboardPage, _React$Component);
 
   function DashboardPage() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
     _classCallCheck(this, DashboardPage);
 
-    return _possibleConstructorReturn(this, (DashboardPage.__proto__ || Object.getPrototypeOf(DashboardPage)).apply(this, arguments));
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = DashboardPage.__proto__ || Object.getPrototypeOf(DashboardPage)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
+      enumerable: true,
+      writable: true,
+      value: {
+        modalOpen: false
+      }
+    }), _temp), _possibleConstructorReturn(_this, _ret);
   }
 
   _createClass(DashboardPage, [{
-    key: 'componentDidMount',
-    value: function componentDidMount() {
+    key: 'componentWillMount',
+    value: function componentWillMount() {
       this.props.data.startPolling(30000);
     }
   }, {
     key: 'render',
     value: function render() {
+      var _this2 = this;
+
       var _props$data = this.props.data,
           orders = _props$data.orders,
           motoboys = _props$data.motoboys;
+      var modalOpen = this.state.modalOpen;
+
 
       return _react2.default.createElement(
-        'div',
-        { className: 'row' },
+        'main',
+        null,
         _react2.default.createElement(
-          'div',
-          { className: 'col-sm-3' },
-          _react2.default.createElement(_motoboys2.default, { motoboys: motoboys })
+          _Button2.default,
+          { raised: true, color: 'primary', className: 'mb-5',
+            onClick: function onClick() {
+              return _this2.setState({ modalOpen: true });
+            }
+          },
+          _react2.default.createElement(_Add2.default, { className: 'mr-2' }),
+          'Nova entrega'
         ),
+        _react2.default.createElement(_new_order_modal2.default, { open: modalOpen, onClose: function onClose() {
+            return _this2.setState({ modalOpen: false });
+          } }),
         _react2.default.createElement(
           'div',
-          { className: 'col-sm-9' },
-          _react2.default.createElement(_orders2.default, { orders: orders })
+          { className: 'row' },
+          _react2.default.createElement(
+            'div',
+            { className: 'col-sm-3' },
+            _react2.default.createElement(_motoboys2.default, { motoboys: motoboys })
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'col-sm-9' },
+            _react2.default.createElement(_orders2.default, { orders: orders })
+          )
         )
       );
     }
@@ -91172,6 +90401,447 @@ function getDateToShow(_ref3) {
 }
 });
 
+;require.register("js/dashboard_page/new_order_modal.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _templateObject = _taggedTemplateLiteral(['query getMyCompanies {\n        companies: myCompanies {\n          id name phoneNumber\n          location { street number neighborhood city uf zipcode complement reference }\n        }\n      }'], ['query getMyCompanies {\n        companies: myCompanies {\n          id name phoneNumber\n          location { street number neighborhood city uf zipcode complement reference }\n        }\n      }']),
+    _templateObject2 = _taggedTemplateLiteral(['mutation createOrderForNewCompany($companyParams: CompanyParams) {\n        order: createOrderForNewCompany(companyParams: $companyParams) {\n          id\n        }\n      }'], ['mutation createOrderForNewCompany($companyParams: CompanyParams) {\n        order: createOrderForNewCompany(companyParams: $companyParams) {\n          id\n        }\n      }']);
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _immutabilityHelper = require('immutability-helper');
+
+var _immutabilityHelper2 = _interopRequireDefault(_immutabilityHelper);
+
+var _graphqlTag = require('graphql-tag');
+
+var _graphqlTag2 = _interopRequireDefault(_graphqlTag);
+
+var _graphql_client = require('js/graphql_client');
+
+var _graphql_client2 = _interopRequireDefault(_graphql_client);
+
+var _Typography = require('material-ui/Typography');
+
+var _Typography2 = _interopRequireDefault(_Typography);
+
+var _Modal = require('material-ui/Modal');
+
+var _Modal2 = _interopRequireDefault(_Modal);
+
+var _Button = require('material-ui/Button');
+
+var _Button2 = _interopRequireDefault(_Button);
+
+var _TextField = require('material-ui/TextField');
+
+var _TextField2 = _interopRequireDefault(_TextField);
+
+var _Add = require('material-ui-icons/Add');
+
+var _Add2 = _interopRequireDefault(_Add);
+
+var _Select = require('material-ui/Select');
+
+var _Select2 = _interopRequireDefault(_Select);
+
+var _Form = require('material-ui/Form');
+
+var _Menu = require('material-ui/Menu');
+
+var _Input = require('material-ui/Input');
+
+var _phone_field = require('js/shared/phone_field');
+
+var _phone_field2 = _interopRequireDefault(_phone_field);
+
+var _zipcode_field = require('js/shared/zipcode_field');
+
+var _zipcode_field2 = _interopRequireDefault(_zipcode_field);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var NewOrderModal = function (_React$Component) {
+  _inherits(NewOrderModal, _React$Component);
+
+  function NewOrderModal() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
+    _classCallCheck(this, NewOrderModal);
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = NewOrderModal.__proto__ || Object.getPrototypeOf(NewOrderModal)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
+      enumerable: true,
+      writable: true,
+      value: {
+        companies: null,
+        companyId: "",
+        company: _this.emptyCompany()
+      }
+    }), Object.defineProperty(_this, 'updateCompanyId', {
+      enumerable: true,
+      writable: true,
+      value: function value(evt) {
+        var companyId = evt.target.value;
+        var companies = _this.state.companies;
+
+
+        if (companyId.length > 0) {
+          var selectedCompany = companies.find(function (company) {
+            return company.id == companyId;
+          });
+          var companyClone = Object.assign({}, selectedCompany);
+          _this.setState({ companyId: companyId, company: selectedCompany });
+        } else {
+          _this.setState({ companyId: companyId, company: _this.emptyCompany() });
+        }
+      }
+    }), Object.defineProperty(_this, 'updateCompany', {
+      enumerable: true,
+      writable: true,
+      value: function value(evt) {
+        var changes = _defineProperty({}, evt.target.name, evt.target.value);
+        _this.setState({ company: _extends({}, _this.state.company, changes) });
+      }
+    }), Object.defineProperty(_this, 'updateLocation', {
+      enumerable: true,
+      writable: true,
+      value: function value(evt) {
+        var changes = _defineProperty({}, evt.target.name, evt.target.value);
+        var newState = (0, _immutabilityHelper2.default)(_this.state, {
+          company: {
+            location: { $set: _extends({}, _this.state.company.location, changes) }
+          }
+        });
+        _this.setState(newState);
+      }
+    }), Object.defineProperty(_this, 'didClickSendButton', {
+      enumerable: true,
+      writable: true,
+      value: function value() {
+        var id = _this.state.company.id;
+
+        id ? _this.createOrderForExistingCompany() : _this.createOrderForNewCompany();
+      }
+    }), _temp), _possibleConstructorReturn(_this, _ret);
+  }
+
+  _createClass(NewOrderModal, [{
+    key: 'emptyCompany',
+    value: function emptyCompany() {
+      return {
+        name: "",
+        phoneNumber: "",
+        location: {
+          street: "",
+          number: "",
+          zipcode: "",
+          complement: "",
+          reference: ""
+        }
+      };
+    }
+  }, {
+    key: 'componentWillUpdate',
+    value: function componentWillUpdate(nextProps, nextState) {
+      if (!this.props.open && nextProps.open) {
+        this.fetchMyCompanies();
+      }
+    }
+  }, {
+    key: 'fetchMyCompanies',
+    value: function fetchMyCompanies() {
+      var _this2 = this;
+
+      _graphql_client2.default.query({
+        query: (0, _graphqlTag2.default)(_templateObject)
+      }).then(function (_ref2) {
+        var companies = _ref2.data.companies;
+        return _this2.setState({ companies: companies });
+      }).catch(function (_ref3) {
+        var graphQLErrors = _ref3.graphQLErrors;
+        return displaySnack(graphQLErrors.map(function (err) {
+          return err.message;
+        }));
+      });
+    }
+  }, {
+    key: 'createOrderForExistingCompany',
+    value: function createOrderForExistingCompany() {}
+  }, {
+    key: 'createOrderForNewCompany',
+    value: function createOrderForNewCompany() {
+      var company = this.state.company;
+      var onClose = this.props.onClose;
+
+
+      _graphql_client2.default.mutate({
+        mutation: (0, _graphqlTag2.default)(_templateObject2),
+        variables: { companyParams: company }
+      }).then(function (_ref4) {
+        var order = _ref4.data.order;
+
+        onClose();
+      }).catch(function (_ref5) {
+        var graphQLErrors = _ref5.graphQLErrors;
+        return displaySnack(graphQLErrors.map(function (err) {
+          return err.message;
+        }));
+      });
+    }
+  }, {
+    key: 'render',
+    value: function render() {
+      var _props = this.props,
+          open = _props.open,
+          onClose = _props.onClose;
+      var _state = this.state,
+          company = _state.company,
+          companyId = _state.companyId,
+          companies = _state.companies;
+
+
+      return _react2.default.createElement(
+        _Modal2.default,
+        {
+          open: open,
+          onClose: onClose,
+          style: modalStyles()
+        },
+        _react2.default.createElement(
+          'div',
+          { style: innerDivStyles() },
+          _react2.default.createElement(
+            _Typography2.default,
+            { type: 'display1', className: 'mb-4' },
+            'Nova entrega'
+          ),
+          _react2.default.createElement(
+            _Form.FormControl,
+            { fullWidth: true, className: classes().formControl },
+            _react2.default.createElement(
+              _Input.InputLabel,
+              { shrink: true },
+              'Selecione a empresa'
+            ),
+            _react2.default.createElement(
+              _Select2.default,
+              {
+                value: companyId,
+                onChange: this.updateCompanyId,
+                displayEmpty: true
+              },
+              _react2.default.createElement(
+                _Menu.MenuItem,
+                { value: '' },
+                'Criar nova empresa'
+              ),
+              getCompaniesOptions(companies)
+            )
+          ),
+          _react2.default.createElement(
+            _Typography2.default,
+            { type: 'title', className: 'mb-2 mt-4' },
+            'Dados da empresa'
+          ),
+          _react2.default.createElement(
+            'section',
+            { className: classes().formControlFlex },
+            _react2.default.createElement(
+              _Form.FormControl,
+              { className: 'w-50 mr-4' },
+              _react2.default.createElement(_TextField2.default, {
+                label: 'Nome da empresa',
+                onChange: this.updateCompany,
+                name: 'name',
+                value: company.name
+              })
+            ),
+            _react2.default.createElement(
+              _Form.FormControl,
+              { className: 'w-50' },
+              _react2.default.createElement(_phone_field2.default, {
+                label: 'Telefone',
+                name: 'phoneNumber',
+                onChange: this.updateCompany,
+                value: company.phoneNumber
+              })
+            )
+          ),
+          _react2.default.createElement(
+            _Typography2.default,
+            { type: 'title', className: 'mb-2 mt-5' },
+            'Endere\xE7o da empresa'
+          ),
+          _react2.default.createElement(
+            'section',
+            { className: classes().formControlFlex },
+            _react2.default.createElement(
+              _Form.FormControl,
+              { className: 'w-50' },
+              _react2.default.createElement(_TextField2.default, {
+                label: 'Logradouro',
+                onChange: this.updateLocation,
+                name: 'street',
+                value: company.location.street
+              })
+            ),
+            _react2.default.createElement(
+              _Form.FormControl,
+              { className: 'w-25 mr-4 ml-4' },
+              _react2.default.createElement(_TextField2.default, {
+                label: 'N\xFAmero',
+                onChange: this.updateLocation,
+                name: 'number',
+                type: 'number',
+                value: company.location.number
+              })
+            ),
+            _react2.default.createElement(
+              _Form.FormControl,
+              { className: 'w-25' },
+              _react2.default.createElement(_TextField2.default, {
+                label: 'Complemento',
+                onChange: this.updateLocation,
+                name: 'complement',
+                value: company.location.complement
+              })
+            )
+          ),
+          _react2.default.createElement(
+            'section',
+            { className: classes().formControlFlex },
+            _react2.default.createElement(
+              _Form.FormControl,
+              { className: 'w-25' },
+              _react2.default.createElement(_zipcode_field2.default, {
+                label: 'CEP',
+                onChange: this.updateLocation,
+                name: 'zipcode',
+                value: company.location.zipcode
+              })
+            ),
+            _react2.default.createElement(
+              _Form.FormControl,
+              { className: 'w-50 ml-4' },
+              _react2.default.createElement(_TextField2.default, {
+                label: 'Ponto de refer\xEAncia',
+                onChange: this.updateLocation,
+                name: 'reference',
+                value: company.location.reference
+              })
+            )
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'mt-5' },
+            _react2.default.createElement(
+              _Button2.default,
+              { raised: true, color: 'primary', onClick: this.didClickSendButton },
+              _react2.default.createElement(_Add2.default, { className: 'mr-2' }),
+              'Enviar entrega'
+            ),
+            _react2.default.createElement(
+              _Form.FormHelperText,
+              null,
+              '* A entrega ser\xE1 enviada para o pr\xF3ximo motoboy'
+            )
+          )
+        )
+      );
+    }
+  }]);
+
+  return NewOrderModal;
+}(_react2.default.Component);
+
+exports.default = NewOrderModal;
+
+
+function classes() {
+  return {
+    formControl: "mb-3",
+    formControlFlex: "mb-3 d-flex align-items-center"
+  };
+}
+
+function modalStyles() {
+  return {
+    alignItems: "center",
+    justifyContent: "center"
+  };
+}
+
+function innerDivStyles() {
+  return {
+    width: "40rem",
+    margin: "5rem 0 auto",
+    border: '1px solid #e5e5e5',
+    backgroundColor: '#fff',
+    boxShadow: '0 5px 15px rgba(0, 0, 0, .5)',
+    zIndex: 1,
+    padding: "2rem"
+  };
+}
+
+function getCompaniesOptions(companies) {
+  if (!companies) {
+    return _react2.default.createElement(
+      _Menu.MenuItem,
+      { disabled: true },
+      _react2.default.createElement(
+        'em',
+        null,
+        'Carregando empresas'
+      )
+    );
+  } else if (companies.length === 0) {
+    return _react2.default.createElement(
+      _Menu.MenuItem,
+      { disabled: true },
+      _react2.default.createElement(
+        'em',
+        null,
+        'Voc\xEA ainda n\xE3o tem empresas cadastradas'
+      )
+    );
+  } else {
+    return companies.map(function (company) {
+      return _react2.default.createElement(
+        _Menu.MenuItem,
+        { key: company.id, value: company.id },
+        company.name
+      );
+    });
+  }
+}
+});
+
 ;require.register("js/dashboard_page/orders.jsx", function(exports, require, module) {
 'use strict';
 
@@ -91508,7 +91178,17 @@ var httpLink = authLink.concat(new _apolloLinkHttp.HttpLink({
 
 exports.default = new _apolloClient.ApolloClient({
   link: httpLink,
-  cache: new _apolloCacheInmemory.InMemoryCache()
+  cache: new _apolloCacheInmemory.InMemoryCache(),
+  defaultOptions: {
+    watchQuery: {
+      fetchPolicy: "network-only",
+      errorPolicy: 'ignore'
+    },
+    query: {
+      fetchPolicy: "network-only",
+      errorPolicy: 'ignore'
+    }
+  }
 });
 });
 
@@ -91670,7 +91350,7 @@ var Layout = function (_React$Component) {
           _Drawer2.default,
           {
             open: this.state.opened,
-            onRequestClose: this.closeDrawer
+            onClose: this.closeDrawer
           },
           _react2.default.createElement(
             _reactRouterDom.Link,
@@ -92537,7 +92217,8 @@ var PhoneField = function (_React$Component) {
           className = _props.className,
           fullWidth = _props.fullWidth,
           label = _props.label,
-          InputClassName = _props.InputClassName;
+          InputClassName = _props.InputClassName,
+          name = _props.name;
 
 
       return _react2.default.createElement(
@@ -92551,6 +92232,7 @@ var PhoneField = function (_React$Component) {
         _react2.default.createElement(_Input2.default, {
           id: "phoneNumber",
           value: value,
+          name: name,
           className: InputClassName,
           onChange: onChange,
           inputComponent: PhoneFieldElement
@@ -92596,6 +92278,110 @@ var PhoneFieldElement = function (_React$Component2) {
   }]);
 
   return PhoneFieldElement;
+}(_react2.default.Component);
+});
+
+;require.register("js/shared/zipcode_field.jsx", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require("react");
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactTextMask = require("react-text-mask");
+
+var _reactTextMask2 = _interopRequireDefault(_reactTextMask);
+
+var _Input = require("material-ui/Input");
+
+var _Input2 = _interopRequireDefault(_Input);
+
+var _Form = require("material-ui/Form");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ZipcodeField = function (_React$Component) {
+  _inherits(ZipcodeField, _React$Component);
+
+  function ZipcodeField() {
+    _classCallCheck(this, ZipcodeField);
+
+    return _possibleConstructorReturn(this, (ZipcodeField.__proto__ || Object.getPrototypeOf(ZipcodeField)).apply(this, arguments));
+  }
+
+  _createClass(ZipcodeField, [{
+    key: "render",
+    value: function render() {
+      var _props = this.props,
+          value = _props.value,
+          onChange = _props.onChange,
+          className = _props.className,
+          fullWidth = _props.fullWidth,
+          label = _props.label,
+          InputClassName = _props.InputClassName,
+          name = _props.name;
+
+
+      return _react2.default.createElement(
+        _Form.FormControl,
+        { className: className, fullWidth: fullWidth },
+        label && _react2.default.createElement(
+          _Input.InputLabel,
+          { htmlFor: "zipcode" },
+          label
+        ),
+        _react2.default.createElement(_Input2.default, {
+          id: "zipcode",
+          value: value,
+          name: name,
+          className: InputClassName,
+          onChange: onChange,
+          inputComponent: ZipcodeFieldElement
+        })
+      );
+    }
+  }]);
+
+  return ZipcodeField;
+}(_react2.default.Component);
+
+exports.default = ZipcodeField;
+
+var ZipcodeFieldElement = function (_React$Component2) {
+  _inherits(ZipcodeFieldElement, _React$Component2);
+
+  function ZipcodeFieldElement() {
+    _classCallCheck(this, ZipcodeFieldElement);
+
+    return _possibleConstructorReturn(this, (ZipcodeFieldElement.__proto__ || Object.getPrototypeOf(ZipcodeFieldElement)).apply(this, arguments));
+  }
+
+  _createClass(ZipcodeFieldElement, [{
+    key: "render",
+    value: function render() {
+      return _react2.default.createElement(_reactTextMask2.default, _extends({}, this.props, {
+        mask: [/\d/, /\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/],
+        placeholderChar: "\u2000",
+        guide: false
+      }));
+    }
+  }]);
+
+  return ZipcodeFieldElement;
 }(_react2.default.Component);
 });
 
@@ -92758,17 +92544,12 @@ require.alias("invariant/browser.js", "invariant");
 require.alias("is-in-browser/dist/index.js", "is-in-browser");
 require.alias("jss/lib/index.js", "jss");
 require.alias("jss-camel-case/lib/index.js", "jss-camel-case");
-require.alias("jss-compose/lib/index.js", "jss-compose");
-require.alias("jss-default-unit/lib/index.js", "jss-default-unit");
-require.alias("jss-expand/lib/index.js", "jss-expand");
-require.alias("jss-extend/lib/index.js", "jss-extend");
 require.alias("jss-global/lib/index.js", "jss-global");
 require.alias("jss-nested/lib/index.js", "jss-nested");
-require.alias("jss-preset-default/lib/index.js", "jss-preset-default");
 require.alias("jss-props-sort/lib/index.js", "jss-props-sort");
-require.alias("jss-template/lib/index.js", "jss-template");
 require.alias("jss-vendor-prefixer/lib/index.js", "jss-vendor-prefixer");
 require.alias("lodash/lodash.js", "lodash");
+require.alias("material-ui/node_modules/jss-default-unit/lib/index.js", "material-ui/node_modules/jss-default-unit");
 require.alias("popper.js/dist/umd/popper.js", "popper.js");
 require.alias("process/browser.js", "process");
 require.alias("react-apollo/react-apollo.browser.umd.js", "react-apollo");

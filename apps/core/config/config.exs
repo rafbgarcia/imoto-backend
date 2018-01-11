@@ -8,7 +8,7 @@ use Mix.Config
 # General application configuration
 config :core,
   namespace: Core,
-  ecto_repos: [Core.Repo]
+  ecto_repos: [Db.Repo]
 
 # Configures the endpoint
 config :core, Core.Endpoint,

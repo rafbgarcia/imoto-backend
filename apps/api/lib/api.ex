@@ -41,6 +41,15 @@ defmodule Api do
     end
   end
 
+  def testcase do
+    quote do
+      import Ecto
+      import Ecto.Query
+      alias Db.Repo
+      alias Core.{Order, Central, Motoboy, Customer, Location, Stop, History, Company}
+    end
+  end
+
   def iex do
     quote do
       import Ecto

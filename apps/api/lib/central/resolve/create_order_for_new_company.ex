@@ -1,10 +1,10 @@
 defmodule Central.Resolve.CreateOrderForNewCompany do
   use Api, :resolver
-  alias Core.{Company, Motoboy, Order, History, Stop, Location}
+  alias Core.{Company, Motoboy, Order, History, Location}
 
   def handle(%{company_params: company_params}, %{context: %{current_central: central}}) do
     with {:ok, company} <- create_company(company_params, central.id),
-    {:ok, motoboy} <- next_motoboy_or_error(central.id),
+    {:ok, motoboy} <- next_available_motoboy(central.id),
     {:ok, order} <- create_order(company.id, motoboy.id) do
       notify_motoboy_new_order(motoboy.one_signal_player_id)
       add_to_history(order.id, motoboy.id)
@@ -23,7 +23,7 @@ defmodule Central.Resolve.CreateOrderForNewCompany do
 
   defp create_order(company_id, motoboy_id) do
     order_params = %{
-      stops: [%Stop{
+      stops: [%{
         sequence: 0,
         instructions: "Falar com o responsável",
         location_id: get_company_location_id(company_id)
@@ -37,6 +37,9 @@ defmodule Central.Resolve.CreateOrderForNewCompany do
     |> Repo.insert
   end
 
+  @doc """
+  Returns the ID of the location
+  """
   defp get_company_location_id(company_id) do
     from(l in Location,
       where: l.company_id == ^company_id,
@@ -44,13 +47,12 @@ defmodule Central.Resolve.CreateOrderForNewCompany do
     )
     |> first
     |> Repo.one
-    |> Map.get("id")
   end
 
-  defp next_motoboy_or_error(central_id) do
+  defp next_available_motoboy(central_id) do
     Repo.transaction(fn ->
       case get_next_motoboy(central_id) do
-        nil -> nil
+        nil -> Repo.rollback("Nenhum motoboy disponível")
         motoboy -> update_motoboy_state(motoboy)
       end
     end)
@@ -60,7 +62,8 @@ defmodule Central.Resolve.CreateOrderForNewCompany do
     from(m in Motoboy,
       lock: "FOR UPDATE",
       where: m.state == ^Motoboy.available(),
-      where: m.central_id in ^central_id,
+      where: m.central_id == ^central_id,
+      where: m.active == ^true,
       order_by: [asc: m.became_available_at]
     )
     |> first

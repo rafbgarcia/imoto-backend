@@ -1,25 +1,45 @@
 import React from 'react'
-import Orders from './orders'
-import Motoboys from './motoboys'
 import gql from 'graphql-tag'
 import { graphql } from 'react-apollo'
+import Button from 'material-ui/Button';
+import AddIcon from 'material-ui-icons/Add'
+
+import Orders from './orders'
+import Motoboys from './motoboys'
+import NewOrderModal from './new_order_modal'
 
 class DashboardPage extends React.Component{
-  componentDidMount() {
+  state = {
+    modalOpen: false
+  }
+
+  componentWillMount() {
     this.props.data.startPolling(30000)
   }
 
   render() {
     const {orders, motoboys} = this.props.data
+    const {modalOpen} = this.state
+
     return (
-      <div className="row">
-        <div className="col-sm-3">
-          <Motoboys motoboys={motoboys} />
+      <main>
+        <Button raised color="primary" className="mb-5"
+          onClick={() => this.setState({modalOpen: true})}
+        >
+          <AddIcon className="mr-2" />
+          Nova entrega
+        </Button>
+        <NewOrderModal open={modalOpen} onClose={() => this.setState({modalOpen: false})} />
+
+        <div className="row">
+          <div className="col-sm-3">
+            <Motoboys motoboys={motoboys} />
+          </div>
+          <div className="col-sm-9">
+            <Orders orders={orders} />
+          </div>
         </div>
-        <div className="col-sm-9">
-          <Orders orders={orders} />
-        </div>
-      </div>
+      </main>
     )
   }
 }

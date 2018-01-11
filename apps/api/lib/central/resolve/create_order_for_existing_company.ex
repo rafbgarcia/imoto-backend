@@ -63,7 +63,7 @@ defmodule Central.Resolve.CreateOrderForExistingCompany do
     from(m in Motoboy,
       lock: "FOR UPDATE",
       where: m.state == ^Motoboy.available(),
-      where: m.central_id in ^central_id,
+      where: m.central_id == ^central_id,
       order_by: [asc: m.became_available_at]
     )
     |> first

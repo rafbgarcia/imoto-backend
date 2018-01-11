@@ -37,7 +37,7 @@ defmodule Central.GraphqlSchema do
     end
 
     field :create_order_for_new_company, :order do
-      arg :new_company_params, :new_company_params
+      arg :company_params, :company_params
       resolve &Central.Resolve.CreateOrderForNewCompany.handle/2
     end
   end
@@ -53,7 +53,7 @@ defmodule Central.GraphqlSchema do
     field :active, non_null(:boolean)
   end
 
-  input_object :new_company_params do
+  input_object :company_params do
     field :name, :string
     field :phone_number, :string
     field :location, :location_input

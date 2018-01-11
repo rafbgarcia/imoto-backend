@@ -63,7 +63,7 @@ export default class Layout extends React.Component {
 
         <Drawer
           open={this.state.opened}
-          onRequestClose={this.closeDrawer}
+          onClose={this.closeDrawer}
         >
           <Link to="/" style={{width: 250}}>
             <MenuItem onClick={this.closeDrawer}>Dashboard</MenuItem>

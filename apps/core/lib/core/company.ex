@@ -18,15 +18,23 @@ defmodule Core.Company do
   end
 
   def changeset(changeset, params \\ %{}) do
+    case params["centrals_ids"] do
+      nil -> nil
+      ids -> put_assoc(changeset, :centrals, parse_centrals_ids(ids))
+    end
+
     changeset
-    |> cast(params, [:phone_number, :name, :password_hash, :login])
+    |> cast(params, [:phone_number, :name, :central_id, :password_hash, :login])
     |> cast_assoc(:location)
-    |> put_assoc(:centrals, parse_centrals_ids(params.centrals_ids))
     |> unique_constraint(:login)
   end
 
   defp parse_centrals_ids(centrals_ids) do
-    from(c in Core.Central, where: c.id in ^centrals_ids)
-    |> Db.Repo.all
+    case centrals_ids do
+      nil -> []
+      ids ->
+        from(c in Core.Central, where: c.id in ^ids)
+        |> Db.Repo.all
+    end
   end
 end

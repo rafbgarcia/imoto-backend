@@ -2,7 +2,6 @@ defmodule Core.Location do
   use Core, :schema
 
   schema "locations" do
-    belongs_to :stop, Core.Stop
     belongs_to :customer, Core.Customer
     belongs_to :company, Core.Company
     field :name, :string
@@ -26,7 +25,7 @@ defmodule Core.Location do
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, [
-      :customer_id, :company_id, :stop_id,
+      :customer_id, :company_id,
       :name, :street, :number, :neighborhood, :zipcode, :formatted_address, :formatted_phone_number,
       :complement, :reference, :city, :uf, :lat, :lng, :google_place_id,
       :last_used_at, :used_count,
