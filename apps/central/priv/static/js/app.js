@@ -90025,7 +90025,13 @@ var DashboardPage = function (_React$Component) {
       enumerable: true,
       writable: true,
       value: function value() {
+        var startPolling = _this.props.data.startPolling;
+
         _this.setState({ modalOpen: false });
+
+        setTimeout(function () {
+          startPolling(2000);
+        }, 1000);
       }
     }), _temp), _possibleConstructorReturn(_this, _ret);
   }
@@ -90553,8 +90559,9 @@ var NewOrderModal = function (_React$Component) {
           var selectedCompany = companies.find(function (company) {
             return company.id == companyId;
           });
-          var companyClone = Object.assign({}, selectedCompany);
-          debugger;
+          selectedCompany = _this.setFieldsAs(selectedCompany, "");
+          selectedCompany.location = _this.setFieldsAs(selectedCompany.location, "");
+
           _this.setState({ companyId: companyId, company: selectedCompany });
         } else {
           _this.setState({ companyId: companyId, company: _this.emptyCompany() });
@@ -90633,6 +90640,15 @@ var NewOrderModal = function (_React$Component) {
       });
     }
   }, {
+    key: 'setFieldsAs',
+    value: function setFieldsAs(object, value) {
+      var newObj = {};
+      for (var key in object) {
+        if (!object[key]) newObj[key] = "";else newObj[key] = object[key];
+      }
+      return newObj;
+    }
+  }, {
     key: 'createOrderForExistingCompany',
     value: function createOrderForExistingCompany() {
       var showSnack = this.context.showSnack;
@@ -90645,13 +90661,14 @@ var NewOrderModal = function (_React$Component) {
 
 
       this.props.onClose();
+      showSnack("Enviando pedido...");
 
       _graphql_client2.default.mutate({
         mutation: (0, _graphqlTag2.default)(_templateObject2),
         variables: { companyParams: company }
       }).then(function (_ref4) {
         var order = _ref4.data.order;
-        return showSnack("Pedido enviado");
+        return showSnack("Pedido enviado, aguardando confirmação do motoboy");
       }).catch(function (_ref5) {
         var graphQLErrors = _ref5.graphQLErrors;
         return showSnack(graphQLErrors.map(function (err) {

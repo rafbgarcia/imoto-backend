@@ -63,13 +63,23 @@ class NewOrderModal extends React.Component {
     const {companies} = this.state
 
     if (companyId.length > 0) {
-      const selectedCompany = companies.find((company) => company.id == companyId)
-      const companyClone = Object.assign({}, selectedCompany)
-      debugger
+      let selectedCompany = companies.find((company) => company.id == companyId)
+      selectedCompany = this.setFieldsAs(selectedCompany, "")
+      selectedCompany.location = this.setFieldsAs(selectedCompany.location, "")
+
       this.setState({companyId, company: selectedCompany})
     } else {
       this.setState({companyId, company: this.emptyCompany()})
     }
+  }
+
+  setFieldsAs(object, value) {
+    const newObj = {}
+    for (let key in object) {
+      if (!object[key]) newObj[key] = ""
+      else newObj[key] = object[key]
+    }
+    return newObj
   }
 
   updateCompany = (evt) => {
@@ -102,6 +112,7 @@ class NewOrderModal extends React.Component {
     const {showSnack} = this.context
 
     this.props.onClose()
+    showSnack("Enviando pedido...")
 
     apolloClient.mutate({
       mutation: gql`mutation createOrderForNewCompany($companyParams: CompanyParams) {
@@ -111,7 +122,7 @@ class NewOrderModal extends React.Component {
       }`,
       variables: {companyParams: company},
     })
-    .then(({data: {order}}) => showSnack("Pedido enviado"))
+    .then(({data: {order}}) => showSnack("Pedido enviado, aguardando confirmação do motoboy"))
     .catch(({graphQLErrors}) => showSnack(graphQLErrors.map(err => err.message)))
   }
 

@@ -31,7 +31,12 @@ class DashboardPage extends React.Component{
   }
 
   onCloseNewOrderModal = () => {
+    const {startPolling} = this.props.data
     this.setState({modalOpen: false})
+
+    setTimeout(() => {
+      startPolling(2000)
+    }, 1000)
   }
 
   render() {
