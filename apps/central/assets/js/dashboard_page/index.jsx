@@ -11,17 +11,22 @@ import NewOrderModal from './new_order_modal'
 class DashboardPage extends React.Component{
   state = {
     modalOpen: false,
+    hasNewOrder: true,
   }
 
   startStopPolling() {
     const {orders, loading} = this.props.data
+    const {hasNewOrder} = this.state
 
     if (loading) return
 
     const hasPendingOrder = orders.some((order) => order.pending)
     const hasOngoingOrder = orders.some((order) => order.confirmed)
 
-    if (hasPendingOrder) {
+    if (hasNewOrder) {
+      this.props.data.startPolling(2000)
+      window.setTimeout(() => this.setState({hasNewOrder: false}), 3000)
+    } else if (hasPendingOrder) {
       this.props.data.startPolling(2000)
     } else if (hasOngoingOrder) {
       this.props.data.startPolling(30000)

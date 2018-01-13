@@ -103,7 +103,22 @@ class NewOrderModal extends React.Component {
   }
 
   createOrderForExistingCompany() {
+    const {companyId} = this.state
     const {showSnack} = this.context
+
+    this.props.onClose()
+    showSnack("Enviando pedido...")
+
+    apolloClient.mutate({
+      mutation: gql`mutation createOrderForExistingCompany($companyId: ID!) {
+        order: createOrderForExistingCompany(companyId: $companyId) {
+          id
+        }
+      }`,
+      variables: {companyId},
+    })
+    .then(({data: {order}}) => showSnack("Pedido enviado, aguardando confirmação do motoboy"))
+    .catch(({graphQLErrors}) => showSnack(graphQLErrors.map(err => err.message)))
 
   }
 
@@ -124,6 +139,10 @@ class NewOrderModal extends React.Component {
     })
     .then(({data: {order}}) => showSnack("Pedido enviado, aguardando confirmação do motoboy"))
     .catch(({graphQLErrors}) => showSnack(graphQLErrors.map(err => err.message)))
+  }
+
+  canEdit = () => {
+    return this.state.companyId.length > 0
   }
 
   render() {
@@ -159,6 +178,7 @@ class NewOrderModal extends React.Component {
                 onChange={this.updateCompany}
                 name="name"
                 value={company.name}
+                disabled={this.canEdit()}
               />
             </FormControl>
 
@@ -168,6 +188,7 @@ class NewOrderModal extends React.Component {
                 name="phoneNumber"
                 onChange={this.updateCompany}
                 value={company.phoneNumber}
+                disabled={this.canEdit()}
               />
             </FormControl>
           </section>
@@ -181,6 +202,7 @@ class NewOrderModal extends React.Component {
                 onChange={this.updateLocation}
                 name="street"
                 value={company.location.street}
+                disabled={this.canEdit()}
               />
             </FormControl>
             <FormControl className="w-25 mr-4 ml-4">
@@ -190,6 +212,7 @@ class NewOrderModal extends React.Component {
                 name="number"
                 type="number"
                 value={company.location.number}
+                disabled={this.canEdit()}
               />
             </FormControl>
             <FormControl className="w-25">
@@ -198,6 +221,7 @@ class NewOrderModal extends React.Component {
                 onChange={this.updateLocation}
                 name="complement"
                 value={company.location.complement}
+                disabled={this.canEdit()}
               />
             </FormControl>
           </section>
@@ -209,6 +233,7 @@ class NewOrderModal extends React.Component {
                 onChange={this.updateLocation}
                 name="zipcode"
                 value={company.location.zipcode}
+                disabled={this.canEdit()}
               />
             </FormControl>
             <FormControl className="w-50 ml-4">
@@ -217,6 +242,7 @@ class NewOrderModal extends React.Component {
                 onChange={this.updateLocation}
                 name="reference"
                 value={company.location.reference}
+                disabled={this.canEdit()}
               />
             </FormControl>
           </section>

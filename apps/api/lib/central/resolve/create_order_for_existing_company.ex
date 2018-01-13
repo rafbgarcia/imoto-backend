@@ -1,11 +1,11 @@
 defmodule Central.Resolve.CreateOrderForExistingCompany do
   use Api, :resolver
-  alias Core.{Company, Motoboy, Order, History, Stop, Location}
+  alias Core.{Company, Motoboy, Order, History, Location}
 
   def handle(%{company_id: company_id}, %{context: %{current_central: central}}) do
-    with _ <- ensure_this_is_my_company!(company_id, central.id),
-    {:ok, motoboy} <- next_motoboy_or_error(central.id),
-    {:ok, order} <- create_order(company_id, motoboy.id) do
+    with {:ok, company} <- find_my_company!(company_id, central.id),
+    {:ok, motoboy} <- next_available_motoboy(central.id),
+    {:ok, order} <- create_order(company.id, motoboy.id) do
       notify_motoboy_new_order(motoboy.one_signal_player_id)
       add_to_history(order.id, motoboy.id)
 
@@ -16,17 +16,21 @@ defmodule Central.Resolve.CreateOrderForExistingCompany do
     {:error, "Algo deu errado, por favor refaça login e tente novamente"}
   end
 
-  defp ensure_this_is_my_company!(company_id, central_id) do
+  defp find_my_company!(company_id, central_id) do
     from(c in Company,
       where: c.id == ^company_id,
       where: c.central_id == ^central_id
     )
-    |> Repo.one!
+    |> Repo.one
+    |> case do
+      nil -> {:error, "Empresa não encontrada"}
+      company -> {:ok, company}
+    end
   end
 
   defp create_order(company_id, motoboy_id) do
     order_params = %{
-      stops: [%Stop{
+      stops: [%{
         sequence: 0,
         instructions: "Falar com o responsável",
         location_id: get_company_location_id(company_id)
@@ -40,6 +44,9 @@ defmodule Central.Resolve.CreateOrderForExistingCompany do
     |> Repo.insert
   end
 
+  @doc """
+  Returns the ID of the location
+  """
   defp get_company_location_id(company_id) do
     from(l in Location,
       where: l.company_id == ^company_id,
@@ -47,13 +54,12 @@ defmodule Central.Resolve.CreateOrderForExistingCompany do
     )
     |> first
     |> Repo.one
-    |> Map.get("id")
   end
 
-  defp next_motoboy_or_error(central_id) do
+  defp next_available_motoboy(central_id) do
     Repo.transaction(fn ->
       case get_next_motoboy(central_id) do
-        nil -> nil
+        nil -> Repo.rollback("Nenhum motoboy disponível")
         motoboy -> update_motoboy_state(motoboy)
       end
     end)
@@ -64,6 +70,7 @@ defmodule Central.Resolve.CreateOrderForExistingCompany do
       lock: "FOR UPDATE",
       where: m.state == ^Motoboy.available(),
       where: m.central_id == ^central_id,
+      where: m.active == ^true,
       order_by: [asc: m.became_available_at]
     )
     |> first

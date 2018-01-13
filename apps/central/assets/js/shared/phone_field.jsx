@@ -7,7 +7,7 @@ export default class PhoneField extends React.Component {
   render() {
     const {
       value, onChange, className, fullWidth,
-      label, InputClassName, name,
+      label, InputClassName, name, disabled,
     } = this.props
 
     return (
@@ -20,6 +20,7 @@ export default class PhoneField extends React.Component {
           className={InputClassName}
           onChange={onChange}
           inputComponent={PhoneFieldElement}
+          disabled={disabled}
         />
       </FormControl>
     )

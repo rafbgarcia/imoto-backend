@@ -90019,7 +90019,8 @@ var DashboardPage = function (_React$Component) {
       enumerable: true,
       writable: true,
       value: {
-        modalOpen: false
+        modalOpen: false,
+        hasNewOrder: true
       }
     }), Object.defineProperty(_this, 'onCloseNewOrderModal', {
       enumerable: true,
@@ -90039,9 +90040,12 @@ var DashboardPage = function (_React$Component) {
   _createClass(DashboardPage, [{
     key: 'startStopPolling',
     value: function startStopPolling() {
+      var _this2 = this;
+
       var _props$data = this.props.data,
           orders = _props$data.orders,
           loading = _props$data.loading;
+      var hasNewOrder = this.state.hasNewOrder;
 
 
       if (loading) return;
@@ -90053,7 +90057,12 @@ var DashboardPage = function (_React$Component) {
         return order.confirmed;
       });
 
-      if (hasPendingOrder) {
+      if (hasNewOrder) {
+        this.props.data.startPolling(2000);
+        window.setTimeout(function () {
+          return _this2.setState({ hasNewOrder: false });
+        }, 3000);
+      } else if (hasPendingOrder) {
         this.props.data.startPolling(2000);
       } else if (hasOngoingOrder) {
         this.props.data.startPolling(30000);
@@ -90064,7 +90073,7 @@ var DashboardPage = function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
-      var _this2 = this;
+      var _this3 = this;
 
       var _props$data2 = this.props.data,
           orders = _props$data2.orders,
@@ -90081,7 +90090,7 @@ var DashboardPage = function (_React$Component) {
           _Button2.default,
           { raised: true, color: 'primary', className: 'mb-5',
             onClick: function onClick() {
-              return _this2.setState({ modalOpen: true });
+              return _this3.setState({ modalOpen: true });
             }
           },
           _react2.default.createElement(_Add2.default, { className: 'mr-2' }),
@@ -90453,7 +90462,8 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _templateObject = _taggedTemplateLiteral(['query getMyCompanies {\n        companies: myCompanies {\n          id name phoneNumber\n          location { street number neighborhood city uf zipcode complement reference }\n        }\n      }'], ['query getMyCompanies {\n        companies: myCompanies {\n          id name phoneNumber\n          location { street number neighborhood city uf zipcode complement reference }\n        }\n      }']),
-    _templateObject2 = _taggedTemplateLiteral(['mutation createOrderForNewCompany($companyParams: CompanyParams) {\n        order: createOrderForNewCompany(companyParams: $companyParams) {\n          id\n        }\n      }'], ['mutation createOrderForNewCompany($companyParams: CompanyParams) {\n        order: createOrderForNewCompany(companyParams: $companyParams) {\n          id\n        }\n      }']);
+    _templateObject2 = _taggedTemplateLiteral(['mutation createOrderForExistingCompany($companyId: ID!) {\n        order: createOrderForExistingCompany(companyId: $companyId) {\n          id\n        }\n      }'], ['mutation createOrderForExistingCompany($companyId: ID!) {\n        order: createOrderForExistingCompany(companyId: $companyId) {\n          id\n        }\n      }']),
+    _templateObject3 = _taggedTemplateLiteral(['mutation createOrderForNewCompany($companyParams: CompanyParams) {\n        order: createOrderForNewCompany(companyParams: $companyParams) {\n          id\n        }\n      }'], ['mutation createOrderForNewCompany($companyParams: CompanyParams) {\n        order: createOrderForNewCompany(companyParams: $companyParams) {\n          id\n        }\n      }']);
 
 var _react = require('react');
 
@@ -90594,6 +90604,12 @@ var NewOrderModal = function (_React$Component) {
 
         id ? _this.createOrderForExistingCompany() : _this.createOrderForNewCompany();
       }
+    }), Object.defineProperty(_this, 'canEdit', {
+      enumerable: true,
+      writable: true,
+      value: function value() {
+        return _this.state.companyId.length > 0;
+      }
     }), _temp), _possibleConstructorReturn(_this, _ret);
   }
 
@@ -90651,7 +90667,25 @@ var NewOrderModal = function (_React$Component) {
   }, {
     key: 'createOrderForExistingCompany',
     value: function createOrderForExistingCompany() {
+      var companyId = this.state.companyId;
       var showSnack = this.context.showSnack;
+
+
+      this.props.onClose();
+      showSnack("Enviando pedido...");
+
+      _graphql_client2.default.mutate({
+        mutation: (0, _graphqlTag2.default)(_templateObject2),
+        variables: { companyId: companyId }
+      }).then(function (_ref4) {
+        var order = _ref4.data.order;
+        return showSnack("Pedido enviado, aguardando confirmação do motoboy");
+      }).catch(function (_ref5) {
+        var graphQLErrors = _ref5.graphQLErrors;
+        return showSnack(graphQLErrors.map(function (err) {
+          return err.message;
+        }));
+      });
     }
   }, {
     key: 'createOrderForNewCompany',
@@ -90664,13 +90698,13 @@ var NewOrderModal = function (_React$Component) {
       showSnack("Enviando pedido...");
 
       _graphql_client2.default.mutate({
-        mutation: (0, _graphqlTag2.default)(_templateObject2),
+        mutation: (0, _graphqlTag2.default)(_templateObject3),
         variables: { companyParams: company }
-      }).then(function (_ref4) {
-        var order = _ref4.data.order;
+      }).then(function (_ref6) {
+        var order = _ref6.data.order;
         return showSnack("Pedido enviado, aguardando confirmação do motoboy");
-      }).catch(function (_ref5) {
-        var graphQLErrors = _ref5.graphQLErrors;
+      }).catch(function (_ref7) {
+        var graphQLErrors = _ref7.graphQLErrors;
         return showSnack(graphQLErrors.map(function (err) {
           return err.message;
         }));
@@ -90741,7 +90775,8 @@ var NewOrderModal = function (_React$Component) {
                 label: 'Nome da empresa',
                 onChange: this.updateCompany,
                 name: 'name',
-                value: company.name
+                value: company.name,
+                disabled: this.canEdit()
               })
             ),
             _react2.default.createElement(
@@ -90751,7 +90786,8 @@ var NewOrderModal = function (_React$Component) {
                 label: 'Telefone',
                 name: 'phoneNumber',
                 onChange: this.updateCompany,
-                value: company.phoneNumber
+                value: company.phoneNumber,
+                disabled: this.canEdit()
               })
             )
           ),
@@ -90770,7 +90806,8 @@ var NewOrderModal = function (_React$Component) {
                 label: 'Logradouro',
                 onChange: this.updateLocation,
                 name: 'street',
-                value: company.location.street
+                value: company.location.street,
+                disabled: this.canEdit()
               })
             ),
             _react2.default.createElement(
@@ -90781,7 +90818,8 @@ var NewOrderModal = function (_React$Component) {
                 onChange: this.updateLocation,
                 name: 'number',
                 type: 'number',
-                value: company.location.number
+                value: company.location.number,
+                disabled: this.canEdit()
               })
             ),
             _react2.default.createElement(
@@ -90791,7 +90829,8 @@ var NewOrderModal = function (_React$Component) {
                 label: 'Complemento',
                 onChange: this.updateLocation,
                 name: 'complement',
-                value: company.location.complement
+                value: company.location.complement,
+                disabled: this.canEdit()
               })
             )
           ),
@@ -90805,7 +90844,8 @@ var NewOrderModal = function (_React$Component) {
                 label: 'CEP',
                 onChange: this.updateLocation,
                 name: 'zipcode',
-                value: company.location.zipcode
+                value: company.location.zipcode,
+                disabled: this.canEdit()
               })
             ),
             _react2.default.createElement(
@@ -90815,7 +90855,8 @@ var NewOrderModal = function (_React$Component) {
                 label: 'Ponto de refer\xEAncia',
                 onChange: this.updateLocation,
                 name: 'reference',
-                value: company.location.reference
+                value: company.location.reference,
+                disabled: this.canEdit()
               })
             )
           ),
@@ -92268,7 +92309,8 @@ var PhoneField = function (_React$Component) {
           fullWidth = _props.fullWidth,
           label = _props.label,
           InputClassName = _props.InputClassName,
-          name = _props.name;
+          name = _props.name,
+          disabled = _props.disabled;
 
 
       return _react2.default.createElement(
@@ -92285,7 +92327,8 @@ var PhoneField = function (_React$Component) {
           name: name,
           className: InputClassName,
           onChange: onChange,
-          inputComponent: PhoneFieldElement
+          inputComponent: PhoneFieldElement,
+          disabled: disabled
         })
       );
     }
@@ -92383,7 +92426,8 @@ var ZipcodeField = function (_React$Component) {
           fullWidth = _props.fullWidth,
           label = _props.label,
           InputClassName = _props.InputClassName,
-          name = _props.name;
+          name = _props.name,
+          disabled = _props.disabled;
 
 
       return _react2.default.createElement(
@@ -92398,6 +92442,7 @@ var ZipcodeField = function (_React$Component) {
           id: "zipcode",
           value: value,
           name: name,
+          disabled: disabled,
           className: InputClassName,
           onChange: onChange,
           inputComponent: ZipcodeFieldElement

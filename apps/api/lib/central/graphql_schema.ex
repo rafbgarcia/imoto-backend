@@ -32,7 +32,7 @@ defmodule Central.GraphqlSchema do
     end
 
     field :create_order_for_existing_company, :order do
-      arg :company_id, :id
+      arg :company_id, non_null(:id)
       resolve &Central.Resolve.CreateOrderForExistingCompany.handle/2
     end
 
