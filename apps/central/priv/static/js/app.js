@@ -4789,13 +4789,6 @@ require.register("babel-runtime/core-js/array/from.js", function(exports, requir
   })();
 });
 
-require.register("babel-runtime/core-js/json/stringify.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "babel-runtime");
-  (function() {
-    module.exports = { "default": require("core-js/library/fn/json/stringify"), __esModule: true };
-  })();
-});
-
 require.register("babel-runtime/core-js/map.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "babel-runtime");
   (function() {
@@ -6812,17 +6805,6 @@ require.register("core-js/library/fn/array/from.js", function(exports, require, 
     require('../../modules/es6.string.iterator');
 require('../../modules/es6.array.from');
 module.exports = require('../../modules/_core').Array.from;
-  })();
-});
-
-require.register("core-js/library/fn/json/stringify.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "core-js");
-  (function() {
-    var core = require('../../modules/_core');
-var $JSON = core.JSON || (core.JSON = { stringify: JSON.stringify });
-module.exports = function stringify(it) { // eslint-disable-line no-unused-vars
-  return $JSON.stringify.apply($JSON, arguments);
-};
   })();
 });
 
@@ -45301,928 +45283,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   })();
 });
 
-require.register("material-ui/Grid/Grid.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.styles = undefined;
-
-var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
-
-var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
-
-var _extends2 = require('babel-runtime/helpers/extends');
-
-var _extends3 = _interopRequireDefault(_extends2);
-
-var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
-
-var _defineProperty3 = _interopRequireDefault(_defineProperty2);
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = require('prop-types');
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _classnames = require('classnames');
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-var _withStyles = require('../styles/withStyles');
-
-var _withStyles2 = _interopRequireDefault(_withStyles);
-
-var _createBreakpoints = require('../styles/createBreakpoints');
-
-var _requirePropFactory = require('../utils/requirePropFactory');
-
-var _requirePropFactory2 = _interopRequireDefault(_requirePropFactory);
-
-var _Hidden = require('../Hidden');
-
-var _Hidden2 = _interopRequireDefault(_Hidden);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var GUTTERS = [0, 8, 16, 24, 40]; // A grid component using the following libs as inspiration.
-//
-// For the implementation:
-// - http://v4-alpha.getbootstrap.com/layout/flexbox-grid/
-// - https://github.com/kristoferjoseph/flexboxgrid/blob/master/src/css/flexboxgrid.css
-// - https://github.com/roylee0704/react-flexbox-grid
-// - https://material.angularjs.org/latest/layout/introduction
-//
-// Follow this flexbox Guide to better understand the underlying model:
-// - https://css-tricks.com/snippets/css/a-guide-to-flexbox/
-
-var GRID_SIZES = [true, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-
-function generateGrid(globalStyles, theme, breakpoint) {
-  // For the auto layouting
-  var styles = (0, _defineProperty3.default)({}, 'grid-' + breakpoint, {
-    flexBasis: 0,
-    flexGrow: 1,
-    maxWidth: '100%'
-  });
-
-  GRID_SIZES.forEach(function (size) {
-    if (typeof size === 'boolean') {
-      // Skip the first one as handle above.
-      return;
-    }
-
-    // Only keep 6 significant numbers.
-    var width = Math.round(size / 12 * Math.pow(10, 6)) / Math.pow(10, 4) + '%';
-
-    /* eslint-disable max-len */
-    // Close to the bootstrap implementation:
-    // https://github.com/twbs/bootstrap/blob/b0508a975d711d6b24c01f57dd5445c22699fac4/scss/mixins/_grid.scss#L69
-    /* eslint-enable max-len */
-    styles['grid-' + breakpoint + '-' + size] = {
-      flexBasis: width,
-      maxWidth: width
-    };
-  });
-
-  // No need for a media query for the first size.
-  if (breakpoint === 'xs') {
-    (0, _extends3.default)(globalStyles, styles);
-  } else {
-    globalStyles[theme.breakpoints.up(breakpoint)] = styles;
-  }
-}
-
-function generateGutter(theme, breakpoint) {
-  var styles = {};
-
-  GUTTERS.forEach(function (spacing, index) {
-    if (index === 0) {
-      // Skip the default style.
-      return;
-    }
-
-    styles['spacing-' + breakpoint + '-' + spacing] = {
-      margin: -spacing / 2,
-      width: 'calc(100% + ' + spacing + 'px)',
-      '& > $typeItem': {
-        padding: spacing / 2
-      }
-    };
-  });
-
-  return styles;
-}
-
-// Default CSS values
-// flex: '0 1 auto',
-// flexDirection: 'row',
-// alignItems: 'flex-start',
-// flexWrap: 'nowrap',
-// justifyContent: 'flex-start',
-var styles = exports.styles = function styles(theme) {
-  return (0, _extends3.default)({
-    typeContainer: {
-      boxSizing: 'border-box',
-      display: 'flex',
-      flexWrap: 'wrap',
-      width: '100%'
-    },
-    typeItem: {
-      boxSizing: 'border-box',
-      flex: '0 0 auto',
-      margin: '0' // For instance, it's useful when used with a `figure` element.
-    },
-    'direction-xs-column': {
-      flexDirection: 'column'
-    },
-    'direction-xs-column-reverse': {
-      flexDirection: 'column-reverse'
-    },
-    'direction-xs-row-reverse': {
-      flexDirection: 'row-reverse'
-    },
-    'wrap-xs-nowrap': {
-      flexWrap: 'nowrap'
-    },
-    'wrap-xs-wrap-reverse': {
-      flexWrap: 'wrap-reverse'
-    },
-    'align-items-xs-center': {
-      alignItems: 'center'
-    },
-    'align-items-xs-flex-start': {
-      alignItems: 'flex-start'
-    },
-    'align-items-xs-flex-end': {
-      alignItems: 'flex-end'
-    },
-    'align-items-xs-baseline': {
-      alignItems: 'baseline'
-    },
-    'align-content-xs-center': {
-      alignContent: 'center'
-    },
-    'align-content-xs-flex-start': {
-      alignContent: 'flex-start'
-    },
-    'align-content-xs-flex-end': {
-      alignContent: 'flex-end'
-    },
-    'align-content-xs-space-between': {
-      alignContent: 'space-between'
-    },
-    'align-content-xs-space-around': {
-      alignContent: 'space-around'
-    },
-    'justify-xs-center': {
-      justifyContent: 'center'
-    },
-    'justify-xs-flex-end': {
-      justifyContent: 'flex-end'
-    },
-    'justify-xs-space-between': {
-      justifyContent: 'space-between'
-    },
-    'justify-xs-space-around': {
-      justifyContent: 'space-around'
-    }
-  }, generateGutter(theme, 'xs'), _createBreakpoints.keys.reduce(function (accumulator, key) {
-    // Use side effect over immutability for better performance.
-    generateGrid(accumulator, theme, key);
-    return accumulator;
-  }, {}));
-};
-
-function Grid(props) {
-  var _classNames;
-
-  var alignContent = props.alignContent,
-      alignItems = props.alignItems,
-      classes = props.classes,
-      classNameProp = props.className,
-      ComponentProp = props.component,
-      container = props.container,
-      direction = props.direction,
-      hidden = props.hidden,
-      item = props.item,
-      justify = props.justify,
-      lg = props.lg,
-      md = props.md,
-      sm = props.sm,
-      spacing = props.spacing,
-      wrap = props.wrap,
-      xl = props.xl,
-      xs = props.xs,
-      other = (0, _objectWithoutProperties3.default)(props, ['alignContent', 'alignItems', 'classes', 'className', 'component', 'container', 'direction', 'hidden', 'item', 'justify', 'lg', 'md', 'sm', 'spacing', 'wrap', 'xl', 'xs']);
-
-
-  var className = (0, _classnames2.default)((_classNames = {}, (0, _defineProperty3.default)(_classNames, classes.typeContainer, container), (0, _defineProperty3.default)(_classNames, classes.typeItem, item), (0, _defineProperty3.default)(_classNames, classes['spacing-xs-' + String(spacing)], container && spacing !== 0), (0, _defineProperty3.default)(_classNames, classes['direction-xs-' + String(direction)], direction !== Grid.defaultProps.direction), (0, _defineProperty3.default)(_classNames, classes['wrap-xs-' + String(wrap)], wrap !== Grid.defaultProps.wrap), (0, _defineProperty3.default)(_classNames, classes['align-items-xs-' + String(alignItems)], alignItems !== Grid.defaultProps.alignItems), (0, _defineProperty3.default)(_classNames, classes['align-content-xs-' + String(alignContent)], alignContent !== Grid.defaultProps.alignContent), (0, _defineProperty3.default)(_classNames, classes['justify-xs-' + String(justify)], justify !== Grid.defaultProps.justify), (0, _defineProperty3.default)(_classNames, classes['grid-xs'], xs === true), (0, _defineProperty3.default)(_classNames, classes['grid-xs-' + String(xs)], xs && xs !== true), (0, _defineProperty3.default)(_classNames, classes['grid-sm'], sm === true), (0, _defineProperty3.default)(_classNames, classes['grid-sm-' + String(sm)], sm && sm !== true), (0, _defineProperty3.default)(_classNames, classes['grid-md'], md === true), (0, _defineProperty3.default)(_classNames, classes['grid-md-' + String(md)], md && md !== true), (0, _defineProperty3.default)(_classNames, classes['grid-lg'], lg === true), (0, _defineProperty3.default)(_classNames, classes['grid-lg-' + String(lg)], lg && lg !== true), (0, _defineProperty3.default)(_classNames, classes['grid-xl'], xl === true), (0, _defineProperty3.default)(_classNames, classes['grid-xl-' + String(xl)], xl && xl !== true), _classNames), classNameProp);
-  var gridProps = (0, _extends3.default)({ className: className }, other);
-
-  if (hidden) {
-    return _react2.default.createElement(
-      _Hidden2.default,
-      hidden,
-      _react2.default.createElement(ComponentProp, gridProps)
-    );
-  }
-
-  return _react2.default.createElement(ComponentProp, gridProps);
-}
-
-Grid.propTypes = 'development' !== "production" ? {
-  /**
-   * Defines the `align-content` style property.
-   * It's applied for all screen sizes.
-   */
-  alignContent: _propTypes2.default.oneOf(['stretch', 'center', 'flex-start', 'flex-end', 'space-between', 'space-around']),
-  /**
-   * Defines the `align-items` style property.
-   * It's applied for all screen sizes.
-   */
-  alignItems: _propTypes2.default.oneOf(['flex-start', 'center', 'flex-end', 'stretch', 'baseline']),
-  /**
-   * The content of the component.
-   */
-  children: _propTypes2.default.node,
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: _propTypes2.default.object.isRequired,
-  /**
-   * @ignore
-   */
-  className: _propTypes2.default.string,
-  /**
-   * The component used for the root node.
-   * Either a string to use a DOM element or a component.
-   */
-  component: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
-  /**
-   * If `true`, the component will have the flex *container* behavior.
-   * You should be wrapping *items* with a *container*.
-   */
-  container: _propTypes2.default.bool,
-  /**
-   * Defines the `flex-direction` style property.
-   * It is applied for all screen sizes.
-   */
-  direction: _propTypes2.default.oneOf(['row', 'row-reverse', 'column', 'column-reverse']),
-  /**
-   * If provided, will wrap with [Hidden](/api/hidden) component and given properties.
-   */
-  hidden: _propTypes2.default.object,
-  /**
-   * If `true`, the component will have the flex *item* behavior.
-   * You should be wrapping *items* with a *container*.
-   */
-  item: _propTypes2.default.bool,
-  /**
-   * Defines the `justify-content` style property.
-   * It is applied for all screen sizes.
-   */
-  justify: _propTypes2.default.oneOf(['flex-start', 'center', 'flex-end', 'space-between', 'space-around']),
-  /**
-   * Defines the number of grids the component is going to use.
-   * It's applied for the `lg` breakpoint and wider screens if not overridden.
-   */
-  lg: _propTypes2.default.oneOf([true, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
-  /**
-   * Defines the number of grids the component is going to use.
-   * It's applied for the `md` breakpoint and wider screens if not overridden.
-   */
-  md: _propTypes2.default.oneOf([true, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
-  /**
-   * Defines the number of grids the component is going to use.
-   * It's applied for the `sm` breakpoint and wider screens if not overridden.
-   */
-  sm: _propTypes2.default.oneOf([true, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
-  /**
-   * Defines the space between the type `item` component.
-   * It can only be used on a type `container` component.
-   */
-  spacing: _propTypes2.default.oneOf(GUTTERS),
-  /**
-   * Defines the `flex-wrap` style property.
-   * It's applied for all screen sizes.
-   */
-  wrap: _propTypes2.default.oneOf(['nowrap', 'wrap', 'wrap-reverse']),
-  /**
-   * Defines the number of grids the component is going to use.
-   * It's applied for the `xl` breakpoint and wider screens.
-   */
-  xl: _propTypes2.default.oneOf([true, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]),
-  /**
-   * Defines the number of grids the component is going to use.
-   * It's applied for all the screen sizes with the lowest priority.
-   */
-  xs: _propTypes2.default.oneOf([true, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
-} : {};
-
-Grid.defaultProps = {
-  alignContent: 'stretch',
-  alignItems: 'stretch',
-  component: 'div',
-  container: false,
-  direction: 'row',
-  item: false,
-  justify: 'flex-start',
-  spacing: 16,
-  wrap: 'wrap'
-};
-
-// Add a wrapper component to generate some helper messages in the development
-// environment.
-/* eslint-disable react/no-multi-comp */
-// eslint-disable-next-line import/no-mutable-exports
-var GridWrapper = Grid;
-
-if ('development' !== 'production') {
-  GridWrapper = function GridWrapper(props) {
-    return _react2.default.createElement(Grid, props);
-  };
-
-  var requireProp = (0, _requirePropFactory2.default)('Grid');
-  GridWrapper.propTypes = {
-    alignContent: requireProp('container'),
-    alignItems: requireProp('container'),
-    direction: requireProp('container'),
-    justify: requireProp('container'),
-    lg: requireProp('item'),
-    md: requireProp('item'),
-    sm: requireProp('item'),
-    spacing: requireProp('container'),
-    wrap: requireProp('container'),
-    xs: requireProp('item')
-  };
-}
-
-exports.default = (0, _withStyles2.default)(styles, { name: 'MuiGrid' })(GridWrapper);
-  })();
-});
-
-require.register("material-ui/Grid/index.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _Grid = require('./Grid');
-
-Object.defineProperty(exports, 'default', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_Grid).default;
-  }
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-  })();
-});
-
-require.register("material-ui/Hidden/Hidden.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
-
-var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = require('prop-types');
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _HiddenJs = require('./HiddenJs');
-
-var _HiddenJs2 = _interopRequireDefault(_HiddenJs);
-
-var _HiddenCss = require('./HiddenCss');
-
-var _HiddenCss2 = _interopRequireDefault(_HiddenCss);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * Responsively hides children based on the selected implementation.
- */
-function Hidden(props) {
-  var implementation = props.implementation,
-      other = (0, _objectWithoutProperties3.default)(props, ['implementation']);
-
-
-  if (implementation === 'js') {
-    return _react2.default.createElement(_HiddenJs2.default, other);
-  }
-
-  return _react2.default.createElement(_HiddenCss2.default, other);
-}
-
-Hidden.propTypes = 'development' !== "production" ? {
-  /**
-   * The content of the component.
-   */
-  children: _propTypes2.default.node,
-  /**
-   * @ignore
-   */
-  className: _propTypes2.default.string,
-  /**
-   * Specify which implementation to use.  'js' is the default, 'css' works better for server
-   * side rendering.
-   */
-  implementation: _propTypes2.default.oneOf(['js', 'css']),
-  /**
-   * You can use this property when choosing the `js` implementation with server side rendering.
-   *
-   * As `window.innerWidth` is unavailable on the server,
-   * we default to rendering an empty componenent during the first mount.
-   * In some situation you might want to use an heristic to approximate
-   * the screen width of the client browser screen width.
-   *
-   * For instance, you could be using the user-agent or the client-hints.
-   * http://caniuse.com/#search=client%20hint
-   */
-  initialWidth: _propTypes2.default.number,
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  lgDown: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  lgUp: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  mdDown: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  mdUp: _propTypes2.default.bool,
-  /**
-   * Hide the given breakpoint(s).
-   */
-  only: _propTypes2.default.oneOfType([_propTypes2.default.oneOf(['xs', 'sm', 'md', 'lg', 'xl']), _propTypes2.default.arrayOf(_propTypes2.default.oneOf(['xs', 'sm', 'md', 'lg', 'xl']))]),
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  smDown: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  smUp: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  xlDown: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  xlUp: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  xsDown: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  xsUp: _propTypes2.default.bool
-} : {};
-
-Hidden.defaultProps = {
-  implementation: 'js',
-  lgDown: false,
-  lgUp: false,
-  mdDown: false,
-  mdUp: false,
-  smDown: false,
-  smUp: false,
-  xlDown: false,
-  xlUp: false,
-  xsDown: false,
-  xsUp: false
-};
-
-exports.default = Hidden;
-  })();
-});
-
-require.register("material-ui/Hidden/HiddenCss.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _keys = require('babel-runtime/core-js/object/keys');
-
-var _keys2 = _interopRequireDefault(_keys);
-
-var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
-
-var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
-
-var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
-
-var _defineProperty3 = _interopRequireDefault(_defineProperty2);
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = require('prop-types');
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _warning = require('warning');
-
-var _warning2 = _interopRequireDefault(_warning);
-
-var _createBreakpoints = require('../styles/createBreakpoints');
-
-var _helpers = require('../utils/helpers');
-
-var _withStyles = require('../styles/withStyles');
-
-var _withStyles2 = _interopRequireDefault(_withStyles);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var styles = function styles(theme) {
-  var hidden = {
-    display: 'none'
-  };
-
-  return _createBreakpoints.keys.reduce(function (acc, key) {
-    acc['only' + (0, _helpers.capitalizeFirstLetter)(key)] = (0, _defineProperty3.default)({}, theme.breakpoints.only(key), hidden);
-    acc[key + 'Up'] = (0, _defineProperty3.default)({}, theme.breakpoints.up(key), hidden);
-    acc[key + 'Down'] = (0, _defineProperty3.default)({}, theme.breakpoints.down(key), hidden);
-
-    return acc;
-  }, {});
-};
-
-/**
- * @ignore - internal component.
- */
-function HiddenCss(props) {
-  var children = props.children,
-      classes = props.classes,
-      lgDown = props.lgDown,
-      lgUp = props.lgUp,
-      mdDown = props.mdDown,
-      mdUp = props.mdUp,
-      only = props.only,
-      smDown = props.smDown,
-      smUp = props.smUp,
-      xlDown = props.xlDown,
-      xlUp = props.xlUp,
-      xsDown = props.xsDown,
-      xsUp = props.xsUp,
-      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'lgDown', 'lgUp', 'mdDown', 'mdUp', 'only', 'smDown', 'smUp', 'xlDown', 'xlUp', 'xsDown', 'xsUp']);
-
-
-  'development' !== "production" ? (0, _warning2.default)((0, _keys2.default)(other).length === 0 || (0, _keys2.default)(other).length === 1 && other.hasOwnProperty('ref'), 'Material-UI: unsupported properties received ' + (0, _keys2.default)(other).join(', ') + ' by `<Hidden />`.') : void 0;
-
-  var className = [];
-
-  for (var i = 0; i < _createBreakpoints.keys.length; i += 1) {
-    var breakpoint = _createBreakpoints.keys[i];
-    var breakpointUp = props[breakpoint + 'Up'];
-    var breakpointDown = props[breakpoint + 'Down'];
-
-    if (breakpointUp) {
-      className.push(classes[breakpoint + 'Up']);
-    }
-    if (breakpointDown) {
-      className.push(classes[breakpoint + 'Down']);
-    }
-  }
-
-  if (only) {
-    var onlyBreakpoints = Array.isArray(only) ? only : [only];
-    onlyBreakpoints.forEach(function (breakpoint) {
-      className.push(classes['only' + (0, _helpers.capitalizeFirstLetter)(breakpoint)]);
-    });
-  }
-
-  return _react2.default.createElement(
-    'span',
-    { className: className },
-    children
-  );
-}
-
-HiddenCss.propTypes = 'development' !== "production" ? {
-  /**
-   * The content of the component.
-   */
-  children: _propTypes2.default.node,
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: _propTypes2.default.object.isRequired,
-  /**
-   * @ignore
-   */
-  className: _propTypes2.default.string,
-  /**
-   * Specify which implementation to use.  'js' is the default, 'css' works better for server
-   * side rendering.
-   */
-  implementation: _propTypes2.default.oneOf(['js', 'css']),
-  /**
-   * You can use this property when choosing the `js` implementation with server side rendering.
-   *
-   * As `window.innerWidth` is unavailable on the server,
-   * we default to rendering an empty componenent during the first mount.
-   * In some situation you might want to use an heristic to approximate
-   * the screen width of the client browser screen width.
-   *
-   * For instance, you could be using the user-agent or the client-hints.
-   * http://caniuse.com/#search=client%20hint
-   */
-  initialWidth: _propTypes2.default.number,
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  lgDown: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  lgUp: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  mdDown: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  mdUp: _propTypes2.default.bool,
-  /**
-   * Hide the given breakpoint(s).
-   */
-  only: _propTypes2.default.oneOfType([_propTypes2.default.oneOf(['xs', 'sm', 'md', 'lg', 'xl']), _propTypes2.default.arrayOf(_propTypes2.default.oneOf(['xs', 'sm', 'md', 'lg', 'xl']))]),
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  smDown: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  smUp: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  xlDown: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  xlUp: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  xsDown: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  xsUp: _propTypes2.default.bool
-} : {};
-
-exports.default = (0, _withStyles2.default)(styles, { name: 'MuiHiddenCss' })(HiddenCss);
-  })();
-});
-
-require.register("material-ui/Hidden/HiddenJs.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _stringify = require('babel-runtime/core-js/json/stringify');
-
-var _stringify2 = _interopRequireDefault(_stringify);
-
-var _keys = require('babel-runtime/core-js/object/keys');
-
-var _keys2 = _interopRequireDefault(_keys);
-
-var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
-
-var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
-
-var _propTypes = require('prop-types');
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _warning = require('warning');
-
-var _warning2 = _interopRequireDefault(_warning);
-
-var _createBreakpoints = require('../styles/createBreakpoints');
-
-var _withWidth = require('../utils/withWidth');
-
-var _withWidth2 = _interopRequireDefault(_withWidth);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * @ignore - internal component.
- */
-function HiddenJs(props) {
-  var children = props.children,
-      lgDown = props.lgDown,
-      lgUp = props.lgUp,
-      mdDown = props.mdDown,
-      mdUp = props.mdUp,
-      only = props.only,
-      smDown = props.smDown,
-      smUp = props.smUp,
-      width = props.width,
-      xlDown = props.xlDown,
-      xlUp = props.xlUp,
-      xsDown = props.xsDown,
-      xsUp = props.xsUp,
-      other = (0, _objectWithoutProperties3.default)(props, ['children', 'lgDown', 'lgUp', 'mdDown', 'mdUp', 'only', 'smDown', 'smUp', 'width', 'xlDown', 'xlUp', 'xsDown', 'xsUp']);
-
-
-  'development' !== "production" ? (0, _warning2.default)((0, _keys2.default)(other).length === 0, 'Material-UI: unsupported properties received ' + (0, _stringify2.default)(other) + ' by `<Hidden />`.') : void 0;
-
-  var visible = true;
-
-  // `only` check is faster to get out sooner if used.
-  if (only) {
-    if (Array.isArray(only)) {
-      for (var i = 0; i < only.length; i += 1) {
-        var breakpoint = only[i];
-        if (width === breakpoint) {
-          visible = false;
-          break;
-        }
-      }
-    } else if (only && width === only) {
-      visible = false;
-    }
-  }
-
-  // Allow `only` to be combined with other props. If already hidden, no need to check others.
-  if (visible) {
-    // determine visibility based on the smallest size up
-    for (var _i = 0; _i < _createBreakpoints.keys.length; _i += 1) {
-      var _breakpoint = _createBreakpoints.keys[_i];
-      var breakpointUp = props[_breakpoint + 'Up'];
-      var breakpointDown = props[_breakpoint + 'Down'];
-      if (breakpointUp && (0, _withWidth.isWidthUp)(_breakpoint, width) || breakpointDown && (0, _withWidth.isWidthDown)(_breakpoint, width)) {
-        visible = false;
-        break;
-      }
-    }
-  }
-
-  if (!visible) {
-    return null;
-  }
-
-  return children;
-}
-
-HiddenJs.propTypes = {
-  /**
-   * The content of the component.
-   */
-  children: _propTypes2.default.node,
-  /**
-   * @ignore
-   */
-  className: _propTypes2.default.string,
-  /**
-   * Specify which implementation to use.  'js' is the default, 'css' works better for server
-   * side rendering.
-   */
-  implementation: _propTypes2.default.oneOf(['js', 'css']),
-  /**
-   * You can use this property when choosing the `js` implementation with server side rendering.
-   *
-   * As `window.innerWidth` is unavailable on the server,
-   * we default to rendering an empty componenent during the first mount.
-   * In some situation you might want to use an heristic to approximate
-   * the screen width of the client browser screen width.
-   *
-   * For instance, you could be using the user-agent or the client-hints.
-   * http://caniuse.com/#search=client%20hint
-   */
-  initialWidth: _propTypes2.default.number,
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  lgDown: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  lgUp: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  mdDown: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  mdUp: _propTypes2.default.bool,
-  /**
-   * Hide the given breakpoint(s).
-   */
-  only: _propTypes2.default.oneOfType([_propTypes2.default.oneOf(['xs', 'sm', 'md', 'lg', 'xl']), _propTypes2.default.arrayOf(_propTypes2.default.oneOf(['xs', 'sm', 'md', 'lg', 'xl']))]),
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  smDown: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  smUp: _propTypes2.default.bool,
-  /**
-   * @ignore
-   * width prop provided by withWidth decorator.
-   */
-  width: _propTypes2.default.string.isRequired,
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  xlDown: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  xlUp: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and down will be hidden.
-   */
-  xsDown: _propTypes2.default.bool,
-  /**
-   * If true, screens this size and up will be hidden.
-   */
-  xsUp: _propTypes2.default.bool
-};
-
-exports.default = (0, _withWidth2.default)()(HiddenJs);
-  })();
-});
-
-require.register("material-ui/Hidden/index.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _Hidden = require('./Hidden');
-
-Object.defineProperty(exports, 'default', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_Hidden).default;
-  }
-});
-
-var _HiddenJs = require('./HiddenJs');
-
-Object.defineProperty(exports, 'HiddenJs', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_HiddenJs).default;
-  }
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-  })();
-});
-
 require.register("material-ui/Icon/Icon.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "material-ui");
   (function() {
@@ -61386,35 +60446,6 @@ function isMuiElement(element, muiNames) {
 function isMuiComponent(element, muiNames) {
   return muiNames.indexOf(element.muiName) !== -1;
 }
-  })();
-});
-
-require.register("material-ui/utils/requirePropFactory.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-//  weak
-
-var requirePropFactory = function requirePropFactory(componentNameInError) {
-  var requireProp = function requireProp(requiredProp) {
-    return function (props, propName, componentName, location, propFullName) {
-      var propFullNameSafe = propFullName || propName;
-
-      if (typeof props[propName] !== 'undefined' && !props[requiredProp]) {
-        return new Error('The property `' + propFullNameSafe + '` of ' + ('`' + componentNameInError + '` must be used on `' + requiredProp + '`.'));
-      }
-
-      return null;
-    };
-  };
-  return requireProp;
-};
-
-exports.default = requirePropFactory;
   })();
 });
 
@@ -89413,7 +88444,463 @@ if ('development' !== 'production') {
 module.exports = warning;
   })();
 });
-require.register("js/app.jsx", function(exports, require, module) {
+require.register("js/AuthenticateLayout.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _TextField = require('material-ui/TextField');
+
+var _TextField2 = _interopRequireDefault(_TextField);
+
+var _Button = require('material-ui/Button');
+
+var _Button2 = _interopRequireDefault(_Button);
+
+var _auth = require('./auth');
+
+var _auth2 = _interopRequireDefault(_auth);
+
+var _Typography = require('material-ui/Typography');
+
+var _Typography2 = _interopRequireDefault(_Typography);
+
+var _central = require('js/central');
+
+var _central2 = _interopRequireDefault(_central);
+
+var _LoginPage = require('./LoginPage');
+
+var _LoginPage2 = _interopRequireDefault(_LoginPage);
+
+var _AppBar = require('material-ui/AppBar');
+
+var _AppBar2 = _interopRequireDefault(_AppBar);
+
+var _RegisterPage = require('./RegisterPage');
+
+var _RegisterPage2 = _interopRequireDefault(_RegisterPage);
+
+var _reactRouterDom = require('react-router-dom');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var AuthenticateLayout = function (_React$Component) {
+  _inherits(AuthenticateLayout, _React$Component);
+
+  function AuthenticateLayout() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
+    _classCallCheck(this, AuthenticateLayout);
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = AuthenticateLayout.__proto__ || Object.getPrototypeOf(AuthenticateLayout)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
+      enumerable: true,
+      writable: true,
+      value: {
+        login: "",
+        password: ""
+      }
+    }), Object.defineProperty(_this, 'didClickLoginButton', {
+      enumerable: true,
+      writable: true,
+      value: function value() {
+        _auth2.default.login(_this.state.login, _this.state.password, function (central) {
+          _central2.default.login(central);
+          window.location.reload();
+        });
+      }
+    }), _temp), _possibleConstructorReturn(_this, _ret);
+  }
+
+  _createClass(AuthenticateLayout, [{
+    key: 'render',
+    value: function render() {
+      return _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement(
+          _AppBar2.default,
+          { position: 'static' },
+          _react2.default.createElement(
+            'div',
+            { className: 'text-center' },
+            _react2.default.createElement('img', { src: '/images/logo_white.svg', width: '80', className: 'pt-3 pb-3' })
+          )
+        ),
+        _react2.default.createElement(
+          'section',
+          { className: 'text-center mt-5' },
+          _react2.default.createElement(
+            _reactRouterDom.Link,
+            { to: '/', className: 'mr-4' },
+            _react2.default.createElement(
+              _Button2.default,
+              { color: 'primary' },
+              'Fa\xE7a login'
+            )
+          ),
+          _react2.default.createElement(
+            _reactRouterDom.Link,
+            { to: '/cadastro' },
+            _react2.default.createElement(
+              _Button2.default,
+              { raised: true, color: 'primary' },
+              'Cadastre sua central'
+            )
+          )
+        ),
+        _react2.default.createElement(
+          'main',
+          { className: 'p-4' },
+          _react2.default.createElement(_reactRouterDom.Route, { path: '/', exact: true, component: _LoginPage2.default }),
+          _react2.default.createElement(_reactRouterDom.Route, { path: '/cadastro', exact: true, component: _RegisterPage2.default })
+        )
+      );
+    }
+  }]);
+
+  return AuthenticateLayout;
+}(_react2.default.Component);
+
+exports.default = AuthenticateLayout;
+});
+
+;require.register("js/LoginPage.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _TextField = require('material-ui/TextField');
+
+var _TextField2 = _interopRequireDefault(_TextField);
+
+var _Button = require('material-ui/Button');
+
+var _Button2 = _interopRequireDefault(_Button);
+
+var _auth = require('./auth');
+
+var _auth2 = _interopRequireDefault(_auth);
+
+var _Typography = require('material-ui/Typography');
+
+var _Typography2 = _interopRequireDefault(_Typography);
+
+var _AppBar = require('material-ui/AppBar');
+
+var _AppBar2 = _interopRequireDefault(_AppBar);
+
+var _central = require('js/central');
+
+var _central2 = _interopRequireDefault(_central);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var LoginPage = function (_React$Component) {
+  _inherits(LoginPage, _React$Component);
+
+  function LoginPage() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
+    _classCallCheck(this, LoginPage);
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = LoginPage.__proto__ || Object.getPrototypeOf(LoginPage)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
+      enumerable: true,
+      writable: true,
+      value: {
+        login: "",
+        password: ""
+      }
+    }), Object.defineProperty(_this, 'didClickLoginButton', {
+      enumerable: true,
+      writable: true,
+      value: function value() {
+        _auth2.default.login(_this.state.login, _this.state.password, function (central) {
+          _central2.default.login(central);
+          window.location.reload();
+        });
+      }
+    }), _temp), _possibleConstructorReturn(_this, _ret);
+  }
+
+  _createClass(LoginPage, [{
+    key: 'render',
+    value: function render() {
+      var _this2 = this;
+
+      return _react2.default.createElement(
+        'section',
+        { className: 'd-flex align-items-center justify-content-center mt-5' },
+        _react2.default.createElement(
+          'div',
+          { className: 'col-xs-10 col-sm-6 col-md-4 thumbnail' },
+          _react2.default.createElement(
+            _Typography2.default,
+            { type: 'display1' },
+            'Fa\xE7a Login'
+          ),
+          _react2.default.createElement(_TextField2.default, {
+            label: 'Email',
+            onChange: function onChange(evt) {
+              return _this2.setState({ login: evt.target.value });
+            },
+            margin: 'normal',
+            fullWidth: true
+          }),
+          _react2.default.createElement(_TextField2.default, {
+            label: 'Senha',
+            onChange: function onChange(evt) {
+              return _this2.setState({ password: evt.target.value });
+            },
+            margin: 'normal',
+            type: 'password',
+            fullWidth: true
+          }),
+          _react2.default.createElement(
+            _Button2.default,
+            { raised: true, color: 'primary', onClick: this.didClickLoginButton, className: 'mt-4' },
+            'Acessar'
+          )
+        )
+      );
+    }
+  }]);
+
+  return LoginPage;
+}(_react2.default.Component);
+
+exports.default = LoginPage;
+});
+
+;require.register("js/RegisterPage.jsx", function(exports, require, module) {
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _TextField = require('material-ui/TextField');
+
+var _TextField2 = _interopRequireDefault(_TextField);
+
+var _Button = require('material-ui/Button');
+
+var _Button2 = _interopRequireDefault(_Button);
+
+var _auth = require('./auth');
+
+var _auth2 = _interopRequireDefault(_auth);
+
+var _Typography = require('material-ui/Typography');
+
+var _Typography2 = _interopRequireDefault(_Typography);
+
+var _AppBar = require('material-ui/AppBar');
+
+var _AppBar2 = _interopRequireDefault(_AppBar);
+
+var _central = require('js/central');
+
+var _central2 = _interopRequireDefault(_central);
+
+var _phone_field = require('js/shared/phone_field');
+
+var _phone_field2 = _interopRequireDefault(_phone_field);
+
+var _CnpjField = require('js/shared/CnpjField');
+
+var _CnpjField2 = _interopRequireDefault(_CnpjField);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var RegisterPage = function (_React$Component) {
+  _inherits(RegisterPage, _React$Component);
+
+  function RegisterPage() {
+    var _ref;
+
+    var _temp, _this, _ret;
+
+    _classCallCheck(this, RegisterPage);
+
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = RegisterPage.__proto__ || Object.getPrototypeOf(RegisterPage)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
+      enumerable: true,
+      writable: true,
+      value: {
+        login: "",
+        password: "",
+        company: {
+          name: "",
+          email: "",
+          phoneNumber: "",
+          cnpj: "",
+          login: "",
+          password: ""
+        }
+      }
+    }), Object.defineProperty(_this, 'didClickRegisterButton', {
+      enumerable: true,
+      writable: true,
+      value: function value() {
+        _auth2.default.login(_this.state.login, _this.state.password, function (central) {
+          _central2.default.login(central);
+          window.location.reload();
+        });
+      }
+    }), Object.defineProperty(_this, 'updateCompany', {
+      enumerable: true,
+      writable: true,
+      value: function value(evt) {
+        var changes = _defineProperty({}, evt.target.name, evt.target.value);
+        _this.setState({ company: _extends({}, _this.state.company, changes) });
+      }
+    }), _temp), _possibleConstructorReturn(_this, _ret);
+  }
+
+  _createClass(RegisterPage, [{
+    key: 'render',
+    value: function render() {
+      var company = this.state.company;
+
+
+      return _react2.default.createElement(
+        'section',
+        { className: 'd-flex align-items-center justify-content-center mt-5' },
+        _react2.default.createElement(
+          'div',
+          { className: 'col-xs-10 col-sm-6 col-md-4 thumbnail' },
+          _react2.default.createElement(
+            _Typography2.default,
+            { type: 'display1' },
+            'Informe os dados abaixo'
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'd-flex align-items-center' },
+            _react2.default.createElement(_TextField2.default, {
+              label: 'Nome da central',
+              onChange: this.updateCompany,
+              margin: 'normal',
+              className: 'mr-4',
+              name: 'name',
+              fullWidth: true
+            }),
+            _react2.default.createElement(_phone_field2.default, {
+              label: 'Telefone',
+              name: 'phoneNumber',
+              onChange: this.updateCompany,
+              value: company.phoneNumber,
+              fullWidth: true
+            })
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'd-flex align-items-center' },
+            _react2.default.createElement(_CnpjField2.default, {
+              label: 'CNPJ',
+              onChange: this.updateCompany,
+              name: 'cnpj',
+              margin: 'normal',
+              helperText: 'CNPJ \xE9 requerido para aumentar a seguran\xE7a dos clientes',
+              fullWidth: true
+            })
+          ),
+          _react2.default.createElement(
+            'section',
+            { className: 'd-flex align-items-center' },
+            _react2.default.createElement(_TextField2.default, {
+              label: 'E-mail',
+              onChange: this.updateCompany,
+              name: 'email',
+              margin: 'normal',
+              className: 'mr-4',
+              fullWidth: true
+            }),
+            _react2.default.createElement(_TextField2.default, {
+              fullWidth: true,
+              label: 'Senha',
+              onChange: this.updateCompany,
+              margin: 'normal',
+              type: 'password'
+            })
+          ),
+          _react2.default.createElement(
+            _Button2.default,
+            { raised: true, color: 'primary', onClick: this.didClickRegisterButton, className: 'mt-4' },
+            'Cadastrar'
+          )
+        )
+      );
+    }
+  }]);
+
+  return RegisterPage;
+}(_react2.default.Component);
+
+exports.default = RegisterPage;
+});
+
+;require.register("js/app.jsx", function(exports, require, module) {
 'use strict';
 
 var _react = require('react');
@@ -89442,9 +88929,9 @@ var _layout = require('./layout');
 
 var _layout2 = _interopRequireDefault(_layout);
 
-var _login = require('./login');
+var _AuthenticateLayout = require('./AuthenticateLayout');
 
-var _login2 = _interopRequireDefault(_login);
+var _AuthenticateLayout2 = _interopRequireDefault(_AuthenticateLayout);
 
 var _central = require('./central');
 
@@ -89470,7 +88957,7 @@ var theme = (0, _styles.createMuiTheme)({
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-  var page = _central2.default.loggedIn() ? _react2.default.createElement(_layout2.default, null) : _react2.default.createElement(_login2.default, null);
+  var page = _central2.default.loggedIn() ? _react2.default.createElement(_layout2.default, null) : _react2.default.createElement(_AuthenticateLayout2.default, null);
 
   _reactDom2.default.render(_react2.default.createElement(
     _reactApollo.ApolloProvider,
@@ -91496,133 +90983,6 @@ var Layout = function (_React$Component) {
 exports.default = Layout;
 });
 
-;require.register("js/login.jsx", function(exports, require, module) {
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _TextField = require('material-ui/TextField');
-
-var _TextField2 = _interopRequireDefault(_TextField);
-
-var _Button = require('material-ui/Button');
-
-var _Button2 = _interopRequireDefault(_Button);
-
-var _auth = require('./auth');
-
-var _auth2 = _interopRequireDefault(_auth);
-
-var _Grid = require('material-ui/Grid');
-
-var _Grid2 = _interopRequireDefault(_Grid);
-
-var _Typography = require('material-ui/Typography');
-
-var _Typography2 = _interopRequireDefault(_Typography);
-
-var _central = require('js/central');
-
-var _central2 = _interopRequireDefault(_central);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Login = function (_React$Component) {
-  _inherits(Login, _React$Component);
-
-  function Login() {
-    var _ref;
-
-    var _temp, _this, _ret;
-
-    _classCallCheck(this, Login);
-
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = Login.__proto__ || Object.getPrototypeOf(Login)).call.apply(_ref, [this].concat(args))), _this), Object.defineProperty(_this, 'state', {
-      enumerable: true,
-      writable: true,
-      value: {
-        login: "",
-        password: ""
-      }
-    }), Object.defineProperty(_this, 'didClickLoginButton', {
-      enumerable: true,
-      writable: true,
-      value: function value() {
-        _auth2.default.login(_this.state.login, _this.state.password, function (central) {
-          _central2.default.login(central);
-          window.location.reload();
-        });
-      }
-    }), _temp), _possibleConstructorReturn(_this, _ret);
-  }
-
-  _createClass(Login, [{
-    key: 'render',
-    value: function render() {
-      var _this2 = this;
-
-      return _react2.default.createElement(
-        _Grid2.default,
-        { container: true, alignItems: 'center', justify: 'center', spacing: 0 },
-        _react2.default.createElement(
-          _Grid2.default,
-          { item: true, xs: 10, sm: 6, md: 4 },
-          _react2.default.createElement(
-            _Typography2.default,
-            { type: 'display1' },
-            'Fa\xE7a Login'
-          ),
-          _react2.default.createElement(_TextField2.default, {
-            label: 'Login',
-            onChange: function onChange(evt) {
-              return _this2.setState({ login: evt.target.value });
-            },
-            margin: 'normal',
-            fullWidth: true
-          }),
-          _react2.default.createElement(_TextField2.default, {
-            label: 'Senha',
-            onChange: function onChange(evt) {
-              return _this2.setState({ password: evt.target.value });
-            },
-            margin: 'normal',
-            type: 'password',
-            fullWidth: true
-          }),
-          _react2.default.createElement(
-            _Button2.default,
-            { raised: true, color: 'primary', onClick: this.didClickLoginButton },
-            'Acessar'
-          )
-        )
-      );
-    }
-  }]);
-
-  return Login;
-}(_react2.default.Component);
-
-exports.default = Login;
-});
-
 ;require.register("js/motoboys_page/index.jsx", function(exports, require, module) {
 'use strict';
 
@@ -92257,6 +91617,118 @@ var NewMotoboyForm = function (_React$Component) {
 exports.default = NewMotoboyForm;
 });
 
+;require.register("js/shared/CnpjField.jsx", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = require("react");
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactTextMask = require("react-text-mask");
+
+var _reactTextMask2 = _interopRequireDefault(_reactTextMask);
+
+var _Input = require("material-ui/Input");
+
+var _Input2 = _interopRequireDefault(_Input);
+
+var _Form = require("material-ui/Form");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var CnpjField = function (_React$Component) {
+  _inherits(CnpjField, _React$Component);
+
+  function CnpjField() {
+    _classCallCheck(this, CnpjField);
+
+    return _possibleConstructorReturn(this, (CnpjField.__proto__ || Object.getPrototypeOf(CnpjField)).apply(this, arguments));
+  }
+
+  _createClass(CnpjField, [{
+    key: "render",
+    value: function render() {
+      var _props = this.props,
+          value = _props.value,
+          onChange = _props.onChange,
+          className = _props.className,
+          fullWidth = _props.fullWidth,
+          label = _props.label,
+          InputClassName = _props.InputClassName,
+          name = _props.name,
+          disabled = _props.disabled,
+          helperText = _props.helperText;
+
+
+      return _react2.default.createElement(
+        _Form.FormControl,
+        { className: className + " MuiFormControl-root-83 MuiFormControl-marginNormal-84 MuiFormControl-fullWidth-86", fullWidth: fullWidth },
+        label && _react2.default.createElement(
+          _Input.InputLabel,
+          { htmlFor: "cnpj" },
+          label
+        ),
+        _react2.default.createElement(_Input2.default, {
+          id: "cnpj",
+          value: value,
+          name: name,
+          disabled: disabled,
+          className: InputClassName,
+          onChange: onChange,
+          inputComponent: CnpjFieldElement
+        }),
+        helperText && _react2.default.createElement(
+          _Form.FormHelperText,
+          null,
+          helperText
+        )
+      );
+    }
+  }]);
+
+  return CnpjField;
+}(_react2.default.Component);
+
+exports.default = CnpjField;
+
+var CnpjFieldElement = function (_React$Component2) {
+  _inherits(CnpjFieldElement, _React$Component2);
+
+  function CnpjFieldElement() {
+    _classCallCheck(this, CnpjFieldElement);
+
+    return _possibleConstructorReturn(this, (CnpjFieldElement.__proto__ || Object.getPrototypeOf(CnpjFieldElement)).apply(this, arguments));
+  }
+
+  _createClass(CnpjFieldElement, [{
+    key: "render",
+    value: function render() {
+      return _react2.default.createElement(_reactTextMask2.default, _extends({}, this.props, {
+        mask: [/\d/, /\d/, ".", /\d/, /\d/, /\d/, '.', /\d/, /\d/, /\d/, "/", /\d/, /\d/, /\d/, /\d/, "-", /\d/, /\d/],
+        placeholderChar: "\u2000",
+        guide: false
+      }));
+    }
+  }]);
+
+  return CnpjFieldElement;
+}(_react2.default.Component);
+});
+
 ;require.register("js/shared/phone_field.jsx", function(exports, require, module) {
 "use strict";
 
@@ -92315,7 +91787,7 @@ var PhoneField = function (_React$Component) {
 
       return _react2.default.createElement(
         _Form.FormControl,
-        { className: className, fullWidth: fullWidth },
+        { className: className + " MuiFormControl-root-83 MuiFormControl-marginNormal-84 MuiFormControl-fullWidth-86", fullWidth: fullWidth },
         label && _react2.default.createElement(
           _Input.InputLabel,
           { htmlFor: "phoneNumber" },

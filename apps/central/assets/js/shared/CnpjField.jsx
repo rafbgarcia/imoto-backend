@@ -1,48 +1,40 @@
 import React from "react"
 import MaskedInput from "react-text-mask"
 import Input, { InputLabel } from "material-ui/Input"
-import {FormControl} from "material-ui/Form"
+import {FormControl, FormHelperText} from "material-ui/Form"
 
-export default class PhoneField extends React.Component {
+export default class CnpjField extends React.Component {
   render() {
     const {
       value, onChange, className, fullWidth,
       label, InputClassName, name, disabled,
+      helperText,
     } = this.props
 
     return (
       <FormControl className={`${className} MuiFormControl-root-83 MuiFormControl-marginNormal-84 MuiFormControl-fullWidth-86`} fullWidth={fullWidth}>
-        {label && <InputLabel htmlFor="phoneNumber">{label}</InputLabel>}
+        {label && <InputLabel htmlFor="cnpj">{label}</InputLabel>}
         <Input
-          id="phoneNumber"
+          id="cnpj"
           value={value}
           name={name}
+          disabled={disabled}
           className={InputClassName}
           onChange={onChange}
-          inputComponent={PhoneFieldElement}
-          disabled={disabled}
+          inputComponent={CnpjFieldElement}
         />
+        {helperText && <FormHelperText>{helperText}</FormHelperText>}
       </FormControl>
     )
   }
 }
 
-class PhoneFieldElement extends React.Component {
-  phoneMask(phoneNumber) {
-    const rawPhoneNumber = phoneNumber.replace(/[^\d]/g, "")
-
-    if (rawPhoneNumber.length > 10) {
-      return ['(', /[1-9]/, /\d/, ')', ' ', /\d/, /\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]
-    } else {
-      return ['(', /[1-9]/, /\d/, ')', ' ', /\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/]
-    }
-  }
-
+class CnpjFieldElement extends React.Component {
   render() {
     return (
       <MaskedInput
         {...this.props}
-        mask={this.phoneMask}
+        mask={[/\d/, /\d/, ".", /\d/, /\d/, /\d/, '.', /\d/, /\d/, /\d/, "/", /\d/, /\d/, /\d/, /\d/, "-", /\d/, /\d/]}
         placeholderChar={"\u2000"}
         guide={false}
       />

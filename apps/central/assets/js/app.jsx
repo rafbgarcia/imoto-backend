@@ -9,7 +9,7 @@ import ptBR from 'react-intl/locale-data/pt'
 addLocaleData(ptBR)
 
 import Layout from './layout'
-import Login from './login'
+import AuthenticateLayout from './AuthenticateLayout'
 import Central from './central'
 import client from './graphql_client'
 import SnackProvider from './snack_provider'
@@ -22,7 +22,7 @@ const theme = createMuiTheme({
 })
 
 document.addEventListener('DOMContentLoaded', () => {
-  const page = Central.loggedIn() ? <Layout /> : <Login />
+  const page = Central.loggedIn() ? <Layout /> : <AuthenticateLayout />
 
   ReactDOM.render(
     <ApolloProvider client={client}>

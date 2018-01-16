@@ -2,11 +2,11 @@ import React from 'react'
 import TextField from 'material-ui/TextField'
 import Button from 'material-ui/Button'
 import Auth from './auth'
-import Grid from 'material-ui/Grid'
 import Typography from 'material-ui/Typography'
+import AppBar from 'material-ui/AppBar';
 import Central from 'js/central'
 
-export default class Login extends React.Component {
+export default class LoginPage extends React.Component {
   state = {
     login: "",
     password: "",
@@ -21,12 +21,12 @@ export default class Login extends React.Component {
 
   render() {
     return (
-      <Grid container alignItems="center" justify="center" spacing={0}>
-        <Grid item xs={10} sm={6} md={4}>
+      <section className="d-flex align-items-center justify-content-center mt-5">
+        <div className="col-xs-10 col-sm-6 col-md-4 thumbnail">
           <Typography type="display1">Faça Login</Typography>
 
           <TextField
-            label="Login"
+            label="Email"
             onChange={(evt) => this.setState({login: evt.target.value})}
             margin="normal"
             fullWidth
@@ -38,11 +38,11 @@ export default class Login extends React.Component {
             type="password"
             fullWidth
           />
-          <Button raised color="primary" onClick={this.didClickLoginButton}>
+          <Button raised color="primary" onClick={this.didClickLoginButton} className="mt-4">
             Acessar
           </Button>
-        </Grid>
-      </Grid>
+        </div>
+      </section>
     )
   }
 }
