@@ -30,6 +30,5 @@ defmodule Core.Location do
       :complement, :reference, :city, :uf, :lat, :lng, :google_place_id,
       :last_used_at, :used_count,
     ])
-    |> validate_required([:street])
   end
 end

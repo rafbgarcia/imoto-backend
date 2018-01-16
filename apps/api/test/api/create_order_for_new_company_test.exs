@@ -52,4 +52,33 @@ defmodule Test.CreateOrderForNewCompanyTest do
     assert order.company_id == company.id
   end
 
+  test "#handle - handle empty location" do
+    assert Repo.aggregate(Location, :count, :id) == 0
+
+    central = Repo.insert!(%Core.Central{name: "A Central"})
+    motoboy = Repo.insert!(Motoboy.changeset(%Motoboy{
+      central_id: central.id,
+      name: "A Central",
+      phone_number: "(84) 91413-1023",
+      state: "available"
+    }))
+
+    company_params = %{
+      name: "A Company",
+      phone_number: "(45) 4123-1323",
+      location: %{ street: "" }
+    }
+
+    {:ok, order} = CreateOrderForNewCompany.handle(
+      %{company_params: company_params},
+      %{context: %{current_central: central}}
+    )
+
+    company = Repo.get(Company, order.company_id)
+
+    assert order.company_id == company.id
+    assert Repo.aggregate(Order, :count, :id) == 1
+    assert Repo.aggregate(Company, :count, :id) == 1
+    assert Repo.aggregate(Location, :count, :id) == 1
+  end
 end
