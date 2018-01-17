@@ -156,6 +156,6 @@ RegisterPage.contextTypes = {
 
 const TermsOfUseLabel = () => (
   <span>
-    Ao se registrar você aceita os <a href="/termos-de-uso">termos de uso</a>
+    Ao se registrar você aceita os <a href="/termos-de-uso" target="_blank" style={{textTransform: "lowercase"}}>TERMOS E CONDIÇÕES DE USO E POLÍTICA DE PRIVACIDADE</a>
   </span>
 )

@@ -12,6 +12,7 @@ defmodule Central.Router do
   scope "/" do
     pipe_through :browser
 
-    get "/*path", Central.CentralController, :orders
+    get "/termos-de-uso", Central.CentralController, :terms_of_use
+    get "/*path", Central.CentralController, :jsapp
   end
 end

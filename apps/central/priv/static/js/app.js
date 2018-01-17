@@ -89210,8 +89210,8 @@ var TermsOfUseLabel = function TermsOfUseLabel() {
     'Ao se registrar voc\xEA aceita os ',
     _react2.default.createElement(
       'a',
-      { href: '/termos-de-uso' },
-      'termos de uso'
+      { href: '/termos-de-uso', target: '_blank', style: { textTransform: "lowercase" } },
+      'TERMOS E CONDI\xC7\xD5ES DE USO E POL\xCDTICA DE PRIVACIDADE'
     )
   );
 };
