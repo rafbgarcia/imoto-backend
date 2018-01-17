@@ -17,7 +17,7 @@ defmodule Central.Resolve.Register do
 
   defp add_needed_params(params) do
     params
-    |> Map.put(:login, params[:email])
+    |> Map.put(:active, false)
     |> Map.put(:password_hash, hashed_pw(params[:password]))
   end
 

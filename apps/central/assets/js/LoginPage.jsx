@@ -8,12 +8,14 @@ import Central from 'js/central'
 
 export default class LoginPage extends React.Component {
   state = {
-    login: "",
+    email: "",
     password: "",
   }
 
   didClickLoginButton = () => {
-    Auth.login(this.state.login, this.state.password, (central) => {
+    const {email, password} = this.state
+
+    Auth.login(email, password, (central) => {
       Central.login(central)
       window.location.reload()
     })
@@ -27,7 +29,7 @@ export default class LoginPage extends React.Component {
 
           <TextField
             label="Email"
-            onChange={(evt) => this.setState({login: evt.target.value})}
+            onChange={(evt) => this.setState({email: evt.target.value})}
             margin="normal"
             fullWidth
           />

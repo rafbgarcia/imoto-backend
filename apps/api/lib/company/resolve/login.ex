@@ -10,10 +10,10 @@ defmodule Company.Resolve.Login do
   end
 
   defp authenticate(params) do
-    company = Repo.get_by(Company, login: String.downcase(params.login))
+    company = Repo.get_by(Company, email: String.downcase(params.email))
     case check_password(company, params.password) do
       true -> {:ok, company}
-      _ -> {:error, "Login e/ou senha incorretos"}
+      _ -> {:error, "Email e/ou senha incorretos"}
     end
   end
 

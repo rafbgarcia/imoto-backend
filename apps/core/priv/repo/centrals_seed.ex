@@ -7,13 +7,15 @@ Db.Repo.delete_all(Core.Central)
 
 unimoto = Db.Repo.insert!(Core.Central.changeset(%Core.Central{}, %{
   name: "Unimoto",
-  login: "unimoto",
+  email: "unimoto",
   password_hash: pw,
+  accepted_terms_of_use: true,
+  cnpj: "12.123.124/0001-23",
 }))
 
 Db.Repo.insert!(Core.Company.changeset(%Core.Company{}, %{
   name: "CooperFarma",
-  login: "cooperfarma",
+  email: "cooperfarma",
   phone_number: "(45) 3523-1771",
   password_hash: pw,
   centrals_ids: [unimoto.id],

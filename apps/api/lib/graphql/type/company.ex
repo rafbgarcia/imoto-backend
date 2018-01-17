@@ -5,7 +5,7 @@ defmodule Graphql.Type.Company do
     field :id, :id
     field :name, :string
     field :phone_number, :string
-    field :login, :string
+    field :email, :string
     field :token, :string
     field :location, :location, resolve: assoc(:location)
     field :orders, list_of(:order), resolve: assoc(:orders)

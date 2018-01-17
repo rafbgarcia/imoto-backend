@@ -14,7 +14,7 @@ defmodule Company.GraphqlSchema do
     end
 
     field :login, :company do
-      arg :login, non_null(:string)
+      arg :email, non_null(:string)
       arg :password, non_null(:string)
       resolve &Company.Resolve.Login.handle/2
     end

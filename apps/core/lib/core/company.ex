@@ -11,7 +11,7 @@ defmodule Core.Company do
     field :password_hash, :string
     field :name, :string
     field :phone_number, :string
-    field :login, :string
+    field :email, :string
     field :token, :string, virtual: true
 
     timestamps()
@@ -24,9 +24,9 @@ defmodule Core.Company do
     end
 
     changeset
-    |> cast(params, [:phone_number, :name, :central_id, :password_hash, :login])
+    |> cast(params, [:phone_number, :name, :central_id, :password_hash, :email])
     |> cast_assoc(:location)
-    |> unique_constraint(:login)
+    |> unique_constraint(:email)
   end
 
   defp parse_centrals_ids(centrals_ids) do

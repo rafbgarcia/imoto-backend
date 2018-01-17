@@ -67,7 +67,7 @@ export default class RegisterPage extends React.Component {
     .then(({data: {central}}) => {
       showSnack("Conta criada com sucesso")
       Central.login(central)
-      window.location.reload()
+      window.location.href = "/"
     })
     .catch(({graphQLErrors}) => showSnack(graphQLErrors.map(err => err.message)))
   }

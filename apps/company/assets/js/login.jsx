@@ -8,12 +8,14 @@ import Company from 'js/company'
 
 export default class Login extends React.Component {
   state = {
-    login: "",
+    email: "",
     password: "",
   }
 
   didClickLoginButton = () => {
-    Auth.login(this.state.login, this.state.password, (company) => {
+    const {email, password} = this.state
+
+    Auth.login(email, password, (company) => {
       Company.login(company)
       window.location.reload()
     })
@@ -26,8 +28,8 @@ export default class Login extends React.Component {
           <Typography type="display1">Faça Login</Typography>
 
           <TextField
-            label="Login"
-            onChange={(evt) => this.setState({login: evt.target.value})}
+            label="Email"
+            onChange={(evt) => this.setState({email: evt.target.value})}
             margin="normal"
             fullWidth
           />

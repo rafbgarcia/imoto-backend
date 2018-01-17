@@ -8,21 +8,21 @@ defmodule Db.Repo.Migrations.CreateCentrals do
 
     create table(:centrals) do
       add :name, :string
-      add :phone_number, :string, unique: true
-      add :email, :string, unique: true
-      add :login, :string, unique: true
+      add :phone_number, :string
+      add :email, :string
       add :password_hash, :string
       add :cnpj, :string
       add :accepted_terms_of_use, :boolean, default: false, null: false
       add :active, :boolean, default: false, null: false
       timestamps()
     end
+    create unique_index(:centrals, [:email])
 
     create table(:motoboys) do
       add :name, :string
       add :central_id, references(:centrals)
       add :state, :string, default: "unavailable"
-      add :phone_number, :string, unique: true
+      add :phone_number, :string
       add :one_signal_player_id, :string
       add :became_unavailable_at, :utc_datetime
       add :became_available_at, :utc_datetime
@@ -30,6 +30,8 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       add :active, :boolean, default: true, null: false
       timestamps()
     end
+    create unique_index(:motoboys, [:phone_number])
+
 
     ##################
     ### Company
@@ -38,11 +40,12 @@ defmodule Db.Repo.Migrations.CreateCentrals do
     create table(:companies) do
       add :central_id, references(:centrals)
       add :name, :string
-      add :login, :string, unique: true
+      add :email, :string
       add :password_hash, :string
       add :phone_number, :string
       timestamps()
     end
+    create unique_index(:companies, [:email])
 
     create table(:companies_centrals) do
       add :central_id, references(:centrals, on_delete: :delete_all)
@@ -60,6 +63,7 @@ defmodule Db.Repo.Migrations.CreateCentrals do
       add :phone_number, :string
       timestamps()
     end
+    create unique_index(:customers, [:phone_number])
 
     ##################
     ### Central Orders

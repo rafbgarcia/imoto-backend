@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import gql from 'graphql-tag'
 import apolloClient from 'js/graphql_client'
 import Typography from 'material-ui/Typography'
@@ -8,7 +9,7 @@ import Button from 'material-ui/Button'
 import Paper from 'material-ui/Paper'
 import PhoneField from 'js/shared/phone_field'
 
-export default class NewMotoboyForm extends React.Component {
+class NewMotoboyForm extends React.Component {
   state = {
     newMotoboy: {name: "", phoneNumber: ""},
   }
@@ -18,7 +19,8 @@ export default class NewMotoboyForm extends React.Component {
   }
 
   createMotoboy = (motoboy) => {
-    const {displaySnack, onCreate} = this.props
+    const {onCreate} = this.props
+    const {showSnack} = this.context
 
     apolloClient.mutate({
       mutation: gql`mutation createMotoboy($params: MotoboyCreateParams) {
@@ -30,12 +32,12 @@ export default class NewMotoboyForm extends React.Component {
     })
     .then(({data: {motoboy}}) => {
       this.setState({ newMotoboy: {name: "", phoneNumber: ""}})
-      displaySnack("Motoboy adicionado!")
+      showSnack("Motoboy adicionado!")
 
       onCreate(motoboy)
     })
     .catch(({graphQLErrors}) =>
-      displaySnack(graphQLErrors.map(err => err.message))
+      showSnack(graphQLErrors.map(err => err.message))
     )
   }
 
@@ -70,3 +72,9 @@ export default class NewMotoboyForm extends React.Component {
     )
   }
 }
+
+NewMotoboyForm.contextTypes = {
+  showSnack: PropTypes.func
+}
+
+export default NewMotoboyForm

@@ -88866,14 +88866,19 @@ var LoginPage = function (_React$Component) {
       enumerable: true,
       writable: true,
       value: {
-        login: "",
+        email: "",
         password: ""
       }
     }), Object.defineProperty(_this, 'didClickLoginButton', {
       enumerable: true,
       writable: true,
       value: function value() {
-        _auth2.default.login(_this.state.login, _this.state.password, function (central) {
+        var _this$state = _this.state,
+            email = _this$state.email,
+            password = _this$state.password;
+
+
+        _auth2.default.login(email, password, function (central) {
           _central2.default.login(central);
           window.location.reload();
         });
@@ -88900,7 +88905,7 @@ var LoginPage = function (_React$Component) {
           _react2.default.createElement(_TextField2.default, {
             label: 'Email',
             onChange: function onChange(evt) {
-              return _this2.setState({ login: evt.target.value });
+              return _this2.setState({ email: evt.target.value });
             },
             margin: 'normal',
             fullWidth: true
@@ -89076,7 +89081,7 @@ var RegisterPage = function (_React$Component) {
 
           showSnack("Conta criada com sucesso");
           _central2.default.login(central);
-          window.location.reload();
+          window.location.href = "/";
         }).catch(function (_ref3) {
           var graphQLErrors = _ref3.graphQLErrors;
           return showSnack(graphQLErrors.map(function (err) {
@@ -89302,7 +89307,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _templateObject = _taggedTemplateLiteral(['\n  mutation login($login: String!, $password: String!) {\n    central: login(login: $login, password: $password) {\n      id\n      name\n      phoneNumber\n      token\n    }\n  }\n'], ['\n  mutation login($login: String!, $password: String!) {\n    central: login(login: $login, password: $password) {\n      id\n      name\n      phoneNumber\n      token\n    }\n  }\n']),
+var _templateObject = _taggedTemplateLiteral(['\n  mutation login($email: String!, $password: String!) {\n    central: login(email: $email, password: $password) {\n      id\n      name\n      phoneNumber\n      token\n    }\n  }\n'], ['\n  mutation login($email: String!, $password: String!) {\n    central: login(email: $email, password: $password) {\n      id\n      name\n      phoneNumber\n      token\n    }\n  }\n']),
     _templateObject2 = _taggedTemplateLiteral(['\n  mutation logout($token: String!) {\n    central: logout(token: $token) {\n      token\n    }\n  }\n'], ['\n  mutation logout($token: String!) {\n    central: logout(token: $token) {\n      token\n    }\n  }\n']);
 
 var _graphqlTag = require('graphql-tag');
@@ -89320,10 +89325,10 @@ function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defi
 var loginMutation = (0, _graphqlTag2.default)(_templateObject);
 var logoutMutation = (0, _graphqlTag2.default)(_templateObject2);
 
-var login = function login(_login, password, cb) {
+var login = function login(email, password, cb) {
   _graphql_client2.default.mutate({
     mutation: loginMutation,
-    variables: { login: _login, password: password }
+    variables: { email: email, password: password }
   }).then(function (res) {
     cb(res.data.central);
   }).catch(function (res) {
@@ -89778,6 +89783,12 @@ var _Add = require('material-ui-icons/Add');
 
 var _Add2 = _interopRequireDefault(_Add);
 
+var _reactRouterDom = require('react-router-dom');
+
+var _Menu = require('material-ui-icons/Menu');
+
+var _Menu2 = _interopRequireDefault(_Menu);
+
 var _orders = require('./orders');
 
 var _orders2 = _interopRequireDefault(_orders);
@@ -89847,7 +89858,7 @@ var DashboardPage = function (_React$Component) {
       var hasNewOrder = this.state.hasNewOrder;
 
 
-      if (loading) return;
+      if (loading || !orders) return;
 
       var hasPendingOrder = orders.some(function (order) {
         return order.pending;
@@ -89885,17 +89896,19 @@ var DashboardPage = function (_React$Component) {
       return _react2.default.createElement(
         'main',
         null,
-        _react2.default.createElement(
-          _Button2.default,
-          { raised: true, color: 'primary', className: 'mb-5',
-            onClick: function onClick() {
-              return _this3.setState({ modalOpen: true });
-            }
-          },
-          _react2.default.createElement(_Add2.default, { className: 'mr-2' }),
-          'Nova entrega'
+        !motoboys || motoboys.length === 0 ? _react2.default.createElement(NoMotoboysMessage, null) : _react2.default.createElement(
+          'div',
+          { className: 'mb-5' },
+          _react2.default.createElement(
+            _Button2.default,
+            { raised: true, color: 'primary', onClick: function onClick() {
+                return _this3.setState({ modalOpen: true });
+              } },
+            _react2.default.createElement(_Add2.default, { className: 'mr-2' }),
+            ' Nova entrega'
+          ),
+          _react2.default.createElement(_new_order_modal2.default, { open: modalOpen, onClose: this.onCloseNewOrderModal })
         ),
-        _react2.default.createElement(_new_order_modal2.default, { open: modalOpen, onClose: this.onCloseNewOrderModal }),
         _react2.default.createElement(
           'div',
           { className: 'row' },
@@ -89920,6 +89933,30 @@ var DashboardPage = function (_React$Component) {
 exports.default = (0, _reactApollo.graphql)((0, _graphqlTag2.default)(_templateObject))(function (props) {
   return _react2.default.createElement(DashboardPage, props);
 });
+
+
+var NoMotoboysMessage = function NoMotoboysMessage() {
+  return _react2.default.createElement(
+    'div',
+    { className: 'mb-5' },
+    _react2.default.createElement(
+      'p',
+      null,
+      'Para come\xE7ar a enviar pedidos, cadastre seus motoboys'
+    ),
+    _react2.default.createElement(
+      'p',
+      null,
+      'Clique no icone ',
+      _react2.default.createElement(
+        _Button2.default,
+        { raised: true, dense: true, color: 'primary' },
+        _react2.default.createElement(_Menu2.default, null)
+      ),
+      ' e depois em "Motoboys"'
+    )
+  );
+};
 });
 
 ;require.register("js/dashboard_page/motoboy_details.jsx", function(exports, require, module) {
@@ -91263,7 +91300,7 @@ var Layout = function (_React$Component) {
             _react2.default.createElement(
               _Menu3.MenuItem,
               { onClick: this.closeDrawer },
-              'Dashboard'
+              'P\xE1gina inicial'
             )
           ),
           _react2.default.createElement(
@@ -91416,10 +91453,7 @@ var MotoboysPage = function (_React$Component) {
         _react2.default.createElement(
           'div',
           { className: 'col-sm-4' },
-          _react2.default.createElement(_new_motoboy_form2.default, {
-            displaySnack: this.displaySnack,
-            onCreate: this.pushNewMotoboy
-          })
+          _react2.default.createElement(_new_motoboy_form2.default, { onCreate: this.pushNewMotoboy })
         ),
         _react2.default.createElement(
           'div',
@@ -91776,6 +91810,10 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
 var _graphqlTag = require('graphql-tag');
 
 var _graphqlTag2 = _interopRequireDefault(_graphqlTag);
@@ -91842,9 +91880,8 @@ var NewMotoboyForm = function (_React$Component) {
       enumerable: true,
       writable: true,
       value: function value(motoboy) {
-        var _this$props = _this.props,
-            displaySnack = _this$props.displaySnack,
-            onCreate = _this$props.onCreate;
+        var onCreate = _this.props.onCreate;
+        var showSnack = _this.context.showSnack;
 
 
         _graphql_client2.default.mutate({
@@ -91854,12 +91891,12 @@ var NewMotoboyForm = function (_React$Component) {
           var motoboy = _ref2.data.motoboy;
 
           _this.setState({ newMotoboy: { name: "", phoneNumber: "" } });
-          displaySnack("Motoboy adicionado!");
+          showSnack("Motoboy adicionado!");
 
           onCreate(motoboy);
         }).catch(function (_ref3) {
           var graphQLErrors = _ref3.graphQLErrors;
-          return displaySnack(graphQLErrors.map(function (err) {
+          return showSnack(graphQLErrors.map(function (err) {
             return err.message;
           }));
         });
@@ -91925,6 +91962,10 @@ var NewMotoboyForm = function (_React$Component) {
 
   return NewMotoboyForm;
 }(_react2.default.Component);
+
+NewMotoboyForm.contextTypes = {
+  showSnack: _propTypes2.default.func
+};
 
 exports.default = NewMotoboyForm;
 });
@@ -92712,7 +92753,7 @@ require.alias("warning/browser.js", "warning");process = require('process');requ
         });
     }
   };
-  var port = ar.port || 9487;
+  var port = ar.port || 9485;
   var host = br.server || window.location.hostname || 'localhost';
 
   var connect = function(){

@@ -44,10 +44,7 @@ export default class MotoboysPage extends React.Component{
     return (
       <div className="row">
         <div className="col-sm-4">
-          <NewMotoboyForm
-            displaySnack={this.displaySnack}
-            onCreate={this.pushNewMotoboy}
-          />
+          <NewMotoboyForm onCreate={this.pushNewMotoboy} />
         </div>
 
         <div className="col-sm-8">

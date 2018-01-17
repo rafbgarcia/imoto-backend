@@ -2,8 +2,8 @@ import gql from 'graphql-tag'
 import apolloClient from './graphql_client'
 
 const loginMutation = gql`
-  mutation login($login: String!, $password: String!) {
-    central: login(login: $login, password: $password) {
+  mutation login($email: String!, $password: String!) {
+    central: login(email: $email, password: $password) {
       id
       name
       phoneNumber
@@ -19,10 +19,10 @@ const logoutMutation = gql`
   }
 `
 
-const login = (login, password, cb) => {
+const login = (email, password, cb) => {
   apolloClient.mutate({
     mutation: loginMutation,
-    variables: { login, password }
+    variables: { email, password }
   }).then((res) => {
     cb(res.data.central)
   }).catch((res) => {

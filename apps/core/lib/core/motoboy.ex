@@ -29,8 +29,8 @@ defmodule Core.Motoboy do
       :name, :phone_number, :one_signal_player_id, :state, :active,
       :became_available_at, :became_unavailable_at, :became_busy_at,
     ])
-    |> validate_inclusion(:state, [busy(), available(), unavailable(), confirming_order()])
     |> validate_required([:name, :phone_number])
     |> unique_constraint(:phone_number)
+    |> validate_inclusion(:state, [busy(), available(), unavailable(), confirming_order()])
   end
 end

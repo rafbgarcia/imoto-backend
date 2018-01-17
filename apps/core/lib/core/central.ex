@@ -10,7 +10,6 @@ defmodule Core.Central do
     field :name, :string
     field :email, :string
     field :cnpj, :string
-    field :login, :string
     field :password_hash, :string
     field :phone_number, :string
     field :active, :boolean
@@ -24,10 +23,9 @@ defmodule Core.Central do
     changeset
     |> cast(params, [
       :name, :phone_number, :cnpj, :accepted_terms_of_use,
-      :email, :login, :password_hash,
+      :email, :password_hash, :active,
     ])
     |> validate_required([:name, :cnpj, :accepted_terms_of_use])
-    |> unique_constraint(:login)
     |> unique_constraint(:email)
   end
 end
