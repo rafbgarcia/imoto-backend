@@ -8,10 +8,13 @@ defmodule Core.Central do
     many_to_many :companies, Core.Company, join_through: "companies_centrals"
 
     field :name, :string
+    field :email, :string
+    field :cnpj, :string
     field :login, :string
     field :password_hash, :string
     field :phone_number, :string
     field :active, :boolean
+    field :accepted_terms_of_use, :boolean
     field :token, :string, virtual: true
 
     timestamps()
@@ -20,9 +23,11 @@ defmodule Core.Central do
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, [
-      :name, :phone_number, :password_hash, :login, :active
+      :name, :phone_number, :cnpj, :accepted_terms_of_use,
+      :email, :login, :password_hash,
     ])
-    |> validate_required([:name])
+    |> validate_required([:name, :cnpj, :accepted_terms_of_use])
     |> unique_constraint(:login)
+    |> unique_constraint(:email)
   end
 end

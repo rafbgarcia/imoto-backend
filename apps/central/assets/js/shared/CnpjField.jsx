@@ -8,20 +8,20 @@ export default class CnpjField extends React.Component {
     const {
       value, onChange, className, fullWidth,
       label, InputClassName, name, disabled,
-      helperText,
+      helperText, margin,
     } = this.props
 
     return (
-      <FormControl className={`${className} MuiFormControl-root-83 MuiFormControl-marginNormal-84 MuiFormControl-fullWidth-86`} fullWidth={fullWidth}>
+      <FormControl margin={margin} className={className} fullWidth={fullWidth}>
         {label && <InputLabel htmlFor="cnpj">{label}</InputLabel>}
         <Input
           id="cnpj"
           value={value}
           name={name}
-          disabled={disabled}
           className={InputClassName}
           onChange={onChange}
           inputComponent={CnpjFieldElement}
+          disabled={disabled}
         />
         {helperText && <FormHelperText>{helperText}</FormHelperText>}
       </FormControl>
@@ -36,7 +36,7 @@ class CnpjFieldElement extends React.Component {
         {...this.props}
         mask={[/\d/, /\d/, ".", /\d/, /\d/, /\d/, '.', /\d/, /\d/, /\d/, "/", /\d/, /\d/, /\d/, /\d/, "-", /\d/, /\d/]}
         placeholderChar={"\u2000"}
-        guide={false}
+        guide={true}
       />
     )
   }

@@ -8,10 +8,11 @@ export default class PhoneField extends React.Component {
     const {
       value, onChange, className, fullWidth,
       label, InputClassName, name, disabled,
+      margin,
     } = this.props
 
     return (
-      <FormControl className={`${className} MuiFormControl-root-83 MuiFormControl-marginNormal-84 MuiFormControl-fullWidth-86`} fullWidth={fullWidth}>
+      <FormControl margin={margin} className={className} fullWidth={fullWidth}>
         {label && <InputLabel htmlFor="phoneNumber">{label}</InputLabel>}
         <Input
           id="phoneNumber"
@@ -44,7 +45,7 @@ class PhoneFieldElement extends React.Component {
         {...this.props}
         mask={this.phoneMask}
         placeholderChar={"\u2000"}
-        guide={false}
+        guide={true}
       />
     )
   }

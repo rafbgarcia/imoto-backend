@@ -9,6 +9,11 @@ defmodule Central.GraphqlSchema do
   end
 
   mutation do
+    field :register, :central do
+      arg :params, :central_params
+      resolve &Central.Resolve.Register.handle/2
+    end
+
     field :login, :central do
       arg :login, non_null(:string)
       arg :password, non_null(:string)
@@ -68,5 +73,14 @@ defmodule Central.GraphqlSchema do
     field :reference, :string
     field :city, :string
     field :uf, :string
+  end
+
+  input_object :central_params do
+    field :name, :string
+    field :email, :string
+    field :cnpj, :string
+    field :phone_number, :string
+    field :password, :string
+    field :accepted_terms_of_use, :boolean
   end
 end

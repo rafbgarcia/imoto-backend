@@ -43119,6 +43119,182 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   })();
 });
 
+require.register("material-ui/Checkbox/Checkbox.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.styles = undefined;
+
+var _extends2 = require('babel-runtime/helpers/extends');
+
+var _extends3 = _interopRequireDefault(_extends2);
+
+var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
+
+var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
+
+var _SwitchBase = require('../internal/SwitchBase');
+
+var _SwitchBase2 = _interopRequireDefault(_SwitchBase);
+
+var _IndeterminateCheckBox = require('../internal/svg-icons/IndeterminateCheckBox');
+
+var _IndeterminateCheckBox2 = _interopRequireDefault(_IndeterminateCheckBox);
+
+var _withStyles = require('../styles/withStyles');
+
+var _withStyles2 = _interopRequireDefault(_withStyles);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var styles = exports.styles = function styles(theme) {
+  return {
+    default: {
+      color: theme.palette.text.secondary
+    },
+    checked: {
+      color: theme.palette.primary[500]
+    },
+    disabled: {
+      color: theme.palette.action.disabled
+    }
+  };
+};
+
+function Checkbox(props) {
+  var checkedIcon = props.checkedIcon,
+      icon = props.icon,
+      indeterminate = props.indeterminate,
+      indeterminateIcon = props.indeterminateIcon,
+      other = (0, _objectWithoutProperties3.default)(props, ['checkedIcon', 'icon', 'indeterminate', 'indeterminateIcon']);
+
+
+  return _react2.default.createElement(_SwitchBase2.default, (0, _extends3.default)({
+    checkedIcon: indeterminate ? indeterminateIcon : checkedIcon,
+    icon: indeterminate ? indeterminateIcon : icon
+  }, other));
+}
+
+Checkbox.propTypes = 'development' !== "production" ? {
+  /**
+   * If `true`, the component is checked.
+   */
+  checked: _propTypes2.default.oneOfType([_propTypes2.default.bool, _propTypes2.default.string]),
+  /**
+   * The icon to display when the component is checked.
+   * If a string is provided, it will be used as a font ligature.
+   */
+  checkedIcon: _propTypes2.default.node,
+  /**
+   * Useful to extend the style applied to components.
+   */
+  classes: _propTypes2.default.object.isRequired,
+  /**
+   * @ignore
+   */
+  className: _propTypes2.default.string,
+  /**
+   * @ignore
+   */
+  defaultChecked: _propTypes2.default.bool,
+  /**
+   * If `true`, the switch will be disabled.
+   */
+  disabled: _propTypes2.default.bool,
+  /**
+   * If `true`, the ripple effect will be disabled.
+   */
+  disableRipple: _propTypes2.default.bool,
+  /**
+   * The icon to display when the component is unchecked.
+   * If a string is provided, it will be used as a font ligature.
+   */
+  icon: _propTypes2.default.node,
+  /**
+   * If `true`, the component appears indeterminate.
+   */
+  indeterminate: _propTypes2.default.bool,
+  /**
+   * The icon to display when the component is indeterminate.
+   * If a string is provided, it will be used as a font ligature.
+   */
+  indeterminateIcon: _propTypes2.default.node,
+  /**
+   * Properties applied to the `input` element.
+   */
+  inputProps: _propTypes2.default.object,
+  /**
+   * Use that property to pass a ref callback to the native input component.
+   */
+  inputRef: _propTypes2.default.func,
+  /**
+   * The input component property `type`.
+   */
+  inputType: _propTypes2.default.string,
+  /*
+   * @ignore
+   */
+  name: _propTypes2.default.string,
+  /**
+   * Callback fired when the state is changed.
+   *
+   * @param {object} event The event source of the callback
+   * @param {boolean} checked The `checked` value of the switch
+   */
+  onChange: _propTypes2.default.func,
+  /**
+   * @ignore
+   */
+  tabIndex: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.string]),
+  /**
+   * The value of the component.
+   */
+  value: _propTypes2.default.string
+} : {};
+
+Checkbox.defaultProps = {
+  indeterminate: false,
+  indeterminateIcon: _react2.default.createElement(_IndeterminateCheckBox2.default, null)
+};
+
+exports.default = (0, _withStyles2.default)(styles, { name: 'MuiCheckbox' })(Checkbox);
+  })();
+});
+
+require.register("material-ui/Checkbox/index.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _Checkbox = require('./Checkbox');
+
+Object.defineProperty(exports, 'default', {
+  enumerable: true,
+  get: function get() {
+    return _interopRequireDefault(_Checkbox).default;
+  }
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+  })();
+});
+
 require.register("material-ui/Dialog/Dialog.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "material-ui");
   (function() {
@@ -56835,6 +57011,48 @@ CheckBoxOutlineBlank = (0, _pure2.default)(CheckBoxOutlineBlank);
 CheckBoxOutlineBlank.muiName = 'SvgIcon';
 
 exports.default = CheckBoxOutlineBlank;
+  })();
+});
+
+require.register("material-ui/internal/svg-icons/IndeterminateCheckBox.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = require('react');
+
+var _react2 = _interopRequireDefault(_react);
+
+var _pure = require('recompose/pure');
+
+var _pure2 = _interopRequireDefault(_pure);
+
+var _SvgIcon = require('../../SvgIcon');
+
+var _SvgIcon2 = _interopRequireDefault(_SvgIcon);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @ignore - internal component.
+ */
+var _ref = _react2.default.createElement('path', { d: 'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10H7v-2h10v2z' });
+
+var IndeterminateCheckBox = function IndeterminateCheckBox(props) {
+  return _react2.default.createElement(
+    _SvgIcon2.default,
+    props,
+    _ref
+  );
+};
+IndeterminateCheckBox = (0, _pure2.default)(IndeterminateCheckBox);
+IndeterminateCheckBox.muiName = 'SvgIcon';
+
+exports.default = IndeterminateCheckBox;
   })();
 });
 
@@ -88723,9 +88941,15 @@ var _extends = Object.assign || function (target) { for (var i = 1; i < argument
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _templateObject = _taggedTemplateLiteral(['mutation Register($params: CompanyParams) {\n        central: register(params: $params) {\n          id\n          name\n          email\n          cnpj\n          acceptedTermsOfUse\n          phoneNumber\n          token\n        }\n      }'], ['mutation Register($params: CompanyParams) {\n        central: register(params: $params) {\n          id\n          name\n          email\n          cnpj\n          acceptedTermsOfUse\n          phoneNumber\n          token\n        }\n      }']);
+
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _propTypes = require('prop-types');
+
+var _propTypes2 = _interopRequireDefault(_propTypes);
 
 var _TextField = require('material-ui/TextField');
 
@@ -88747,6 +88971,20 @@ var _AppBar = require('material-ui/AppBar');
 
 var _AppBar2 = _interopRequireDefault(_AppBar);
 
+var _Checkbox = require('material-ui/Checkbox');
+
+var _Checkbox2 = _interopRequireDefault(_Checkbox);
+
+var _Form = require('material-ui/Form');
+
+var _graphqlTag = require('graphql-tag');
+
+var _graphqlTag2 = _interopRequireDefault(_graphqlTag);
+
+var _graphql_client = require('js/graphql_client');
+
+var _graphql_client2 = _interopRequireDefault(_graphql_client);
+
 var _central = require('js/central');
 
 var _central2 = _interopRequireDefault(_central);
@@ -88759,7 +88997,15 @@ var _CnpjField = require('js/shared/CnpjField');
 
 var _CnpjField2 = _interopRequireDefault(_CnpjField);
 
+var _validations = require('js/shared/validations');
+
+var validate = _interopRequireWildcard(_validations);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _taggedTemplateLiteral(strings, raw) { return Object.freeze(Object.defineProperties(strings, { raw: { value: Object.freeze(raw) } })); }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -88789,38 +89035,75 @@ var RegisterPage = function (_React$Component) {
       value: {
         login: "",
         password: "",
-        company: {
+        central: {
           name: "",
           email: "",
           phoneNumber: "",
           cnpj: "",
-          login: "",
-          password: ""
+          password: "",
+          acceptedTermsOfUse: false
         }
-      }
-    }), Object.defineProperty(_this, 'didClickRegisterButton', {
-      enumerable: true,
-      writable: true,
-      value: function value() {
-        _auth2.default.login(_this.state.login, _this.state.password, function (central) {
-          _central2.default.login(central);
-          window.location.reload();
-        });
       }
     }), Object.defineProperty(_this, 'updateCompany', {
       enumerable: true,
       writable: true,
       value: function value(evt) {
         var changes = _defineProperty({}, evt.target.name, evt.target.value);
-        _this.setState({ company: _extends({}, _this.state.company, changes) });
+        _this.setState({ central: _extends({}, _this.state.central, changes) });
+      }
+    }), Object.defineProperty(_this, 'updateTermsOfUse', {
+      enumerable: true,
+      writable: true,
+      value: function value(evt) {
+        var changes = { acceptedTermsOfUse: !_this.state.central.acceptedTermsOfUse };
+        _this.setState({ central: _extends({}, _this.state.central, changes) });
+      }
+    }), Object.defineProperty(_this, 'didClickRegisterButton', {
+      enumerable: true,
+      writable: true,
+      value: function value() {
+        var central = _this.state.central;
+        var showSnack = _this.context.showSnack;
+
+
+        showSnack("Criando cadastro...");
+
+        _graphql_client2.default.mutate({
+          mutation: (0, _graphqlTag2.default)(_templateObject),
+          variables: { params: central }
+        }).then(function (_ref2) {
+          var central = _ref2.data.central;
+
+          showSnack("Conta criada com sucesso");
+          _central2.default.login(central);
+          window.location.reload();
+        }).catch(function (_ref3) {
+          var graphQLErrors = _ref3.graphQLErrors;
+          return showSnack(graphQLErrors.map(function (err) {
+            return err.message;
+          }));
+        });
       }
     }), _temp), _possibleConstructorReturn(_this, _ret);
   }
 
   _createClass(RegisterPage, [{
+    key: 'canRegister',
+    value: function canRegister() {
+      var _state$central = this.state.central,
+          acceptedTermsOfUse = _state$central.acceptedTermsOfUse,
+          name = _state$central.name,
+          email = _state$central.email,
+          phoneNumber = _state$central.phoneNumber,
+          cnpj = _state$central.cnpj,
+          password = _state$central.password;
+
+      return acceptedTermsOfUse === true && validate.notBlank(name, email, phoneNumber, cnpj, password);
+    }
+  }, {
     key: 'render',
     value: function render() {
-      var company = this.state.company;
+      var central = this.state.central;
 
 
       return _react2.default.createElement(
@@ -88838,55 +89121,66 @@ var RegisterPage = function (_React$Component) {
             'div',
             { className: 'd-flex align-items-center' },
             _react2.default.createElement(_TextField2.default, {
-              label: 'Nome da central',
+              label: '* Nome da central',
               onChange: this.updateCompany,
               margin: 'normal',
               className: 'mr-4',
               name: 'name',
+              value: central.name,
               fullWidth: true
             }),
             _react2.default.createElement(_phone_field2.default, {
-              label: 'Telefone',
+              label: '* Telefone',
               name: 'phoneNumber',
+              margin: 'normal',
               onChange: this.updateCompany,
-              value: company.phoneNumber,
+              value: central.phoneNumber,
               fullWidth: true
             })
           ),
+          _react2.default.createElement(_CnpjField2.default, {
+            label: '* CNPJ',
+            name: 'cnpj',
+            margin: 'normal',
+            onChange: this.updateCompany,
+            value: central.cnpj,
+            helperText: 'Para dar mais seguran\xE7a aos clientes, checaremos se sua central realmente existe',
+            fullWidth: true
+          }),
           _react2.default.createElement(
             'div',
             { className: 'd-flex align-items-center' },
-            _react2.default.createElement(_CnpjField2.default, {
-              label: 'CNPJ',
-              onChange: this.updateCompany,
-              name: 'cnpj',
-              margin: 'normal',
-              helperText: 'CNPJ \xE9 requerido para aumentar a seguran\xE7a dos clientes',
-              fullWidth: true
-            })
-          ),
-          _react2.default.createElement(
-            'section',
-            { className: 'd-flex align-items-center' },
             _react2.default.createElement(_TextField2.default, {
-              label: 'E-mail',
+              error: !validate.email(central.email),
+              label: '* E-mail',
               onChange: this.updateCompany,
               name: 'email',
               margin: 'normal',
               className: 'mr-4',
+              value: central.email,
               fullWidth: true
             }),
             _react2.default.createElement(_TextField2.default, {
               fullWidth: true,
-              label: 'Senha',
+              label: '* Senha',
+              name: 'password',
               onChange: this.updateCompany,
               margin: 'normal',
+              value: central.password,
               type: 'password'
             })
           ),
+          _react2.default.createElement(_Form.FormControlLabel, {
+            control: _react2.default.createElement(_Checkbox2.default, {
+              checked: central.acceptedTermsOfUse,
+              onChange: this.updateTermsOfUse,
+              name: 'acceptedTermsOfUse'
+            }),
+            label: _react2.default.createElement(TermsOfUseLabel, null)
+          }),
           _react2.default.createElement(
             _Button2.default,
-            { raised: true, color: 'primary', onClick: this.didClickRegisterButton, className: 'mt-4' },
+            { disabled: !this.canRegister(), raised: true, color: 'primary', onClick: this.didClickRegisterButton, className: 'mt-4' },
             'Cadastrar'
           )
         )
@@ -88898,6 +89192,24 @@ var RegisterPage = function (_React$Component) {
 }(_react2.default.Component);
 
 exports.default = RegisterPage;
+
+
+RegisterPage.contextTypes = {
+  showSnack: _propTypes2.default.func
+};
+
+var TermsOfUseLabel = function TermsOfUseLabel() {
+  return _react2.default.createElement(
+    'span',
+    null,
+    'Ao se registrar voc\xEA aceita os ',
+    _react2.default.createElement(
+      'a',
+      { href: '/termos-de-uso' },
+      'termos de uso'
+    )
+  );
+};
 });
 
 ;require.register("js/app.jsx", function(exports, require, module) {
@@ -91671,12 +91983,13 @@ var CnpjField = function (_React$Component) {
           InputClassName = _props.InputClassName,
           name = _props.name,
           disabled = _props.disabled,
-          helperText = _props.helperText;
+          helperText = _props.helperText,
+          margin = _props.margin;
 
 
       return _react2.default.createElement(
         _Form.FormControl,
-        { className: className + " MuiFormControl-root-83 MuiFormControl-marginNormal-84 MuiFormControl-fullWidth-86", fullWidth: fullWidth },
+        { margin: margin, className: className, fullWidth: fullWidth },
         label && _react2.default.createElement(
           _Input.InputLabel,
           { htmlFor: "cnpj" },
@@ -91686,10 +91999,10 @@ var CnpjField = function (_React$Component) {
           id: "cnpj",
           value: value,
           name: name,
-          disabled: disabled,
           className: InputClassName,
           onChange: onChange,
-          inputComponent: CnpjFieldElement
+          inputComponent: CnpjFieldElement,
+          disabled: disabled
         }),
         helperText && _react2.default.createElement(
           _Form.FormHelperText,
@@ -91720,7 +92033,7 @@ var CnpjFieldElement = function (_React$Component2) {
       return _react2.default.createElement(_reactTextMask2.default, _extends({}, this.props, {
         mask: [/\d/, /\d/, ".", /\d/, /\d/, /\d/, '.', /\d/, /\d/, /\d/, "/", /\d/, /\d/, /\d/, /\d/, "-", /\d/, /\d/],
         placeholderChar: "\u2000",
-        guide: false
+        guide: true
       }));
     }
   }]);
@@ -91782,12 +92095,13 @@ var PhoneField = function (_React$Component) {
           label = _props.label,
           InputClassName = _props.InputClassName,
           name = _props.name,
-          disabled = _props.disabled;
+          disabled = _props.disabled,
+          margin = _props.margin;
 
 
       return _react2.default.createElement(
         _Form.FormControl,
-        { className: className + " MuiFormControl-root-83 MuiFormControl-marginNormal-84 MuiFormControl-fullWidth-86", fullWidth: fullWidth },
+        { margin: margin, className: className, fullWidth: fullWidth },
         label && _react2.default.createElement(
           _Input.InputLabel,
           { htmlFor: "phoneNumber" },
@@ -91837,13 +92151,47 @@ var PhoneFieldElement = function (_React$Component2) {
       return _react2.default.createElement(_reactTextMask2.default, _extends({}, this.props, {
         mask: this.phoneMask,
         placeholderChar: "\u2000",
-        guide: false
+        guide: true
       }));
     }
   }]);
 
   return PhoneFieldElement;
 }(_react2.default.Component);
+});
+
+;require.register("js/shared/validations.js", function(exports, require, module) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.notBlank = notBlank;
+exports.email = email;
+function notBlank() {
+  for (var _len = arguments.length, values = Array(_len), _key = 0; _key < _len; _key++) {
+    values[_key] = arguments[_key];
+  }
+
+  return values.every(function (value) {
+    return !isBlank(value);
+  });
+}
+
+function isBlank(val) {
+  return !val || val.length === 0;
+}
+
+function lengthGreaterThan(val, length) {
+  return !isBlank(val) && val.length > length;
+}
+
+function email(val) {
+  if (!lengthGreaterThan(val, 3)) return true;
+
+  var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return re.test(val.toLowerCase());
+}
 });
 
 ;require.register("js/shared/zipcode_field.jsx", function(exports, require, module) {
@@ -91943,7 +92291,7 @@ var ZipcodeFieldElement = function (_React$Component2) {
       return _react2.default.createElement(_reactTextMask2.default, _extends({}, this.props, {
         mask: [/\d/, /\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/],
         placeholderChar: "\u2000",
-        guide: false
+        guide: true
       }));
     }
   }]);
@@ -92364,7 +92712,7 @@ require.alias("warning/browser.js", "warning");process = require('process');requ
         });
     }
   };
-  var port = ar.port || 9485;
+  var port = ar.port || 9487;
   var host = br.server || window.location.hostname || 'localhost';
 
   var connect = function(){

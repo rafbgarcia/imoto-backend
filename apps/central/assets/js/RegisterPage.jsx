@@ -1,42 +1,79 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import TextField from 'material-ui/TextField'
 import Button from 'material-ui/Button'
 import Auth from './auth'
 import Typography from 'material-ui/Typography'
-import AppBar from 'material-ui/AppBar';
+import AppBar from 'material-ui/AppBar'
+import Checkbox from 'material-ui/Checkbox'
+import {FormControlLabel} from 'material-ui/Form'
+import gql from 'graphql-tag'
+import apolloClient from 'js/graphql_client'
 
 import Central from 'js/central'
 import PhoneField from 'js/shared/phone_field'
 import CnpjField from 'js/shared/CnpjField'
+import * as validate from 'js/shared/validations'
 
 export default class RegisterPage extends React.Component {
   state = {
     login: "",
     password: "",
-    company: {
+    central: {
       name: "",
       email: "",
       phoneNumber: "",
       cnpj: "",
-      login: "",
       password: "",
+      acceptedTermsOfUse: false,
     },
-  }
-
-  didClickRegisterButton = () => {
-    Auth.login(this.state.login, this.state.password, (central) => {
-      Central.login(central)
-      window.location.reload()
-    })
   }
 
   updateCompany = (evt) => {
     const changes = {[evt.target.name]: evt.target.value}
-    this.setState({company: {...this.state.company, ...changes}})
+    this.setState({central: {...this.state.central, ...changes}})
+  }
+
+  updateTermsOfUse = (evt) => {
+    const changes = {acceptedTermsOfUse: !this.state.central.acceptedTermsOfUse}
+    this.setState({central: {...this.state.central, ...changes}})
+  }
+
+  canRegister() {
+    const {central: {acceptedTermsOfUse, name, email, phoneNumber, cnpj, password}} = this.state
+    return acceptedTermsOfUse === true && validate.notBlank(name, email, phoneNumber, cnpj, password)
+  }
+
+  didClickRegisterButton = () => {
+    const {central} = this.state
+    const {showSnack} = this.context
+
+    showSnack("Criando cadastro...")
+
+    apolloClient.mutate({
+      mutation: gql`mutation Register($params: CompanyParams) {
+        central: register(params: $params) {
+          id
+          name
+          email
+          cnpj
+          acceptedTermsOfUse
+          phoneNumber
+          token
+        }
+      }`,
+      variables: {params: central},
+    })
+    .then(({data: {central}}) => {
+      showSnack("Conta criada com sucesso")
+      Central.login(central)
+      window.location.reload()
+    })
+    .catch(({graphQLErrors}) => showSnack(graphQLErrors.map(err => err.message)))
   }
 
   render() {
-    const {company} = this.state
+    const {central} = this.state
 
     return (
       <section className="d-flex align-items-center justify-content-center mt-5">
@@ -45,49 +82,66 @@ export default class RegisterPage extends React.Component {
 
           <div className="d-flex align-items-center">
             <TextField
-              label="Nome da central"
+              label="* Nome da central"
               onChange={this.updateCompany}
               margin="normal"
               className="mr-4"
               name="name"
+              value={central.name}
               fullWidth
             />
             <PhoneField
-              label="Telefone"
+              label="* Telefone"
               name="phoneNumber"
-              onChange={this.updateCompany}
-              value={company.phoneNumber}
-              fullWidth
-            />
-          </div>
-          <div className="d-flex align-items-center">
-            <CnpjField
-              label="CNPJ"
-              onChange={this.updateCompany}
-              name="cnpj"
               margin="normal"
-              helperText="CNPJ é requerido para aumentar a segurança dos clientes"
+              onChange={this.updateCompany}
+              value={central.phoneNumber}
               fullWidth
             />
           </div>
-          <section className="d-flex align-items-center">
+
+          <CnpjField
+            label="* CNPJ"
+            name="cnpj"
+            margin="normal"
+            onChange={this.updateCompany}
+            value={central.cnpj}
+            helperText="Para dar mais segurança aos clientes, checaremos se sua central realmente existe"
+            fullWidth
+          />
+
+          <div className="d-flex align-items-center">
             <TextField
-              label="E-mail"
+              error={!validate.email(central.email)}
+              label="* E-mail"
               onChange={this.updateCompany}
               name="email"
               margin="normal"
               className="mr-4"
+              value={central.email}
               fullWidth
             />
             <TextField
               fullWidth
-              label="Senha"
+              label="* Senha"
+              name="password"
               onChange={this.updateCompany}
               margin="normal"
+              value={central.password}
               type="password"
             />
-          </section>
-          <Button raised color="primary" onClick={this.didClickRegisterButton} className="mt-4">
+          </div>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={central.acceptedTermsOfUse}
+                onChange={this.updateTermsOfUse}
+                name="acceptedTermsOfUse"
+              />
+            }
+            label={<TermsOfUseLabel />}
+          />
+          <Button disabled={!this.canRegister()} raised color="primary" onClick={this.didClickRegisterButton} className="mt-4">
             Cadastrar
           </Button>
         </div>
@@ -95,3 +149,13 @@ export default class RegisterPage extends React.Component {
     )
   }
 }
+
+RegisterPage.contextTypes = {
+  showSnack: PropTypes.func
+}
+
+const TermsOfUseLabel = () => (
+  <span>
+    Ao se registrar você aceita os <a href="/termos-de-uso">termos de uso</a>
+  </span>
+)

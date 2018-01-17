@@ -34,7 +34,7 @@ class ZipcodeFieldElement extends React.Component {
         {...this.props}
         mask={[/\d/, /\d/, /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/]}
         placeholderChar={"\u2000"}
-        guide={false}
+        guide={true}
       />
     )
   }
