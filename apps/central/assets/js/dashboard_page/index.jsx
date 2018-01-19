@@ -47,23 +47,31 @@ class DashboardPage extends React.Component{
   }
 
   render() {
-    const {orders, motoboys} = this.props.data
+    const {orders, motoboys, loading} = this.props.data
     const {modalOpen} = this.state
+
+    const hasMotoboysAvailable = motoboys && motoboys.some((motoboy) => motoboy.available)
 
     this.startStopPolling()
 
     return (
       <main>
         {
-          !motoboys || motoboys.length === 0 ?
-          <NoMotoboysMessage />
-          :
-          <div className="mb-5">
-            <Button raised color="primary" onClick={() => this.setState({modalOpen: true})}>
-              <AddIcon className="mr-2" /> Nova entrega
-            </Button>
-            <NewOrderModal open={modalOpen} onClose={this.onCloseNewOrderModal} />
-          </div>
+          !loading && (!motoboys || motoboys.length === 0) ?
+            <NoMotoboysMessage />
+            :
+            <div className="mb-5">
+              <Button disabled={!hasMotoboysAvailable} raised color="primary" onClick={() => this.setState({modalOpen: true})}>
+                <AddIcon className="mr-2" /> Nova entrega
+                {!hasMotoboysAvailable && " *"}
+              </Button>
+              {
+                !hasMotoboysAvailable && <div>
+                  <small className="text-muted">* Nenhum motoboy disponível no momento</small>
+                </div>
+              }
+              <NewOrderModal open={modalOpen} onClose={this.onCloseNewOrderModal} />
+            </div>
         }
 
         <div className="row">

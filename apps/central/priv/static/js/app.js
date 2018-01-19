@@ -89887,25 +89887,40 @@ var DashboardPage = function (_React$Component) {
 
       var _props$data2 = this.props.data,
           orders = _props$data2.orders,
-          motoboys = _props$data2.motoboys;
+          motoboys = _props$data2.motoboys,
+          loading = _props$data2.loading;
       var modalOpen = this.state.modalOpen;
 
+
+      var hasMotoboysAvailable = motoboys && motoboys.some(function (motoboy) {
+        return motoboy.available;
+      });
 
       this.startStopPolling();
 
       return _react2.default.createElement(
         'main',
         null,
-        !motoboys || motoboys.length === 0 ? _react2.default.createElement(NoMotoboysMessage, null) : _react2.default.createElement(
+        !loading && (!motoboys || motoboys.length === 0) ? _react2.default.createElement(NoMotoboysMessage, null) : _react2.default.createElement(
           'div',
           { className: 'mb-5' },
           _react2.default.createElement(
             _Button2.default,
-            { raised: true, color: 'primary', onClick: function onClick() {
+            { disabled: !hasMotoboysAvailable, raised: true, color: 'primary', onClick: function onClick() {
                 return _this3.setState({ modalOpen: true });
               } },
             _react2.default.createElement(_Add2.default, { className: 'mr-2' }),
-            ' Nova entrega'
+            ' Nova entrega',
+            !hasMotoboysAvailable && " *"
+          ),
+          !hasMotoboysAvailable && _react2.default.createElement(
+            'div',
+            null,
+            _react2.default.createElement(
+              'small',
+              { className: 'text-muted' },
+              '* Nenhum motoboy dispon\xEDvel no momento'
+            )
           ),
           _react2.default.createElement(_new_order_modal2.default, { open: modalOpen, onClose: this.onCloseNewOrderModal })
         ),
