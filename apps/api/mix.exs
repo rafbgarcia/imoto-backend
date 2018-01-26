@@ -4,28 +4,18 @@ defmodule Api.Mixfile do
   def project do
     [
       app: :api,
-      version: append_revision("1.0.0"),
+      version: "1.0.0",
       build_path: "../../_build",
       config_path: "../../config/config.exs",
       deps_path: "../../deps",
       lockfile: "../../mix.lock",
-      elixir: "~> 1.4",
+      elixir: "~> 1.6",
       elixirc_paths: elixirc_paths(Mix.env),
       compilers: [:phoenix, :gettext] ++ Mix.compilers,
       start_permanent: Mix.env == :prod,
       aliases: aliases(),
       deps: deps()
     ]
-  end
-
-  def append_revision(version) do
-    "#{version}+#{revision()}"
-  end
-
-  defp revision() do
-    System.cmd("git", ["rev-parse", "--short", "HEAD"])
-    |> elem(0)
-    |> String.trim_trailing
   end
 
   # Configuration for the OTP application.
