@@ -1,0 +1,4 @@
+cd $build_dir
+(cd apps/central/assets && npm install)
+(cd apps/company/assets && npm install)
+mix phx.digest
