@@ -2,7 +2,8 @@ import React from 'react'
 import gql from 'graphql-tag'
 import { graphql } from 'react-apollo'
 import { CircularProgress } from 'material-ui/Progress';
-import Dialog from 'material-ui/Dialog'
+import Modal from 'material-ui/Modal';
+
 import {
   Table,
   TableBody,
@@ -15,15 +16,13 @@ import {FormattedDate} from 'react-intl'
 
 function MotoboyDetails({motoboy, open, handleClose, data: {entries, loading}}) {
   return (
-    <Dialog
-      title={`${motoboy.name} - hoje`}
-      modal={false}
+    <Modal
       open={open}
-      onRequestClose={() => handleClose()}
-      autoScrollBodyContent={true}
+      onClose={() => handleClose()}
     >
+      <h3>{motoboy.name} - hoje</h3>
       {Entries(entries, loading)}
-    </Dialog>
+    </Modal>
   )
 }
 

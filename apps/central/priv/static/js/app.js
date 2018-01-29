@@ -6745,17 +6745,6 @@ function blitBuffer (src, dst, offset, length) {
   })();
 });
 
-require.register("buffer/node_modules/isarray/index.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "buffer/node_modules/isarray");
-  (function() {
-    var toString = {}.toString;
-
-module.exports = Array.isArray || function (arr) {
-  return toString.call(arr) == '[object Array]';
-};
-  })();
-});
-
 require.register("classnames/index.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "classnames");
   (function() {
@@ -7361,7 +7350,7 @@ module.exports = function (NAME, wrapper, methods, common, IS_MAP, IS_WEAK) {
 require.register("core-js/library/modules/_core.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "core-js");
   (function() {
-    var core = module.exports = { version: '2.5.3' };
+    var core = module.exports = { version: '2.5.1' };
 if (typeof __e == 'number') __e = core; // eslint-disable-line no-undef
   })();
 });
@@ -7753,7 +7742,7 @@ module.exports = function (Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCE
   var VALUES_BUG = false;
   var proto = Base.prototype;
   var $native = proto[ITERATOR] || proto[FF_ITERATOR] || DEFAULT && proto[DEFAULT];
-  var $default = (!BUGGY && $native) || getMethod(DEFAULT);
+  var $default = $native || getMethod(DEFAULT);
   var $entries = DEFAULT ? !DEF_VALUES ? $default : getMethod('entries') : undefined;
   var $anyNative = NAME == 'Array' ? proto.entries || $native : $native;
   var methods, key, IteratorPrototype;
@@ -8255,7 +8244,7 @@ var $export = require('./_export');
 module.exports = function (COLLECTION) {
   $export($export.S, COLLECTION, { of: function of() {
     var length = arguments.length;
-    var A = new Array(length);
+    var A = Array(length);
     while (length--) A[length] = arguments[length];
     return new this(A);
   } });
@@ -8777,7 +8766,6 @@ var wksDefine = require('./_wks-define');
 var enumKeys = require('./_enum-keys');
 var isArray = require('./_is-array');
 var anObject = require('./_an-object');
-var isObject = require('./_is-object');
 var toIObject = require('./_to-iobject');
 var toPrimitive = require('./_to-primitive');
 var createDesc = require('./_property-desc');
@@ -8970,14 +8958,15 @@ $JSON && $export($export.S + $export.F * (!USE_NATIVE || $fails(function () {
   return _stringify([S]) != '[null]' || _stringify({ a: S }) != '{}' || _stringify(Object(S)) != '{}';
 })), 'JSON', {
   stringify: function stringify(it) {
+    if (it === undefined || isSymbol(it)) return; // IE8 returns string on undefined
     var args = [it];
     var i = 1;
     var replacer, $replacer;
     while (arguments.length > i) args.push(arguments[i++]);
-    $replacer = replacer = args[1];
-    if (!isObject(replacer) && it === undefined || isSymbol(it)) return; // IE8 returns string on undefined
-    if (!isArray(replacer)) replacer = function (key, value) {
-      if (typeof $replacer == 'function') value = $replacer.call(this, key, value);
+    replacer = args[1];
+    if (typeof replacer == 'function') $replacer = replacer;
+    if ($replacer || !isArray(replacer)) replacer = function (key, value) {
+      if ($replacer) value = $replacer.call(this, key, value);
       if (!isSymbol(value)) return value;
     };
     args[1] = replacer;
@@ -9490,7 +9479,7 @@ var _hasClass2 = _interopRequireDefault(_hasClass);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function addClass(element, className) {
-  if (element.classList) element.classList.add(className);else if (!(0, _hasClass2.default)(element, className)) if (typeof element.className === 'string') element.className = element.className + ' ' + className;else element.setAttribute('class', (element.className && element.className.baseVal || '') + ' ' + className);
+  if (element.classList) element.classList.add(className);else if (!(0, _hasClass2.default)(element)) element.className = element.className + ' ' + className;
 }
 module.exports = exports['default'];
   })();
@@ -9506,7 +9495,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = hasClass;
 function hasClass(element, className) {
-  if (element.classList) return !!className && element.classList.contains(className);else return (" " + (element.className.baseVal || element.className) + " ").indexOf(" " + className + " ") !== -1;
+  if (element.classList) return !!className && element.classList.contains(className);else return (" " + element.className + " ").indexOf(" " + className + " ") !== -1;
 }
 module.exports = exports["default"];
   })();
@@ -9517,12 +9506,8 @@ require.register("dom-helpers/class/removeClass.js", function(exports, require, 
   (function() {
     'use strict';
 
-function replaceClassName(origClass, classToRemove) {
-  return origClass.replace(new RegExp('(^|\\s)' + classToRemove + '(?:\\s|$)', 'g'), '$1').replace(/\s+/g, ' ').replace(/^\s*|\s*$/g, '');
-}
-
 module.exports = function removeClass(element, className) {
-  if (element.classList) element.classList.remove(className);else if (typeof element.className === 'string') element.className = replaceClassName(element.className, className);else element.setAttribute('class', replaceClassName(element.className && element.className.baseVal || '', className));
+  if (element.classList) element.classList.remove(className);else element.className = element.className.replace(new RegExp('(^|\\s)' + className + '(?:\\s|$)', 'g'), '$1').replace(/\s+/g, ' ').replace(/^\s*|\s*$/g, '');
 };
   })();
 });
@@ -9997,7 +9982,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 
 exports.default = function (recalc) {
-  if (!size && size !== 0 || recalc) {
+  if (!size || recalc) {
     if (_inDOM2.default) {
       var scrollDiv = document.createElement('div');
 
@@ -18994,8 +18979,10 @@ exports.default = isBrowser;
 require.register("isarray/index.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "isarray");
   (function() {
-    module.exports = Array.isArray || function (arr) {
-  return Object.prototype.toString.call(arr) == '[object Array]';
+    var toString = {}.toString;
+
+module.exports = Array.isArray || function (arr) {
+  return toString.call(arr) == '[object Array]';
 };
   })();
 });
@@ -19059,238 +19046,6 @@ function camelCase() {
   }
 
   return { onProcessStyle: onProcessStyle };
-}
-  })();
-});
-
-require.register("jss-default-unit/lib/defaultUnits.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "jss-default-unit");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-/**
- * Generated jss-default-unit CSS property units
- *
- * @type object
- */
-exports['default'] = {
-  'animation-delay': 'ms',
-  'animation-duration': 'ms',
-  'background-position': 'px',
-  'background-position-x': 'px',
-  'background-position-y': 'px',
-  'background-size': 'px',
-  border: 'px',
-  'border-bottom': 'px',
-  'border-bottom-left-radius': 'px',
-  'border-bottom-right-radius': 'px',
-  'border-bottom-width': 'px',
-  'border-left': 'px',
-  'border-left-width': 'px',
-  'border-radius': 'px',
-  'border-right': 'px',
-  'border-right-width': 'px',
-  'border-spacing': 'px',
-  'border-top': 'px',
-  'border-top-left-radius': 'px',
-  'border-top-right-radius': 'px',
-  'border-top-width': 'px',
-  'border-width': 'px',
-  'border-after-width': 'px',
-  'border-before-width': 'px',
-  'border-end-width': 'px',
-  'border-horizontal-spacing': 'px',
-  'border-start-width': 'px',
-  'border-vertical-spacing': 'px',
-  bottom: 'px',
-  'box-shadow': 'px',
-  'column-gap': 'px',
-  'column-rule': 'px',
-  'column-rule-width': 'px',
-  'column-width': 'px',
-  'flex-basis': 'px',
-  'font-size': 'px',
-  'font-size-delta': 'px',
-  height: 'px',
-  left: 'px',
-  'letter-spacing': 'px',
-  'logical-height': 'px',
-  'logical-width': 'px',
-  margin: 'px',
-  'margin-after': 'px',
-  'margin-before': 'px',
-  'margin-bottom': 'px',
-  'margin-left': 'px',
-  'margin-right': 'px',
-  'margin-top': 'px',
-  'max-height': 'px',
-  'max-width': 'px',
-  'margin-end': 'px',
-  'margin-start': 'px',
-  'mask-position-x': 'px',
-  'mask-position-y': 'px',
-  'mask-size': 'px',
-  'max-logical-height': 'px',
-  'max-logical-width': 'px',
-  'min-height': 'px',
-  'min-width': 'px',
-  'min-logical-height': 'px',
-  'min-logical-width': 'px',
-  motion: 'px',
-  'motion-offset': 'px',
-  outline: 'px',
-  'outline-offset': 'px',
-  'outline-width': 'px',
-  padding: 'px',
-  'padding-bottom': 'px',
-  'padding-left': 'px',
-  'padding-right': 'px',
-  'padding-top': 'px',
-  'padding-after': 'px',
-  'padding-before': 'px',
-  'padding-end': 'px',
-  'padding-start': 'px',
-  'perspective-origin-x': '%',
-  'perspective-origin-y': '%',
-  perspective: 'px',
-  right: 'px',
-  'shape-margin': 'px',
-  size: 'px',
-  'text-indent': 'px',
-  'text-stroke': 'px',
-  'text-stroke-width': 'px',
-  top: 'px',
-  'transform-origin': '%',
-  'transform-origin-x': '%',
-  'transform-origin-y': '%',
-  'transform-origin-z': '%',
-  'transition-delay': 'ms',
-  'transition-duration': 'ms',
-  'vertical-align': 'px',
-  width: 'px',
-  'word-spacing': 'px',
-  // Not existing properties.
-  // Used to avoid issues with jss-expand intergration.
-  'box-shadow-x': 'px',
-  'box-shadow-y': 'px',
-  'box-shadow-blur': 'px',
-  'box-shadow-spread': 'px',
-  'font-line-height': 'px',
-  'text-shadow-x': 'px',
-  'text-shadow-y': 'px',
-  'text-shadow-blur': 'px'
-};
-  })();
-});
-
-require.register("jss-default-unit/lib/index.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "jss-default-unit");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-exports['default'] = defaultUnit;
-
-var _defaultUnits = require('./defaultUnits');
-
-var _defaultUnits2 = _interopRequireDefault(_defaultUnits);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
-
-/**
- * Clones the object and adds a camel cased property version.
- */
-function addCamelCasedVersion(obj) {
-  var regExp = /(-[a-z])/g;
-  var replace = function replace(str) {
-    return str[1].toUpperCase();
-  };
-  var newObj = {};
-  for (var key in obj) {
-    newObj[key] = obj[key];
-    newObj[key.replace(regExp, replace)] = obj[key];
-  }
-  return newObj;
-}
-
-var units = addCamelCasedVersion(_defaultUnits2['default']);
-
-/**
- * Recursive deep style passing function
- *
- * @param {String} current property
- * @param {(Object|Array|Number|String)} property value
- * @param {Object} options
- * @return {(Object|Array|Number|String)} resulting value
- */
-function iterate(prop, value, options) {
-  if (!value) return value;
-
-  var convertedValue = value;
-
-  var type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
-  if (type === 'object' && Array.isArray(value)) type = 'array';
-
-  switch (type) {
-    case 'object':
-      if (prop === 'fallbacks') {
-        for (var innerProp in value) {
-          value[innerProp] = iterate(innerProp, value[innerProp], options);
-        }
-        break;
-      }
-      for (var _innerProp in value) {
-        value[_innerProp] = iterate(prop + '-' + _innerProp, value[_innerProp], options);
-      }
-      break;
-    case 'array':
-      for (var i = 0; i < value.length; i++) {
-        value[i] = iterate(prop, value[i], options);
-      }
-      break;
-    case 'number':
-      if (value !== 0) {
-        convertedValue = value + (options[prop] || units[prop] || '');
-      }
-      break;
-    default:
-      break;
-  }
-
-  return convertedValue;
-}
-
-/**
- * Add unit to numeric values.
- */
-function defaultUnit() {
-  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-  var camelCasedOptions = addCamelCasedVersion(options);
-
-  function onProcessStyle(style, rule) {
-    if (rule.type !== 'style') return style;
-
-    for (var prop in style) {
-      style[prop] = iterate(prop, style[prop], camelCasedOptions);
-    }
-
-    return style;
-  }
-
-  function onChangeValue(value, prop) {
-    return iterate(prop, value, camelCasedOptions);
-  }
-
-  return { onProcessStyle: onProcessStyle, onChangeValue: onChangeValue };
 }
   })();
 });
@@ -19772,14 +19527,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 var defaultPlugins = _rules2['default'].concat([_observables2['default'], _functions2['default']]);
 
-var instanceCounter = 0;
-
 var Jss = function () {
   function Jss(options) {
     _classCallCheck(this, Jss);
 
-    this.id = instanceCounter++;
-    this.version = "9.5.1";
+    this.version = "9.3.3";
     this.plugins = new _PluginsRegistry2['default']();
     this.options = {
       createGenerateClassName: _createGenerateClassName2['default'],
@@ -20760,7 +20512,7 @@ require.register("jss/lib/index.js", function(exports, require, module) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.create = exports.createGenerateClassName = exports.sheets = exports.RuleList = exports.SheetsManager = exports.SheetsRegistry = exports.toCssValue = exports.getDynamicStyles = undefined;
+exports.create = exports.createGenerateClassName = exports.sheets = exports.RuleList = exports.SheetsManager = exports.SheetsRegistry = exports.getDynamicStyles = undefined;
 
 var _getDynamicStyles = require('./utils/getDynamicStyles');
 
@@ -20768,15 +20520,6 @@ Object.defineProperty(exports, 'getDynamicStyles', {
   enumerable: true,
   get: function get() {
     return _interopRequireDefault(_getDynamicStyles)['default'];
-  }
-});
-
-var _toCssValue = require('./utils/toCssValue');
-
-Object.defineProperty(exports, 'toCssValue', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_toCssValue)['default'];
   }
 });
 
@@ -21079,9 +20822,9 @@ var _StyleRule = require('../rules/StyleRule');
 
 var _StyleRule2 = _interopRequireDefault(_StyleRule);
 
-var _toCssValue = require('../utils/toCssValue');
+var _global = require('../utils/global');
 
-var _toCssValue2 = _interopRequireDefault(_toCssValue);
+var _global2 = _interopRequireDefault(_global);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
@@ -21104,18 +20847,7 @@ function getStyle(cssRule, prop) {
  */
 function setStyle(cssRule, prop, value) {
   try {
-    var cssValue = value;
-
-    if (Array.isArray(value)) {
-      cssValue = (0, _toCssValue2['default'])(value, true);
-
-      if (value[value.length - 1] === '!important') {
-        cssRule.style.setProperty(prop, cssValue, 'important');
-        return true;
-      }
-    }
-
-    cssRule.style.setProperty(prop, cssValue);
+    cssRule.style.setProperty(prop, value);
   } catch (err) {
     // IE may throw if property is unknown.
     return false;
@@ -21355,7 +21087,7 @@ var DomRenderer = function () {
     if (media) this.element.setAttribute('media', media);
     if (meta) this.element.setAttribute('data-meta', meta);
     // eslint-disable-next-line no-underscore-dangle
-    var nonce = global.__webpack_nonce__;
+    var nonce = _global2['default'].__webpack_nonce__;
     if (nonce) this.element.setAttribute('nonce', nonce);
   }
 
@@ -22161,14 +21893,19 @@ var _StyleSheet = require('../StyleSheet');
 
 var _StyleSheet2 = _interopRequireDefault(_StyleSheet);
 
-var _moduleId = require('./moduleId');
+var _global = require('./global');
 
-var _moduleId2 = _interopRequireDefault(_moduleId);
+var _global2 = _interopRequireDefault(_global);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
 
-var maxRules = 1e10;
+var ns = '2f1acc6c3a606b082e5eef5e54414ffb';
 
+if (_global2['default'][ns] == null) _global2['default'][ns] = 0;
+// In case we have more than one JSS version.
+var jssCounter = _global2['default'][ns]++;
+
+var maxRules = 1e10;
 
 var env = 'development';
 
@@ -22180,7 +21917,6 @@ var env = 'development';
 
 exports['default'] = function () {
   var ruleCounter = 0;
-  var defaultPrefix = env === 'production' ? 'c' : '';
 
   return function (rule, sheet) {
     ruleCounter += 1;
@@ -22189,19 +21925,12 @@ exports['default'] = function () {
       (0, _warning2['default'])(false, '[JSS] You might have a memory leak. Rule counter is at %s.', ruleCounter);
     }
 
-    var prefix = defaultPrefix;
-    var jssId = '';
-
-    if (sheet) {
-      prefix = sheet.options.classNamePrefix || defaultPrefix;
-      if (sheet.options.jss.id != null) jssId += sheet.options.jss.id;
-    }
-
     if (env === 'production') {
-      return '' + prefix + _moduleId2['default'] + jssId + ruleCounter;
+      return 'c' + jssCounter + ruleCounter;
     }
 
-    return prefix + rule.key + '-' + _moduleId2['default'] + (jssId && '-' + jssId) + '-' + ruleCounter;
+    var prefix = sheet ? sheet.options.classNamePrefix || '' : '';
+    return prefix + rule.key + '-' + jssCounter + '-' + ruleCounter;
   };
 };
   })();
@@ -22263,7 +21992,14 @@ require.register("jss/lib/utils/escape.js", function(exports, require, module) {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var CSS = global.CSS;
+
+var _global = require('./global');
+
+var _global2 = _interopRequireDefault(_global);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var CSS = _global2['default'].CSS;
 
 var env = 'development';
 
@@ -22326,6 +22062,18 @@ exports['default'] = function (styles) {
   })();
 });
 
+require.register("jss/lib/utils/global.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "jss");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports['default'] = typeof window === 'undefined' ? global : window;
+  })();
+});
+
 require.register("jss/lib/utils/isObservable.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "jss");
   (function() {
@@ -22382,25 +22130,6 @@ function linkRule(rule, cssRule) {
   rule.renderable = cssRule;
   if (rule.rules && cssRule.cssRules) rule.rules.link(cssRule.cssRules);
 }
-  })();
-});
-
-require.register("jss/lib/utils/moduleId.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "jss");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var ns = '2f1acc6c3a606b082e5eef5e54414ffb';
-if (global[ns] == null) global[ns] = 0;
-
-// Bundle may contain multiple JSS versions at the same time. In order to identify
-// the current version with just one short number and use it for classes generation
-// we use a counter. Also it is more accurate, because user can manually reevaluate
-// the module.
-exports['default'] = global[ns]++;
   })();
 });
 
@@ -22501,15 +22230,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports['default'] = toCssValue;
-var join = function join(value, by) {
-  var result = '';
-  for (var i = 0; i < value.length; i++) {
-    // Remove !important from the value, it will be readded later.
-    if (value[i] === '!important') break;
-    if (result) result += by;
-    result += value[i];
-  }
-  return result;
+var joinWithSpace = function joinWithSpace(value) {
+  return value.join(' ');
 };
 
 /**
@@ -22517,31 +22239,16 @@ var join = function join(value, by) {
  *
  * `margin: [['5px', '10px']]` > `margin: 5px 10px;`
  * `border: ['1px', '2px']` > `border: 1px, 2px;`
- * `margin: [['5px', '10px'], '!important']` > `margin: 5px 10px !important;`
- * `color: ['red', !important]` > `color: red !important;`
  */
 function toCssValue(value) {
-  var ignoreImportant = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
   if (!Array.isArray(value)) return value;
 
-  var cssValue = '';
-
-  // Support space separated values via `[['5px', '10px']]`.
+  // Support space separated values.
   if (Array.isArray(value[0])) {
-    for (var i = 0; i < value.length; i++) {
-      if (value[i] === '!important') break;
-      if (cssValue) cssValue += ', ';
-      cssValue += join(value[i], ' ');
-    }
-  } else cssValue = join(value, ', ');
-
-  // Add !important, because it was ignored.
-  if (!ignoreImportant && value[value.length - 1] === '!important') {
-    cssValue += ' !important';
+    return toCssValue(value.map(joinWithSpace));
   }
 
-  return cssValue;
+  return value.join(', ');
 }
   })();
 });
@@ -43588,761 +43295,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
   })();
 });
 
-require.register("material-ui/Dialog/Dialog.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.styles = undefined;
-
-var _extends2 = require('babel-runtime/helpers/extends');
-
-var _extends3 = _interopRequireDefault(_extends2);
-
-var _defineProperty2 = require('babel-runtime/helpers/defineProperty');
-
-var _defineProperty3 = _interopRequireDefault(_defineProperty2);
-
-var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
-
-var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = require('prop-types');
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _classnames = require('classnames');
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-var _withStyles = require('../styles/withStyles');
-
-var _withStyles2 = _interopRequireDefault(_withStyles);
-
-var _helpers = require('../utils/helpers');
-
-var _Modal = require('../Modal');
-
-var _Modal2 = _interopRequireDefault(_Modal);
-
-var _Fade = require('../transitions/Fade');
-
-var _Fade2 = _interopRequireDefault(_Fade);
-
-var _transitions = require('../styles/transitions');
-
-var _Paper = require('../Paper');
-
-var _Paper2 = _interopRequireDefault(_Paper);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var styles = exports.styles = function styles(theme) {
-  return {
-    root: {
-      justifyContent: 'center',
-      alignItems: 'center'
-    },
-    paper: {
-      display: 'flex',
-      margin: theme.spacing.unit * 4,
-      flexDirection: 'column',
-      flex: '0 1 auto',
-      position: 'relative',
-      maxHeight: '90vh',
-      overflowY: 'auto', // Fix IE11 issue, to remove at some point.
-      '&:focus': {
-        outline: 'none'
-      }
-    },
-    paperWidthXs: {
-      maxWidth: Math.max(theme.breakpoints.values.xs, 360)
-    },
-    paperWidthSm: {
-      maxWidth: theme.breakpoints.values.sm
-    },
-    paperWidthMd: {
-      maxWidth: theme.breakpoints.values.md
-    },
-    fullWidth: {
-      width: '100%'
-    },
-    fullScreen: {
-      margin: 0,
-      width: '100%',
-      maxWidth: '100%',
-      height: '100%',
-      maxHeight: '100%',
-      borderRadius: 0
-    }
-  };
-};
-
-/**
- * Dialogs are overlaid modal paper based components with a backdrop.
- */
-// @inheritedComponent Modal
-
-function Dialog(props) {
-  var _classNames;
-
-  var children = props.children,
-      classes = props.classes,
-      className = props.className,
-      fullScreen = props.fullScreen,
-      fullWidth = props.fullWidth,
-      disableBackdropClick = props.disableBackdropClick,
-      disableEscapeKeyDown = props.disableEscapeKeyDown,
-      maxWidth = props.maxWidth,
-      onBackdropClick = props.onBackdropClick,
-      onClose = props.onClose,
-      onEnter = props.onEnter,
-      onEntered = props.onEntered,
-      onEntering = props.onEntering,
-      onEscapeKeyDown = props.onEscapeKeyDown,
-      onExit = props.onExit,
-      onExited = props.onExited,
-      onExiting = props.onExiting,
-      open = props.open,
-      TransitionProp = props.transition,
-      transitionDuration = props.transitionDuration,
-      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'className', 'fullScreen', 'fullWidth', 'disableBackdropClick', 'disableEscapeKeyDown', 'maxWidth', 'onBackdropClick', 'onClose', 'onEnter', 'onEntered', 'onEntering', 'onEscapeKeyDown', 'onExit', 'onExited', 'onExiting', 'open', 'transition', 'transitionDuration']);
-
-
-  return _react2.default.createElement(
-    _Modal2.default,
-    (0, _extends3.default)({
-      className: (0, _classnames2.default)(classes.root, className),
-      BackdropProps: {
-        transitionDuration: transitionDuration
-      },
-      disableBackdropClick: disableBackdropClick,
-      disableEscapeKeyDown: disableEscapeKeyDown,
-      onBackdropClick: onBackdropClick,
-      onEscapeKeyDown: onEscapeKeyDown,
-      onClose: onClose,
-      open: open,
-      role: 'dialog'
-    }, other),
-    _react2.default.createElement(
-      TransitionProp,
-      {
-        appear: true,
-        'in': open,
-        timeout: transitionDuration,
-        onEnter: onEnter,
-        onEntering: onEntering,
-        onEntered: onEntered,
-        onExit: onExit,
-        onExiting: onExiting,
-        onExited: onExited
-      },
-      _react2.default.createElement(
-        _Paper2.default,
-        {
-          elevation: 24,
-          className: (0, _classnames2.default)(classes.paper, (_classNames = {}, (0, _defineProperty3.default)(_classNames, classes['paperWidth' + (maxWidth ? (0, _helpers.capitalizeFirstLetter)(maxWidth) : '')], maxWidth), (0, _defineProperty3.default)(_classNames, classes.fullScreen, fullScreen), (0, _defineProperty3.default)(_classNames, classes.fullWidth, fullWidth), _classNames))
-        },
-        children
-      )
-    )
-  );
-}
-
-Dialog.propTypes = 'development' !== "production" ? {
-  /**
-   * Dialog children, usually the included sub-components.
-   */
-  children: _propTypes2.default.node.isRequired,
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: _propTypes2.default.object.isRequired,
-  /**
-   * @ignore
-   */
-  className: _propTypes2.default.string,
-  /**
-   * If `true`, clicking the backdrop will not fire the `onClose` callback.
-   */
-  disableBackdropClick: _propTypes2.default.bool,
-  /**
-   * If `true`, hitting escape will not fire the `onClose` callback.
-   */
-  disableEscapeKeyDown: _propTypes2.default.bool,
-  /**
-   * If `true`, it will be full-screen
-   */
-  fullScreen: _propTypes2.default.bool,
-  /**
-   * If specified, stretches dialog to max width.
-   */
-  fullWidth: _propTypes2.default.bool,
-  /**
-   * Determine the max width of the dialog.
-   * The dialog width grows with the size of the screen, this property is useful
-   * on the desktop where you might need some coherent different width size across your
-   * application. Set to `false` to disable `maxWidth`.
-   */
-  maxWidth: _propTypes2.default.oneOf(['xs', 'sm', 'md', false]),
-  /**
-   * Callback fired when the backdrop is clicked.
-   */
-  onBackdropClick: _propTypes2.default.func,
-  /**
-   * Callback fired when the component requests to be closed.
-   *
-   * @param {object} event The event source of the callback
-   */
-  onClose: _propTypes2.default.func,
-  /**
-   * Callback fired before the dialog enters.
-   */
-  onEnter: _propTypes2.default.func,
-  /**
-   * Callback fired when the dialog has entered.
-   */
-  onEntered: _propTypes2.default.func,
-  /**
-   * Callback fired when the dialog is entering.
-   */
-  onEntering: _propTypes2.default.func,
-  /**
-   * Callback fired when the escape key is pressed,
-   * `disableKeyboard` is false and the modal is in focus.
-   */
-  onEscapeKeyDown: _propTypes2.default.func,
-  /**
-   * Callback fired before the dialog exits.
-   */
-  onExit: _propTypes2.default.func,
-  /**
-   * Callback fired when the dialog has exited.
-   */
-  onExited: _propTypes2.default.func,
-  /**
-   * Callback fired when the dialog is exiting.
-   */
-  onExiting: _propTypes2.default.func,
-  /**
-   * If `true`, the Dialog is open.
-   */
-  open: _propTypes2.default.bool.isRequired,
-  /**
-   * Transition component.
-   */
-  transition: _propTypes2.default.oneOfType([_propTypes2.default.string, _propTypes2.default.func]),
-  /**
-   * The duration for the transition, in milliseconds.
-   * You may specify a single timeout for all transitions, or individually with an object.
-   */
-  transitionDuration: _propTypes2.default.oneOfType([_propTypes2.default.number, _propTypes2.default.shape({ enter: _propTypes2.default.number, exit: _propTypes2.default.number })])
-} : {};
-
-Dialog.defaultProps = {
-  fullScreen: false,
-  fullWidth: false,
-  disableBackdropClick: false,
-  disableEscapeKeyDown: false,
-  maxWidth: 'sm',
-  transition: _Fade2.default,
-  transitionDuration: { enter: _transitions.duration.enteringScreen, exit: _transitions.duration.leavingScreen }
-};
-
-exports.default = (0, _withStyles2.default)(styles, { name: 'MuiDialog' })(Dialog);
-  })();
-});
-
-require.register("material-ui/Dialog/DialogActions.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.styles = undefined;
-
-var _extends2 = require('babel-runtime/helpers/extends');
-
-var _extends3 = _interopRequireDefault(_extends2);
-
-var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
-
-var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = require('prop-types');
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _classnames = require('classnames');
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-var _withStyles = require('../styles/withStyles');
-
-var _withStyles2 = _interopRequireDefault(_withStyles);
-
-require('../Button');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// So we don't have any override priority issue.
-
-var styles = exports.styles = function styles(theme) {
-  return {
-    root: {
-      display: 'flex',
-      justifyContent: 'flex-end',
-      alignItems: 'center',
-      margin: theme.spacing.unit + 'px ' + theme.spacing.unit / 2 + 'px',
-      flex: '0 0 auto'
-    },
-    action: {
-      margin: '0 ' + theme.spacing.unit / 2 + 'px'
-    },
-    button: {
-      minWidth: 64
-    }
-  };
-};
-
-function DialogActions(props) {
-  var children = props.children,
-      classes = props.classes,
-      className = props.className,
-      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'className']);
-
-
-  return _react2.default.createElement(
-    'div',
-    (0, _extends3.default)({ className: (0, _classnames2.default)(classes.root, className) }, other),
-    _react2.default.Children.map(children, function (child) {
-      if (!_react2.default.isValidElement(child)) {
-        return null;
-      }
-
-      return _react2.default.createElement(
-        'div',
-        { className: classes.action },
-        _react2.default.cloneElement(child, {
-          className: (0, _classnames2.default)(classes.button, child.props.className)
-        })
-      );
-    })
-  );
-}
-
-DialogActions.propTypes = 'development' !== "production" ? {
-  /**
-   * The content of the component.
-   */
-  children: _propTypes2.default.node,
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: _propTypes2.default.object.isRequired,
-  /**
-   * @ignore
-   */
-  className: _propTypes2.default.string
-} : {};
-
-exports.default = (0, _withStyles2.default)(styles, { name: 'MuiDialogActions' })(DialogActions);
-  })();
-});
-
-require.register("material-ui/Dialog/DialogContent.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.styles = undefined;
-
-var _extends2 = require('babel-runtime/helpers/extends');
-
-var _extends3 = _interopRequireDefault(_extends2);
-
-var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
-
-var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = require('prop-types');
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _classnames = require('classnames');
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-var _withStyles = require('../styles/withStyles');
-
-var _withStyles2 = _interopRequireDefault(_withStyles);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var styles = exports.styles = function styles(theme) {
-  var spacing = theme.spacing.unit * 3;
-  return {
-    root: {
-      flex: '1 1 auto',
-      overflowY: 'auto',
-      padding: '0 ' + spacing + 'px ' + spacing + 'px ' + spacing + 'px',
-      '&:first-child': {
-        paddingTop: spacing
-      }
-    }
-  };
-};
-
-function DialogContent(props) {
-  var classes = props.classes,
-      children = props.children,
-      className = props.className,
-      other = (0, _objectWithoutProperties3.default)(props, ['classes', 'children', 'className']);
-
-
-  return _react2.default.createElement(
-    'div',
-    (0, _extends3.default)({ className: (0, _classnames2.default)(classes.root, className) }, other),
-    children
-  );
-}
-
-DialogContent.propTypes = 'development' !== "production" ? {
-  /**
-   * The content of the component.
-   */
-  children: _propTypes2.default.node,
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: _propTypes2.default.object.isRequired,
-  /**
-   * @ignore
-   */
-  className: _propTypes2.default.string
-} : {};
-
-exports.default = (0, _withStyles2.default)(styles, { name: 'MuiDialogContent' })(DialogContent);
-  })();
-});
-
-require.register("material-ui/Dialog/DialogContentText.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.styles = undefined;
-
-var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
-
-var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
-
-var _extends2 = require('babel-runtime/helpers/extends');
-
-var _extends3 = _interopRequireDefault(_extends2);
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = require('prop-types');
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _classnames = require('classnames');
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-var _withStyles = require('../styles/withStyles');
-
-var _withStyles2 = _interopRequireDefault(_withStyles);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var styles = exports.styles = function styles(theme) {
-  return {
-    root: (0, _extends3.default)({}, theme.typography.subheading, {
-      color: theme.palette.text.secondary,
-      margin: 0
-    })
-  };
-};
-
-function DialogContentText(props) {
-  var children = props.children,
-      classes = props.classes,
-      className = props.className,
-      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'className']);
-
-
-  return _react2.default.createElement(
-    'p',
-    (0, _extends3.default)({ className: (0, _classnames2.default)(classes.root, className) }, other),
-    children
-  );
-}
-
-DialogContentText.propTypes = 'development' !== "production" ? {
-  /**
-   * The content of the component.
-   */
-  children: _propTypes2.default.node,
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: _propTypes2.default.object.isRequired,
-  /**
-   * @ignore
-   */
-  className: _propTypes2.default.string
-} : {};
-
-exports.default = (0, _withStyles2.default)(styles, { name: 'MuiDialogContentText' })(DialogContentText);
-  })();
-});
-
-require.register("material-ui/Dialog/DialogTitle.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.styles = undefined;
-
-var _extends2 = require('babel-runtime/helpers/extends');
-
-var _extends3 = _interopRequireDefault(_extends2);
-
-var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
-
-var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = require('prop-types');
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _classnames = require('classnames');
-
-var _classnames2 = _interopRequireDefault(_classnames);
-
-var _withStyles = require('../styles/withStyles');
-
-var _withStyles2 = _interopRequireDefault(_withStyles);
-
-var _Typography = require('../Typography');
-
-var _Typography2 = _interopRequireDefault(_Typography);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var styles = exports.styles = function styles(theme) {
-  return {
-    root: {
-      margin: 0,
-      padding: theme.spacing.unit * 3 + 'px ' + theme.spacing.unit * 3 + 'px       20px ' + theme.spacing.unit * 3 + 'px',
-      flex: '0 0 auto'
-    }
-  };
-};
-
-function DialogTitle(props) {
-  var children = props.children,
-      classes = props.classes,
-      className = props.className,
-      disableTypography = props.disableTypography,
-      other = (0, _objectWithoutProperties3.default)(props, ['children', 'classes', 'className', 'disableTypography']);
-
-
-  return _react2.default.createElement(
-    'div',
-    (0, _extends3.default)({ className: (0, _classnames2.default)(classes.root, className) }, other),
-    disableTypography ? children : _react2.default.createElement(
-      _Typography2.default,
-      { type: 'title' },
-      children
-    )
-  );
-}
-
-DialogTitle.propTypes = 'development' !== "production" ? {
-  /**
-   * The content of the component.
-   */
-  children: _propTypes2.default.node.isRequired,
-  /**
-   * Useful to extend the style applied to components.
-   */
-  classes: _propTypes2.default.object.isRequired,
-  /**
-   * @ignore
-   */
-  className: _propTypes2.default.string,
-  /**
-   * If `true`, the children won't be wrapped by a typography component.
-   * For instance, this can be useful to render an h4 instead of the default h2.
-   */
-  disableTypography: _propTypes2.default.bool
-} : {};
-
-DialogTitle.defaultProps = {
-  disableTypography: false
-};
-
-exports.default = (0, _withStyles2.default)(styles, { name: 'MuiDialogTitle' })(DialogTitle);
-  })();
-});
-
-require.register("material-ui/Dialog/index.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _Dialog = require('./Dialog');
-
-Object.defineProperty(exports, 'default', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_Dialog).default;
-  }
-});
-
-var _DialogActions = require('./DialogActions');
-
-Object.defineProperty(exports, 'DialogActions', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_DialogActions).default;
-  }
-});
-
-var _DialogTitle = require('./DialogTitle');
-
-Object.defineProperty(exports, 'DialogTitle', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_DialogTitle).default;
-  }
-});
-
-var _DialogContent = require('./DialogContent');
-
-Object.defineProperty(exports, 'DialogContent', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_DialogContent).default;
-  }
-});
-
-var _DialogContentText = require('./DialogContentText');
-
-Object.defineProperty(exports, 'DialogContentText', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_DialogContentText).default;
-  }
-});
-
-var _withMobileDialog = require('./withMobileDialog');
-
-Object.defineProperty(exports, 'withMobileDialog', {
-  enumerable: true,
-  get: function get() {
-    return _interopRequireDefault(_withMobileDialog).default;
-  }
-});
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-  })();
-});
-
-require.register("material-ui/Dialog/withMobileDialog.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _extends2 = require('babel-runtime/helpers/extends');
-
-var _extends3 = _interopRequireDefault(_extends2);
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = require('prop-types');
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _withWidth = require('../utils/withWidth');
-
-var _withWidth2 = _interopRequireDefault(_withWidth);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-/**
- * Dialog will responsively be full screen *at or below* the given breakpoint
- * (defaults to 'sm' for mobile devices).
- * Notice that this Higher-order Component is incompatible with server side rendering.
- */
-var withMobileDialog = function withMobileDialog() {
-  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  return function (Component) {
-    var _options$breakpoint = options.breakpoint,
-        breakpoint = _options$breakpoint === undefined ? 'sm' : _options$breakpoint;
-
-
-    function WithMobileDialog(props) {
-      return _react2.default.createElement(Component, (0, _extends3.default)({ fullScreen: (0, _withWidth.isWidthDown)(breakpoint, props.width) }, props));
-    }
-
-    WithMobileDialog.propTypes = 'development' !== "production" ? {
-      width: _propTypes2.default.oneOf(['xs', 'sm', 'md', 'lg', 'xl']).isRequired
-    } : {};
-
-    return (0, _withWidth2.default)()(WithMobileDialog);
-  };
-};
-
-exports.default = withMobileDialog;
-  })();
-});
-
 require.register("material-ui/Divider/Divider.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "material-ui");
   (function() {
@@ -57433,6 +56385,238 @@ exports.default = KeyboardArrowRight;
   })();
 });
 
+require.register("material-ui/node_modules/jss-default-unit/lib/defaultUnits.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui/node_modules/jss-default-unit");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+/**
+ * Generated jss-default-unit CSS property units
+ *
+ * @type object
+ */
+exports['default'] = {
+  'animation-delay': 'ms',
+  'animation-duration': 'ms',
+  'background-position': 'px',
+  'background-position-x': 'px',
+  'background-position-y': 'px',
+  'background-size': 'px',
+  border: 'px',
+  'border-bottom': 'px',
+  'border-bottom-left-radius': 'px',
+  'border-bottom-right-radius': 'px',
+  'border-bottom-width': 'px',
+  'border-left': 'px',
+  'border-left-width': 'px',
+  'border-radius': 'px',
+  'border-right': 'px',
+  'border-right-width': 'px',
+  'border-spacing': 'px',
+  'border-top': 'px',
+  'border-top-left-radius': 'px',
+  'border-top-right-radius': 'px',
+  'border-top-width': 'px',
+  'border-width': 'px',
+  'border-after-width': 'px',
+  'border-before-width': 'px',
+  'border-end-width': 'px',
+  'border-horizontal-spacing': 'px',
+  'border-start-width': 'px',
+  'border-vertical-spacing': 'px',
+  bottom: 'px',
+  'box-shadow': 'px',
+  'column-gap': 'px',
+  'column-rule': 'px',
+  'column-rule-width': 'px',
+  'column-width': 'px',
+  'flex-basis': 'px',
+  'font-size': 'px',
+  'font-size-delta': 'px',
+  height: 'px',
+  left: 'px',
+  'letter-spacing': 'px',
+  'logical-height': 'px',
+  'logical-width': 'px',
+  margin: 'px',
+  'margin-after': 'px',
+  'margin-before': 'px',
+  'margin-bottom': 'px',
+  'margin-left': 'px',
+  'margin-right': 'px',
+  'margin-top': 'px',
+  'max-height': 'px',
+  'max-width': 'px',
+  'margin-end': 'px',
+  'margin-start': 'px',
+  'mask-position-x': 'px',
+  'mask-position-y': 'px',
+  'mask-size': 'px',
+  'max-logical-height': 'px',
+  'max-logical-width': 'px',
+  'min-height': 'px',
+  'min-width': 'px',
+  'min-logical-height': 'px',
+  'min-logical-width': 'px',
+  motion: 'px',
+  'motion-offset': 'px',
+  outline: 'px',
+  'outline-offset': 'px',
+  'outline-width': 'px',
+  padding: 'px',
+  'padding-bottom': 'px',
+  'padding-left': 'px',
+  'padding-right': 'px',
+  'padding-top': 'px',
+  'padding-after': 'px',
+  'padding-before': 'px',
+  'padding-end': 'px',
+  'padding-start': 'px',
+  'perspective-origin-x': '%',
+  'perspective-origin-y': '%',
+  perspective: 'px',
+  right: 'px',
+  'shape-margin': 'px',
+  size: 'px',
+  'text-indent': 'px',
+  'text-stroke': 'px',
+  'text-stroke-width': 'px',
+  top: 'px',
+  'transform-origin': '%',
+  'transform-origin-x': '%',
+  'transform-origin-y': '%',
+  'transform-origin-z': '%',
+  'transition-delay': 'ms',
+  'transition-duration': 'ms',
+  'vertical-align': 'px',
+  width: 'px',
+  'word-spacing': 'px',
+  // Not existing properties.
+  // Used to avoid issues with jss-expand intergration.
+  'box-shadow-x': 'px',
+  'box-shadow-y': 'px',
+  'box-shadow-blur': 'px',
+  'box-shadow-spread': 'px',
+  'font-line-height': 'px',
+  'text-shadow-x': 'px',
+  'text-shadow-y': 'px',
+  'text-shadow-blur': 'px'
+};
+  })();
+});
+
+require.register("material-ui/node_modules/jss-default-unit/lib/index.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "material-ui/node_modules/jss-default-unit");
+  (function() {
+    'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+exports['default'] = defaultUnit;
+
+var _defaultUnits = require('./defaultUnits');
+
+var _defaultUnits2 = _interopRequireDefault(_defaultUnits);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+/**
+ * Clones the object and adds a camel cased property version.
+ */
+function addCamelCasedVersion(obj) {
+  var regExp = /(-[a-z])/g;
+  var replace = function replace(str) {
+    return str[1].toUpperCase();
+  };
+  var newObj = {};
+  for (var key in obj) {
+    newObj[key] = obj[key];
+    newObj[key.replace(regExp, replace)] = obj[key];
+  }
+  return newObj;
+}
+
+var units = addCamelCasedVersion(_defaultUnits2['default']);
+
+/**
+ * Recursive deep style passing function
+ *
+ * @param {String} current property
+ * @param {(Object|Array|Number|String)} property value
+ * @param {Object} options
+ * @return {(Object|Array|Number|String)} resulting value
+ */
+function iterate(prop, value, options) {
+  if (!value) return value;
+
+  var convertedValue = value;
+
+  var type = typeof value === 'undefined' ? 'undefined' : _typeof(value);
+  if (type === 'object' && Array.isArray(value)) type = 'array';
+
+  switch (type) {
+    case 'object':
+      if (prop === 'fallbacks') {
+        for (var innerProp in value) {
+          value[innerProp] = iterate(innerProp, value[innerProp], options);
+        }
+        break;
+      }
+      for (var _innerProp in value) {
+        value[_innerProp] = iterate(prop + '-' + _innerProp, value[_innerProp], options);
+      }
+      break;
+    case 'array':
+      for (var i = 0; i < value.length; i++) {
+        value[i] = iterate(prop, value[i], options);
+      }
+      break;
+    case 'number':
+      if (value !== 0) {
+        convertedValue = value + (options[prop] || units[prop] || '');
+      }
+      break;
+    default:
+      break;
+  }
+
+  return convertedValue;
+}
+
+/**
+ * Add unit to numeric values.
+ */
+function defaultUnit() {
+  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+  var camelCasedOptions = addCamelCasedVersion(options);
+
+  function onProcessStyle(style, rule) {
+    if (rule.type !== 'style') return style;
+
+    for (var prop in style) {
+      style[prop] = iterate(prop, style[prop], camelCasedOptions);
+    }
+
+    return style;
+  }
+
+  function onChangeValue(value, prop) {
+    return iterate(prop, value, camelCasedOptions);
+  }
+
+  return { onProcessStyle: onProcessStyle, onChangeValue: onChangeValue };
+}
+  })();
+});
+
 require.register("material-ui/styles/MuiThemeProvider.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "material-ui");
   (function() {
@@ -60728,432 +59912,6 @@ function isMuiComponent(element, muiNames) {
   })();
 });
 
-require.register("material-ui/utils/withWidth.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "material-ui");
-  (function() {
-    'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.isWidthDown = exports.isWidthUp = undefined;
-
-var _extends2 = require('babel-runtime/helpers/extends');
-
-var _extends3 = _interopRequireDefault(_extends2);
-
-var _objectWithoutProperties2 = require('babel-runtime/helpers/objectWithoutProperties');
-
-var _objectWithoutProperties3 = _interopRequireDefault(_objectWithoutProperties2);
-
-var _getPrototypeOf = require('babel-runtime/core-js/object/get-prototype-of');
-
-var _getPrototypeOf2 = _interopRequireDefault(_getPrototypeOf);
-
-var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
-
-var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
-
-var _createClass2 = require('babel-runtime/helpers/createClass');
-
-var _createClass3 = _interopRequireDefault(_createClass2);
-
-var _possibleConstructorReturn2 = require('babel-runtime/helpers/possibleConstructorReturn');
-
-var _possibleConstructorReturn3 = _interopRequireDefault(_possibleConstructorReturn2);
-
-var _inherits2 = require('babel-runtime/helpers/inherits');
-
-var _inherits3 = _interopRequireDefault(_inherits2);
-
-var _react = require('react');
-
-var _react2 = _interopRequireDefault(_react);
-
-var _propTypes = require('prop-types');
-
-var _propTypes2 = _interopRequireDefault(_propTypes);
-
-var _reactEventListener = require('react-event-listener');
-
-var _reactEventListener2 = _interopRequireDefault(_reactEventListener);
-
-var _debounce = require('lodash/debounce');
-
-var _debounce2 = _interopRequireDefault(_debounce);
-
-var _wrapDisplayName = require('recompose/wrapDisplayName');
-
-var _wrapDisplayName2 = _interopRequireDefault(_wrapDisplayName);
-
-var _hoistNonReactStatics = require('hoist-non-react-statics');
-
-var _hoistNonReactStatics2 = _interopRequireDefault(_hoistNonReactStatics);
-
-var _withTheme = require('../styles/withTheme');
-
-var _withTheme2 = _interopRequireDefault(_withTheme);
-
-var _createBreakpoints = require('../styles/createBreakpoints');
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-// By default, returns true if screen width is the same or greater than the given breakpoint.
-var isWidthUp = exports.isWidthUp = function isWidthUp(breakpoint, width) {
-  var inclusive = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-
-  if (inclusive) {
-    return _createBreakpoints.keys.indexOf(breakpoint) <= _createBreakpoints.keys.indexOf(width);
-  }
-  return _createBreakpoints.keys.indexOf(breakpoint) < _createBreakpoints.keys.indexOf(width);
-};
-
-// By default, returns true if screen width is the same or less than the given breakpoint.
-var isWidthDown = exports.isWidthDown = function isWidthDown(breakpoint, width) {
-  var inclusive = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-
-  if (inclusive) {
-    return _createBreakpoints.keys.indexOf(width) <= _createBreakpoints.keys.indexOf(breakpoint);
-  }
-  return _createBreakpoints.keys.indexOf(width) < _createBreakpoints.keys.indexOf(breakpoint);
-};
-
-var withWidth = function withWidth() {
-  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  return function (Component) {
-    var _options$resizeInterv = options.resizeInterval,
-        resizeInterval = _options$resizeInterv === undefined ? 166 : _options$resizeInterv,
-        _options$withTheme = options.withTheme,
-        withThemeOption = _options$withTheme === undefined ? false : _options$withTheme;
-
-    var WithWidth = function (_React$Component) {
-      (0, _inherits3.default)(WithWidth, _React$Component);
-
-      function WithWidth() {
-        var _ref;
-
-        var _temp, _this, _ret;
-
-        (0, _classCallCheck3.default)(this, WithWidth);
-
-        for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-          args[_key] = arguments[_key];
-        }
-
-        return _ret = (_temp = (_this = (0, _possibleConstructorReturn3.default)(this, (_ref = WithWidth.__proto__ || (0, _getPrototypeOf2.default)(WithWidth)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
-          width: undefined
-        }, _this.handleResize = (0, _debounce2.default)(function () {
-          _this.updateWidth(window.innerWidth);
-        }, resizeInterval), _temp), (0, _possibleConstructorReturn3.default)(_this, _ret);
-      }
-
-      (0, _createClass3.default)(WithWidth, [{
-        key: 'componentDidMount',
-        value: function componentDidMount() {
-          this.updateWidth(window.innerWidth);
-        }
-      }, {
-        key: 'componentWillUnmount',
-        value: function componentWillUnmount() {
-          this.handleResize.cancel();
-        }
-      }, {
-        key: 'updateWidth',
-        value: function updateWidth(innerWidth) {
-          var breakpoints = this.props.theme.breakpoints;
-          var width = null;
-
-          /**
-           * Start with the slowest value as low end devices often have a small screen.
-           *
-           * innerWidth |xs      sm      md      lg      xl
-           *            |-------|-------|-------|-------|------>
-           * width      |  xs   |  sm   |  md   |  lg   |  xl
-           */
-          var index = 1;
-          while (width === null && index < _createBreakpoints.keys.length) {
-            var currentWidth = _createBreakpoints.keys[index];
-
-            // @media are inclusive, so reproduce the behavior here.
-            if (innerWidth < breakpoints.values[currentWidth]) {
-              width = _createBreakpoints.keys[index - 1];
-              break;
-            }
-
-            index += 1;
-          }
-
-          width = width || 'xl';
-
-          if (width !== this.state.width) {
-            this.setState({
-              width: width
-            });
-          }
-        }
-      }, {
-        key: 'render',
-        value: function render() {
-          var _props = this.props,
-              initialWidth = _props.initialWidth,
-              theme = _props.theme,
-              width = _props.width,
-              other = (0, _objectWithoutProperties3.default)(_props, ['initialWidth', 'theme', 'width']);
-
-          var props = (0, _extends3.default)({
-            width: width || this.state.width || initialWidth
-          }, other);
-          var more = {};
-
-          if (withThemeOption) {
-            more.theme = theme;
-          }
-
-          // When rendering the component on the server,
-          // we have no idea about the client browser screen width.
-          // In order to prevent blinks and help the reconciliation of the React tree
-          // we are not rendering the child component.
-          //
-          // An alternative is to use the `initialWidth` property.
-          if (props.width === undefined) {
-            return null;
-          }
-
-          return _react2.default.createElement(
-            _reactEventListener2.default,
-            { target: 'window', onResize: this.handleResize },
-            _react2.default.createElement(Component, (0, _extends3.default)({}, more, props))
-          );
-        }
-      }]);
-      return WithWidth;
-    }(_react2.default.Component);
-
-    WithWidth.propTypes = 'development' !== "production" ? {
-      /**
-       * As `window.innerWidth` is unavailable on the server,
-       * we default to rendering an empty componenent during the first mount.
-       * In some situation you might want to use an heristic to approximate
-       * the screen width of the client browser screen width.
-       *
-       * For instance, you could be using the user-agent or the client-hints.
-       * http://caniuse.com/#search=client%20hint
-       */
-      initialWidth: _propTypes2.default.oneOf(['xs', 'sm', 'md', 'lg', 'xl']),
-      /**
-       * @ignore
-       */
-      theme: _propTypes2.default.object.isRequired,
-      /**
-       * Bypass the width calculation logic.
-       */
-      width: _propTypes2.default.oneOf(['xs', 'sm', 'md', 'lg', 'xl'])
-    } : {};
-
-    if ('development' !== 'production') {
-      WithWidth.displayName = (0, _wrapDisplayName2.default)(Component, 'WithWidth');
-    }
-
-    (0, _hoistNonReactStatics2.default)(WithWidth, Component);
-
-    return (0, _withTheme2.default)()(WithWidth);
-  };
-};
-
-exports.default = withWidth;
-  })();
-});
-
-require.register("node-browser-modules/node_modules/process/browser.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "node-browser-modules/node_modules/process");
-  (function() {
-    // shim for using process in browser
-var process = module.exports = {};
-
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-  })();
-});
-
 require.register("object-assign/index.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "object-assign");
   (function() {
@@ -61247,438 +60005,6 @@ module.exports = shouldUseNative() ? Object.assign : function (target, source) {
 
 	return to;
 };
-  })();
-});
-
-require.register("path-to-regexp/index.js", function(exports, require, module) {
-  require = __makeRelativeRequire(require, {}, "path-to-regexp");
-  (function() {
-    var isarray = require('isarray')
-
-/**
- * Expose `pathToRegexp`.
- */
-module.exports = pathToRegexp
-module.exports.parse = parse
-module.exports.compile = compile
-module.exports.tokensToFunction = tokensToFunction
-module.exports.tokensToRegExp = tokensToRegExp
-
-/**
- * The main path matching regexp utility.
- *
- * @type {RegExp}
- */
-var PATH_REGEXP = new RegExp([
-  // Match escaped characters that would otherwise appear in future matches.
-  // This allows the user to escape special characters that won't transform.
-  '(\\\\.)',
-  // Match Express-style parameters and un-named parameters with a prefix
-  // and optional suffixes. Matches appear as:
-  //
-  // "/:test(\\d+)?" => ["/", "test", "\d+", undefined, "?", undefined]
-  // "/route(\\d+)"  => [undefined, undefined, undefined, "\d+", undefined, undefined]
-  // "/*"            => ["/", undefined, undefined, undefined, undefined, "*"]
-  '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^\\\\()])+)\\))?|\\(((?:\\\\.|[^\\\\()])+)\\))([+*?])?|(\\*))'
-].join('|'), 'g')
-
-/**
- * Parse a string for the raw tokens.
- *
- * @param  {string}  str
- * @param  {Object=} options
- * @return {!Array}
- */
-function parse (str, options) {
-  var tokens = []
-  var key = 0
-  var index = 0
-  var path = ''
-  var defaultDelimiter = options && options.delimiter || '/'
-  var res
-
-  while ((res = PATH_REGEXP.exec(str)) != null) {
-    var m = res[0]
-    var escaped = res[1]
-    var offset = res.index
-    path += str.slice(index, offset)
-    index = offset + m.length
-
-    // Ignore already escaped sequences.
-    if (escaped) {
-      path += escaped[1]
-      continue
-    }
-
-    var next = str[index]
-    var prefix = res[2]
-    var name = res[3]
-    var capture = res[4]
-    var group = res[5]
-    var modifier = res[6]
-    var asterisk = res[7]
-
-    // Push the current path onto the tokens.
-    if (path) {
-      tokens.push(path)
-      path = ''
-    }
-
-    var partial = prefix != null && next != null && next !== prefix
-    var repeat = modifier === '+' || modifier === '*'
-    var optional = modifier === '?' || modifier === '*'
-    var delimiter = res[2] || defaultDelimiter
-    var pattern = capture || group
-
-    tokens.push({
-      name: name || key++,
-      prefix: prefix || '',
-      delimiter: delimiter,
-      optional: optional,
-      repeat: repeat,
-      partial: partial,
-      asterisk: !!asterisk,
-      pattern: pattern ? escapeGroup(pattern) : (asterisk ? '.*' : '[^' + escapeString(delimiter) + ']+?')
-    })
-  }
-
-  // Match any characters still remaining.
-  if (index < str.length) {
-    path += str.substr(index)
-  }
-
-  // If the path exists, push it onto the end.
-  if (path) {
-    tokens.push(path)
-  }
-
-  return tokens
-}
-
-/**
- * Compile a string to a template function for the path.
- *
- * @param  {string}             str
- * @param  {Object=}            options
- * @return {!function(Object=, Object=)}
- */
-function compile (str, options) {
-  return tokensToFunction(parse(str, options))
-}
-
-/**
- * Prettier encoding of URI path segments.
- *
- * @param  {string}
- * @return {string}
- */
-function encodeURIComponentPretty (str) {
-  return encodeURI(str).replace(/[\/?#]/g, function (c) {
-    return '%' + c.charCodeAt(0).toString(16).toUpperCase()
-  })
-}
-
-/**
- * Encode the asterisk parameter. Similar to `pretty`, but allows slashes.
- *
- * @param  {string}
- * @return {string}
- */
-function encodeAsterisk (str) {
-  return encodeURI(str).replace(/[?#]/g, function (c) {
-    return '%' + c.charCodeAt(0).toString(16).toUpperCase()
-  })
-}
-
-/**
- * Expose a method for transforming tokens into the path function.
- */
-function tokensToFunction (tokens) {
-  // Compile all the tokens into regexps.
-  var matches = new Array(tokens.length)
-
-  // Compile all the patterns before compilation.
-  for (var i = 0; i < tokens.length; i++) {
-    if (typeof tokens[i] === 'object') {
-      matches[i] = new RegExp('^(?:' + tokens[i].pattern + ')$')
-    }
-  }
-
-  return function (obj, opts) {
-    var path = ''
-    var data = obj || {}
-    var options = opts || {}
-    var encode = options.pretty ? encodeURIComponentPretty : encodeURIComponent
-
-    for (var i = 0; i < tokens.length; i++) {
-      var token = tokens[i]
-
-      if (typeof token === 'string') {
-        path += token
-
-        continue
-      }
-
-      var value = data[token.name]
-      var segment
-
-      if (value == null) {
-        if (token.optional) {
-          // Prepend partial segment prefixes.
-          if (token.partial) {
-            path += token.prefix
-          }
-
-          continue
-        } else {
-          throw new TypeError('Expected "' + token.name + '" to be defined')
-        }
-      }
-
-      if (isarray(value)) {
-        if (!token.repeat) {
-          throw new TypeError('Expected "' + token.name + '" to not repeat, but received `' + JSON.stringify(value) + '`')
-        }
-
-        if (value.length === 0) {
-          if (token.optional) {
-            continue
-          } else {
-            throw new TypeError('Expected "' + token.name + '" to not be empty')
-          }
-        }
-
-        for (var j = 0; j < value.length; j++) {
-          segment = encode(value[j])
-
-          if (!matches[i].test(segment)) {
-            throw new TypeError('Expected all "' + token.name + '" to match "' + token.pattern + '", but received `' + JSON.stringify(segment) + '`')
-          }
-
-          path += (j === 0 ? token.prefix : token.delimiter) + segment
-        }
-
-        continue
-      }
-
-      segment = token.asterisk ? encodeAsterisk(value) : encode(value)
-
-      if (!matches[i].test(segment)) {
-        throw new TypeError('Expected "' + token.name + '" to match "' + token.pattern + '", but received "' + segment + '"')
-      }
-
-      path += token.prefix + segment
-    }
-
-    return path
-  }
-}
-
-/**
- * Escape a regular expression string.
- *
- * @param  {string} str
- * @return {string}
- */
-function escapeString (str) {
-  return str.replace(/([.+*?=^!:${}()[\]|\/\\])/g, '\\$1')
-}
-
-/**
- * Escape the capturing group by escaping special characters and meaning.
- *
- * @param  {string} group
- * @return {string}
- */
-function escapeGroup (group) {
-  return group.replace(/([=!:$\/()])/g, '\\$1')
-}
-
-/**
- * Attach the keys as a property of the regexp.
- *
- * @param  {!RegExp} re
- * @param  {Array}   keys
- * @return {!RegExp}
- */
-function attachKeys (re, keys) {
-  re.keys = keys
-  return re
-}
-
-/**
- * Get the flags for a regexp from the options.
- *
- * @param  {Object} options
- * @return {string}
- */
-function flags (options) {
-  return options.sensitive ? '' : 'i'
-}
-
-/**
- * Pull out keys from a regexp.
- *
- * @param  {!RegExp} path
- * @param  {!Array}  keys
- * @return {!RegExp}
- */
-function regexpToRegexp (path, keys) {
-  // Use a negative lookahead to match only capturing groups.
-  var groups = path.source.match(/\((?!\?)/g)
-
-  if (groups) {
-    for (var i = 0; i < groups.length; i++) {
-      keys.push({
-        name: i,
-        prefix: null,
-        delimiter: null,
-        optional: false,
-        repeat: false,
-        partial: false,
-        asterisk: false,
-        pattern: null
-      })
-    }
-  }
-
-  return attachKeys(path, keys)
-}
-
-/**
- * Transform an array into a regexp.
- *
- * @param  {!Array}  path
- * @param  {Array}   keys
- * @param  {!Object} options
- * @return {!RegExp}
- */
-function arrayToRegexp (path, keys, options) {
-  var parts = []
-
-  for (var i = 0; i < path.length; i++) {
-    parts.push(pathToRegexp(path[i], keys, options).source)
-  }
-
-  var regexp = new RegExp('(?:' + parts.join('|') + ')', flags(options))
-
-  return attachKeys(regexp, keys)
-}
-
-/**
- * Create a path regexp from string input.
- *
- * @param  {string}  path
- * @param  {!Array}  keys
- * @param  {!Object} options
- * @return {!RegExp}
- */
-function stringToRegexp (path, keys, options) {
-  return tokensToRegExp(parse(path, options), keys, options)
-}
-
-/**
- * Expose a function for taking tokens and returning a RegExp.
- *
- * @param  {!Array}          tokens
- * @param  {(Array|Object)=} keys
- * @param  {Object=}         options
- * @return {!RegExp}
- */
-function tokensToRegExp (tokens, keys, options) {
-  if (!isarray(keys)) {
-    options = /** @type {!Object} */ (keys || options)
-    keys = []
-  }
-
-  options = options || {}
-
-  var strict = options.strict
-  var end = options.end !== false
-  var route = ''
-
-  // Iterate over the tokens and create our regexp string.
-  for (var i = 0; i < tokens.length; i++) {
-    var token = tokens[i]
-
-    if (typeof token === 'string') {
-      route += escapeString(token)
-    } else {
-      var prefix = escapeString(token.prefix)
-      var capture = '(?:' + token.pattern + ')'
-
-      keys.push(token)
-
-      if (token.repeat) {
-        capture += '(?:' + prefix + capture + ')*'
-      }
-
-      if (token.optional) {
-        if (!token.partial) {
-          capture = '(?:' + prefix + '(' + capture + '))?'
-        } else {
-          capture = prefix + '(' + capture + ')?'
-        }
-      } else {
-        capture = prefix + '(' + capture + ')'
-      }
-
-      route += capture
-    }
-  }
-
-  var delimiter = escapeString(options.delimiter || '/')
-  var endsWithDelimiter = route.slice(-delimiter.length) === delimiter
-
-  // In non-strict mode we allow a slash at the end of match. If the path to
-  // match already ends with a slash, we remove it for consistency. The slash
-  // is valid at the end of a path match, not in the middle. This is important
-  // in non-ending mode, where "/test/" shouldn't match "/test//route".
-  if (!strict) {
-    route = (endsWithDelimiter ? route.slice(0, -delimiter.length) : route) + '(?:' + delimiter + '(?=$))?'
-  }
-
-  if (end) {
-    route += '$'
-  } else {
-    // In non-ending mode, we need the capturing groups to match as much as
-    // possible by using a positive lookahead to the end or next path segment.
-    route += strict && endsWithDelimiter ? '' : '(?=' + delimiter + '|$)'
-  }
-
-  return attachKeys(new RegExp('^' + route, flags(options)), keys)
-}
-
-/**
- * Normalize the given path string, returning a regular expression.
- *
- * An empty array can be passed in for the keys, which will hold the
- * placeholder key descriptions. For example, using `/user/:id`, `keys` will
- * contain `[{ name: 'id', delimiter: '/', optional: false, repeat: false }]`.
- *
- * @param  {(string|RegExp|Array)} path
- * @param  {(Array|Object)=}       keys
- * @param  {Object=}               options
- * @return {!RegExp}
- */
-function pathToRegexp (path, keys, options) {
-  if (!isarray(keys)) {
-    options = /** @type {!Object} */ (keys || options)
-    keys = []
-  }
-
-  options = options || {}
-
-  if (path instanceof RegExp) {
-    return regexpToRegexp(path, /** @type {!Array} */ (keys))
-  }
-
-  if (isarray(path)) {
-    return arrayToRegexp(/** @type {!Array} */ (path), /** @type {!Array} */ (keys), options)
-  }
-
-  return stringToRegexp(/** @type {string} */ (path), /** @type {!Array} */ (keys), options)
-}
   })();
 });
 
@@ -64130,6 +62456,196 @@ return Popper;
 
 })));
 //# sourceMappingURL=popper.js.map
+  })();
+});
+
+require.register("process/browser.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "process");
+  (function() {
+    // shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
   })();
 });
 
@@ -81325,6 +79841,31 @@ if ('development' === 'production') {
   })();
 });
 
+require.register("react-event-listener/lib/define-property.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "react-event-listener");
+  (function() {
+    "use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _defineProperty = require("babel-runtime/core-js/object/define-property");
+
+var _defineProperty2 = _interopRequireDefault(_defineProperty);
+
+exports.default = defineProperty;
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+//  weak
+
+function defineProperty(o, p, attr) {
+  return (0, _defineProperty2.default)(o, p, attr);
+}
+  })();
+});
+
 require.register("react-event-listener/lib/index.js", function(exports, require, module) {
   require = __makeRelativeRequire(require, {}, "react-event-listener");
   (function() {
@@ -81374,8 +79915,6 @@ exports.withOptions = withOptions;
 
 var _react = require('react');
 
-var _react2 = _interopRequireDefault(_react);
-
 var _propTypes = require('prop-types');
 
 var _propTypes2 = _interopRequireDefault(_propTypes);
@@ -81390,12 +79929,17 @@ var _warning2 = _interopRequireDefault(_warning);
 
 var _supports = require('./supports');
 
+var supports = _interopRequireWildcard(_supports);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var defaultEventOptions = {
   capture: false,
   passive: false
 };
+/* eslint-disable prefer-spread */
 
 function mergeDefaultEventOptions(options) {
   return (0, _assign2.default)({}, defaultEventOptions, options);
@@ -81403,18 +79947,28 @@ function mergeDefaultEventOptions(options) {
 
 function getEventListenerArgs(eventName, callback, options) {
   var args = [eventName, callback];
-  args.push(_supports.passiveOption ? options : options.capture);
+  args.push(supports.passiveOption ? options : options.capture);
   return args;
 }
 
 function on(target, eventName, callback, options) {
-  // eslint-disable-next-line prefer-spread
-  target.addEventListener.apply(target, getEventListenerArgs(eventName, callback, options));
+  if (supports.addEventListener) {
+    target.addEventListener.apply(target, getEventListenerArgs(eventName, callback, options));
+  } else if (supports.attachEvent) {
+    // IE8+ Support
+    target.attachEvent('on' + eventName, function () {
+      callback.call(target);
+    });
+  }
 }
 
 function off(target, eventName, callback, options) {
-  // eslint-disable-next-line prefer-spread
-  target.removeEventListener.apply(target, getEventListenerArgs(eventName, callback, options));
+  if (supports.removeEventListener) {
+    target.removeEventListener.apply(target, getEventListenerArgs(eventName, callback, options));
+  } else if (supports.detachEvent) {
+    // IE8+ Support
+    target.detachEvent('on' + eventName, callback);
+  }
 }
 
 function forEachListener(props, iteratee) {
@@ -81450,7 +80004,7 @@ function forEachListener(props, iteratee) {
 }
 
 function withOptions(handler, options) {
-  'development' !== "production" ? (0, _warning2.default)(options, 'react-event-listener: should be specified options in withOptions.') : void 0;
+  'development' !== "production" ? (0, _warning2.default)(options, 'react-event-listener: Should be specified options in withOptions.') : void 0;
 
   return {
     handler: handler,
@@ -81458,8 +80012,8 @@ function withOptions(handler, options) {
   };
 }
 
-var EventListener = function (_React$Component) {
-  (0, _inherits3.default)(EventListener, _React$Component);
+var EventListener = function (_Component) {
+  (0, _inherits3.default)(EventListener, _Component);
 
   function EventListener() {
     (0, _classCallCheck3.default)(this, EventListener);
@@ -81524,19 +80078,18 @@ var EventListener = function (_React$Component) {
     }
   }]);
   return EventListener;
-}(_react2.default.Component);
+}(_react.Component);
 
 EventListener.propTypes = 'development' !== "production" ? {
   /**
    * You can provide a single child too.
    */
-  children: _propTypes2.default.node,
+  children: _propTypes2.default.element,
   /**
    * The DOM target to listen to.
    */
   target: _propTypes2.default.oneOfType([_propTypes2.default.object, _propTypes2.default.string]).isRequired
 } : {};
-
 exports.default = EventListener;
   })();
 });
@@ -81549,17 +80102,23 @@ require.register("react-event-listener/lib/supports.js", function(exports, requi
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.passiveOption = undefined;
+exports.passiveOption = exports.detachEvent = exports.attachEvent = exports.removeEventListener = exports.addEventListener = exports.canUseDOM = undefined;
 
-var _defineProperty = require('babel-runtime/core-js/object/define-property');
+var _defineProperty = require('./define-property');
 
 var _defineProperty2 = _interopRequireDefault(_defineProperty);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function defineProperty(object, property, attr) {
-  return (0, _defineProperty2.default)(object, property, attr);
-}
+// Inspired by https://github.com/facebook/fbjs/blob/master/packages/fbjs/src/core/ExecutionEnvironment.js
+var canUseDOM = exports.canUseDOM = !!(typeof window !== 'undefined' && window.document && window.document.createElement);
+
+var addEventListener = exports.addEventListener = canUseDOM && 'addEventListener' in window;
+var removeEventListener = exports.removeEventListener = canUseDOM && 'removeEventListener' in window;
+
+// IE8+ Support
+var attachEvent = exports.attachEvent = canUseDOM && 'attachEvent' in window;
+var detachEvent = exports.detachEvent = canUseDOM && 'detachEvent' in window;
 
 // Passive options
 // Inspired by https://github.com/Modernizr/Modernizr/blob/master/feature-detects/dom/passiveeventlisteners.js
@@ -81574,22 +80133,18 @@ var passiveOption = exports.passiveOption = function () {
     var supportsPassiveOption = false;
 
     try {
-      window.addEventListener('test', null, defineProperty({}, 'passive', {
+      window.addEventListener('test', null, (0, _defineProperty2.default)({}, 'passive', {
         get: function get() {
           supportsPassiveOption = true;
         }
       }));
-    } catch (err) {
-      //
-    }
+    } catch (e) {} // eslint-disable-line no-empty
 
     cache = supportsPassiveOption;
 
     return supportsPassiveOption;
   }();
 }();
-
-exports.default = {};
   })();
 });
 
@@ -83547,6 +82102,10 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var noop = function noop() {
+  return null;
+};
+
 var Popper = function (_Component) {
   _inherits(Popper, _Component);
 
@@ -83590,7 +82149,7 @@ var Popper = function (_Component) {
       // If Popper isn't instantiated, hide the popperElement
       // to avoid flash of unstyled content
 
-      if (!data) {
+      if (!_this._popper || !data) {
         return {
           position: 'absolute',
           pointerEvents: 'none',
@@ -83608,7 +82167,7 @@ var Popper = function (_Component) {
         position: position
       }, data.styles);
     }, _this._getPopperPlacement = function () {
-      return _this.state.data ? _this.state.data.placement : undefined;
+      return !!_this.state.data ? _this.state.data.placement : undefined;
     }, _this._getPopperHide = function () {
       return !!_this.state.data && _this.state.data.hide ? '' : undefined;
     }, _this._getArrowStyle = function () {
@@ -83635,14 +82194,18 @@ var Popper = function (_Component) {
       };
     }
   }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      this._updatePopper();
+    }
+  }, {
     key: 'componentDidUpdate',
     value: function componentDidUpdate(lastProps) {
       if (lastProps.placement !== this.props.placement || lastProps.eventsEnabled !== this.props.eventsEnabled) {
-        this._destroyPopper();
-        this._createPopper();
+        this._updatePopper();
       }
 
-      if (lastProps.children !== this.props.children) {
+      if (this._popper && lastProps.children !== this.props.children) {
         this._popper.scheduleUpdate();
       }
     }
@@ -83650,6 +82213,14 @@ var Popper = function (_Component) {
     key: 'componentWillUnmount',
     value: function componentWillUnmount() {
       this._destroyPopper();
+    }
+  }, {
+    key: '_updatePopper',
+    value: function _updatePopper() {
+      this._destroyPopper();
+      if (this._node) {
+        this._createPopper();
+      }
     }
   }, {
     key: '_createPopper',
@@ -83675,7 +82246,7 @@ var Popper = function (_Component) {
         modifiers: modifiers
       });
 
-      // schedule an update to make sure everything gets positioned correctly
+      // schedule an update to make sure everything gets positioned correct
       // after being instantiated
       this._popper.scheduleUpdate();
     }
@@ -83702,11 +82273,6 @@ var Popper = function (_Component) {
 
       var popperRef = function popperRef(node) {
         _this2._node = node;
-        if (node) {
-          _this2._createPopper();
-        } else {
-          _this2._destroyPopper();
-        }
         if (typeof innerRef === 'function') {
           innerRef(node);
         }
@@ -83722,16 +82288,10 @@ var Popper = function (_Component) {
           ref: popperRef,
           style: popperStyle
         }, _defineProperty(_popperProps, 'data-placement', popperPlacement), _defineProperty(_popperProps, 'data-x-out-of-boundaries', popperHide), _popperProps);
-
         return children({
           popperProps: popperProps,
           restProps: restProps,
-          scheduleUpdate: function scheduleUpdate() {
-            // _createPopper will scheduleUpdate,
-            // so calling this before this._popper exists
-            // can be a noop.
-            _this2._popper && _this2._popper.scheduleUpdate();
-          }
+          scheduleUpdate: this._popper && this._popper.scheduleUpdate
         });
       }
 
@@ -85411,6 +83971,447 @@ var matchPath = function matchPath(pathname) {
 };
 
 exports.default = matchPath;
+  })();
+});
+
+require.register("react-router/node_modules/isarray/index.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "react-router/node_modules/isarray");
+  (function() {
+    module.exports = Array.isArray || function (arr) {
+  return Object.prototype.toString.call(arr) == '[object Array]';
+};
+  })();
+});
+
+require.register("react-router/node_modules/path-to-regexp/index.js", function(exports, require, module) {
+  require = __makeRelativeRequire(require, {}, "react-router/node_modules/path-to-regexp");
+  (function() {
+    var isarray = require('isarray')
+
+/**
+ * Expose `pathToRegexp`.
+ */
+module.exports = pathToRegexp
+module.exports.parse = parse
+module.exports.compile = compile
+module.exports.tokensToFunction = tokensToFunction
+module.exports.tokensToRegExp = tokensToRegExp
+
+/**
+ * The main path matching regexp utility.
+ *
+ * @type {RegExp}
+ */
+var PATH_REGEXP = new RegExp([
+  // Match escaped characters that would otherwise appear in future matches.
+  // This allows the user to escape special characters that won't transform.
+  '(\\\\.)',
+  // Match Express-style parameters and un-named parameters with a prefix
+  // and optional suffixes. Matches appear as:
+  //
+  // "/:test(\\d+)?" => ["/", "test", "\d+", undefined, "?", undefined]
+  // "/route(\\d+)"  => [undefined, undefined, undefined, "\d+", undefined, undefined]
+  // "/*"            => ["/", undefined, undefined, undefined, undefined, "*"]
+  '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^\\\\()])+)\\))?|\\(((?:\\\\.|[^\\\\()])+)\\))([+*?])?|(\\*))'
+].join('|'), 'g')
+
+/**
+ * Parse a string for the raw tokens.
+ *
+ * @param  {string}  str
+ * @param  {Object=} options
+ * @return {!Array}
+ */
+function parse (str, options) {
+  var tokens = []
+  var key = 0
+  var index = 0
+  var path = ''
+  var defaultDelimiter = options && options.delimiter || '/'
+  var res
+
+  while ((res = PATH_REGEXP.exec(str)) != null) {
+    var m = res[0]
+    var escaped = res[1]
+    var offset = res.index
+    path += str.slice(index, offset)
+    index = offset + m.length
+
+    // Ignore already escaped sequences.
+    if (escaped) {
+      path += escaped[1]
+      continue
+    }
+
+    var next = str[index]
+    var prefix = res[2]
+    var name = res[3]
+    var capture = res[4]
+    var group = res[5]
+    var modifier = res[6]
+    var asterisk = res[7]
+
+    // Push the current path onto the tokens.
+    if (path) {
+      tokens.push(path)
+      path = ''
+    }
+
+    var partial = prefix != null && next != null && next !== prefix
+    var repeat = modifier === '+' || modifier === '*'
+    var optional = modifier === '?' || modifier === '*'
+    var delimiter = res[2] || defaultDelimiter
+    var pattern = capture || group
+
+    tokens.push({
+      name: name || key++,
+      prefix: prefix || '',
+      delimiter: delimiter,
+      optional: optional,
+      repeat: repeat,
+      partial: partial,
+      asterisk: !!asterisk,
+      pattern: pattern ? escapeGroup(pattern) : (asterisk ? '.*' : '[^' + escapeString(delimiter) + ']+?')
+    })
+  }
+
+  // Match any characters still remaining.
+  if (index < str.length) {
+    path += str.substr(index)
+  }
+
+  // If the path exists, push it onto the end.
+  if (path) {
+    tokens.push(path)
+  }
+
+  return tokens
+}
+
+/**
+ * Compile a string to a template function for the path.
+ *
+ * @param  {string}             str
+ * @param  {Object=}            options
+ * @return {!function(Object=, Object=)}
+ */
+function compile (str, options) {
+  return tokensToFunction(parse(str, options))
+}
+
+/**
+ * Prettier encoding of URI path segments.
+ *
+ * @param  {string}
+ * @return {string}
+ */
+function encodeURIComponentPretty (str) {
+  return encodeURI(str).replace(/[\/?#]/g, function (c) {
+    return '%' + c.charCodeAt(0).toString(16).toUpperCase()
+  })
+}
+
+/**
+ * Encode the asterisk parameter. Similar to `pretty`, but allows slashes.
+ *
+ * @param  {string}
+ * @return {string}
+ */
+function encodeAsterisk (str) {
+  return encodeURI(str).replace(/[?#]/g, function (c) {
+    return '%' + c.charCodeAt(0).toString(16).toUpperCase()
+  })
+}
+
+/**
+ * Expose a method for transforming tokens into the path function.
+ */
+function tokensToFunction (tokens) {
+  // Compile all the tokens into regexps.
+  var matches = new Array(tokens.length)
+
+  // Compile all the patterns before compilation.
+  for (var i = 0; i < tokens.length; i++) {
+    if (typeof tokens[i] === 'object') {
+      matches[i] = new RegExp('^(?:' + tokens[i].pattern + ')$')
+    }
+  }
+
+  return function (obj, opts) {
+    var path = ''
+    var data = obj || {}
+    var options = opts || {}
+    var encode = options.pretty ? encodeURIComponentPretty : encodeURIComponent
+
+    for (var i = 0; i < tokens.length; i++) {
+      var token = tokens[i]
+
+      if (typeof token === 'string') {
+        path += token
+
+        continue
+      }
+
+      var value = data[token.name]
+      var segment
+
+      if (value == null) {
+        if (token.optional) {
+          // Prepend partial segment prefixes.
+          if (token.partial) {
+            path += token.prefix
+          }
+
+          continue
+        } else {
+          throw new TypeError('Expected "' + token.name + '" to be defined')
+        }
+      }
+
+      if (isarray(value)) {
+        if (!token.repeat) {
+          throw new TypeError('Expected "' + token.name + '" to not repeat, but received `' + JSON.stringify(value) + '`')
+        }
+
+        if (value.length === 0) {
+          if (token.optional) {
+            continue
+          } else {
+            throw new TypeError('Expected "' + token.name + '" to not be empty')
+          }
+        }
+
+        for (var j = 0; j < value.length; j++) {
+          segment = encode(value[j])
+
+          if (!matches[i].test(segment)) {
+            throw new TypeError('Expected all "' + token.name + '" to match "' + token.pattern + '", but received `' + JSON.stringify(segment) + '`')
+          }
+
+          path += (j === 0 ? token.prefix : token.delimiter) + segment
+        }
+
+        continue
+      }
+
+      segment = token.asterisk ? encodeAsterisk(value) : encode(value)
+
+      if (!matches[i].test(segment)) {
+        throw new TypeError('Expected "' + token.name + '" to match "' + token.pattern + '", but received "' + segment + '"')
+      }
+
+      path += token.prefix + segment
+    }
+
+    return path
+  }
+}
+
+/**
+ * Escape a regular expression string.
+ *
+ * @param  {string} str
+ * @return {string}
+ */
+function escapeString (str) {
+  return str.replace(/([.+*?=^!:${}()[\]|\/\\])/g, '\\$1')
+}
+
+/**
+ * Escape the capturing group by escaping special characters and meaning.
+ *
+ * @param  {string} group
+ * @return {string}
+ */
+function escapeGroup (group) {
+  return group.replace(/([=!:$\/()])/g, '\\$1')
+}
+
+/**
+ * Attach the keys as a property of the regexp.
+ *
+ * @param  {!RegExp} re
+ * @param  {Array}   keys
+ * @return {!RegExp}
+ */
+function attachKeys (re, keys) {
+  re.keys = keys
+  return re
+}
+
+/**
+ * Get the flags for a regexp from the options.
+ *
+ * @param  {Object} options
+ * @return {string}
+ */
+function flags (options) {
+  return options.sensitive ? '' : 'i'
+}
+
+/**
+ * Pull out keys from a regexp.
+ *
+ * @param  {!RegExp} path
+ * @param  {!Array}  keys
+ * @return {!RegExp}
+ */
+function regexpToRegexp (path, keys) {
+  // Use a negative lookahead to match only capturing groups.
+  var groups = path.source.match(/\((?!\?)/g)
+
+  if (groups) {
+    for (var i = 0; i < groups.length; i++) {
+      keys.push({
+        name: i,
+        prefix: null,
+        delimiter: null,
+        optional: false,
+        repeat: false,
+        partial: false,
+        asterisk: false,
+        pattern: null
+      })
+    }
+  }
+
+  return attachKeys(path, keys)
+}
+
+/**
+ * Transform an array into a regexp.
+ *
+ * @param  {!Array}  path
+ * @param  {Array}   keys
+ * @param  {!Object} options
+ * @return {!RegExp}
+ */
+function arrayToRegexp (path, keys, options) {
+  var parts = []
+
+  for (var i = 0; i < path.length; i++) {
+    parts.push(pathToRegexp(path[i], keys, options).source)
+  }
+
+  var regexp = new RegExp('(?:' + parts.join('|') + ')', flags(options))
+
+  return attachKeys(regexp, keys)
+}
+
+/**
+ * Create a path regexp from string input.
+ *
+ * @param  {string}  path
+ * @param  {!Array}  keys
+ * @param  {!Object} options
+ * @return {!RegExp}
+ */
+function stringToRegexp (path, keys, options) {
+  return tokensToRegExp(parse(path, options), keys, options)
+}
+
+/**
+ * Expose a function for taking tokens and returning a RegExp.
+ *
+ * @param  {!Array}          tokens
+ * @param  {(Array|Object)=} keys
+ * @param  {Object=}         options
+ * @return {!RegExp}
+ */
+function tokensToRegExp (tokens, keys, options) {
+  if (!isarray(keys)) {
+    options = /** @type {!Object} */ (keys || options)
+    keys = []
+  }
+
+  options = options || {}
+
+  var strict = options.strict
+  var end = options.end !== false
+  var route = ''
+
+  // Iterate over the tokens and create our regexp string.
+  for (var i = 0; i < tokens.length; i++) {
+    var token = tokens[i]
+
+    if (typeof token === 'string') {
+      route += escapeString(token)
+    } else {
+      var prefix = escapeString(token.prefix)
+      var capture = '(?:' + token.pattern + ')'
+
+      keys.push(token)
+
+      if (token.repeat) {
+        capture += '(?:' + prefix + capture + ')*'
+      }
+
+      if (token.optional) {
+        if (!token.partial) {
+          capture = '(?:' + prefix + '(' + capture + '))?'
+        } else {
+          capture = prefix + '(' + capture + ')?'
+        }
+      } else {
+        capture = prefix + '(' + capture + ')'
+      }
+
+      route += capture
+    }
+  }
+
+  var delimiter = escapeString(options.delimiter || '/')
+  var endsWithDelimiter = route.slice(-delimiter.length) === delimiter
+
+  // In non-strict mode we allow a slash at the end of match. If the path to
+  // match already ends with a slash, we remove it for consistency. The slash
+  // is valid at the end of a path match, not in the middle. This is important
+  // in non-ending mode, where "/test/" shouldn't match "/test//route".
+  if (!strict) {
+    route = (endsWithDelimiter ? route.slice(0, -delimiter.length) : route) + '(?:' + delimiter + '(?=$))?'
+  }
+
+  if (end) {
+    route += '$'
+  } else {
+    // In non-ending mode, we need the capturing groups to match as much as
+    // possible by using a positive lookahead to the end or next path segment.
+    route += strict && endsWithDelimiter ? '' : '(?=' + delimiter + '|$)'
+  }
+
+  return attachKeys(new RegExp('^' + route, flags(options)), keys)
+}
+
+/**
+ * Normalize the given path string, returning a regular expression.
+ *
+ * An empty array can be passed in for the keys, which will hold the
+ * placeholder key descriptions. For example, using `/user/:id`, `keys` will
+ * contain `[{ name: 'id', delimiter: '/', optional: false, repeat: false }]`.
+ *
+ * @param  {(string|RegExp|Array)} path
+ * @param  {(Array|Object)=}       keys
+ * @param  {Object=}               options
+ * @return {!RegExp}
+ */
+function pathToRegexp (path, keys, options) {
+  if (!isarray(keys)) {
+    options = /** @type {!Object} */ (keys || options)
+    keys = []
+  }
+
+  options = options || {}
+
+  if (path instanceof RegExp) {
+    return regexpToRegexp(path, /** @type {!Array} */ (keys))
+  }
+
+  if (isarray(path)) {
+    return arrayToRegexp(/** @type {!Array} */ (path), /** @type {!Array} */ (keys), options)
+  }
+
+  return stringToRegexp(/** @type {string} */ (path), /** @type {!Array} */ (keys), options)
+}
   })();
 });
 
@@ -88501,7 +87502,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _ponyfill = require('./ponyfill.js');
+var _ponyfill = require('./ponyfill');
 
 var _ponyfill2 = _interopRequireDefault(_ponyfill);
 
@@ -90003,9 +89004,9 @@ var _reactApollo = require('react-apollo');
 
 var _Progress = require('material-ui/Progress');
 
-var _Dialog = require('material-ui/Dialog');
+var _Modal = require('material-ui/Modal');
 
-var _Dialog2 = _interopRequireDefault(_Dialog);
+var _Modal2 = _interopRequireDefault(_Modal);
 
 var _Table = require('material-ui/Table');
 
@@ -90024,16 +89025,19 @@ function MotoboyDetails(_ref) {
       loading = _ref$data.loading;
 
   return _react2.default.createElement(
-    _Dialog2.default,
+    _Modal2.default,
     {
-      title: motoboy.name + ' - hoje',
-      modal: false,
       open: open,
-      onRequestClose: function onRequestClose() {
+      onClose: function onClose() {
         return handleClose();
-      },
-      autoScrollBodyContent: true
+      }
     },
+    _react2.default.createElement(
+      'h3',
+      null,
+      motoboy.name,
+      ' - hoje'
+    ),
     Entries(entries, loading)
   );
 }
@@ -92693,15 +91697,14 @@ require.alias("invariant/browser.js", "invariant");
 require.alias("is-in-browser/dist/index.js", "is-in-browser");
 require.alias("jss/lib/index.js", "jss");
 require.alias("jss-camel-case/lib/index.js", "jss-camel-case");
-require.alias("jss-default-unit/lib/index.js", "jss-default-unit");
 require.alias("jss-global/lib/index.js", "jss-global");
 require.alias("jss-nested/lib/index.js", "jss-nested");
 require.alias("jss-props-sort/lib/index.js", "jss-props-sort");
 require.alias("jss-vendor-prefixer/lib/index.js", "jss-vendor-prefixer");
 require.alias("lodash/lodash.js", "lodash");
-require.alias("node-browser-modules/node_modules/process/browser.js", "node-browser-modules/node_modules/process");
+require.alias("material-ui/node_modules/jss-default-unit/lib/index.js", "material-ui/node_modules/jss-default-unit");
 require.alias("popper.js/dist/umd/popper.js", "popper.js");
-require.alias("node-browser-modules/node_modules/process/browser.js", "process");
+require.alias("process/browser.js", "process");
 require.alias("react-apollo/react-apollo.browser.umd.js", "react-apollo");
 require.alias("react-event-listener/lib/index.js", "react-event-listener");
 require.alias("react-intl/lib/index.js", "react-intl");

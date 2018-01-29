@@ -1,13 +1,6 @@
 defmodule Graphql.Type.History do
   use Api, :graphql_schema
 
-  object :history_queries do
-    field :motoboy_history, list_of(:history) do
-      arg :motoboy_id, non_null(:id)
-      resolve &Api.Orders.History.all_of_motoboy/2
-    end
-  end
-
   object :history do
     field :id, :id
     field :scope, :string

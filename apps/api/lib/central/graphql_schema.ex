@@ -6,6 +6,10 @@ defmodule Central.GraphqlSchema do
     field :orders, list_of(:order), resolve: &Central.Resolve.MyOrders.handle/2
     field :motoboys, list_of(:motoboy), resolve: &Central.Resolve.MyMotoboys.handle/2
     field :my_companies, list_of(:company), resolve: &Central.Resolve.MyCompanies.handle/2
+    field :motoboy_history, list_of(:history) do
+      arg :motoboy_id, non_null(:id)
+      resolve &Central.Resolve.MotoboyHistory.handle/2
+    end
   end
 
   mutation do
