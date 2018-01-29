@@ -8,7 +8,7 @@ Path.join(["rel", "plugins", "*.exs"])
 
 use Mix.Releases.Config,
     # This sets the default release built by `mix release`
-    default_release: :pegala,
+    default_release: :imoto,
     # This sets the default environment used by `mix release`
     default_environment: Mix.env()
 
@@ -37,7 +37,7 @@ environment :prod do
   set include_erts: true
   set include_src: false
   set cookie: :"4x)$hL&p>:J|1&H;o8bVp!,NCh_ABb<5lj|rRyG5Rz?2*zq@u!L0x4Davqyg*v@m"
-  set output_dir: "rel/pegala"
+  set output_dir: "rel/imoto"
 end
 
 # You may define one or more releases in this file.
@@ -45,12 +45,13 @@ end
 # when running `mix release`, the first release in the file
 # will be used by default
 
-release :pegala do
+release :imoto do
   set version: current_version(:central)
   set applications: [
     :runtime_tools,
     api: :permanent,
     central: :permanent,
+    company: :permanent,
     core: :permanent,
     db: :permanent
   ]
