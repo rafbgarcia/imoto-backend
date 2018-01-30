@@ -62,4 +62,6 @@ config :api, Api.Endpoint,
 
 # Finally import the config/prod.secret.exs
 # which should be versioned separately.
-import_config "prod.secret.exs"
+config :api, Api.Endpoint,
+  secret_key_base: "${SECRET_KEY_BASE}"
+
