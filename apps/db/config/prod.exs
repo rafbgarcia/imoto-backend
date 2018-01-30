@@ -5,5 +5,5 @@ config :db, Db.Repo,
   url: "${DATABASE_URL}",
   database: "",
   ssl: true,
-  pool_size: 20
+  pool_size: 1 # TODO change this when move to standard plan
 

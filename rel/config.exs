@@ -8,7 +8,7 @@ Path.join(["rel", "plugins", "*.exs"])
 
 use Mix.Releases.Config,
     # This sets the default release built by `mix release`
-    default_release: :imoto,
+    default_release: :default,
     # This sets the default environment used by `mix release`
     default_environment: Mix.env()
 
@@ -30,14 +30,13 @@ environment :dev do
   # dev mode.
   set dev_mode: true
   set include_erts: false
-  set cookie: :"^hKw|F<5;:dF?Q`mh:;w{vm11lPtVZ@S}<Eos%YRemw?vr?N.=>?85P@AGDcGGYA"
+  set cookie: :"LcXqO|M6|i7w*nz4Y6FSEtOn|SOnbF;!;^3L[:UgTXxrRn.Wn(S*7XNroQ/<2?Px"
 end
 
 environment :prod do
   set include_erts: true
   set include_src: false
-  set cookie: :"4x)$hL&p>:J|1&H;o8bVp!,NCh_ABb<5lj|rRyG5Rz?2*zq@u!L0x4Davqyg*v@m"
-  set output_dir: "rel/imoto"
+  set cookie: :"1!yO_P@/5I8vr&nm=Gj7>@aMMkkWK}XTV)mW)*9n3Ez0s_>WjgC,]2W3_D.1@tg|"
 end
 
 # You may define one or more releases in this file.
@@ -45,8 +44,8 @@ end
 # when running `mix release`, the first release in the file
 # will be used by default
 
-release :imoto do
-  set version: current_version(:central)
+release :imoto_backend do
+  set version: "0.1.0"
   set applications: [
     :runtime_tools,
     api: :permanent,
