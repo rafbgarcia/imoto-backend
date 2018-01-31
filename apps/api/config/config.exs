@@ -8,7 +8,8 @@ use Mix.Config
 # General application configuration
 config :api,
   namespace: Api,
-  ecto_repos: [Db.Repo]
+  ecto_repos: [Db.Repo],
+  loggers: [Appsignal.Ecto, Ecto.LogEntry]
 
 # Configures the endpoint
 config :api, Api.Endpoint,
@@ -16,8 +17,8 @@ config :api, Api.Endpoint,
   url: [host: "localhost", port: 4000],
   secret_key_base: "/oA9uwTAyIVn99X5VKrReqdAuZzM5XfVCSGjdVo8mU02SJ16i2Ihx4IDxk5IS2VC",
   render_errors: [view: Api.ErrorView, accepts: ~w(json)],
-  pubsub: [name: Api.PubSub,
-           adapter: Phoenix.PubSub.PG2]
+  pubsub: [name: Api.PubSub, adapter: Phoenix.PubSub.PG2],
+  instrumenters: [Appsignal.Phoenix.Instrumenter]
 
 # Configures Elixir's Logger
 config :logger, :console,
@@ -31,6 +32,11 @@ config :api, Api.Guardian,
   issuer: "api",
   secret_key: "XoA9uwTAyCvn99X5VKrR40dAuZzM5XfVCn12dVo8mU02SJ16i2Ihx4IDxk5IS2VC",
   token_module: Guardian.Token.Jwt
+
+config :phoenix, :template_engines,
+  eex: Appsignal.Phoenix.Template.EExEngine,
+  exs: Appsignal.Phoenix.Template.ExsEngine
+
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

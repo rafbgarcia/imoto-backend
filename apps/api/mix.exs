@@ -56,6 +56,7 @@ defmodule Api.Mixfile do
       {:argon2_elixir, "~> 1.2"},
       {:guardian, "~> 1.0.0"},
       {:httpoison, "~> 0.13"},
+      {:appsignal, "~> 1.0"},
     ]
   end
 

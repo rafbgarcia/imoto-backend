@@ -42,6 +42,8 @@ defmodule Api.Endpoint do
             "Keep-Alive", "X-Requested-With", "If-Modified-Since",
             "X-CSRF-Token", "X-XSRF-TOKEN"]
 
+  # `use Appsignal.Phoenix` must come just before Api.Router
+  use Appsignal.Phoenix
   plug Api.Router
 
   @doc """
