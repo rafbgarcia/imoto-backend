@@ -1,7 +1,7 @@
 defmodule Api.Router do
   use Api, :router
 
-  get "/loaderio-ccfc38fc49ce0360c1f93b82d8ecf647/", Api.Controllers.LoaderController, :challenge
+  get "/loaderio-8b5de0077a6b032f6f821be422161762/", Api.Controllers.LoaderController, :challenge
   get "/termos-de-uso", Api.CentralController, :terms_of_use
 
   pipeline :motoboy_api do
