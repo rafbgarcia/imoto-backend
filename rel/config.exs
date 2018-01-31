@@ -45,12 +45,10 @@ end
 # will be used by default
 
 release :imoto_backend do
-  set version: "0.1.0"
+  set version: "1.0.0"
   set applications: [
     :runtime_tools,
     api: :permanent,
-    central: :permanent,
-    company: :permanent,
     core: :permanent,
     db: :permanent
   ]
