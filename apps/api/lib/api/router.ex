@@ -29,6 +29,7 @@ defmodule Api.Router do
   end
   scope "/central" do
     pipe_through :central_api
+    get "/*path", Api.CentralController, :jsapp
     post "/", Absinthe.Plug.GraphiQL, schema: Central.GraphqlSchema
   end
 
