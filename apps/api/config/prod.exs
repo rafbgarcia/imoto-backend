@@ -15,7 +15,7 @@ use Mix.Config
 # which you typically run after static files are built.
 config :api, Api.Endpoint,
   load_from_system_env: true,
-  url: [host: "www.imotodelivery.com"],
+  url: [host: "imotodelivery.com", port: 80],
   server: true,
   root: ".",
   code_reloader: false,

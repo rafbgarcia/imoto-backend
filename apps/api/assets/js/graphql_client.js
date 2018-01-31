@@ -13,7 +13,7 @@ const authLink = setContext((_, { headers }) => {
   }
 });
 const httpLink = authLink.concat(new HttpLink({
-  uri: 'http://localhost:4000/central'
+  uri: '//www.imotodelivery.com/central'
 }))
 
 export default new ApolloClient({
