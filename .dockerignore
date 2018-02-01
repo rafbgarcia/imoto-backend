@@ -1,0 +1,4 @@
+_build
+deps
+api/test
+apps/api/assets/node_modules

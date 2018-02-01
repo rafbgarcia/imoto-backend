@@ -53,7 +53,7 @@ defmodule Api.Mixfile do
       {:timex_ecto, "~> 3.2.1"},
       {:money, "~> 1.2.1"},
       {:comeonin, "~> 4.0"},
-      {:argon2_elixir, "~> 1.2"},
+      {:argon2_elixir, "~> 1.2.13"},
       {:guardian, "~> 1.0.0"},
       {:httpoison, "~> 0.13"},
       {:appsignal, "~> 1.0"},

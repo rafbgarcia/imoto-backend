@@ -88090,7 +88090,7 @@ var RegisterPage = function (_React$Component) {
 
           showSnack("Conta criada com sucesso");
           _central2.default.login(central);
-          window.location.href = "/";
+          window.location.href = "/central";
         }).catch(function (_ref3) {
           var graphQLErrors = _ref3.graphQLErrors;
           return showSnack(graphQLErrors.map(function (err) {
@@ -90142,7 +90142,7 @@ var authLink = (0, _apolloLinkContext.setContext)(function (_, _ref) {
   };
 });
 var httpLink = authLink.concat(new _apolloLinkHttp.HttpLink({
-  uri: 'http://localhost:4000/central'
+  uri: '//www.imotodelivery.com/central'
 }));
 
 exports.default = new _apolloClient.ApolloClient({
