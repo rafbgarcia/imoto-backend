@@ -29,7 +29,6 @@
   },
   "devDependencies": {
     "@babel/core": "7.0.0-beta.36",
-    "auto-reload-brunch": "2.7.1",
     "babel-brunch": "github:babel/babel-brunch",
     "babel-plugin-transform-class-properties": "6.24.1",
     "babel-plugin-transform-object-rest-spread": "6.26.0",
