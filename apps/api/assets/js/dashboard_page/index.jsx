@@ -5,6 +5,7 @@ import Button from 'material-ui/Button'
 import AddIcon from 'material-ui-icons/Add'
 import {Link} from 'react-router-dom'
 import MenuIcon from 'material-ui-icons/Menu';
+import indigo from 'material-ui/colors/indigo';
 
 import Orders from './orders'
 import Motoboys from './motoboys'
@@ -57,22 +58,22 @@ class DashboardPage extends React.Component{
     return (
       <main>
         {
-          !loading && (!motoboys || motoboys.length === 0) ?
-            <NoMotoboysMessage />
-            :
-            <div className="mb-5">
-              <Button disabled={!hasMotoboysAvailable} raised color="primary" onClick={() => this.setState({modalOpen: true})}>
-                <AddIcon className="mr-2" /> Nova entrega
-                {!hasMotoboysAvailable && " *"}
-              </Button>
-              {
-                !hasMotoboysAvailable && <div>
-                  <small className="text-muted">* Nenhum motoboy disponível no momento</small>
-                </div>
-              }
-              <NewOrderModal open={modalOpen} onClose={this.onCloseNewOrderModal} />
-            </div>
+          !loading && (!motoboys || motoboys.length === 0) &&
+          <NoMotoboysMessage />
         }
+
+        <div className="mb-5">
+          <Button disabled={!hasMotoboysAvailable} raised color="primary" onClick={() => this.setState({modalOpen: true})}>
+            <AddIcon className="mr-2" /> Nova entrega
+            {!hasMotoboysAvailable && " *"}
+          </Button>
+          {
+            !hasMotoboysAvailable && <div>
+              <small className="text-muted">* Nenhum motoboy disponível</small>
+            </div>
+          }
+          <NewOrderModal open={modalOpen} onClose={this.onCloseNewOrderModal} />
+        </div>
 
         <div className="row">
           <div className="col-sm-3">
@@ -86,6 +87,17 @@ class DashboardPage extends React.Component{
     )
   }
 }
+
+const NoMotoboysMessage = () => (
+  <div className="mb-5 ">
+    <div className="alert alert-warning">
+      <h4>Comece a fazer entregas em 3 passos:</h4>
+      1- Cadastre seus motoboys clicando no icone (<MenuIcon style={{top: 6, position: "relative", background: indigo["500"], color: "white"}} />) acima e depois em "Motoboys".<br/>
+      2- Peça aos motoboys para baixarem a app do iMoto na loja do Android ou da Apple.<br/>
+      3- Assim que eles ficarem online na app, você poderá enviar pedidos.
+    </div>
+  </div>
+)
 
 export default graphql(gql`
   query getOrdersAndMotoboys {
@@ -121,10 +133,3 @@ export default graphql(gql`
     }
   }
 `)((props) => <DashboardPage {...props} />)
-
-const NoMotoboysMessage = () => (
-  <div className="mb-5">
-    <p>Para começar a enviar pedidos, cadastre seus motoboys</p>
-    <p>Clique no icone <Button raised dense color="primary"><MenuIcon /></Button> e depois em "Motoboys"</p>
-  </div>
-)

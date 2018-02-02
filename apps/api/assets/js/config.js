@@ -7,7 +7,7 @@ if (isProduction) {
   }
 } else {
   config = {
-    apiHost: "http://172.21.0.3:4000"
+    apiHost: "http://localhost:4000"
   }
 }
 

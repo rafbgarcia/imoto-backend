@@ -7,15 +7,15 @@ run.config:
 
   extra_packages:
     - python-2.7
+    - nodejs-8.9
 
   # we need nodejs in development
   # ensure inotify exists for hot-code reloading
   dev_packages:
-    - nodejs
     - inotify-tools
 
   extra_steps:
-    - (NODE_ENV=${NODE_ENV} cd apps/api/assets && npm install && npm run deploy)
+    - (cd apps/api/assets && npm install && npm run deploy)
 
   # cache node_modules
   cache_dirs:
@@ -45,7 +45,7 @@ deploy.config:
 
 # add postgres as a data component
 data.db:
-  image: nanobox/postgresql
+  image: nanobox/postgresql:9.6
 
 web.main:
   start: node-start mix phx.server

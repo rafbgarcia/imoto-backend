@@ -60,6 +60,10 @@ export default class Layout extends React.Component {
           <Route path="/central/motoboys" exact={true} component={MotoboysPage} />
         </main>
 
+        <footer className="text-center " style={{margin: "10rem 0 2rem"}}>
+          <a href="/termos-de-uso" target="_blank">Termos de uso</a>
+        </footer>
+
         <Drawer
           open={this.state.opened}
           onClose={this.closeDrawer}
