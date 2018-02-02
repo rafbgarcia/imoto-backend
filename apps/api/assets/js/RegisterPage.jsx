@@ -17,8 +17,7 @@ import * as validate from 'js/shared/validations'
 
 export default class RegisterPage extends React.Component {
   state = {
-    login: "",
-    password: "",
+    btnDisabled: false,
     central: {
       name: "",
       email: "",
@@ -45,6 +44,8 @@ export default class RegisterPage extends React.Component {
   }
 
   didClickRegisterButton = () => {
+    this.setState({btnDisabled: true})
+
     const {central} = this.state
     const {showSnack} = this.context
 
@@ -65,11 +66,14 @@ export default class RegisterPage extends React.Component {
       variables: {params: central},
     })
     .then(({data: {central}}) => {
-      showSnack("Conta criada com sucesso")
+      showSnack("Conta criada com sucesso! Redirecionando...")
       Central.login(central)
       window.location.href = "/central"
     })
-    .catch(({graphQLErrors}) => showSnack(graphQLErrors.map(err => err.message)))
+    .catch(({graphQLErrors}) => {
+      this.setState({btnDisabled: false})
+      showSnack(graphQLErrors.map(err => err.message))
+    })
   }
 
   render() {

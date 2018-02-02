@@ -27,7 +27,7 @@ export default class Snack extends React.Component {
       <Snackbar
         anchorOrigin={{vertical: 'top', horizontal: 'right'}}
         open={show}
-        autoHideDuration={5000}
+        autoHideDuration={10000}
         onClose={this.close}
         SnackbarContentProps={{'aria-describedby': 'message-id'}}
         message={message}

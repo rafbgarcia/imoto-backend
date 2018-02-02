@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import TextField from 'material-ui/TextField'
 import Button from 'material-ui/Button'
 import Auth from './auth'
@@ -10,18 +11,33 @@ export default class LoginPage extends React.Component {
   state = {
     email: "",
     password: "",
+    btnDisabled: false,
   }
 
   didClickLoginButton = () => {
-    const {email, password} = this.state
+    this.setState({btnDisabled: true})
 
-    Auth.login(email, password, (central) => {
-      Central.login(central)
-      window.location.reload()
-    })
+    const {email, password} = this.state
+    const {showSnack} = this.context
+
+    showSnack("Fazendo login, aguarde...")
+
+    Auth.login(email, password,
+      (central) => {
+        showSnack("Sucesso! Redirecionando...")
+        Central.login(central)
+        window.location.reload()
+      },
+      (errors) => {
+        showSnack(errors)
+        this.setState({btnDisabled: false})
+      },
+    )
   }
 
   render() {
+    const {btnDisabled} = this.state
+
     return (
       <section className="d-flex align-items-center justify-content-center mt-5">
         <div className="col-xs-10 col-sm-6 col-md-4 thumbnail">
@@ -40,11 +56,15 @@ export default class LoginPage extends React.Component {
             type="password"
             fullWidth
           />
-          <Button raised color="primary" onClick={this.didClickLoginButton} className="mt-4">
+          <Button disabled={btnDisabled} raised color="primary" onClick={this.didClickLoginButton} className="mt-4">
             Acessar
           </Button>
         </div>
       </section>
     )
   }
+}
+
+LoginPage.contextTypes = {
+  showSnack: PropTypes.func
 }

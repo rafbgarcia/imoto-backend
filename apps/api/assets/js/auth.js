@@ -19,14 +19,16 @@ const logoutMutation = gql`
   }
 `
 
-const login = (email, password, cb) => {
+const login = (email, password, cb, cbErr = null) => {
   apolloClient.mutate({
     mutation: loginMutation,
     variables: { email, password }
   }).then((res) => {
     cb(res.data.central)
   }).catch((res) => {
-    alert(res.graphQLErrors[0].message)
+    const errors = res.graphQLErrors[0].message
+    if (cbErr) cbErr(errors)
+    else alert(errors)
   })
 }
 
