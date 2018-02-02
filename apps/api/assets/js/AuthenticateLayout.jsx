@@ -27,6 +27,8 @@ export default class AuthenticateLayout extends React.Component {
   }
 
   render() {
+    const path = window.location.pathname
+
     return (
       <div>
         <AppBar position="static">
@@ -37,20 +39,20 @@ export default class AuthenticateLayout extends React.Component {
 
         <section className="text-center mt-5">
           <Link to="/central" className="mr-4">
-            <Button color="primary">
-              Faça login
+            <Button raised={path === "/central"} color="primary">
+              Cadastre sua central
             </Button>
           </Link>
-          <Link to="/central/cadastro">
-            <Button raised color="primary">
-              Cadastre sua central
+          <Link to="/central/login" className="mr-4">
+            <Button raised={path === "/central/login"} color="primary">
+              Faça login
             </Button>
           </Link>
         </section>
 
         <main className="p-4">
-          <Route path="/central" exact={true} component={LoginPage} />
-          <Route path="/central/cadastro" exact={true} component={RegisterPage} />
+          <Route path="/central" exact={true} component={RegisterPage} />
+          <Route path="/central/login" exact={true} component={LoginPage} />
         </main>
       </div>
     )
