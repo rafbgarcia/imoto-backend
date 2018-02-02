@@ -25,6 +25,7 @@ run.config:
 deploy.config:
   # generate the static assets digest
   extra_steps:
+    - (cd apps/api/assets && npm run deploy)
     - mix phx.digest
 
   # just before the new process comes online,
