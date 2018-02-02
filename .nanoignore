@@ -1,8 +1,14 @@
 .DS_Store
-.git/
 README.md
+.git
+.gitignore
 
-apps/*/.gitignore
-apps/*/assets
-apps/*/test
-apps/core/priv/repo
+apps/api/.gitignore
+apps/core/.gitignore
+apps/db/.gitignore
+
+apps/api/assets
+
+apps/core/test
+apps/api/test
+apps/db/test

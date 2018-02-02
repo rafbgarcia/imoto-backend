@@ -3,6 +3,7 @@ import { HttpLink } from 'apollo-link-http'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import { setContext } from 'apollo-link-context';
 import Central from './central'
+import config from 'js/config'
 
 const authLink = setContext((_, { headers }) => {
   return {
@@ -13,7 +14,7 @@ const authLink = setContext((_, { headers }) => {
   }
 });
 const httpLink = authLink.concat(new HttpLink({
-  uri: '//www.imotodelivery.com/central'
+  uri: config.apiHost + '/central',
 }))
 
 export default new ApolloClient({
