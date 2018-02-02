@@ -1,3 +1,0 @@
-#!/bin/bash
-
-mix edeliver build release production --start-deploy
