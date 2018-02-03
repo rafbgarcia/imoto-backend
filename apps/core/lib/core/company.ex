@@ -25,6 +25,7 @@ defmodule Core.Company do
 
     changeset
     |> cast(params, [:phone_number, :name, :central_id, :password_hash, :email])
+    |> validate_required([:name])
     |> cast_assoc(:location)
     |> unique_constraint(:email)
   end

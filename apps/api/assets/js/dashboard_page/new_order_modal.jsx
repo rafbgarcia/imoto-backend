@@ -15,6 +15,7 @@ import { InputLabel } from 'material-ui/Input';
 
 import PhoneField from 'js/shared/phone_field'
 import ZipcodeField from 'js/shared/zipcode_field'
+import * as validate from 'js/shared/validations'
 
 class NewOrderModal extends React.Component {
   state = {
@@ -145,6 +146,11 @@ class NewOrderModal extends React.Component {
     return this.state.companyId.length > 0
   }
 
+  canSendOrder() {
+    const {company} = this.state
+    return validate.notBlank(company.name)
+  }
+
   render() {
     const {open, onClose} = this.props
     const {company, companyId, companies} = this.state
@@ -174,7 +180,7 @@ class NewOrderModal extends React.Component {
           <section className={classes().formControlFlex}>
             <FormControl className="w-50 mr-4">
               <TextField
-                label="Nome da empresa"
+                label="* Nome da empresa"
                 onChange={this.updateCompany}
                 name="name"
                 value={company.name}
@@ -248,7 +254,7 @@ class NewOrderModal extends React.Component {
           </section>
 
           <div className="mt-5">
-            <Button raised color="primary" onClick={this.didClickSendButton}>
+            <Button disabled={!this.canSendOrder()} raised color="primary" onClick={this.didClickSendButton}>
               <AddIcon className="mr-2" />
               Enviar entrega
             </Button>
