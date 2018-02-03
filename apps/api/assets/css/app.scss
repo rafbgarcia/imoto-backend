@@ -1,2 +1,12 @@
 // $font-size-base: .875rem;
 @import "./bootstrap";
+
+/**
+ * Snackbar
+ */
+.snackbar-bg-danger > div {
+  @extend .bg-danger
+}
+.snackbar-bg-success > div {
+  @extend .bg-success
+}

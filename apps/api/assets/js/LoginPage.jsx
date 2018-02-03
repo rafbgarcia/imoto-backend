@@ -24,12 +24,12 @@ export default class LoginPage extends React.Component {
 
     Auth.login(email, password,
       (central) => {
-        showSnack("Sucesso! Redirecionando...")
+        showSnack("Sucesso! Redirecionando...", "success")
         Central.login(central)
-        window.location.reload()
+        window.location.href = "/central"
       },
       (errors) => {
-        showSnack(errors)
+        showSnack(errors, "error")
         this.setState({btnDisabled: false})
       },
     )

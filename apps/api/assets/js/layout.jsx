@@ -41,7 +41,7 @@ export default class Layout extends React.Component {
         <AppBar position="static">
           <div className="d-flex align-items-center">
             <Toolbar>
-              <IconButton onClick={this.openDrawer} color="contrast" aria-label="Menu">
+              <IconButton onClick={this.openDrawer} color="inherit" aria-label="Menu">
                 <MenuIcon />
               </IconButton>
               <Typography type="title" color="inherit">

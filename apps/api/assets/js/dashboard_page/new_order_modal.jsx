@@ -55,7 +55,7 @@ class NewOrderModal extends React.Component {
       }`,
     })
     .then(({data: {companies}}) => this.setState({companies}))
-    .catch(({graphQLErrors}) => showSnack(graphQLErrors.map(err => err.message)))
+    .catch(({graphQLErrors}) => showSnack(graphQLErrors.map(err => err.message), "error"))
   }
 
   updateCompanyId = (evt) => {
@@ -117,8 +117,8 @@ class NewOrderModal extends React.Component {
       }`,
       variables: {companyId},
     })
-    .then(({data: {order}}) => showSnack("Pedido enviado, aguardando confirmação do motoboy"))
-    .catch(({graphQLErrors}) => showSnack(graphQLErrors.map(err => err.message)))
+    .then(({data: {order}}) => showSnack("Pedido enviado, aguardando confirmação do motoboy", "success"))
+    .catch(({graphQLErrors}) => showSnack(graphQLErrors.map(err => err.message), "error"))
 
   }
 
@@ -137,8 +137,8 @@ class NewOrderModal extends React.Component {
       }`,
       variables: {companyParams: company},
     })
-    .then(({data: {order}}) => showSnack("Pedido enviado, aguardando confirmação do motoboy"))
-    .catch(({graphQLErrors}) => showSnack(graphQLErrors.map(err => err.message)))
+    .then(({data: {order}}) => showSnack("Pedido enviado, aguardando confirmação do motoboy", "success"))
+    .catch(({graphQLErrors}) => showSnack(graphQLErrors.map(err => err.message), "error"))
   }
 
   canEdit = () => {
@@ -165,7 +165,7 @@ class NewOrderModal extends React.Component {
               onChange={this.updateCompanyId}
               displayEmpty
             >
-              <MenuItem value="">Criar nova empresa</MenuItem>
+              <MenuItem value="">Nova empresa</MenuItem>
               {getCompaniesOptions(companies)}
             </Select>
           </FormControl>

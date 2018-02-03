@@ -8,11 +8,17 @@ class SnackProvider extends React.Component {
   state = {
     open: false,
     messages: [""],
+    messageType: "default",
   }
 
   getChildContext() {
     return {
-      showSnack: (messages) => { this.setState({open: true, messages}) }
+      /**
+       * @param String messageType "error" | "success" | "default".
+       * Default "default"
+       */
+      showSnack: (messages, messageType = "default") =>
+        this.setState({messageType, messages, open: true})
     }
   }
 
@@ -21,12 +27,12 @@ class SnackProvider extends React.Component {
   }
 
   render() {
-    const {open, messages} = this.state
+    const {open, messages, messageType} = this.state
 
     return (
       <div>
         {this.props.children}
-        <Snack open={open} messages={messages} onClose={this.close} />
+        <Snack open={open} messageType={messageType} messages={messages} onClose={this.close} />
       </div>
     )
   }
@@ -37,17 +43,39 @@ SnackProvider.childContextTypes = {
 }
 
 class Snack extends React.Component {
+  formattedMessages() {
+    const {messages} = this.props
+
+    if (typeof messages === "string") {
+      return messages
+    } else {
+      return messages.map((error, i) => <div key={i}>{error}</div>)
+    }
+  }
+
+  messageClass() {
+    const {messageType} = this.props
+
+    if (messageType === "success")
+      return "snackbar-bg-success"
+    else if (messageType === "error")
+      return "snackbar-bg-danger"
+    else
+      return ""
+  }
+
   render() {
-    const {open, messages, onClose} = this.props
+    const {open, onClose, messageType} = this.props
 
     return (
       <Snackbar
         anchorOrigin={{vertical: 'top', horizontal: 'right'}}
         open={open}
-        autoHideDuration={5000}
+        autoHideDuration={10000}
         onClose={onClose}
+        classes={{anchorTopRight: this.messageClass()}}
         SnackbarContentProps={{'aria-describedby': 'message-id'}}
-        message={formatMessages(messages)}
+        message={this.formattedMessages()}
         action={[
           <IconButton key="close" color="inherit" onClick={onClose}>
             <CloseIcon />
@@ -57,17 +85,5 @@ class Snack extends React.Component {
     )
   }
 }
-
-const formatMessages = (messages) => {
-  if (typeof messages === "string") {
-    return messages
-  } else {
-    return messages.map(Err)
-  }
-}
-
-const Err = (error, i) => (
-  <div className="mb-2" key={i}>{error}</div>
-)
 
 export default SnackProvider

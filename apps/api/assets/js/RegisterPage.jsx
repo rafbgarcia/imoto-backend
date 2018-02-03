@@ -66,13 +66,13 @@ export default class RegisterPage extends React.Component {
       variables: {params: central},
     })
     .then(({data: {central}}) => {
-      showSnack("Conta criada com sucesso! Redirecionando...")
+      showSnack("Conta criada com sucesso! Redirecionando...", "success")
       Central.login(central)
       window.location.href = "/central"
     })
     .catch(({graphQLErrors}) => {
       this.setState({btnDisabled: false})
-      showSnack(graphQLErrors.map(err => err.message))
+      showSnack(graphQLErrors.map(err => err.message), "error")
     })
   }
 

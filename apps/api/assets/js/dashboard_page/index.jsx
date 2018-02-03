@@ -14,7 +14,7 @@ import NewOrderModal from './new_order_modal'
 class DashboardPage extends React.Component{
   state = {
     modalOpen: false,
-    hasNewOrder: true,
+    hasNewOrder: false,
   }
 
   startStopPolling() {
@@ -32,7 +32,7 @@ class DashboardPage extends React.Component{
     } else if (hasPendingOrder) {
       this.props.data.startPolling(2000)
     } else if (hasOngoingOrder) {
-      this.props.data.startPolling(30000)
+      this.props.data.startPolling(10000)
     } else {
       this.props.data.stopPolling()
     }
@@ -42,9 +42,11 @@ class DashboardPage extends React.Component{
     const {startPolling} = this.props.data
     this.setState({modalOpen: false})
 
-    setTimeout(() => {
-      startPolling(2000)
-    }, 1000)
+    /**
+     * This line starts polling after the NewOrderModal is dismissed.
+     * Without it
+     */
+    setTimeout(() => startPolling(2000), 1000)
   }
 
   render() {
