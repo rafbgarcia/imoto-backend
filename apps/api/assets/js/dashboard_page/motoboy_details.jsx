@@ -3,15 +3,7 @@ import gql from 'graphql-tag'
 import { graphql } from 'react-apollo'
 import { CircularProgress } from 'material-ui/Progress';
 import Modal from 'material-ui/Modal';
-
-import {
-  Table,
-  TableBody,
-  TableHeader,
-  TableHeaderColumn,
-  TableRow,
-  TableRowColumn,
-} from 'material-ui/Table';
+import Table, { TableBody, TableCell, TableRow } from 'material-ui/Table';
 import {FormattedDate} from 'react-intl'
 
 function MotoboyDetails({motoboy, open, handleClose, data: {entries, loading}}) {
@@ -19,28 +11,26 @@ function MotoboyDetails({motoboy, open, handleClose, data: {entries, loading}}) 
     <Modal
       open={open}
       onClose={() => handleClose()}
+      style={modalStyles()}
     >
-      <h3>{motoboy.name} - hoje</h3>
-      {Entries(entries, loading)}
+      <div style={innerDivStyles()}>
+        <h5>{motoboy.name} - histórico de hoje</h5>
+        {Entries(entries, loading)}
+      </div>
     </Modal>
   )
 }
 
 function Entries(entries, loading) {
   if (loading) {
-    return <CircularProgress size={30} />
+    return (<CircularProgress size={30} />)
   }
   if (entries.length === 0) {
     return (<span>Nenhuma atividade</span>)
   }
   return (
-    <Table
-      selectable={false}
-    >
-      <TableBody
-        displayRowCheckbox={false}
-        showRowHover={true}
-      >
+    <Table>
+      <TableBody>
         {entries.map(Entry)}
       </TableBody>
     </Table>
@@ -49,15 +39,15 @@ function Entries(entries, loading) {
 
 function Entry(entry, index) {
   return (
-    <TableRow key={index}>
-      <TableRowColumn>{entryText(entry)}</TableRowColumn>
-      <TableRowColumn>
+    <TableRow hover key={index}>
+      <TableCell>{entryText(entry)}</TableCell>
+      <TableCell>
         <FormattedDate
           value={entry.insertedAt}
           hour="numeric"
           minute="numeric"
         />h
-      </TableRowColumn>
+      </TableCell>
     </TableRow>
   )
 }
@@ -74,6 +64,25 @@ function entryText(entry) {
   }
 }
 
+function modalStyles() {
+  return {
+    alignItems: "center",
+    justifyContent: "center",
+  }
+}
+
+function innerDivStyles() {
+  return {
+    width: "40rem",
+    margin: "5rem 0 auto",
+    border: '1px solid #e5e5e5',
+    backgroundColor: '#fff',
+    boxShadow: '0 5px 15px rgba(0, 0, 0, .5)',
+    zIndex: 1,
+    padding: "2rem",
+  };
+}
+
 export default graphql(gql`query motoboyHistory($motoboyId: ID!) {
   entries: motoboyHistory(motoboyId: $motoboyId) {
     text
@@ -84,7 +93,6 @@ export default graphql(gql`query motoboyHistory($motoboyId: ID!) {
 }`, {
   options: ({motoboy: {id}}) => {
     return {
-      fetchPolicy: 'network-only',
       variables: { motoboyId: id},
     }
   }
