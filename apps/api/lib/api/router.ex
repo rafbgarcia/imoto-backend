@@ -1,6 +1,8 @@
 defmodule Api.Router do
   use Api, :router
 
+  get "/", Redirect, to: "/central"
+
   get "/loaderio-8b5de0077a6b032f6f821be422161762/", Api.Controllers.LoaderController, :challenge
   get "/termos-de-uso", Api.CentralController, :terms_of_use
 
@@ -30,5 +32,17 @@ defmodule Api.Router do
   scope "/company" do
     pipe_through :company_api
     post "/", Absinthe.Plug.GraphiQL, schema: Company.GraphqlSchema
+  end
+end
+
+defmodule Redirect do
+  use Api, :controller
+
+  def init(opts), do: opts
+
+  def call(conn, opts) do
+    conn
+    |> Phoenix.Controller.redirect(opts)
+    |> halt()
   end
 end
