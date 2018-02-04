@@ -49,7 +49,7 @@ function Motoboy(motoboy, index, onClick) {
   let dateToShow = getDateToShow(motoboy)
 
   return (
-    <ListItem button key={index}>
+    <ListItem button key={index} onClick={onClick}>
       <ListItemIcon>
         <FiberManualRecordIcon style={{color: iconColor, width: 20}} className="mr-2" />
       </ListItemIcon>
@@ -60,7 +60,6 @@ function Motoboy(motoboy, index, onClick) {
           </div>
         }
         secondary={dateToShow}
-        onClick={onClick}
         style={{lineHeight: 1.5, padding: 0, margin: 0}}
       />
     </ListItem>
