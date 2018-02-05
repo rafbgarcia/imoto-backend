@@ -36,13 +36,11 @@ defmodule Api.Router do
 end
 
 defmodule Redirect do
-  use Api, :controller
-
   def init(opts), do: opts
 
   def call(conn, opts) do
     conn
     |> Phoenix.Controller.redirect(opts)
-    |> halt()
+    |> Plug.Conn.halt()
   end
 end
