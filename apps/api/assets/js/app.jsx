@@ -21,6 +21,11 @@ const theme = createMuiTheme({
   },
 })
 
+
+// Start Sentry
+Raven.config('https://e9dbd50d84e746b3adc21788424f8556@sentry.io/283876').install()
+
+
 document.addEventListener('DOMContentLoaded', () => {
   const page = Central.loggedIn() ? <Layout /> : <AuthenticateLayout />
 
