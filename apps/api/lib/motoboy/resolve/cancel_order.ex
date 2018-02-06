@@ -16,7 +16,7 @@ defmodule Motoboy.Resolve.CancelOrder do
     Repo.transaction(fn ->
       set_no_motoboys!(order)
       add_order_no_motoboys_to_history(order.id)
-      {:ok, current_motoboy} = Motoboy.SharedFunctions.make_available(current_motoboy)
+      {:ok, current_motoboy} = make_motoboy_available(current_motoboy)
 
       current_motoboy
     end)
@@ -25,7 +25,7 @@ defmodule Motoboy.Resolve.CancelOrder do
     Repo.transaction(fn ->
       set_new_motoboy!(order, new_motoboy.id)
       add_order_new_motoboy_to_history(order.id, new_motoboy.id)
-      {:ok, current_motoboy} = Motoboy.SharedFunctions.make_available(current_motoboy)
+      {:ok, current_motoboy} = make_motoboy_available(current_motoboy)
       current_motoboy
     end)
   end
@@ -82,5 +82,11 @@ defmodule Motoboy.Resolve.CancelOrder do
 
   defp add_order_no_motoboys_to_history(order_id) do
     Repo.insert(%History{scope: "order", text: "Pedido cancelado, nenhum motoboy disponível", order_id: order_id})
+  end
+
+  defp make_motoboy_available(motoboy) do
+    motoboy
+    |> Core.Motoboy.changeset(%{state: Core.Motoboy.available(), became_available_at: Timex.local})
+    |> Repo.update
   end
 end
