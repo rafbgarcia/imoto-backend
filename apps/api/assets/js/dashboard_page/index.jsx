@@ -24,17 +24,14 @@ class DashboardPage extends React.Component{
     if (loading || !orders) return
 
     const hasPendingOrder = orders.some((order) => order.pending)
-    const hasOngoingOrder = orders.some((order) => order.confirmed)
 
     if (hasNewOrder) {
       this.props.data.startPolling(2000)
       window.setTimeout(() => this.setState({hasNewOrder: false}), 3000)
     } else if (hasPendingOrder) {
       this.props.data.startPolling(2000)
-    } else if (hasOngoingOrder) {
-      this.props.data.startPolling(10000)
     } else {
-      this.props.data.stopPolling()
+      this.props.data.startPolling(10000)
     }
   }
 
