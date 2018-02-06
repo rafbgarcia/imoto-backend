@@ -2,7 +2,11 @@ defmodule Api.Application do
   use Application
 
   def start(_type, _args) do
-    import Supervisor.Spec
+    import Supervisor.Spec, warn: false
+
+    # Logs for Cowboy
+    PhoenixCowboyLogging.enable_for(:api, Api.Endpoint)
+
 
     # Define workers and child supervisors to be supervised
     children = [
