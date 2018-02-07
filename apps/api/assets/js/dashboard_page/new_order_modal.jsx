@@ -107,37 +107,36 @@ class NewOrderModal extends React.Component {
     const {companyId} = this.state
     const {showSnack} = this.context
 
-    this.props.onClose()
-    showSnack("Enviando pedido...")
-
-    apolloClient.mutate({
+    this._createOrder({
       mutation: gql`mutation createOrderForExistingCompany($companyId: ID!) {
         order: createOrderForExistingCompany(companyId: $companyId) {
           id
         }
       }`,
-      variables: {companyId},
+      variables: { companyId },
     })
-    .then(({data: {order}}) => showSnack("Pedido enviado, aguardando confirmação do motoboy", "success"))
-    .catch(({graphQLErrors}) => showSnack(graphQLErrors.map(err => err.message), "error"))
-
   }
 
   createOrderForNewCompany() {
     const {company} = this.state
-    const {showSnack} = this.context
 
-    this.props.onClose()
-    showSnack("Enviando pedido...")
-
-    apolloClient.mutate({
+    this._createOrder({
       mutation: gql`mutation createOrderForNewCompany($companyParams: CompanyParams) {
         order: createOrderForNewCompany(companyParams: $companyParams) {
           id
         }
       }`,
-      variables: {companyParams: company},
+      variables: { companyParams: company },
     })
+  }
+
+  _createOrder(mutationData) {
+    const {showSnack} = this.context
+
+    this.props.onClose()
+    showSnack("Enviando pedido...")
+
+    apolloClient.mutate(mutationData)
     .then(({data: {order}}) => showSnack("Pedido enviado, aguardando confirmação do motoboy", "success"))
     .catch(({graphQLErrors}) => showSnack(graphQLErrors.map(err => err.message), "error"))
   }

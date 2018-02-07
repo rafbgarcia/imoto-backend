@@ -5,8 +5,8 @@
  * Snackbar
  */
 .snackbar-bg-danger > div {
-  @extend .bg-danger
+  @extend .bg-danger;
 }
 .snackbar-bg-success > div {
-  @extend .bg-success
+  @extend .bg-success;
 }

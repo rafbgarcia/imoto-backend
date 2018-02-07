@@ -14,6 +14,8 @@ defmodule Motoboy.Resolve.SendVerificationCode do
     case Motoboy.NexmoApi.send_verification_code(phone_number) do
       {:ok, %{"status" => "0", "request_id" => request_id}} ->
         {:ok, request_id}
+      {:ok, %{"status" => "10"}} ->
+        {:error, "Você acabou de pedir um código, espere 3 minutos e tente novamente."}
       {_, %{"error_text" => error}} ->
         {:error, error}
       _ ->

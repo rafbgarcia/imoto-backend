@@ -6,28 +6,11 @@ defmodule Test.CreateOrderForNewCompanyTest do
   alias Elixir.Central.Resolve.CreateOrderForNewCompany
 
   test "#handle - happy path" do
-    central = Repo.insert!(%Core.Central{name: "A Central"})
-    motoboy = Repo.insert!(Motoboy.changeset(%Motoboy{
-      central_id: central.id,
-      name: "A Central",
-      phone_number: "(84) 91413-1023",
-      state: "available"
-    }))
-
-    company_params = %{
-      name: "A Company",
-      phone_number: "(45) 4123-1323",
-      location: %{
-        street: "Rua Alguma Coisa",
-        number: "18",
-        complement: "apt 212",
-        zipcode: "85812-230",
-        reference: "Perto da vila naval",
-      }
-    }
+    central = insert_central()
+    motoboy = insert_motoboy(central.id)
 
     {:ok, order} = CreateOrderForNewCompany.handle(
-      %{company_params: company_params},
+      %{company_params: company_params()},
       %{context: %{current_central: central}}
     )
 
@@ -52,25 +35,20 @@ defmodule Test.CreateOrderForNewCompanyTest do
     assert order.company_id == company.id
   end
 
-  test "#handle - handle empty location" do
+  test "Data has empty location" do
     assert Repo.aggregate(Location, :count, :id) == 0
 
-    central = Repo.insert!(%Core.Central{name: "A Central"})
-    motoboy = Repo.insert!(Motoboy.changeset(%Motoboy{
-      central_id: central.id,
-      name: "A Central",
-      phone_number: "(84) 91413-1023",
-      state: "available"
-    }))
-
-    company_params = %{
-      name: "A Company",
-      phone_number: "(45) 4123-1323",
-      location: %{ street: "" }
-    }
+    central = insert_central()
+    motoboy = insert_motoboy(central.id)
 
     {:ok, order} = CreateOrderForNewCompany.handle(
-      %{company_params: company_params},
+      %{
+        company_params: %{
+          name: "A Company",
+          phone_number: "(45) 4123-1323",
+          location: %{ street: "" }
+        }
+      },
       %{context: %{current_central: central}}
     )
 
@@ -80,5 +58,66 @@ defmodule Test.CreateOrderForNewCompanyTest do
     assert Repo.aggregate(Order, :count, :id) == 1
     assert Repo.aggregate(Company, :count, :id) == 1
     assert Repo.aggregate(Location, :count, :id) == 1
+  end
+
+  test "Make sure Motoboy order is correct" do
+    central = insert_central()
+    motoboy1 = insert_motoboy(central.id, %{
+      became_available_at: DateTime.from_naive!(~N[2018-02-07 08:00:00.000], "Etc/UTC")
+    })
+    motoboy2 = insert_motoboy(central.id, %{
+      became_available_at: DateTime.from_naive!(~N[2018-02-07 09:00:00.000], "Etc/UTC")
+    })
+    motoboy3 = insert_motoboy(central.id, %{
+      became_available_at: DateTime.from_naive!(~N[2018-02-07 10:00:00.000], "Etc/UTC")
+    })
+
+    {:ok, order1} = CreateOrderForNewCompany.handle(
+      %{company_params: company_params()},
+      %{context: %{current_central: central}}
+    )
+    {:ok, order2} = CreateOrderForNewCompany.handle(
+      %{company_params: company_params()},
+      %{context: %{current_central: central}}
+    )
+    {:ok, order3} = CreateOrderForNewCompany.handle(
+      %{company_params: company_params()},
+      %{context: %{current_central: central}}
+    )
+
+    assert motoboy1.id == Repo.preload(order1, :motoboy).motoboy.id
+    assert motoboy2.id == Repo.preload(order2, :motoboy).motoboy.id
+    assert motoboy3.id == Repo.preload(order3, :motoboy).motoboy.id
+  end
+
+
+  defp insert_motoboy(central_id, extra_data \\ %{}) do
+    params = Map.merge(%Motoboy{
+      central_id: central_id,
+      name: Faker.Name.name,
+      phone_number: Faker.Phone.EnUs.phone,
+      state: "available",
+    }, extra_data)
+
+    Repo.insert!(Motoboy.changeset(params))
+  end
+
+  defp insert_central do
+    Repo.insert!(%Core.Central{name: Faker.Name.last_name})
+  end
+
+  defp company_params do
+    %{
+      name: "A Company",
+      phone_number: "(45) 4123-1323",
+      email: Faker.Name.first_name <> "@gmail.com",
+      location: %{
+        street: "Rua Alguma Coisa",
+        number: "18",
+        complement: "apt 212",
+        zipcode: "85812-230",
+        reference: "Perto da vila naval",
+      }
+    }
   end
 end
