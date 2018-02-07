@@ -7,7 +7,7 @@ run.config:
 
   extra_packages:
     - python-2.7
-    - nodejs-8.9.4
+    - nodejs-8.9
 
   # we need nodejs in development
   # ensure inotify exists for hot-code reloading
