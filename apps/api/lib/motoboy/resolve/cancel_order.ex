@@ -6,59 +6,48 @@ defmodule Motoboy.Resolve.CancelOrder do
   @doc "returns the current motoboy because he's the one making this request"
   def handle(%{order_id: order_id, reason: _reason}, %{context: %{current_motoboy: current_motoboy}}) do
     order = Motoboy.SharedFunctions.get_order!(order_id, current_motoboy.id)
-    add_cancel_to_history(order.id, current_motoboy.id)
 
-    {:ok, new_motoboy} = get_next_motoboy(current_motoboy)
-    update_order_new_motoboy(order, current_motoboy, new_motoboy)
-  end
-
-  defp update_order_new_motoboy(order, current_motoboy, nil) do
     Repo.transaction(fn ->
-      set_no_motoboys!(order)
-      add_order_no_motoboys_to_history(order.id)
-      {:ok, current_motoboy} = make_motoboy_available(current_motoboy)
+      add_cancel_to_history(order.id, current_motoboy.id)
 
-      current_motoboy
-    end)
-  end
-  defp update_order_new_motoboy(order, current_motoboy, new_motoboy) do
-    Repo.transaction(fn ->
-      set_new_motoboy!(order, new_motoboy.id)
-      add_order_new_motoboy_to_history(order.id, new_motoboy.id)
-      {:ok, current_motoboy} = make_motoboy_available(current_motoboy)
-      current_motoboy
-    end)
-  end
-
-  defp get_next_motoboy(%{id: id, central_id: central_id}) do
-    Repo.transaction(fn ->
-      from(m in Core.Motoboy,
-        lock: "FOR UPDATE",
-        where: m.state == ^Core.Motoboy.available(),
-        where: m.id != ^id,
-        order_by: fragment(
-          """
-          CASE m0.central_id WHEN ? THEN 1 ELSE 2 END,
-          m0.became_available_at ASC
-          """, ^central_id
-        )
-      )
-      |> first
-      |> Repo.one
+      get_next_motoboy(current_motoboy.id, current_motoboy.central_id)
       |> case do
-        nil -> nil
-        motoboy -> make_motoboy_busy!(motoboy)
+        nil -> process_order_without_motoboy_available!(order)
+        new_motoboy -> process_order_with_new_motoboy!(order, new_motoboy)
       end
+
+      make_motoboy_available!(current_motoboy)
     end)
   end
 
-  defp make_motoboy_busy!(motoboy) do
-    motoboy
-    |> Core.Motoboy.changeset(%{state: Core.Motoboy.busy()})
-    |> Repo.update!
+  defp process_order_with_new_motoboy!(order, new_motoboy) do
+    make_motoboy_busy!(new_motoboy)
+    update_order_with_new_motoboy!(order, new_motoboy.id)
+    add_order_new_motoboy_to_history(order.id, new_motoboy.id)
   end
 
-  defp set_new_motoboy!(order, motoboy_id) do
+  defp process_order_without_motoboy_available!(order) do
+    set_no_motoboys!(order)
+    add_order_no_motoboys_to_history(order.id)
+  end
+
+  defp get_next_motoboy(current_motoboy_id, central_id) do
+    from(m in Core.Motoboy,
+      lock: "FOR UPDATE",
+      where: m.state == ^Core.Motoboy.available(),
+      where: m.id != ^current_motoboy_id,
+      order_by: fragment(
+        """
+        CASE m0.central_id WHEN ? THEN 1 ELSE 2 END,
+        m0.became_available_at ASC
+        """, ^central_id
+      )
+    )
+    |> first
+    |> Repo.one
+  end
+
+  defp update_order_with_new_motoboy!(order, motoboy_id) do
     order
     |> Order.changeset(%{motoboy_id: motoboy_id})
     |> Repo.update!
@@ -72,7 +61,7 @@ defmodule Motoboy.Resolve.CancelOrder do
 
   defp add_cancel_to_history(order_id, motoboy_id) do
     Repo.insert(%History{scope: "motoboy", text: "Cancelou pedido", order_id: order_id, motoboy_id: motoboy_id})
-    Repo.insert(%History{scope: "order", text: "Pedido cancelado", order_id: order_id, motoboy_id: motoboy_id})
+    Repo.insert(%History{scope: "order", text: "Motoboy cancelou pedido", order_id: order_id, motoboy_id: motoboy_id})
   end
 
   defp add_order_new_motoboy_to_history(order_id, motoboy_id) do
@@ -84,9 +73,15 @@ defmodule Motoboy.Resolve.CancelOrder do
     Repo.insert(%History{scope: "order", text: "Pedido cancelado, nenhum motoboy disponível", order_id: order_id})
   end
 
-  defp make_motoboy_available(motoboy) do
+  defp make_motoboy_available!(motoboy) do
     motoboy
     |> Core.Motoboy.changeset(%{state: Core.Motoboy.available(), became_available_at: Timex.local})
-    |> Repo.update
+    |> Repo.update!
+  end
+
+  defp make_motoboy_busy!(motoboy) do
+    motoboy
+    |> Core.Motoboy.changeset(%{state: Core.Motoboy.busy()})
+    |> Repo.update!
   end
 end

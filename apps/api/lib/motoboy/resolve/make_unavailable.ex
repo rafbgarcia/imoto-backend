@@ -4,6 +4,7 @@ defmodule Motoboy.Resolve.MakeUnavailable do
   alias Core.{History}
 
   def handle(_args, %{context: %{current_motoboy: current_motoboy}}) do
+    add_to_history(current_motoboy.id)
     make_motoboy_unavailable(current_motoboy)
   end
 
@@ -11,11 +12,6 @@ defmodule Motoboy.Resolve.MakeUnavailable do
     motoboy
     |> Core.Motoboy.changeset(%{state: Core.Motoboy.unavailable(), became_unavailable_at: Timex.local})
     |> Repo.update
-    |> case do
-      {:ok, motoboy} ->
-        add_to_history(motoboy.id)
-        {:ok, motoboy}
-    end
   end
 
   defp add_to_history(motoboy_id) do
