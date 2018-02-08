@@ -6,9 +6,10 @@ defmodule Test.Central.CancelOrder do
   alias Elixir.Motoboy.Resolve.CancelOrder
   alias Elixir.Central.Resolve.CreateOrderForNewCompany
 
-  test "Happy path - no_motoboys" do
+  test "No other motoboys available" do
     central = insert_central()
     motoboy = insert_motoboy(central.id)
+    assert motoboy.became_unavailable_at == nil
 
     {:ok, order} = CreateOrderForNewCompany.handle(
       %{company_params: company_params()},
@@ -16,8 +17,12 @@ defmodule Test.Central.CancelOrder do
     )
     assert order.id != nil
 
-    {:ok, motoboy} = CancelOrder.handle(%{order_id: order.id, reason: ""}, %{context: %{current_motoboy: motoboy}})
-    assert motoboy.state == "unavailable"
+    {:ok, motoboy} = CancelOrder.handle(
+      %{order_id: order.id, reason: ""},
+      %{context: %{current_motoboy: motoboy}}
+    )
+    assert motoboy.state == Core.Motoboy.unavailable()
+    assert motoboy.became_unavailable_at != nil
     assert Repo.get(Core.Order, order.id).state == Core.Order.no_motoboys()
   end
 
