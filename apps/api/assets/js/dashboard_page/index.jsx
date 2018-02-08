@@ -31,7 +31,8 @@ class DashboardPage extends React.Component{
     } else if (hasPendingOrder) {
       this.props.data.startPolling(2000)
     } else {
-      this.props.data.startPolling(10000)
+      // this.props.data.startPolling(10000)
+      this.props.data.startPolling(3000)
     }
   }
 
