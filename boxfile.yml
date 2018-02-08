@@ -15,7 +15,7 @@ run.config:
     - inotify-tools
 
   extra_steps:
-    - (cd apps/api/assets && npm rebuild node-sass)
+    # - (cd apps/api/assets && npm rebuild node-sass)
     - (cd apps/api/assets && npm install)
     - (cd apps/api/assets && npm run deploy)
 

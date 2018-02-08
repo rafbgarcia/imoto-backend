@@ -3,7 +3,9 @@ defmodule Motoboy.Resolve.CancelOrder do
 
   alias Core.{History, Order}
 
-  @doc "returns the current motoboy because he's the one making this request"
+  @doc """
+  returns the current motoboy because he's the one making this request
+  """
   def handle(%{order_id: order_id, reason: _reason}, %{context: %{current_motoboy: current_motoboy}}) do
     order = Motoboy.SharedFunctions.get_order!(order_id, current_motoboy.id)
 
@@ -16,13 +18,14 @@ defmodule Motoboy.Resolve.CancelOrder do
         new_motoboy -> process_order_with_new_motoboy!(order, new_motoboy)
       end
 
-      make_motoboy_available!(current_motoboy)
+      make_motoboy_unavailable!(current_motoboy)
     end)
   end
 
   defp process_order_with_new_motoboy!(order, new_motoboy) do
     make_motoboy_busy!(new_motoboy)
     update_order_with_new_motoboy!(order, new_motoboy.id)
+    notify_new_motoboy(new_motoboy.one_signal_player_id)
     add_order_new_motoboy_to_history(order.id, new_motoboy.id)
   end
 
@@ -73,9 +76,9 @@ defmodule Motoboy.Resolve.CancelOrder do
     Repo.insert(%History{scope: "order", text: "Pedido cancelado, nenhum motoboy disponível", order_id: order_id})
   end
 
-  defp make_motoboy_available!(motoboy) do
+  defp make_motoboy_unavailable!(motoboy) do
     motoboy
-    |> Core.Motoboy.changeset(%{state: Core.Motoboy.available(), became_available_at: Timex.local})
+    |> Core.Motoboy.changeset(%{state: Core.Motoboy.unavailable(), became_unavailable_at: Timex.local})
     |> Repo.update!
   end
 
@@ -83,5 +86,9 @@ defmodule Motoboy.Resolve.CancelOrder do
     motoboy
     |> Core.Motoboy.changeset(%{state: Core.Motoboy.busy()})
     |> Repo.update!
+  end
+
+  defp notify_new_motoboy(player_id) do
+    Api.OneSignal.notify(player_id, "Você tem uma nova entrega!")
   end
 end
