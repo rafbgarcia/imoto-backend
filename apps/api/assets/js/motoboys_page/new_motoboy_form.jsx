@@ -33,12 +33,9 @@ class NewMotoboyForm extends React.Component {
     .then(({data: {motoboy}}) => {
       this.setState({ newMotoboy: {name: "", phoneNumber: ""}})
       showSnack("Motoboy adicionado!", "success")
-
       onCreate(motoboy)
     })
-    .catch(({graphQLErrors}) =>
-      showSnack(graphQLErrors.map(err => err.message), "error")
-    )
+    .catch((errors) => showSnack(errors, "error"))
   }
 
   render() {

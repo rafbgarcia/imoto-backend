@@ -7,7 +7,7 @@ import IconButton from 'material-ui/IconButton'
 class SnackProvider extends React.Component {
   state = {
     open: false,
-    messages: [""],
+    messages: null,
     messageType: "default",
   }
 
@@ -46,10 +46,14 @@ class Snack extends React.Component {
   formattedMessages() {
     const {messages} = this.props
 
+    if (!messages || messages == [""]) return
+
     if (typeof messages === "string") {
       return messages
-    } else {
+    } else if (messages.map && typeof messages[0] === "string") {
       return messages.map((error, i) => <div key={i}>{error}</div>)
+    } else if (messages.graphQLErrors && messages.graphQLErrors[0]) {
+      return messages.graphQLErrors.map((error, i) => <div key={i}>{error.message}</div>)
     }
   }
 

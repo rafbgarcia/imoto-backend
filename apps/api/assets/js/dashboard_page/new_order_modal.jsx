@@ -56,7 +56,7 @@ class NewOrderModal extends React.Component {
       }`,
     })
     .then(({data: {companies}}) => this.setState({companies}))
-    .catch(({graphQLErrors}) => showSnack(graphQLErrors.map(err => err.message), "error"))
+    .catch((errors) => showSnack(errors, "error"))
   }
 
   updateCompanyId = (evt) => {
@@ -138,7 +138,7 @@ class NewOrderModal extends React.Component {
 
     apolloClient.mutate(mutationData)
     .then(({data: {order}}) => showSnack("Pedido enviado, aguardando confirmação do motoboy", "success"))
-    .catch(({graphQLErrors}) => showSnack(graphQLErrors.map(err => err.message), "error"))
+    .catch((errors) => showSnack(errors, "error"))
   }
 
   canEdit = () => {

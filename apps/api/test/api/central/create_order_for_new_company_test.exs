@@ -1,4 +1,4 @@
-defmodule Test.CreateOrderForNewCompanyTest do
+defmodule Test.Central.CreateOrderForNewCompanyTest do
   use ExUnit.Case
   use Api.ConnCase
   use Api, :testcase

@@ -70,9 +70,9 @@ export default class RegisterPage extends React.Component {
       Central.login(central)
       window.location.href = "/central"
     })
-    .catch(({graphQLErrors}) => {
+    .catch((errors) => {
       this.setState({btnDisabled: false})
-      showSnack(graphQLErrors.map(err => err.message), "error")
+      showSnack(errors, "error")
     })
   }
 

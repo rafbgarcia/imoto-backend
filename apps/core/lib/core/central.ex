@@ -27,5 +27,6 @@ defmodule Core.Central do
     ])
     |> validate_required([:name, :cnpj, :accepted_terms_of_use])
     |> unique_constraint(:email)
+    |> unique_constraint(:cnpj)
   end
 end
