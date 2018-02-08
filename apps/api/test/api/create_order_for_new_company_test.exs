@@ -63,13 +63,16 @@ defmodule Test.CreateOrderForNewCompanyTest do
   test "Make sure Motoboy order is correct" do
     central = insert_central()
     motoboy1 = insert_motoboy(central.id, %{
-      became_available_at: DateTime.from_naive!(~N[2018-02-07 08:00:00.000], "Etc/UTC")
+      became_available_at: DateTime.from_naive!(~N[2018-02-07 08:00:00.000], "Etc/UTC"),
+      active: true
     })
     motoboy2 = insert_motoboy(central.id, %{
-      became_available_at: DateTime.from_naive!(~N[2018-02-07 09:00:00.000], "Etc/UTC")
+      became_available_at: DateTime.from_naive!(~N[2018-02-07 09:00:00.000], "Etc/UTC"),
+      active: true
     })
     motoboy3 = insert_motoboy(central.id, %{
-      became_available_at: DateTime.from_naive!(~N[2018-02-07 10:00:00.000], "Etc/UTC")
+      became_available_at: DateTime.from_naive!(~N[2018-02-07 10:00:00.000], "Etc/UTC"),
+      active: true
     })
 
     {:ok, order1} = CreateOrderForNewCompany.handle(
@@ -90,6 +93,21 @@ defmodule Test.CreateOrderForNewCompanyTest do
     assert motoboy3.id == Repo.preload(order3, :motoboy).motoboy.id
   end
 
+  test "Make sure it accounts for inactive motoboys" do
+    central = insert_central()
+
+    motoboy = insert_motoboy(central.id, %{
+      became_available_at: DateTime.from_naive!(~N[2018-02-07 07:00:00.000], "Etc/UTC"),
+      active: false
+    })
+
+    {:error, error} = CreateOrderForNewCompany.handle(
+      %{company_params: company_params()},
+      %{context: %{current_central: central}}
+    )
+
+    assert error == "Nenhum motoboy disponível"
+  end
 
   defp insert_motoboy(central_id, extra_data \\ %{}) do
     params = Map.merge(%Motoboy{
