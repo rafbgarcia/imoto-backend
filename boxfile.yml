@@ -49,5 +49,8 @@ deploy.config:
 data.db:
   image: nanobox/postgresql:9.6
 
+data.elasticsearch:
+  image: nanobox/elasticsearch:5
+
 web.main:
   start: node-start mix phx.server

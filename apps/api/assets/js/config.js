@@ -3,11 +3,11 @@ let config = {}
 
 if (isProduction) {
   config = {
-    apiHost: "https://imotodelivery.com"
+    apiHost: "https://imotodelivery.com",
   }
 } else {
   config = {
-    apiHost: "http://localhost:4000"
+    apiHost: "http://localhost:4000",
   }
 }
 
