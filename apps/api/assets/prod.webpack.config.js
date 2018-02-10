@@ -37,10 +37,9 @@ module.exports = {
   },
 
   plugins: [
-    new webpack.DefinePlugin({ // <-- key to reducing React's size
+    new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('production')
     }),
-    // new webpack.optimize.DedupePlugin(), //dedupe similar code
     new webpack.optimize.UglifyJsPlugin({
       mangle: true,
       compress: {
@@ -53,9 +52,9 @@ module.exports = {
       output: {
         comments: false,
       },
-      exclude: [/\.min\.js$/gi]
-    }), //minify everything
-    new webpack.optimize.AggressiveMergingPlugin(), //Merge chunks
+      exclude: [/\.min\.js$/gi] // skip pre-minified libs
+    }),
+    new webpack.optimize.AggressiveMergingPlugin(), // Merge chunks
     new CompressionPlugin({
       asset: "[path].gz[query]",
       algorithm: "gzip",
