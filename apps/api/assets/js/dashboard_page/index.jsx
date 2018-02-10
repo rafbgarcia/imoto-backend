@@ -17,6 +17,10 @@ class DashboardPage extends React.Component{
     hasNewOrder: false,
   }
 
+  componentWillMount() {
+    this.props.data.refetch()
+  }
+
   startStopPolling() {
     const {orders, loading} = this.props.data
     const {hasNewOrder} = this.state
