@@ -15,10 +15,9 @@ run.config:
 
   extra_steps:
     # - (cd apps/api/assets && npm rebuild node-sass)
-    - rm apps/api/assets/package-lock.json
+    # - rm apps/api/assets/package-lock.json
     - rm -rf apps/api/priv/static/js/app.js*
     - (cd apps/api/assets && npm install)
-    - (cd apps/api/assets && node_modules/.bin/brunch build)
 
   # cache node_modules
   # cache_dirs:
