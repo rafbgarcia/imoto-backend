@@ -17,11 +17,34 @@ import PhoneField from 'js/shared/phone_field'
 import ZipcodeField from 'js/shared/zipcode_field'
 import * as validate from 'js/shared/validations'
 
+import { elasticsearch } from "elasticsearch"
+
 class NewOrderModal extends React.Component {
   state = {
     companies: null,
     companyId: "",
     company: this.emptyCompany()
+  }
+
+  componentDidMount() {
+    this.elasticSearch()
+  }
+
+  elasticSearch() {
+    var elasticsearch = require('elasticsearch')
+    var client = new elasticsearch.Client({
+      host: 'localhost:9200',
+      log: 'trace',
+      apiVersion: "5.4",
+    })
+
+    client.ping({}, function (error) {
+      if (error) {
+        console.trace('elasticsearch cluster is down!');
+      } else {
+        console.log('All is well');
+      }
+    })
   }
 
   emptyCompany() {
