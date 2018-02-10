@@ -9,19 +9,20 @@ run.config:
     - python-2.7
     - nodejs-8.9
 
-  # we need nodejs in development
-  # ensure inotify exists for hot-code reloading
-  dev_packages:
-    - inotify-tools
+  # dev_packages:
+    # ensure inotify exists for hot-code reloading
+    # - inotify-tools
 
   extra_steps:
     # - (cd apps/api/assets && npm rebuild node-sass)
+    - rm apps/api/assets/package-lock.json
+    - rm -rf apps/api/priv/static/js/app.js*
     - (cd apps/api/assets && npm install)
-    - (cd apps/api/assets && npm run deploy)
+    - (cd apps/api/assets && node_modules/.bin/brunch build)
 
   # cache node_modules
-  cache_dirs:
-    - apps/api/assets/node_modules
+  # cache_dirs:
+  #   - apps/api/assets/node_modules
 
   # add node_module bins to the $PATH
   extra_path_dirs:
