@@ -17,11 +17,11 @@ run.config:
     # - (cd apps/api/assets && npm rebuild node-sass)
     # - rm apps/api/assets/package-lock.json
     - rm -rf apps/api/priv/static/js/app.js*
-    - (cd apps/api/assets && npm install)
+    - (cd apps/api/assets && npm install && npm run build)
 
   # cache node_modules
-  cache_dirs:
-    - apps/api/assets/node_modules
+  # cache_dirs:
+  #   - apps/api/assets/node_modules
 
   # add node_module bins to the $PATH
   extra_path_dirs:

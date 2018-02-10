@@ -1,8 +1,4 @@
-var webpack = require('webpack');
-var CompressionPlugin = require('compression-webpack-plugin');
-
 module.exports = {
-  context: __dirname,
   entry: __dirname + "/js/app.jsx",
 
   output: {
@@ -35,4 +31,7 @@ module.exports = {
     extensions: [ '.js', '.jsx', '.json' ],
     modules: [ "node_modules", "js" ],
   },
+
+  plugins: [
+  ],
 };

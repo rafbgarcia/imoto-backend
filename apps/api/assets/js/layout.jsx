@@ -3,9 +3,6 @@ import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
 import Typography from 'material-ui/Typography';
 import Button from 'material-ui/Button';
-import IconButton from 'material-ui/IconButton';
-import MenuIcon from 'material-ui-icons/Menu';
-import Drawer from 'material-ui/Drawer'
 import { MenuItem } from 'material-ui/Menu'
 
 import Central from './central'
@@ -41,9 +38,6 @@ export default class Layout extends React.Component {
         <AppBar position="static">
           <div className="d-flex align-items-center">
             <Toolbar>
-              <IconButton onClick={this.openDrawer} color="inherit" aria-label="Menu">
-                <MenuIcon />
-              </IconButton>
               <Typography type="title" color="inherit">
                 {Central.current().name}
               </Typography>
@@ -55,31 +49,33 @@ export default class Layout extends React.Component {
           </div>
         </AppBar>
 
-        <main className="p-4">
-          <Route path="/central" exact={true} component={DashboardPage} />
-          <Route path="/central/motoboys" exact={true} component={MotoboysPage} />
-        </main>
+        <section className="row mt-4">
+          <nav className="col-sm-2">
+            <div>
+              <small className="text-muted pl-3"><strong>MENU</strong></small>
+            </div>
+            <Link to="/central" style={{width: 250}}>
+              <MenuItem onClick={this.closeDrawer}>Início</MenuItem>
+            </Link>
+            <Link to="/central/motoboys">
+              <MenuItem onClick={this.closeDrawer}>Motoboys</MenuItem>
+            </Link>
+            <Link to="/central">
+              <MenuItem onClick={this.logout}>
+                Sair
+              </MenuItem>
+            </Link>
+          </nav>
+
+          <main className="col-sm-10">
+            <Route path="/central" exact={true} component={DashboardPage} />
+            <Route path="/central/motoboys" exact={true} component={MotoboysPage} />
+          </main>
+        </section>
 
         <footer className="text-center " style={{margin: "10rem 0 2rem"}}>
           <a href="/termos-de-uso" target="_blank">Termos de uso</a>
         </footer>
-
-        <Drawer
-          open={this.state.opened}
-          onClose={this.closeDrawer}
-        >
-          <Link to="/central" style={{width: 250}}>
-            <MenuItem onClick={this.closeDrawer}>Página inicial</MenuItem>
-          </Link>
-          <Link to="/central/motoboys">
-            <MenuItem onClick={this.closeDrawer}>Motoboys</MenuItem>
-          </Link>
-          <Link to="/central">
-            <MenuItem onClick={this.logout}>
-              Sair
-            </MenuItem>
-          </Link>
-        </Drawer>
       </div>
     )
   }

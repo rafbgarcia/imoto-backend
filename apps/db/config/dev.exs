@@ -8,10 +8,10 @@ config :db, Db.Repo,
   database: "imoto_dev",
   pool_size: 10
 
-# config :db, Db.Repo,
-#   adapter: Ecto.Adapters.Postgres,
-#   username: "rafa",
-#   password: "",
-#   database: "imoto_dev",
-#   hostname: "localhost",
-#   pool_size: 10
+config :db, Db.Repo,
+  adapter: Ecto.Adapters.Postgres,
+  username: "rafa",
+  password: "",
+  database: "imoto_dev",
+  hostname: "localhost",
+  pool_size: 10
