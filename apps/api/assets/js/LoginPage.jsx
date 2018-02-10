@@ -1,16 +1,17 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import linkState from 'linkstate';
+
 import TextField from 'material-ui/TextField'
 import Button from 'material-ui/Button'
-import Auth from './auth'
 import Typography from 'material-ui/Typography'
 import AppBar from 'material-ui/AppBar';
+
 import Central from 'js/central'
+import Auth from './auth'
 
 export default class LoginPage extends React.Component {
   state = {
-    email: "",
-    password: "",
     btnDisabled: false,
   }
 
@@ -35,9 +36,7 @@ export default class LoginPage extends React.Component {
     )
   }
 
-  render() {
-    const {btnDisabled} = this.state
-
+  render({}, {email, password, btnDisabled}) {
     return (
       <section className="d-flex align-items-center justify-content-center mt-5">
         <div className="col-xs-10 col-sm-6 col-md-4 thumbnail">
@@ -45,13 +44,15 @@ export default class LoginPage extends React.Component {
 
           <TextField
             label="Email"
-            onChange={(evt) => this.setState({email: evt.target.value})}
+            onChange={linkState(this, 'email')}
+            value={email}
             margin="normal"
             fullWidth
           />
           <TextField
             label="Senha"
-            onChange={(evt) => this.setState({password: evt.target.value})}
+            onChange={linkState(this, 'password')}
+            value={password}
             margin="normal"
             type="password"
             fullWidth
