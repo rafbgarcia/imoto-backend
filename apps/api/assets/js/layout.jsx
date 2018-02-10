@@ -20,12 +20,7 @@ export default class Layout extends React.Component {
     opened: false,
   }
 
-  openDrawer = () => this.setState({opened: true})
-  closeDrawer = () => this.setState({opened: false})
-
   logout = () => {
-    this.closeDrawer()
-
     Auth.logout(Central.current().token, () => {
       window.location.reload()
     })
@@ -55,10 +50,10 @@ export default class Layout extends React.Component {
               <small className="text-muted pl-3"><strong>MENU</strong></small>
             </div>
             <Link to="/central" style={{width: 250}}>
-              <MenuItem onClick={this.closeDrawer}>Início</MenuItem>
+              <MenuItem>Início</MenuItem>
             </Link>
             <Link to="/central/motoboys">
-              <MenuItem onClick={this.closeDrawer}>Motoboys</MenuItem>
+              <MenuItem>Motoboys</MenuItem>
             </Link>
             <Link to="/central">
               <MenuItem onClick={this.logout}>
