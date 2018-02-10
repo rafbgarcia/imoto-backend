@@ -54,6 +54,10 @@ export default class AuthenticateLayout extends React.Component {
           <Route path="/central" exact={true} component={RegisterPage} />
           <Route path="/central/login" exact={true} component={LoginPage} />
         </main>
+
+        <footer className="text-center " style={{margin: "10rem 0 2rem"}}>
+          <a href="/termos-de-uso" target="_blank">Termos de uso</a>
+        </footer>
       </div>
     )
   }
