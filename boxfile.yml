@@ -9,9 +9,9 @@ run.config:
     - python-2.7
     - nodejs-8.9
 
-  # dev_packages:
+  dev_packages:
     # ensure inotify exists for hot-code reloading
-    # - inotify-tools
+    - inotify-tools
 
   extra_steps:
     # - (cd apps/api/assets && npm rebuild node-sass)
@@ -20,8 +20,8 @@ run.config:
     - (cd apps/api/assets && npm install)
 
   # cache node_modules
-  # cache_dirs:
-  #   - apps/api/assets/node_modules
+  cache_dirs:
+    - apps/api/assets/node_modules
 
   # add node_module bins to the $PATH
   extra_path_dirs:
