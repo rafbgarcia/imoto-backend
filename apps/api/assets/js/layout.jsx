@@ -10,16 +10,9 @@ import Auth from './auth'
 import DashboardPage from './dashboard_page'
 import MotoboysPage from './motoboys_page'
 
-import {
-  Route,
-  Link
-} from 'react-router-dom'
+import { Route, Link } from 'react-router-dom'
 
 export default class Layout extends React.Component {
-  state = {
-    opened: false,
-  }
-
   logout = () => {
     Auth.logout(Central.current().token, () => {
       window.location.reload()
@@ -47,7 +40,8 @@ export default class Layout extends React.Component {
         <section className="row mt-4">
           <nav className="col-sm-2">
             <div>
-              <small className="text-muted pl-3"><strong>MENU</strong></small>
+              <small style={{fontSize: "0.7rem"}} className="text-muted pl-3"><strong>MENU</strong></small>
+              <hr className="m-0" />
             </div>
             <Link to="/central" style={{width: 250}}>
               <MenuItem>Início</MenuItem>
