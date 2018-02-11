@@ -4,11 +4,15 @@ export function notBlank(...values) {
   })
 }
 
-function isBlank(val) {
+export function allBlank(...values) {
+  return values.every(isBlank)
+}
+
+export function isBlank(val) {
   return !val || val.length === 0
 }
 
-function lengthGreaterThan(val, length) {
+export function lengthGreaterThan(val, length) {
   return !isBlank(val) && val.length > length
 }
 

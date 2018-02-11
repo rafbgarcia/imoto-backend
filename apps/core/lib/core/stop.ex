@@ -3,15 +3,23 @@ defmodule Core.Stop do
 
   schema "stops" do
     belongs_to(:order, Core.Order)
-    belongs_to(:location, Core.Location)
     field(:sequence, :integer)
     field(:instructions, :string)
+
+    field(:street, :string)
+    field(:number, :string)
+    field(:neighborhood, :string)
+    field(:zipcode, :string)
+    field(:complement, :string)
+    field(:reference, :string)
+    field(:city, :string)
+    field(:uf, :string)
+    field(:lat, :decimal)
+    field(:lng, :decimal)
   end
 
   def changeset(changeset, params \\ %{}) do
     changeset
-    |> cast(params, [:location_id, :instructions, :sequence])
-    |> cast_assoc(:location)
-    |> validate_required([:instructions])
+    |> cast(params, [:instructions, :sequence])
   end
 end

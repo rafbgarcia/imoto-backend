@@ -18,6 +18,7 @@ import * as validate from 'js/shared/validations'
 export default class NewCustomerModal extends React.Component {
   state = {
     customer: this.emptyCustomer(),
+    btnDisabled: false,
   }
 
   emptyCustomer() {
@@ -40,6 +41,7 @@ export default class NewCustomerModal extends React.Component {
     const {customer} = this.state
     const {onCreate} = this.props
 
+    this.setState({ btnDisabled: true })
     showSnack("Criando cliente...")
 
     apolloClient.mutate({
@@ -52,14 +54,18 @@ export default class NewCustomerModal extends React.Component {
     })
     .then(({data: {customer}}) => {
       onCreate(true)
+      this.setState({ btnDisabled: false })
       showSnack("Cliente criado com sucesso", "success")
     })
-    .catch((errors) => showSnack(errors, "error"))
+    .catch((errors) => {
+      this.setState({ btnDisabled: false })
+      showSnack(errors, "error")
+    })
   }
 
   canCreate = () => {
-    const {customer} = this.state
-    return validate.notBlank(customer.name)
+    const {customer, btnDisabled} = this.state
+    return btnDisabled || validate.notBlank(customer.name)
   }
 
   render({open, onCreate}, {customer}) {
@@ -122,14 +128,14 @@ export default class NewCustomerModal extends React.Component {
 
           <section className={classes().formControlFlex}>
             <FormControl className="w-25">
-              <ZipcodeField
+              <TextField
                 label="Bairro"
                 onChange={linkState(this, 'customer.neighborhood')}
                 name="neighborhood"
                 value={customer.neighborhood}
               />
             </FormControl>
-            <FormControl className="w-25">
+            <FormControl className="w-25 ml-4 mr-4">
               <ZipcodeField
                 label="CEP"
                 onChange={linkState(this, 'customer.zipcode')}
@@ -137,7 +143,7 @@ export default class NewCustomerModal extends React.Component {
                 value={customer.zipcode}
               />
             </FormControl>
-            <FormControl className="w-50 ml-4">
+            <FormControl className="w-50">
               <TextField
                 label="Ponto de referência"
                 onChange={linkState(this, 'customer.reference')}

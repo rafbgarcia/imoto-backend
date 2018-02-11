@@ -47,10 +47,11 @@ defmodule Central.GraphqlSchema do
       resolve(&Central.Resolve.CreateCustomer.handle/2)
     end
 
-    # field :create_order_for_existing_company, :order do
-    #   arg :company_id, non_null(:id)
-    #   resolve &Central.Resolve.CreateOrderForExistingCompany.handle/2
-    # end
+    field :create_order, :order do
+      arg :motoboy_id, :id
+      arg :params, :order_params
+      resolve &Central.Resolve.CreateOrder.handle/2
+    end
 
     # field :create_order_for_new_company, :order do
     #   arg :company_params, :company_params
@@ -82,23 +83,41 @@ defmodule Central.GraphqlSchema do
     field(:active, non_null(:boolean))
   end
 
-  input_object :company_params do
-    field(:name, :string)
-    field(:phone_number, :string)
-    field(:location, :location_input)
+  input_object :order_params do
+    field(:central_customer_id, :id)
+    field(:stops, list_of(:stops_input))
   end
 
-  input_object :location_input do
-    field(:name, :string)
+  input_object :stops_input do
+    field(:sequence, :integer)
+    field(:instructions, :string)
     field(:street, :string)
     field(:number, :string)
-    field(:neighborhood, :string)
-    field(:zipcode, :string)
     field(:complement, :string)
+    field(:neighborhood, :string)
     field(:reference, :string)
+    field(:zipcode, :string)
     field(:city, :string)
     field(:uf, :string)
   end
+
+  # input_object :company_params do
+  #   field(:name, :string)
+  #   field(:phone_number, :string)
+  #   field(:location, :location_input)
+  # end
+
+  # input_object :location_input do
+  #   field(:name, :string)
+  #   field(:street, :string)
+  #   field(:number, :string)
+  #   field(:neighborhood, :string)
+  #   field(:zipcode, :string)
+  #   field(:complement, :string)
+  #   field(:reference, :string)
+  #   field(:city, :string)
+  #   field(:uf, :string)
+  # end
 
   input_object :central_params do
     field(:name, :string)
