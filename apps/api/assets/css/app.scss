@@ -4,9 +4,11 @@
 /**
  * Snackbar
  */
-.snackbar-bg-danger > div {
-  @extend .bg-danger;
-}
-.snackbar-bg-success > div {
-  @extend .bg-success;
-}
+.snackbar-bg-danger > div  { @extend .bg-danger; }
+.snackbar-bg-success > div { @extend .bg-success; }
+
+
+/**
+ * Bootstrap override
+ */
+.bg-light { background: #eaeaea }

@@ -53,7 +53,7 @@ export default class NewCustomerModal extends React.Component {
       variables: { params: customer },
     })
     .then(({data: {customer}}) => {
-      onCreate(true)
+      onCreate(customer)
       this.setState({ btnDisabled: false })
       showSnack("Cliente criado com sucesso", "success")
     })

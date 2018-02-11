@@ -52,11 +52,15 @@ defmodule Central.GraphqlSchema do
       arg :params, :order_params
       resolve &Central.Resolve.CreateOrder.handle/2
     end
+  end
 
-    # field :create_order_for_new_company, :order do
-    #   arg :company_params, :company_params
-    #   resolve &Central.Resolve.CreateOrderForNewCompany.handle/2
-    # end
+  input_object :central_params do
+    field(:name, :string)
+    field(:email, :string)
+    field(:cnpj, :string)
+    field(:phone_number, :string)
+    field(:password, :string)
+    field(:accepted_terms_of_use, :boolean)
   end
 
   input_object :central_customer_params do
@@ -99,32 +103,5 @@ defmodule Central.GraphqlSchema do
     field(:zipcode, :string)
     field(:city, :string)
     field(:uf, :string)
-  end
-
-  # input_object :company_params do
-  #   field(:name, :string)
-  #   field(:phone_number, :string)
-  #   field(:location, :location_input)
-  # end
-
-  # input_object :location_input do
-  #   field(:name, :string)
-  #   field(:street, :string)
-  #   field(:number, :string)
-  #   field(:neighborhood, :string)
-  #   field(:zipcode, :string)
-  #   field(:complement, :string)
-  #   field(:reference, :string)
-  #   field(:city, :string)
-  #   field(:uf, :string)
-  # end
-
-  input_object :central_params do
-    field(:name, :string)
-    field(:email, :string)
-    field(:cnpj, :string)
-    field(:phone_number, :string)
-    field(:password, :string)
-    field(:accepted_terms_of_use, :boolean)
   end
 end

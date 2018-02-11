@@ -33,11 +33,11 @@ export default class FinishedOrder extends React.Component {
         <div className={`mt-3 ${hidden}`}>
           <div className="mb-2 d-flex align-items-center">
             <PersonIcon />
-            <span className="ml-2">{order.company.name}</span>
+            <span className="ml-2">{order.customer.name}</span>
           </div>
           <div className="mb-2 d-flex align-items-center">
             <PhoneIcon />
-            <span className="ml-2">{order.company.phoneNumber}</span>
+            <span className="ml-2">{order.customer.phoneNumber}</span>
           </div>
           <div className="mb-2 d-flex align-items-center">
             <MotorcycleIcon />

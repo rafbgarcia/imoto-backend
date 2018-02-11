@@ -27,11 +27,11 @@ export default class ConfirmedOrder extends React.Component {
           <div>
             <div className="mb-2 d-flex align-items-center">
               <PersonIcon />
-              <span>{order.company.name}</span>
+              <span>{order.customer.name}</span>
             </div>
             <div className="d-flex align-items-center">
               <PhoneIcon />
-              <span>{order.company.phoneNumber}</span>
+              <span>{order.customer.phoneNumber}</span>
             </div>
           </div>
           <div>
@@ -57,10 +57,10 @@ class Stop extends React.Component {
     const {stop} = this.props
     return (
       <section className="mt-4 mb-2">
-        <div className="mb-2"><strong>{stop.sequence+1}ª parada - {stop.location.name}</strong></div>
+        <div className="mb-2"><strong>{stop.sequence+1}ª parada</strong></div>
         <div className="mb-2 d-flex align-items-center">
           <PlaceIcon className="mr-2" />
-          {stop.location.line1}
+          {stop.line1}
         </div>
         <div className="d-flex align-items-center">
           <ListIcon className="mr-2" />

@@ -1,9 +1,9 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import linkState from 'linkstate';
 import TextField from 'material-ui/TextField'
 import Button from 'material-ui/Button'
 import Auth from './auth'
-import Typography from 'material-ui/Typography'
 import AppBar from 'material-ui/AppBar'
 import Checkbox from 'material-ui/Checkbox'
 import {FormControlLabel} from 'material-ui/Form'
@@ -28,11 +28,6 @@ export default class RegisterPage extends React.Component {
     },
   }
 
-  updateCompany = (evt) => {
-    const changes = {[evt.target.name]: evt.target.value}
-    this.setState({central: {...this.state.central, ...changes}})
-  }
-
   updateTermsOfUse = (evt) => {
     const changes = {acceptedTermsOfUse: !this.state.central.acceptedTermsOfUse}
     this.setState({central: {...this.state.central, ...changes}})
@@ -52,7 +47,7 @@ export default class RegisterPage extends React.Component {
     showSnack("Criando cadastro...")
 
     apolloClient.mutate({
-      mutation: gql`mutation Register($params: CompanyParams) {
+      mutation: gql`mutation Register($params: CentralParams) {
         central: register(params: $params) {
           id
           name
@@ -82,23 +77,23 @@ export default class RegisterPage extends React.Component {
     return (
       <section className="d-flex align-items-center justify-content-center mt-5">
         <div className="col-xs-10 col-sm-6 col-md-4 thumbnail">
-          <Typography type="display1">Informe os dados abaixo</Typography>
+          <h3>Informe os dados abaixo</h3>
 
           <div className="d-flex align-items-center">
             <TextField
               label="* Nome da central"
-              onChange={this.updateCompany}
+              onChange={linkState(this, "central.name")}
+              value={central.name}
               margin="normal"
               className="mr-4"
               name="name"
-              value={central.name}
               fullWidth
             />
             <PhoneField
               label="* Telefone"
               name="phoneNumber"
               margin="normal"
-              onChange={this.updateCompany}
+              onChange={linkState(this, "central.phoneNumber")}
               value={central.phoneNumber}
               fullWidth
             />
@@ -108,7 +103,7 @@ export default class RegisterPage extends React.Component {
             label="* CNPJ"
             name="cnpj"
             margin="normal"
-            onChange={this.updateCompany}
+            onChange={linkState(this, "central.cnpj")}
             value={central.cnpj}
             helperText="Para dar mais segurança aos clientes, checaremos se sua central realmente existe"
             fullWidth
@@ -118,20 +113,20 @@ export default class RegisterPage extends React.Component {
             <TextField
               error={!validate.email(central.email)}
               label="* E-mail"
-              onChange={this.updateCompany}
+              onChange={linkState(this, "central.email")}
+              value={central.email}
               name="email"
               margin="normal"
               className="mr-4"
-              value={central.email}
               fullWidth
             />
             <TextField
               fullWidth
               label="* Senha"
               name="password"
-              onChange={this.updateCompany}
-              margin="normal"
+              onChange={linkState(this, "central.password")}
               value={central.password}
+              margin="normal"
               type="password"
             />
           </div>
@@ -139,7 +134,7 @@ export default class RegisterPage extends React.Component {
             control={
               <Checkbox
                 checked={central.acceptedTermsOfUse}
-                onChange={this.updateTermsOfUse}
+                onChange={linkState(this, "central.acceptedTermsOfUse", "target.value")}
                 name="acceptedTermsOfUse"
               />
             }

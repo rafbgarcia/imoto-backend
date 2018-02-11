@@ -17,6 +17,7 @@ defmodule Graphql.Type.OrderOrError do
     field(:finished_at, :datetime)
 
     field(:customer, :customer, resolve: assoc(:customer))
+    field(:central_customer, :central_customer, resolve: assoc(:central_customer))
     field(:company, :company, resolve: assoc(:company))
     field(:motoboy, :motoboy, resolve: assoc(:motoboy))
     field(:stops, list_of(:stop), resolve: assoc(:stops))

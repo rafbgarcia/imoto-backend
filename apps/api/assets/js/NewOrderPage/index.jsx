@@ -108,9 +108,16 @@ class NewOrderPage extends React.Component {
     })
   }
 
-  onCreateCustomer = (success = false) => {
-    success && this.props.data.refetch()
-    this.setState({ modalOpen: false })
+  onCreateCustomer = (customer) => {
+    const {order} = this.state
+    customer && this.props.data.refetch()
+
+    this.setState({
+      modalOpen: false,
+      order: update(order, {
+        centralCustomerId: { $set: customer.id }
+      })
+    })
   }
 
   didClickSendButton = () => {
@@ -158,7 +165,7 @@ class NewOrderPage extends React.Component {
                 <Button fullWidth variant="raised" className="mb-4" onClick={this.openNewCustomerModal}>
                   Cadastrar novo cliente
                 </Button>
-                <div style={{overflow: "auto", maxHeight: 400, border: "1px solid #ddd", padding: ".3rem 1rem"}}>
+                <div style={{overflow: "auto", maxHeight: 480, border: "1px solid #ddd", padding: ".3rem 1rem"}}>
                   {loading && <em className="text-muted">Carregando seus clientes, aguarde...</em>}
 
                   <RadioGroup
@@ -167,7 +174,7 @@ class NewOrderPage extends React.Component {
                     value={order.centralCustomerId}
                     onChange={this.updateCustomerId}
                   >
-                    {!loading && getCompaniesRadios(customers)}
+                    {!loading && getCompaniesRadios(customers, order.centralCustomerId)}
                   </RadioGroup>
                 </div>
               </div>
@@ -322,7 +329,7 @@ class StopElement extends React.Component {
   }
 }
 
-function getCompaniesRadios(customers) {
+function getCompaniesRadios(customers, selectedCustomerId) {
   if (customers.length === 0) {
     return (
       <div>
@@ -333,8 +340,8 @@ function getCompaniesRadios(customers) {
       </div>
     )
   } else {
-    return customers.map((company) => (
-      <FormControlLabel value={company.id} control={<Radio />} label={company.name} />
+    return customers.map((customer) => (
+      <FormControlLabel className={customer.id == selectedCustomerId && "bg-light"} value={customer.id} control={<Radio />} label={customer.name} />
     ))
   }
 }

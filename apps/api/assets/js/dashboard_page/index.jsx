@@ -94,10 +94,9 @@ export default graphql(gql`
       stops {
         sequence
         instructions
-        location { name reference line1 }
+        reference line1
       }
-      customer { id name phoneNumber }
-      company { id name phoneNumber}
+      customer: centralCustomer { id name phoneNumber}
       motoboy { id name }
     }
 

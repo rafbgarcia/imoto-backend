@@ -22,11 +22,11 @@ export default class PendingOrder extends React.Component {
           <div>
             <div className="mb-2 d-flex align-items-center">
               <PersonIcon />
-              <span>{order.company.name}</span>
+              <span>{order.customer.name}</span>
             </div>
             <div className="mb-2 d-flex align-items-center">
               <PhoneIcon />
-              <span>{order.company.phoneNumber}</span>
+              <span>{order.customer.phoneNumber}</span>
             </div>
           </div>
           <div>
