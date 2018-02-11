@@ -13,6 +13,7 @@ defmodule Core.Order do
     belongs_to :motoboy, Core.Motoboy
     belongs_to :company, Core.Company
     belongs_to :customer, Core.Customer
+    belongs_to :central_customer, Core.CentralCustomer
     field :price, Money.Ecto.Type
     field :state, :string
     field :confirmed_at, Timex.Ecto.DateTime
@@ -25,8 +26,8 @@ defmodule Core.Order do
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, [
-      :price, :state, :confirmed_at, :finished_at,
-      :canceled_at, :motoboy_id, :customer_id, :company_id
+      :motoboy_id, :customer_id, :company_id, :central_customer_id,
+      :price, :state, :confirmed_at, :finished_at, :canceled_at,
     ])
     |> cast_assoc(:stops)
     |> validate_required([:state])

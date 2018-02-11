@@ -14,6 +14,8 @@ import Central from './central'
 import client from './graphql_client'
 import SnackProvider from './snack_provider'
 
+import config from 'js/config'
+
 const theme = createMuiTheme({
   palette: {
     // Logo color: #074C8C
@@ -21,10 +23,7 @@ const theme = createMuiTheme({
   },
 })
 
-
-// Start Sentry
-Raven.config('https://e9dbd50d84e746b3adc21788424f8556@sentry.io/283876').install()
-
+config.startSentry()
 
 document.addEventListener('DOMContentLoaded', () => {
   const page = Central.loggedIn() ? <Layout /> : <AuthenticateLayout />

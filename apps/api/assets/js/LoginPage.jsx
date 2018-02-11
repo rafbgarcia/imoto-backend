@@ -57,7 +57,7 @@ export default class LoginPage extends React.Component {
             type="password"
             fullWidth
           />
-          <Button disabled={btnDisabled} raised color="primary" onClick={this.didClickLoginButton} className="mt-4">
+          <Button disabled={btnDisabled} variant="raised" color="primary" onClick={this.didClickLoginButton} className="mt-4">
             Acessar
           </Button>
         </div>

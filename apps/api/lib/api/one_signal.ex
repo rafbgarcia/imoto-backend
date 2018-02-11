@@ -11,7 +11,7 @@ defmodule Api.OneSignal do
       content_available: true,
       android_visibility: 1,
       priority: 10,
-      ttl: 45, # seconds
+      ttl: 60, # seconds
       data: data,
     }
 

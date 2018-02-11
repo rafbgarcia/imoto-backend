@@ -46,7 +46,11 @@ defmodule Api do
       import Ecto
       import Ecto.Query
       alias Db.Repo
-      alias Core.{Order, Central, Motoboy, Customer, Location, Stop, History, Company}
+      alias Core.{
+        Order, Central, Motoboy, Customer,
+        Location, Stop, History, Company,
+        CentralCustomer,
+      }
     end
   end
 
@@ -55,7 +59,11 @@ defmodule Api do
       import Ecto
       import Ecto.Query
       alias Db.Repo
-      alias Core.{Order, Central, Motoboy, Customer, Location, Stop, History, Company}
+      alias Core.{
+        Order, Central, Motoboy, Customer,
+        Location, Stop, History, Company,
+        CentralCustomer,
+      }
     end
   end
 

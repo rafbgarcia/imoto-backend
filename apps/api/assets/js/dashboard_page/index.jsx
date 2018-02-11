@@ -3,17 +3,14 @@ import gql from 'graphql-tag'
 import { graphql } from 'react-apollo'
 import Button from 'material-ui/Button'
 import AddIcon from 'material-ui-icons/Add'
+import RemoveIcon from 'material-ui-icons/Remove'
 import {Link} from 'react-router-dom'
-import MenuIcon from 'material-ui-icons/Menu';
-import indigo from 'material-ui/colors/indigo';
 
 import Orders from './orders'
 import Motoboys from './motoboys'
-import NewOrderModal from './new_order_modal'
 
 class DashboardPage extends React.Component{
   state = {
-    modalOpen: false,
     hasNewOrder: false,
   }
 
@@ -40,21 +37,12 @@ class DashboardPage extends React.Component{
     }
   }
 
-  onCloseNewOrderModal = () => {
-    const {startPolling} = this.props.data
-    this.setState({modalOpen: false})
-
-    /**
-     * This line starts polling after the NewOrderModal is dismissed.
-     * Without it
-     */
-    setTimeout(() => startPolling(2000), 1000)
+  onMakeOrder = () => {
+    this.setState({ hasNewOrder: true, newOrderOpen: false })
+    this.props.data.refetch()
   }
 
-  render() {
-    const {orders, motoboys, loading} = this.props.data
-    const {modalOpen} = this.state
-
+  render({data: {orders, motoboys, loading}}, {newOrderOpen = false}) {
     const hasMotoboysAvailable = motoboys && motoboys.some((motoboy) => motoboy.available)
 
     this.startStopPolling()
@@ -66,18 +54,6 @@ class DashboardPage extends React.Component{
           <NoMotoboysMessage />
         }
 
-        <div className="mb-5">
-          <Button disabled={!hasMotoboysAvailable} raised color="primary" onClick={() => this.setState({modalOpen: true})}>
-            <AddIcon className="mr-2" /> Nova entrega
-            {!hasMotoboysAvailable && " *"}
-          </Button>
-          {
-            !hasMotoboysAvailable && <div>
-              <small className="text-muted">* Nenhum motoboy disponível</small>
-            </div>
-          }
-          <NewOrderModal open={modalOpen} onClose={this.onCloseNewOrderModal} />
-        </div>
 
         <div className="row">
           <div className="col-sm-3">
@@ -96,9 +72,9 @@ const NoMotoboysMessage = () => (
   <div className="mb-5 ">
     <div className="alert alert-warning">
       <h4>Comece a fazer entregas em 3 passos:</h4>
-      1- Cadastre seus motoboys clicando no icone (<MenuIcon style={{top: 6, position: "relative", background: indigo["500"], color: "white"}} />) acima e depois em "Motoboys".<br/>
-      2- Peça aos motoboys para baixarem a app do iMoto na loja do Android ou da Apple.<br/>
-      3- Assim que eles ficarem online na app, você poderá enviar pedidos.
+      1- Cadastre seus motoboys clicando em "Motoboys" no MENU ao lado.<br/>
+      2- Os motoboys devem baixar a app do iMoto buscando por "iMoto Motoboys" na Play ou Apple store.<br/>
+      3- Assim que eles ficarem disponíveis, você poderá enviar os pedidos.
     </div>
   </div>
 )

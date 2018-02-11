@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import linkState from 'linkstate';
 import update from 'immutability-helper';
 import gql from 'graphql-tag'
 import apolloClient from 'js/graphql_client'
@@ -9,9 +10,10 @@ import Button from 'material-ui/Button';
 import TextField from 'material-ui/TextField'
 import AddIcon from 'material-ui-icons/Add'
 import Select from 'material-ui/Select';
-import { FormControl, FormHelperText } from 'material-ui/Form';
+import { FormLabel, FormControl, FormControlLabel, FormHelperText } from 'material-ui/Form';
 import { MenuItem } from 'material-ui/Menu';
 import { InputLabel } from 'material-ui/Input';
+import Radio, { RadioGroup } from 'material-ui/Radio';
 
 import PhoneField from 'js/shared/phone_field'
 import ZipcodeField from 'js/shared/zipcode_field'
@@ -19,7 +21,7 @@ import * as validate from 'js/shared/validations'
 
 class NewOrderModal extends React.Component {
   state = {
-    companies: null,
+    companies: [],
     companyId: "",
     company: this.emptyCompany()
   }
@@ -59,19 +61,8 @@ class NewOrderModal extends React.Component {
     .catch((errors) => showSnack(errors, "error"))
   }
 
-  updateCompanyId = (evt) => {
-    const companyId = evt.target.value
-    const {companies} = this.state
-
-    if (companyId.length > 0) {
-      let selectedCompany = companies.find((company) => company.id == companyId)
-      selectedCompany = this.setFieldsAs(selectedCompany, "")
-      selectedCompany.location = this.setFieldsAs(selectedCompany.location, "")
-
-      this.setState({companyId, company: selectedCompany})
-    } else {
-      this.setState({companyId, company: this.emptyCompany()})
-    }
+  updateCompanyId = (evt, companyId) => {
+    this.setState({ companyId })
   }
 
   setFieldsAs(object, value) {
@@ -150,9 +141,9 @@ class NewOrderModal extends React.Component {
     return validate.notBlank(company.name)
   }
 
-  render() {
+  render({}, {companyId, companies}) {
     const {open, onClose} = this.props
-    const {company, companyId, companies} = this.state
+    const {company} = this.state
 
     return (
       <Modal
@@ -161,106 +152,118 @@ class NewOrderModal extends React.Component {
         style={modalStyles()}
       >
         <div style={innerDivStyles()}>
-          <Typography type="display1" className="mb-4">Nova entrega</Typography>
+          <h3 className="mb-4">Nova entrega</h3>
 
-          <FormControl fullWidth className={classes().formControl}>
-            <InputLabel shrink>Selecione a empresa</InputLabel>
-            <Select
-              value={companyId}
-              onChange={this.updateCompanyId}
-              displayEmpty
-            >
-              <MenuItem value="">Nova empresa</MenuItem>
-              {getCompaniesOptions(companies)}
-            </Select>
+          <FormControl component="fieldset" required className={classes().formControl}>
+            <FormLabel component="legend">Selecione a empresa</FormLabel>
+            <div>
+              <RadioGroup
+                aria-label="company"
+                name="companyId"
+                value={this.state.companyId}
+                onChange={this.updateCompanyId}
+              >
+                {companies.map(c =>
+                  <FormControlLabel value={c.id} control={<Radio />} label={c.name} />
+                )}
+              </RadioGroup>
+            </div>
           </FormControl>
 
-          <Typography type="title" className="mb-2 mt-4">Dados da empresa</Typography>
-          <section className={classes().formControlFlex}>
-            <FormControl className="w-50 mr-4">
-              <TextField
-                label="* Nome da empresa"
-                onChange={this.updateCompany}
-                name="name"
-                value={company.name}
-                disabled={this.canEdit()}
-              />
-            </FormControl>
-
-            <FormControl className="w-50">
-              <PhoneField
-                label="Telefone"
-                name="phoneNumber"
-                onChange={this.updateCompany}
-                value={company.phoneNumber}
-                disabled={this.canEdit()}
-              />
-            </FormControl>
-          </section>
-
-          <Typography type="title" className="mb-2 mt-5">Endereço da empresa</Typography>
-
-          <section className={classes().formControlFlex}>
-            <FormControl className="w-50">
-              <TextField
-                label="Logradouro"
-                onChange={this.updateLocation}
-                name="street"
-                value={company.location.street}
-                disabled={this.canEdit()}
-              />
-            </FormControl>
-            <FormControl className="w-25 mr-4 ml-4">
-              <TextField
-                label="Número"
-                onChange={this.updateLocation}
-                name="number"
-                type="number"
-                value={company.location.number}
-                disabled={this.canEdit()}
-              />
-            </FormControl>
-            <FormControl className="w-25">
-              <TextField
-                label="Complemento"
-                onChange={this.updateLocation}
-                name="complement"
-                value={company.location.complement}
-                disabled={this.canEdit()}
-              />
-            </FormControl>
-          </section>
-
-          <section className={classes().formControlFlex}>
-            <FormControl className="w-25">
-              <ZipcodeField
-                label="CEP"
-                onChange={this.updateLocation}
-                name="zipcode"
-                value={company.location.zipcode}
-                disabled={this.canEdit()}
-              />
-            </FormControl>
-            <FormControl className="w-50 ml-4">
-              <TextField
-                label="Ponto de referência"
-                onChange={this.updateLocation}
-                name="reference"
-                value={company.location.reference}
-                disabled={this.canEdit()}
-              />
-            </FormControl>
-          </section>
-
-          <div className="mt-5">
-            <Button disabled={!this.canSendOrder()} raised color="primary" onClick={this.didClickSendButton}>
+          <div className="mt-5 text-center">
+            <Button disabled={!this.canSendOrder()} variant="raised" color="primary" onClick={this.didClickSendButton}>
               <AddIcon className="mr-2" />
               Enviar entrega
             </Button>
-            <FormHelperText>* A entrega será enviada para o próximo motoboy</FormHelperText>
+            <FormHelperText className="text-center mt-2">Obs: a entrega será enviada para o próximo motoboy</FormHelperText>
           </div>
         </div>
       </Modal>
+    )
+  }
+}
+
+class NewCompanyFields extends React.Component {
+  render({}, {}) {
+    return (
+      <div>
+        <Typography type="title" className="mb-2 mt-4">Dados da empresa</Typography>
+        <section className={classes().formControlFlex}>
+          <FormControl className="w-50 mr-4">
+            <TextField
+              label="* Nome da empresa"
+              onChange={this.updateCompany}
+              name="name"
+              value={company.name}
+              disabled={this.canEdit()}
+            />
+          </FormControl>
+
+          <FormControl className="w-50">
+            <PhoneField
+              label="Telefone"
+              name="phoneNumber"
+              onChange={this.updateCompany}
+              value={company.phoneNumber}
+              disabled={this.canEdit()}
+            />
+          </FormControl>
+        </section>
+
+        <Typography type="title" className="mb-2 mt-5">Endereço da empresa</Typography>
+
+        <section className={classes().formControlFlex}>
+          <FormControl className="w-50">
+            <TextField
+              label="Logradouro"
+              onChange={this.updateLocation}
+              name="street"
+              value={company.location.street}
+              disabled={this.canEdit()}
+            />
+          </FormControl>
+          <FormControl className="w-25 mr-4 ml-4">
+            <TextField
+              label="Número"
+              onChange={this.updateLocation}
+              name="number"
+              type="number"
+              value={company.location.number}
+              disabled={this.canEdit()}
+            />
+          </FormControl>
+          <FormControl className="w-25">
+            <TextField
+              label="Complemento"
+              onChange={this.updateLocation}
+              name="complement"
+              value={company.location.complement}
+              disabled={this.canEdit()}
+            />
+          </FormControl>
+        </section>
+
+        <section className={classes().formControlFlex}>
+          <FormControl className="w-25">
+            <ZipcodeField
+              label="CEP"
+              onChange={this.updateLocation}
+              name="zipcode"
+              value={company.location.zipcode}
+              disabled={this.canEdit()}
+            />
+          </FormControl>
+          <FormControl className="w-50 ml-4">
+            <TextField
+              label="Ponto de referência"
+              onChange={this.updateLocation}
+              name="reference"
+              value={company.location.reference}
+              disabled={this.canEdit()}
+            />
+          </FormControl>
+        </section>
+      </div>
     )
   }
 }

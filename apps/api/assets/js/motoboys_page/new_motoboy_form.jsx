@@ -2,7 +2,6 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import gql from 'graphql-tag'
 import apolloClient from 'js/graphql_client'
-import Typography from 'material-ui/Typography'
 import AddIcon from 'material-ui-icons/Add'
 import TextField from 'material-ui/TextField'
 import Button from 'material-ui/Button'
@@ -43,9 +42,7 @@ class NewMotoboyForm extends React.Component {
 
     return (
       <Paper className="p-4">
-        <Typography type="headline" style={{marginBottom: 24}}>
-          Adicionar novos motoboys
-        </Typography>
+        <h4 style={{marginBottom: 24}}>Novo motoboy</h4>
         <TextField
           label="Nome do motoboy"
           onChange={(evt) => this.updateNewMotoboy({name: evt.target.value})}
@@ -53,14 +50,14 @@ class NewMotoboyForm extends React.Component {
           fullWidth
         />
         <PhoneField
-          label="Telefone"
+          label="Telefone com DDD"
           onChange={(evt) => this.updateNewMotoboy({phoneNumber: evt.target.value})}
           value={newMotoboy.phoneNumber}
           className="mt-4 mb-5"
           fullWidth
         />
         <div className="text-right">
-          <Button raised onClick={() => this.createMotoboy(newMotoboy)}>
+          <Button variant="raised" onClick={() => this.createMotoboy(newMotoboy)}>
             <AddIcon className="mr-2" />
             Salvar
           </Button>

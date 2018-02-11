@@ -2,7 +2,6 @@ import React from 'react'
 import TextField from 'material-ui/TextField'
 import Button from 'material-ui/Button'
 import Auth from './auth'
-import Typography from 'material-ui/Typography'
 import Central from 'js/central'
 import LoginPage from './LoginPage'
 import AppBar from 'material-ui/AppBar';
@@ -39,12 +38,12 @@ export default class AuthenticateLayout extends React.Component {
 
         <section className="text-center mt-5">
           <Link to="/central" className="mr-4">
-            <Button raised={path === "/central"} color="primary">
+            <Button variant={path === "/central" && "raised"} color="primary">
               Cadastre sua central
             </Button>
           </Link>
           <Link to="/central/login" className="mr-4">
-            <Button raised={path === "/central/login"} color="primary">
+            <Button variant={path === "/central/login" && "raised"} color="primary">
               Faça login
             </Button>
           </Link>

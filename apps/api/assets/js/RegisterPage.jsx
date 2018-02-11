@@ -145,7 +145,7 @@ export default class RegisterPage extends React.Component {
             }
             label={<TermsOfUseLabel />}
           />
-          <Button disabled={!this.canRegister()} raised color="primary" onClick={this.didClickRegisterButton} className="mt-4">
+          <Button disabled={!this.canRegister()} variant="raised" color="primary" onClick={this.didClickRegisterButton} className="mt-4">
             Cadastrar
           </Button>
         </div>

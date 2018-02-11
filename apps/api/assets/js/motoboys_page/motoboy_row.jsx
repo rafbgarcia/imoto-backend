@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import gql from 'graphql-tag'
 import apolloClient from 'js/graphql_client'
 import { TableCell, TableRow } from 'material-ui/Table'
@@ -48,7 +49,7 @@ class MotoboyRow extends React.Component {
   }
 
   saveMotoboy(motoboy) {
-    const {displaySnack} = this.props
+    const {showSnack} = this.context
     const {id, name, phoneNumber, active} = motoboy
 
     apolloClient.mutate({
@@ -61,13 +62,15 @@ class MotoboyRow extends React.Component {
       `,
       variables: { id, params: {name, phoneNumber, active} },
     })
-    .then(() => displaySnack("Motoboy atualizado!"))
+    .then(() => showSnack("Motoboy atualizado!"))
     .catch((res) => {
+      const {motoboyBeforeEdit} = this.state
+
       this.setState({
-        motoboy: this.state.motoboysBeforeEdit,
+        motoboy: motoboyBeforeEdit,
         editMode: true,
       })
-      displaySnack("Ops! Ocorreu")
+      showSnack("Ops! Ocorreu um erro")
     })
 
     this.setState({editMode: false})
@@ -143,5 +146,10 @@ const styles = theme => ({
     background: red[50]
   }
 })
+
+
+MotoboyRow.contextTypes = {
+  showSnack: PropTypes.func
+}
 
 export default withStyles(styles)(MotoboyRow)

@@ -5,6 +5,7 @@ defmodule Central.GraphqlSchema do
   query do
     field :orders, list_of(:order), resolve: &Central.Resolve.MyOrders.handle/2
     field :motoboys, list_of(:motoboy), resolve: &Central.Resolve.MyMotoboys.handle/2
+    field :customers, list_of(:central_customer), resolve: &Central.Resolve.MyCustomers.handle/2
     field :my_companies, list_of(:company), resolve: &Central.Resolve.MyCompanies.handle/2
     field :motoboy_history, list_of(:history) do
       arg :motoboy_id, non_null(:id)
@@ -40,15 +41,33 @@ defmodule Central.GraphqlSchema do
       resolve &Central.Resolve.UpdateMotoboy.handle/2
     end
 
-    field :create_order_for_existing_company, :order do
-      arg :company_id, non_null(:id)
-      resolve &Central.Resolve.CreateOrderForExistingCompany.handle/2
+    field :create_customer, :central_customer do
+      arg :params, :central_customer_params
+      resolve &Central.Resolve.CreateCustomer.handle/2
     end
 
-    field :create_order_for_new_company, :order do
-      arg :company_params, :company_params
-      resolve &Central.Resolve.CreateOrderForNewCompany.handle/2
-    end
+    # field :create_order_for_existing_company, :order do
+    #   arg :company_id, non_null(:id)
+    #   resolve &Central.Resolve.CreateOrderForExistingCompany.handle/2
+    # end
+
+    # field :create_order_for_new_company, :order do
+    #   arg :company_params, :company_params
+    #   resolve &Central.Resolve.CreateOrderForNewCompany.handle/2
+    # end
+  end
+
+  input_object :central_customer_params do
+    field :name, non_null(:string)
+    field :phone_number, :string
+    field :street, :string
+    field :number, :string
+    field :complement, :string
+    field :neighborhood, :string
+    field :zipcode, :string
+    field :reference, :string
+    field :city, :string
+    field :uf, :string
   end
 
   input_object :motoboy_create_params do

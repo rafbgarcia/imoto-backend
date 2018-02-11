@@ -45,7 +45,6 @@ class PhoneFieldElement extends React.Component {
         {...this.props}
         mask={this.phoneMask}
         placeholderChar={"\u2000"}
-        guide={true}
       />
     )
   }

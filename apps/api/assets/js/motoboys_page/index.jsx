@@ -30,16 +30,12 @@ export default class MotoboysPage extends React.Component{
   }
 
   pushNewMotoboy = (motoboy) => {
-    this.setState({ motoboys: this.state.motoboys.concat(motoboy) })
+    const {motoboys} = this.state
+    this.setState({ motoboys: motoboys.concat(motoboy) })
   }
 
-  displaySnack = (message) => {
-    this.setState({ showSnack: true, snackMessages: message })
-  }
-
-  render() {
-    const {snackMessages, showSnack} = this.state
-    const motoboys = _.sortBy(_.cloneDeep(this.state.motoboys), 'name')
+  render({}, {motoboys}) {
+    const clonedMotoboys = _.sortBy(_.cloneDeep(motoboys), 'name')
 
     return (
       <div className="row">
@@ -48,14 +44,14 @@ export default class MotoboysPage extends React.Component{
         </div>
 
         <div className="col-sm-8">
-          {MotoboysTable(motoboys, this.displaySnack)}
+          {MotoboysTable(clonedMotoboys)}
         </div>
       </div>
     )
   }
 }
 
-const MotoboysTable = (motoboys, displaySnack) => (
+const MotoboysTable = (motoboys) => (
   <Paper>
     <Table>
       <TableHead>
@@ -67,11 +63,10 @@ const MotoboysTable = (motoboys, displaySnack) => (
         </TableRow>
       </TableHead>
       <TableBody>
-        {motoboys.map((motoboy) =>
+        {motoboys.map(motoboy =>
           <MotoboyRow
             key={motoboy.id}
             motoboy={motoboy}
-            displaySnack={displaySnack}
           />
         )}
       </TableBody>
