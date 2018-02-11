@@ -11,8 +11,10 @@ import_config "../apps/*/config/config.exs"
 
 # Configures Elixir's Logger
 config :logger, :console,
+  level: :debug,
   format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+  metadata: :all,
+  colors: [enabled: true]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

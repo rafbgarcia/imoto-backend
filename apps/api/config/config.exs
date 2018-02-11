@@ -9,7 +9,7 @@ use Mix.Config
 config :api,
   namespace: Api,
   ecto_repos: [Db.Repo],
-  loggers: [Appsignal.Ecto, Ecto.LogEntry]
+  loggers: [Absinthe.Logger, Appsignal.Ecto, Ecto.LogEntry]
 
 # Configures the endpoint
 config :api, Api.Endpoint,
@@ -21,9 +21,9 @@ config :api, Api.Endpoint,
   instrumenters: [Appsignal.Phoenix.Instrumenter]
 
 # Configures Elixir's Logger
-config :logger, :console,
-  format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id]
+# config :logger, :console,
+#   format: "$time $metadata[$level] $message\n",
+#   metadata: [:request_id]
 
 config :api, :generators,
   context_app: false
@@ -36,6 +36,10 @@ config :api, Api.Guardian,
 config :phoenix, :template_engines,
   eex: Appsignal.Phoenix.Template.EExEngine,
   exs: Appsignal.Phoenix.Template.ExsEngine
+
+config :absinthe, Absinthe.Logger,
+  filter_variables: ["token", "password", "secret"],
+  pipeline: true
 
 
 # Import environment specific config. This must remain at the bottom

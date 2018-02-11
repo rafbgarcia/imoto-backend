@@ -44,7 +44,6 @@ defmodule Api.Mixfile do
       {:phoenix_live_reload, "~> 1.0", only: :dev},
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
-      {:phoenix_cowboy_logging, "~> 1.0"},
       {:faker, "~> 0.9", only: :test},
       {:absinthe, "~> 1.4.2"},
       {:absinthe_plug, "~> 1.4.0"},
