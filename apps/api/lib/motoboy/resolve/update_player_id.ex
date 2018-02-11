@@ -4,7 +4,7 @@ defmodule Motoboy.Resolve.UpdatePlayerId do
   def handle(%{player_id: player_id}, %{context: %{current_motoboy: motoboy}}) do
     motoboy
     |> Core.Motoboy.changeset(%{one_signal_player_id: player_id})
-    |> Repo.update
+    |> Repo.update()
 
     {:ok, motoboy}
   end

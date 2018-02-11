@@ -1,10 +1,10 @@
 defmodule Api.Orders.Location do
   use Api, :context
-  alias Core.Location
 
   def line1(location, _args, _ctx) do
-    {:ok, line1(location) }
+    {:ok, line1(location)}
   end
+
   defp line1(location) do
     [
       location.street,
@@ -19,6 +19,7 @@ defmodule Api.Orders.Location do
   def geocodable_address(location, _args, _ctx) do
     {:ok, geocodable_address(location)}
   end
+
   defp geocodable_address(location) do
     [
       location.street,
@@ -27,7 +28,7 @@ defmodule Api.Orders.Location do
       location.zipcode,
       location.city,
       location.uf,
-      "Brasil",
+      "Brasil"
     ]
     |> Enum.reject(&is_nil/1)
     |> Enum.join(", ")

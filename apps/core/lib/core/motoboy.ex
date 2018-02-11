@@ -7,17 +7,17 @@ defmodule Core.Motoboy do
   def confirming_order, do: "confirming_order"
 
   schema "motoboys" do
-    belongs_to :central, Core.Central
-    has_many :orders, Core.Order
-    field :name, :string
-    field :state, :string
-    field :phone_number, :string
-    field :one_signal_player_id, :string
-    field :became_available_at, Timex.Ecto.DateTime
-    field :became_unavailable_at, Timex.Ecto.DateTime
-    field :became_busy_at, Timex.Ecto.DateTime
-    field :active, :boolean
-    field :token, :string, virtual: true
+    belongs_to(:central, Core.Central)
+    has_many(:orders, Core.Order)
+    field(:name, :string)
+    field(:state, :string)
+    field(:phone_number, :string)
+    field(:one_signal_player_id, :string)
+    field(:became_available_at, Timex.Ecto.DateTime)
+    field(:became_unavailable_at, Timex.Ecto.DateTime)
+    field(:became_busy_at, Timex.Ecto.DateTime)
+    field(:active, :boolean)
+    field(:token, :string, virtual: true)
 
     timestamps()
   end
@@ -26,8 +26,14 @@ defmodule Core.Motoboy do
     changeset
     |> cast(params, [
       :central_id,
-      :name, :phone_number, :one_signal_player_id, :state, :active,
-      :became_available_at, :became_unavailable_at, :became_busy_at,
+      :name,
+      :phone_number,
+      :one_signal_player_id,
+      :state,
+      :active,
+      :became_available_at,
+      :became_unavailable_at,
+      :became_busy_at
     ])
     |> validate_required([:name, :phone_number])
     |> unique_constraint(:phone_number)

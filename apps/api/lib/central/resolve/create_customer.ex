@@ -12,6 +12,6 @@ defmodule Central.Resolve.CreateCustomer do
   defp create_customer(params, central_id) do
     %CentralCustomer{}
     |> CentralCustomer.changeset(Map.merge(params, %{central_id: central_id}))
-    |> Repo.insert
+    |> Repo.insert()
   end
 end

@@ -10,8 +10,11 @@ defmodule Motoboy.Resolve.MakeUnavailable do
 
   defp make_motoboy_unavailable(motoboy) do
     motoboy
-    |> Core.Motoboy.changeset(%{state: Core.Motoboy.unavailable(), became_unavailable_at: Timex.local})
-    |> Repo.update
+    |> Core.Motoboy.changeset(%{
+      state: Core.Motoboy.unavailable(),
+      became_unavailable_at: Timex.local()
+    })
+    |> Repo.update()
   end
 
   defp add_to_history(motoboy_id) do

@@ -11,7 +11,7 @@ defmodule Motoboy.NexmoApi do
       country: "BR",
       brand: "iMoto",
       pin_expiry: 60,
-      next_event_wait: 60,
+      next_event_wait: 60
     }
 
     with {:ok, response} <- do_post("/verify/json", params) do
@@ -24,7 +24,7 @@ defmodule Motoboy.NexmoApi do
       api_key: "9b89aa7e",
       api_secret: "5000b71f741c8cae",
       request_id: request_id,
-      code: code,
+      code: code
     }
 
     with {:ok, response} <- do_post("/verify/check/json", params) do

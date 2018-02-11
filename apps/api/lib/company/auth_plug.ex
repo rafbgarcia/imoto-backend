@@ -14,6 +14,7 @@ defmodule Company.AuthPlug do
   end
 
   defp current_resource([]), do: nil
+
   defp current_resource(token) do
     case Api.Guardian.resource_from_token(token) do
       {:ok, resource, _} -> resource

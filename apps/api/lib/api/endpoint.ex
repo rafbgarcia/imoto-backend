@@ -8,43 +8,65 @@ defmodule Api.Endpoint do
   #
   # You should set gzip to true if you are running phoenix.digest
   # when deploying your static files in production.
-  plug Plug.Static,
-    at: "/", from: :api, gzip: false,
+  plug(
+    Plug.Static,
+    at: "/",
+    from: :api,
+    gzip: false,
     only: ~w(css fonts images js favicon.ico robots.txt)
+  )
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
   if code_reloading? do
-    plug Phoenix.CodeReloader
+    plug(Phoenix.CodeReloader)
   end
 
-  plug Plug.RequestId
-  plug Plug.Logger
+  plug(Plug.RequestId)
+  plug(Plug.Logger)
 
-  plug Plug.Parsers,
+  plug(
+    Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],
     json_decoder: Poison
+  )
 
-  plug Plug.MethodOverride
-  plug Plug.Head
+  plug(Plug.MethodOverride)
+  plug(Plug.Head)
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
   # Set :encryption_salt if you would also like to encrypt it.
-  plug Plug.Session,
+  plug(
+    Plug.Session,
     store: :cookie,
     key: "_api_key",
     signing_salt: "nxQi/gen"
+  )
 
-  plug CORSPlug, headers: ["Authorization", "Content-Type", "Accept", "Origin",
-            "User-Agent", "DNT","Cache-Control", "X-Mx-ReqToken",
-            "Keep-Alive", "X-Requested-With", "If-Modified-Since",
-            "X-CSRF-Token", "X-XSRF-TOKEN"]
+  plug(
+    CORSPlug,
+    headers: [
+      "Authorization",
+      "Content-Type",
+      "Accept",
+      "Origin",
+      "User-Agent",
+      "DNT",
+      "Cache-Control",
+      "X-Mx-ReqToken",
+      "Keep-Alive",
+      "X-Requested-With",
+      "If-Modified-Since",
+      "X-CSRF-Token",
+      "X-XSRF-TOKEN"
+    ]
+  )
 
   # `use Appsignal.Phoenix` must come just before Api.Router
   use Appsignal.Phoenix
-  plug Api.Router
+  plug(Api.Router)
 
   @doc """
   Callback invoked for dynamically configuring the endpoint.

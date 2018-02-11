@@ -1,11 +1,10 @@
 defmodule Central.Resolve.Customer.Fields do
   use Api, :resolver
 
-  alias Core.{CentralCustomer}
-
   def line1(customer, _, _) do
-    {:ok, line1(customer) }
+    {:ok, line1(customer)}
   end
+
   defp line1(customer) do
     [
       customer.street,

@@ -4,7 +4,7 @@ defmodule MyApp.Umbrella.Mixfile do
   def project do
     [
       apps_path: "apps",
-      start_permanent: Mix.env == :prod,
+      start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
   end
@@ -30,7 +30,7 @@ defmodule MyApp.Umbrella.Mixfile do
   defp deps do
     [
       {:distillery, "~> 1.5.2", runtime: false},
-      {:edeliver, "~> 1.4.4", runtime: false},
+      {:edeliver, "~> 1.4.4", runtime: false}
     ]
   end
 end

@@ -46,10 +46,17 @@ defmodule Api do
       import Ecto
       import Ecto.Query
       alias Db.Repo
+
       alias Core.{
-        Order, Central, Motoboy, Customer,
-        Location, Stop, History, Company,
-        CentralCustomer,
+        Order,
+        Central,
+        Motoboy,
+        Customer,
+        Location,
+        Stop,
+        History,
+        Company,
+        CentralCustomer
       }
     end
   end
@@ -59,10 +66,17 @@ defmodule Api do
       import Ecto
       import Ecto.Query
       alias Db.Repo
+
       alias Core.{
-        Order, Central, Motoboy, Customer,
-        Location, Stop, History, Company,
-        CentralCustomer,
+        Order,
+        Central,
+        Motoboy,
+        Customer,
+        Location,
+        Stop,
+        History,
+        Company,
+        CentralCustomer
       }
     end
   end
@@ -78,8 +92,9 @@ defmodule Api do
 
   def view do
     quote do
-      use Phoenix.View, root: "lib/api/templates",
-                        namespace: Api
+      use Phoenix.View,
+        root: "lib/api/templates",
+        namespace: Api
 
       # Import convenience functions from controllers
       import Phoenix.Controller, only: [get_flash: 2, view_module: 1]

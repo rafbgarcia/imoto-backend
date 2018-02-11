@@ -5,6 +5,6 @@ defmodule Api.Orders.Customer do
   def update(customer, params) do
     customer
     |> Customer.changeset(params)
-    |> Repo.update
+    |> Repo.update()
   end
 end

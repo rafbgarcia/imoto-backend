@@ -8,10 +8,11 @@ defmodule Central.Resolve.MyCustomers do
   end
 
   defp all(central_id) do
-    from(c in CentralCustomer,
+    from(
+      c in CentralCustomer,
       where: c.central_id == ^central_id,
-      order_by: c.name,
+      order_by: c.name
     )
-    |> Repo.all
+    |> Repo.all()
   end
 end

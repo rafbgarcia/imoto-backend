@@ -3,21 +3,24 @@ defmodule Motoboy.Resolve.SendVerificationCode do
 
   def handle(%{phone_number: phone_number}, _) do
     with {:ok, _} <- find_motoboy(phone_number),
-    {:ok, request_id} <- send_code(phone_number) do
+         {:ok, request_id} <- send_code(phone_number) do
       {:ok, %{request_id: request_id}}
     end
   end
 
   defp send_code(phone_number) do
-    Motoboy.NexmoApi.start
+    Motoboy.NexmoApi.start()
 
     case Motoboy.NexmoApi.send_verification_code(phone_number) do
       {:ok, %{"status" => "0", "request_id" => request_id}} ->
         {:ok, request_id}
+
       {:ok, %{"status" => "10"}} ->
         {:error, "Você acabou de pedir um código, espere 3 minutos e tente novamente."}
+
       {_, %{"error_text" => error}} ->
         {:error, error}
+
       _ ->
         {:error, "Tivemos um problema inesperado, por favor tente novamente"}
     end

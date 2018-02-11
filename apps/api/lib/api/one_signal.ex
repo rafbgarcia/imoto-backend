@@ -11,8 +11,9 @@ defmodule Api.OneSignal do
       content_available: true,
       android_visibility: 1,
       priority: 10,
-      ttl: 60, # seconds
-      data: data,
+      # seconds
+      ttl: 60,
+      data: data
     }
 
     with {:ok, response} <- do_post("/notifications", params) do

@@ -12,11 +12,12 @@ defmodule Api.Guardian do
   def resource_from_claims(claims) do
     id = claims["sub"]
 
-    resource = case claims["resource_type"] do
-      "central" -> Repo.get(Central, id)
-      "company" -> Repo.get(Company, id)
-      "motoboy" -> Repo.get(Motoboy, id)
-    end
+    resource =
+      case claims["resource_type"] do
+        "central" -> Repo.get(Central, id)
+        "company" -> Repo.get(Company, id)
+        "motoboy" -> Repo.get(Motoboy, id)
+      end
 
     {:ok, resource}
   end

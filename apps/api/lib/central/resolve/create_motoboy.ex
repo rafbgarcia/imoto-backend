@@ -13,6 +13,6 @@ defmodule Central.Resolve.CreateMotoboy do
     %Motoboy{}
     |> Motoboy.changeset(params)
     |> Motoboy.changeset(%{central_id: central_id, active: true})
-    |> Repo.insert
+    |> Repo.insert()
   end
 end

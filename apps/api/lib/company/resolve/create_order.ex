@@ -4,36 +4,39 @@ defmodule Company.Resolve.CreateOrder do
 
   def handle(%{order_params: order_params}, %{context: %{current_company: company}}) do
     with {:ok, my_centrals_ids} <- get_centrals_ids(company.id),
-    {:ok, motoboy} <- next_motoboy_or_error(my_centrals_ids),
-    {:ok, order} <- create_order(company, motoboy, order_params) do
+         {:ok, motoboy} <- next_motoboy_or_error(my_centrals_ids),
+         {:ok, order} <- create_order(company, motoboy, order_params) do
       notify_motoboy_new_order(motoboy.one_signal_player_id)
       add_to_history(order.id, motoboy.id)
 
       {:ok, order}
     end
   end
+
   def handle(_, _) do
     {:error, "Algo deu errado, por favor refaça login e tente novamente"}
   end
 
   defp get_centrals_ids(company_id) do
-    from(cc in "companies_centrals",
+    from(
+      cc in "companies_centrals",
       where: cc.company_id == ^company_id,
       select: cc.central_id
     )
-    |> Repo.all
-    |> Enum.map(&(&1["central_id"]))
+    |> Repo.all()
+    |> Enum.map(& &1["central_id"])
   end
 
   defp create_order(company, motoboy, order_params) do
-    order_params = Map.merge(order_params, %{
-      company_id: company.id,
-      motoboy_id: motoboy.id,
-      state: Order.pending(),
-    })
+    order_params =
+      Map.merge(order_params, %{
+        company_id: company.id,
+        motoboy_id: motoboy.id,
+        state: Order.pending()
+      })
 
     Order.changeset(%Order{}, order_params)
-    |> Repo.insert
+    |> Repo.insert()
   end
 
   defp next_motoboy_or_error(centrals_ids) do
@@ -46,25 +49,37 @@ defmodule Company.Resolve.CreateOrder do
   end
 
   defp get_next_motoboy(centrals_ids) do
-    from(m in Motoboy,
+    from(
+      m in Motoboy,
       lock: "FOR UPDATE",
       where: m.state == ^Motoboy.available(),
       where: m.central_id in ^centrals_ids,
       order_by: [asc: m.became_available_at]
     )
     |> first
-    |> Repo.one
+    |> Repo.one()
   end
 
   defp update_motoboy_state(motoboy) do
     motoboy
-    |> Motoboy.changeset(%{state: Motoboy.busy, became_busy_at: Timex.local})
-    |> Repo.update!
+    |> Motoboy.changeset(%{state: Motoboy.busy(), became_busy_at: Timex.local()})
+    |> Repo.update!()
   end
 
   defp add_to_history(order_id, motoboy_id) do
-    Repo.insert(%History{scope: "motoboy", text: "Recebeu pedido", order_id: order_id, motoboy_id: motoboy_id})
-    Repo.insert(%History{scope: "order", text: "Pedido enviado", order_id: order_id, motoboy_id: motoboy_id})
+    Repo.insert(%History{
+      scope: "motoboy",
+      text: "Recebeu pedido",
+      order_id: order_id,
+      motoboy_id: motoboy_id
+    })
+
+    Repo.insert(%History{
+      scope: "order",
+      text: "Pedido enviado",
+      order_id: order_id,
+      motoboy_id: motoboy_id
+    })
   end
 
   defp notify_motoboy_new_order(player_id) do

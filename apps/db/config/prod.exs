@@ -14,4 +14,3 @@ config :db, Db.Repo,
 #   database: "",
 #   ssl: true,
 #   pool_size: 1 # TODO change this when move to standard plan
-

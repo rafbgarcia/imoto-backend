@@ -5,33 +5,42 @@ Db.Repo.delete_all(Core.Central)
 
 %{password_hash: pw} = Comeonin.Argon2.add_hash("admin")
 
-unimoto = Db.Repo.insert!(Core.Central.changeset(%Core.Central{}, %{
-  name: "Unimoto",
-  email: "unimoto",
-  password_hash: pw,
-  accepted_terms_of_use: true,
-  cnpj: "12.123.124/0001-23",
-}))
+unimoto =
+  Db.Repo.insert!(
+    Core.Central.changeset(%Core.Central{}, %{
+      name: "Unimoto",
+      email: "unimoto",
+      password_hash: pw,
+      accepted_terms_of_use: true,
+      cnpj: "12.123.124/0001-23"
+    })
+  )
 
-Db.Repo.insert!(Core.Company.changeset(%Core.Company{}, %{
-  name: "CooperFarma",
-  email: "cooperfarma",
-  phone_number: "(45) 3523-1771",
-  password_hash: pw,
-  centrals_ids: [unimoto.id],
-  location: %{
-    name: "Empresa",
-    street: "Av Brasil",
-    number: "1215",
-    zipcode: "85851-000",
-    neighborhood: "Centro",
-    city: "Foz do Iguaçu",
-    uf: "PR",
-  },
-}))
+Db.Repo.insert!(
+  Core.Company.changeset(%Core.Company{}, %{
+    name: "CooperFarma",
+    email: "cooperfarma",
+    phone_number: "(45) 3523-1771",
+    password_hash: pw,
+    centrals_ids: [unimoto.id],
+    location: %{
+      name: "Empresa",
+      street: "Av Brasil",
+      number: "1215",
+      zipcode: "85851-000",
+      neighborhood: "Centro",
+      city: "Foz do Iguaçu",
+      uf: "PR"
+    }
+  })
+)
 
+Db.Repo.insert!(%Core.Motoboy{
+  name: "Rafa",
+  central_id: unimoto.id,
+  phone_number: "(84) 98141-4140"
+})
 
-Db.Repo.insert!(%Core.Motoboy{name: "Rafa", central_id: unimoto.id, phone_number: "(84) 98141-4140"})
 # Db.Repo.insert!(%Core.Motoboy{name: "João", central_id: unimoto.id, login: "joao-token"})
 # Db.Repo.insert!(%Core.Motoboy{name: "Pedro", central_id: unimoto.id, login: "pedro-token"})
 # Db.Repo.insert!(%Core.Motoboy{name: "Paulo Andrade", central_id: unimoto.id})

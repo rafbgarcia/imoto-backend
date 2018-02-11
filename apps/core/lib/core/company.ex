@@ -2,17 +2,17 @@ defmodule Core.Company do
   use Core, :schema
 
   schema "companies" do
-    belongs_to :central, Core.Central
-    has_one :location, Core.Location
-    has_many :orders, Core.Order
-    has_many :customers, Core.Customer
-    many_to_many :centrals, Core.Central, join_through: "companies_centrals"
+    belongs_to(:central, Core.Central)
+    has_one(:location, Core.Location)
+    has_many(:orders, Core.Order)
+    has_many(:customers, Core.Customer)
+    many_to_many(:centrals, Core.Central, join_through: "companies_centrals")
 
-    field :password_hash, :string
-    field :name, :string
-    field :phone_number, :string
-    field :email, :string
-    field :token, :string, virtual: true
+    field(:password_hash, :string)
+    field(:name, :string)
+    field(:phone_number, :string)
+    field(:email, :string)
+    field(:token, :string, virtual: true)
 
     timestamps()
   end
@@ -32,10 +32,12 @@ defmodule Core.Company do
 
   defp parse_centrals_ids(centrals_ids) do
     case centrals_ids do
-      nil -> []
+      nil ->
+        []
+
       ids ->
         from(c in Core.Central, where: c.id in ^ids)
-        |> Db.Repo.all
+        |> Db.Repo.all()
     end
   end
 end

@@ -2,6 +2,6 @@ defmodule Graphql.Type.Error do
   use Api, :graphql_schema
 
   object :error do
-    field :error, :string
+    field(:error, :string)
   end
 end

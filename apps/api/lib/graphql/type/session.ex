@@ -2,6 +2,6 @@ defmodule Graphql.Type.Session do
   use Api, :graphql_schema
 
   object :session do
-    field :token, :string
+    field(:token, :string)
   end
 end

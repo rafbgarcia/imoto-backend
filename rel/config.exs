@@ -7,14 +7,13 @@ Path.join(["rel", "plugins", "*.exs"])
 |> Enum.map(&Code.eval_file(&1))
 
 use Mix.Releases.Config,
-    # This sets the default release built by `mix release`
-    default_release: :default,
-    # This sets the default environment used by `mix release`
-    default_environment: Mix.env()
+  # This sets the default release built by `mix release`
+  default_release: :default,
+  # This sets the default environment used by `mix release`
+  default_environment: Mix.env()
 
 # For a full list of config options for both releases
 # and environments, visit https://hexdocs.pm/distillery/configuration.html
-
 
 # You may define one or more environments in this file,
 # an environment's settings will override those of a release
@@ -28,15 +27,15 @@ environment :dev do
   # It is recommended that you build with MIX_ENV=prod and pass
   # the --env flag to Distillery explicitly if you want to use
   # dev mode.
-  set dev_mode: true
-  set include_erts: false
-  set cookie: :"LcXqO|M6|i7w*nz4Y6FSEtOn|SOnbF;!;^3L[:UgTXxrRn.Wn(S*7XNroQ/<2?Px"
+  set(dev_mode: true)
+  set(include_erts: false)
+  set(cookie: :"LcXqO|M6|i7w*nz4Y6FSEtOn|SOnbF;!;^3L[:UgTXxrRn.Wn(S*7XNroQ/<2?Px")
 end
 
 environment :prod do
-  set include_erts: true
-  set include_src: false
-  set cookie: :"1!yO_P@/5I8vr&nm=Gj7>@aMMkkWK}XTV)mW)*9n3Ez0s_>WjgC,]2W3_D.1@tg|"
+  set(include_erts: true)
+  set(include_src: false)
+  set(cookie: :"1!yO_P@/5I8vr&nm=Gj7>@aMMkkWK}XTV)mW)*9n3Ez0s_>WjgC,]2W3_D.1@tg|")
 end
 
 # You may define one or more releases in this file.
@@ -45,12 +44,14 @@ end
 # will be used by default
 
 release :imoto_backend do
-  set version: "1.0.0"
-  set applications: [
-    :runtime_tools,
-    api: :permanent,
-    core: :permanent,
-    db: :permanent
-  ]
-end
+  set(version: "1.0.0")
 
+  set(
+    applications: [
+      :runtime_tools,
+      api: :permanent,
+      core: :permanent,
+      db: :permanent
+    ]
+  )
+end

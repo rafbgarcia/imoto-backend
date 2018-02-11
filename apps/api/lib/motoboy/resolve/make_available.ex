@@ -10,8 +10,11 @@ defmodule Motoboy.Resolve.MakeAvailable do
 
   defp make_motoboy_available(motoboy) do
     motoboy
-    |> Core.Motoboy.changeset(%{state: Core.Motoboy.available(), became_available_at: Timex.local})
-    |> Repo.update
+    |> Core.Motoboy.changeset(%{
+      state: Core.Motoboy.available(),
+      became_available_at: Timex.local()
+    })
+    |> Repo.update()
   end
 
   defp add_to_history(motoboy_id) do

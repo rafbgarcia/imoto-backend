@@ -2,10 +2,10 @@ defmodule Core.History do
   use Core, :schema
 
   schema "history" do
-    belongs_to :order, Core.Order
-    belongs_to :motoboy, Core.Motoboy
-    field :scope, :string
-    field :text, :string
+    belongs_to(:order, Core.Order)
+    belongs_to(:motoboy, Core.Motoboy)
+    field(:scope, :string)
+    field(:text, :string)
 
     timestamps()
   end

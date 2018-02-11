@@ -4,7 +4,7 @@ defmodule Central.Resolve.Register do
 
   def handle(%{params: params}, _ctx) do
     with {:ok, central} <- create_central(params),
-    {:ok, jwt, _ } <- Api.Guardian.encode_and_sign(central, %{resource_type: :central}) do
+         {:ok, jwt, _} <- Api.Guardian.encode_and_sign(central, %{resource_type: :central}) do
       {:ok, Map.put(central, :token, jwt)}
     else
       {:error, changeset} -> {:error, Api.ErrorHelper.messages(changeset)}
@@ -14,12 +14,13 @@ defmodule Central.Resolve.Register do
   defp create_central(params) do
     %Central{}
     |> Central.changeset(add_needed_params(params))
-    |> Repo.insert
+    |> Repo.insert()
   end
 
   defp add_needed_params(params) do
+    # TODO: This has to be changed
     params
-    |> Map.put(:active, true) # TODO: This has to be changed
+    |> Map.put(:active, true)
     |> Map.put(:password_hash, hashed_pw(params[:password]))
   end
 
