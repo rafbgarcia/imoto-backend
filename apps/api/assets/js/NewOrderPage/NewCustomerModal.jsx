@@ -68,7 +68,10 @@ export default class NewCustomerModal extends React.Component {
     return btnDisabled || validate.notBlank(customer.name)
   }
 
-  render({open, onCreate}, {customer}) {
+  render() {
+    const {open, onCreate} = this.props
+    const {customer} = this.state
+
     return (
       <Modal
         open={open}

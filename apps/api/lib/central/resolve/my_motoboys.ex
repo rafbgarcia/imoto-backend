@@ -10,6 +10,7 @@ defmodule Central.Resolve.MyMotoboys do
   defp all(central_id) do
     from(
       m in Motoboy,
+      where: m.active == ^true,
       where: m.central_id == ^central_id,
       order_by:
         fragment(

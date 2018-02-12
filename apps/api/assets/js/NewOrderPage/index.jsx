@@ -34,11 +34,11 @@ class NewOrderPage extends React.Component {
   initialState() {
     return {
       modalOpen: false,
-      motoboyId: "",
+      motoboyId: "next_in_queue",
       order: {
         centralCustomerId: "",
-        price: 0.0,
-        stops: [this.newStop(0)]
+        price: "",
+        stops: []
       }
     }
   }
@@ -55,7 +55,9 @@ class NewOrderPage extends React.Component {
     }
   }
 
-  openNewCustomerModal = () => this.setState({ modalOpen: true })
+  openNewCustomerModal = () => {
+    this.setState({ modalOpen: true })
+  }
 
   componentWillMount() {
     this.props.data.refetch()
@@ -69,15 +71,17 @@ class NewOrderPage extends React.Component {
 
     const firstStop = _.merge(this.newStop(0), {
       instructions: "Falar com o responsável",
-      street: selectedCustomer.street,
+      street: selectedCustomer.street || "",
+      number: selectedCustomer.number || "",
+      complement: selectedCustomer.complement || "",
+      neighborhood: selectedCustomer.neighborhood || "",
+      reference: selectedCustomer.reference || "",
     })
 
     this.setState({
       order: update(order, {
         centralCustomerId: {$set: centralCustomerId},
-        stops: { $splice: [
-          [0, 1, firstStop]
-        ]},
+        stops: {$set: [firstStop]},
       })
     })
   }
@@ -142,15 +146,23 @@ class NewOrderPage extends React.Component {
     .catch((errors) => showSnack(errors, "error"))
   }
 
+  parsedOrder() {
+    const {order} = this.state
+
+    return update(order, {
+      price: { $set: parseFloat(order.price) || undefined }
+    })
+  }
+
   canSendOrder() {
     const {order} = this.state
     return validate.notBlank(order.centralCustomerId)
   }
 
-  render(
-    {data: {loading, customers, motoboys}},
-    {order, motoboyId, modalOpen}
-  ) {
+  render() {
+    const {data: {loading, customers, motoboys}} = this.props
+    const {order, motoboyId, modalOpen} = this.state
+
     return (
       <section>
         <section className="row">
@@ -164,7 +176,11 @@ class NewOrderPage extends React.Component {
               <div className="p-3">
                 <header style={{padding: ".5rem .2rem", borderBottom: "1px solid #ddd"}}>Seus clientes</header>
                 <div style={{overflow: "auto", maxHeight: 360, borderBottom: "1px solid #ddd"}}>
-                  {loading && <em className="text-muted">Carregando seus clientes, aguarde...</em>}
+                  {loading &&
+                    <div className="pt-3 mb-3">
+                      <em className="text-muted">Carregando seus clientes, aguarde...</em>
+                    </div>
+                  }
 
                   <RadioGroup
                     aria-label="centralCustomerId"
@@ -195,6 +211,7 @@ class NewOrderPage extends React.Component {
               <div>
                 {_.sortBy(order.stops, "sequence").map((stop, i) =>
                   <StopElement
+                    key={stop.sequence}
                     index={i}
                     stops={order.stops}
                     stop={stop}
@@ -222,25 +239,27 @@ class NewOrderPage extends React.Component {
                   <InputLabel htmlFor="motoboyId">Enviar para qual motoboy?</InputLabel>
                   <Select
                     value={motoboyId}
-                    onChange={linkState(this, "motoboyId")}
+                    onChange={linkState(this, "motoboyId", "target.value")}
                     inputProps={{
                       name: 'motoboyId',
                       id: 'motoboyId',
                     }}
+                    displayEmpty={true}
                   >
-                    <MenuItem value="">
+                    <MenuItem value="next_in_queue">
                       <em>O próximo da fila</em>
                     </MenuItem>
                     {motoboys && motoboys.map(motoboy =>
-                      <MenuItem value={motoboy.id}>{motoboy.name}</MenuItem>)
+                      <MenuItem key={motoboy.id} value={motoboy.id}>{motoboy.name}</MenuItem>)
                     }
                   </Select>
                 </FormControl>
 
                 <FormControl fullWidth className="mb-4">
                   <TextField
-                    label="Preço da entrega"
-                    onChange={linkState(parent, `order.price`)}
+                    label="Valor da entrega"
+                    placeholder="Ex: 12"
+                    onChange={linkState(this, `order.price`)}
                     value={order.price}
                     type="number"
                   />
@@ -266,7 +285,9 @@ NewOrderPage.contextTypes = {
 }
 
 class StopElement extends React.Component {
-  render({stops, stop, index, parent, moveStop}) {
+  render() {
+    const {stops, stop, index, parent, moveStop} = this.props
+
     return (
       <Paper elevation={4} className="mt-3">
         <h6 className="m-0 text-muted p-3 d-flex align-items-center justify-content-between">
@@ -359,7 +380,7 @@ function getCompaniesRadios(customers, selectedCustomerId) {
     )
   } else {
     return customers.map((customer) => (
-      <FormControlLabel className={customer.id == selectedCustomerId && "bg-light"} value={customer.id} control={<Radio />} label={customer.name} />
+      <FormControlLabel key={customer.id} className={customer.id == selectedCustomerId ? "bg-light" : ""} value={customer.id} control={<Radio />} label={customer.name} />
     ))
   }
 }

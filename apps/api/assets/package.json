@@ -1,6 +1,7 @@
 {
   "repository": {},
   "license": "MIT",
+  "description": "iMoto backend",
   "scripts": {
     "build": "webpack",
     "build:prod": "webpack --optimize-minimize --config prod.webpack.config.js",
@@ -19,9 +20,9 @@
     "linkstate": "1.1.1",
     "material-ui": "1.0.0-beta.33",
     "material-ui-icons": "1.0.0-beta.17",
-    "preact": "8.2.7",
-    "preact-compat": "3.18.0",
+    "react": "16.2.0",
     "react-apollo": "2.0.4",
+    "react-dom": "16.2.0",
     "react-intl": "2.4.0",
     "react-router": "4.2.0",
     "react-router-dom": "4.2.2",

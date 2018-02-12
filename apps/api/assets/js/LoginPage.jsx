@@ -13,6 +13,8 @@ import Auth from './auth'
 export default class LoginPage extends React.Component {
   state = {
     btnDisabled: false,
+    email: "",
+    password: "",
   }
 
   didClickLoginButton = () => {
@@ -36,7 +38,8 @@ export default class LoginPage extends React.Component {
     )
   }
 
-  render({}, {email, password, btnDisabled}) {
+  render() {
+    const {email, password, btnDisabled} = this.state
     return (
       <section className="d-flex align-items-center justify-content-center mt-5">
         <div className="col-xs-10 col-sm-6 col-md-4 thumbnail">

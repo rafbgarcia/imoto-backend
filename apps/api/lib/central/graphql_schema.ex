@@ -89,7 +89,7 @@ defmodule Central.GraphqlSchema do
 
   input_object :order_params do
     field(:central_customer_id, :id)
-    field(:price, :float)
+    field(:price, :string)
     field(:stops, list_of(:stops_input))
   end
 

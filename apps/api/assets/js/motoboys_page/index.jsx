@@ -34,7 +34,8 @@ export default class MotoboysPage extends React.Component{
     this.setState({ motoboys: motoboys.concat(motoboy) })
   }
 
-  render({}, {motoboys}) {
+  render() {
+    const {motoboys} = this.state
     const clonedMotoboys = _.sortBy(_.cloneDeep(motoboys), 'name')
 
     return (

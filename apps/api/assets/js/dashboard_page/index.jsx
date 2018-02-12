@@ -12,6 +12,7 @@ import Motoboys from './motoboys'
 class DashboardPage extends React.Component{
   state = {
     hasNewOrder: false,
+    newOrderOpen: false,
   }
 
   componentWillMount() {
@@ -42,7 +43,10 @@ class DashboardPage extends React.Component{
     this.props.data.refetch()
   }
 
-  render({data: {orders, motoboys, loading}}, {newOrderOpen = false}) {
+  render() {
+    const {data: {orders, motoboys, loading}} = this.props
+    const {newOrderOpen} = this.state
+
     const hasMotoboysAvailable = motoboys && motoboys.some((motoboy) => motoboy.available)
 
     this.startStopPolling()
