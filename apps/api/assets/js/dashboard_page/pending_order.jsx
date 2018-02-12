@@ -13,31 +13,29 @@ export default class PendingOrder extends React.Component {
 
     return (
       <Paper elevation={1} className="mb-3 pt-2 pb-2 pl-3 pr-3">
-        <div className="text-muted d-flex align-items-center justify-content-between">
-          <span>#{order.id}</span>
-          <span>pedido <Timeago date={order.insertedAt} /></span>
-        </div>
+        <header className="text-center text-muted" style={{borderBottom: "1px solid #ddd", paddingBottom: ".5rem"}}>
+          Pedido #{order.id}
+        </header>
 
-        <div className="mt-3 d-flex align-items-start justify-content-between">
-          <div>
-            <div className="mb-2 d-flex align-items-center">
-              <PersonIcon />
-              <span>{order.customer.name}</span>
-            </div>
-            <div className="mb-2 d-flex align-items-center">
-              <PhoneIcon />
-              <span>{order.customer.phoneNumber}</span>
-            </div>
+        <div className="mt-3">
+          <div className="mb-3">
+            <small className="text-muted">Enviado <Timeago date={order.insertedAt} /></small>
           </div>
-          <div>
-            <div className="mb-2 d-flex align-items-center">
-              <MotorcycleIcon />
-              <span>{order.motoboy.name}</span>
-            </div>
-            <div className="d-flex align-items-center">
-              <AttachMoneyIcon />
-              <span>{order.formattedPrice}</span>
-            </div>
+          <div className="mb-3 d-flex align-items-center">
+            <PersonIcon className="mr-2" />
+            <span>{order.customer.name}</span>
+          </div>
+          <div className="mb-3 d-flex align-items-center">
+            <PhoneIcon className="mr-2" />
+            <span>{order.customer.phoneNumber}</span>
+          </div>
+          <div className="mb-3 d-flex align-items-center">
+            <MotorcycleIcon className="mr-2" />
+            <span>{order.motoboy.name}</span>
+          </div>
+          <div className="d-flex align-items-center">
+            <AttachMoneyIcon className="mr-2" />
+            <span>{order.formattedPrice}</span>
           </div>
         </div>
 

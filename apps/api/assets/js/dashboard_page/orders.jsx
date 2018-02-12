@@ -47,15 +47,15 @@ export default class Orders extends React.Component {
     return (
       <div className="row">
         <div className="col-sm-4">
-          <ListSubheader>Aguardando motoboy</ListSubheader>
+          <ListSubheader disableSticky>Aguardando motoboy</ListSubheader>
           {this.pending(orders)}
         </div>
         <div className="col-sm-5">
-          <ListSubheader>Em entrega</ListSubheader>
+          <ListSubheader disableSticky>Em entrega</ListSubheader>
           {this.confirmed(orders)}
         </div>
         <div className="col-sm-3">
-          <ListSubheader>Finalizadas</ListSubheader>
+          <ListSubheader disableSticky>Finalizadas</ListSubheader>
           {this.finished(orders)}
         </div>
       </div>

@@ -29,7 +29,7 @@ export default class Motoboys extends React.Component {
 
     return (
       <div className="card">
-        <ListSubheader>Motoboys</ListSubheader>
+        <ListSubheader disableSticky>Motoboys</ListSubheader>
         {motoboysList}
 
         {
