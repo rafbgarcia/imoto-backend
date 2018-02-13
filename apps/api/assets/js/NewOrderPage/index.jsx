@@ -63,7 +63,7 @@ class NewOrderPage extends React.Component {
     this.props.data.refetch()
   }
 
-  updateCustomerId = (evt, centralCustomerId) => {
+  updateCustomerId = (centralCustomerId) => {
     const {customers} = this.props.data
     const {order} = this.state
 
@@ -114,17 +114,12 @@ class NewOrderPage extends React.Component {
   }
 
   onCreateCustomer = (customer) => {
-    const {order} = this.state
+    this.setState({ modalOpen: false })
+
     if (customer) {
-      this.props.data.refetch()
-      this.setState({
-        modalOpen: false,
-        order: update(order, {
-          centralCustomerId: { $set: customer.id }
-        })
-      })
-    } else {
-      this.setState({modalOpen: false})
+      this.props.data.refetch().then(() =>
+        this.updateCustomerId(customer.id)
+      )
     }
   }
 
@@ -189,7 +184,7 @@ class NewOrderPage extends React.Component {
                     aria-label="centralCustomerId"
                     name="centralCustomerId"
                     value={order.centralCustomerId}
-                    onChange={this.updateCustomerId}
+                    onChange={(evt) => this.updateCustomerId(evt.target.value)}
                   >
                     {!loading && getCompaniesRadios(customers, order.centralCustomerId)}
                   </RadioGroup>
@@ -375,8 +370,9 @@ function getCompaniesRadios(customers, selectedCustomerId) {
   if (customers.length === 0) {
     return (
       <div>
-        <p><em>Nenhum cliente.</em></p>
+        <p className="mt-3 text-muted"><em></em></p>
         <div className="alert alert-warning">
+          <h5>Você não tem nenhum cliente</h5>
           Cadastre um novo cliente para enviar o pedido.
         </div>
       </div>
