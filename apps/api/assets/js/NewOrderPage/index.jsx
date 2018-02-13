@@ -115,14 +115,17 @@ class NewOrderPage extends React.Component {
 
   onCreateCustomer = (customer) => {
     const {order} = this.state
-    customer && this.props.data.refetch()
-
-    this.setState({
-      modalOpen: false,
-      order: update(order, {
-        centralCustomerId: { $set: customer.id }
+    if (customer) {
+      this.props.data.refetch()
+      this.setState({
+        modalOpen: false,
+        order: update(order, {
+          centralCustomerId: { $set: customer.id }
+        })
       })
-    })
+    } else {
+      this.setState({modalOpen: false})
+    }
   }
 
   didClickSendButton = () => {
