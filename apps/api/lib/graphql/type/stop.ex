@@ -18,6 +18,6 @@ defmodule Graphql.Type.Stop do
     @doc """
     @deprecated Doesn't exist anymore
     """
-    field(:location, :location, resolve: fn(_, _) -> {:ok, %{}} end)
+    field(:location, :location, resolve: fn _, _ -> {:ok, %{}} end)
   end
 end

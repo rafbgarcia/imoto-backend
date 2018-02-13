@@ -6,8 +6,10 @@ defmodule Order.Resolve.GetCustomer do
     case order do
       %{company_id: id} when is_integer(id) ->
         {:ok, get_company(id)}
+
       %{customer_id: id} when is_integer(id) ->
         {:ok, get_customer(id)}
+
       %{central_customer_id: id} when is_integer(id) ->
         {:ok, get_central_customer(id)}
     end

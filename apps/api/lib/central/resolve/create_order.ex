@@ -12,6 +12,7 @@ defmodule Central.Resolve.CreateOrder do
       end)
     end
   end
+
   def handle(_, _) do
     {:error, "Algo deu errado, por favor refaça login e tente novamente"}
   end
@@ -24,11 +25,13 @@ defmodule Central.Resolve.CreateOrder do
       motoboy -> create_pending_order(params, motoboy, central_id)
     end
   end
+
   defp send_or_enqueue_order(params, central_id, motoboy_id) do
     with {:ok, motoboy} <- get_motoboy(motoboy_id, central_id) do
       Central.Shared.NotifyMotoboy.new_order(motoboy.one_signal_player_id)
 
       available = Motoboy.available()
+
       case motoboy.state do
         ^available -> create_pending_order(params, motoboy, central_id)
         _ -> create_order_in_queue(params, central_id, motoboy.id)
@@ -37,12 +40,15 @@ defmodule Central.Resolve.CreateOrder do
   end
 
   defp create_order_in_queue(params, central_id, motoboy_id) do
-    {:ok, order} = create_order(Map.merge(params, %{
-      state: Order.in_queue(),
-      queued_at: Timex.local(),
-      motoboy_id: motoboy_id,
-      central_id: central_id
-    }))
+    {:ok, order} =
+      create_order(
+        Map.merge(params, %{
+          state: Order.in_queue(),
+          queued_at: Timex.local(),
+          motoboy_id: motoboy_id,
+          central_id: central_id
+        })
+      )
 
     add_order_in_queue_to_history(order.id)
     {:ok, order}
@@ -50,11 +56,15 @@ defmodule Central.Resolve.CreateOrder do
 
   defp create_pending_order(params, motoboy, central_id) do
     make_motoboy_busy(motoboy)
-    {:ok, order} = create_order(Map.merge(params, %{
-      state: Order.pending(),
-      motoboy_id: motoboy.id,
-      central_id: central_id
-    }))
+
+    {:ok, order} =
+      create_order(
+        Map.merge(params, %{
+          state: Order.pending(),
+          motoboy_id: motoboy.id,
+          central_id: central_id
+        })
+      )
 
     add_order_pending_to_history(order.id, motoboy.id)
     {:ok, order}
@@ -65,9 +75,12 @@ defmodule Central.Resolve.CreateOrder do
 
     case motoboy do
       nil ->
-        {:error, "Estranho, este motoboy não está cadastrado, entre em contato com o suporte técnico"}
+        {:error,
+         "Estranho, este motoboy não está cadastrado, entre em contato com o suporte técnico"}
+
       %{active: active} when active == false ->
         {:error, "Este motoboy está INATIVO. Ative-o para enviar um pedido"}
+
       motoboy ->
         {:ok, motoboy}
     end
@@ -130,7 +143,7 @@ defmodule Central.Resolve.CreateOrder do
     Repo.insert(%History{
       scope: "order",
       text: "Nenhum motoboy disponível. Pedido criado e enviado para a fila.",
-      order_id: order_id,
+      order_id: order_id
     })
   end
 end

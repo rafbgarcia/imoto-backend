@@ -9,6 +9,7 @@ defmodule Motoboy.Resolve.CurrentOrder do
         Repo.transaction(fn ->
           next_order_in_queue!(motoboy)
         end)
+
       order ->
         {:ok, order}
     end
@@ -27,7 +28,9 @@ defmodule Motoboy.Resolve.CurrentOrder do
   defp next_order_in_queue!(motoboy) do
     get_next_order_in_queue(motoboy)
     |> case do
-      nil -> nil
+      nil ->
+        nil
+
       order ->
         Central.Shared.NotifyMotoboy.new_order(motoboy.one_signal_player_id)
         make_motoboy_busy!(motoboy)

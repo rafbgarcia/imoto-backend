@@ -48,9 +48,9 @@ defmodule Central.GraphqlSchema do
     end
 
     field :create_order, :order do
-      arg :motoboy_id, :id
-      arg :params, :order_params
-      resolve &Central.Resolve.CreateOrder.handle/2
+      arg(:motoboy_id, :id)
+      arg(:params, :order_params)
+      resolve(&Central.Resolve.CreateOrder.handle/2)
     end
   end
 
