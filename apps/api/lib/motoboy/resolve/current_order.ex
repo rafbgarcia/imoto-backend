@@ -1,7 +1,7 @@
 defmodule Motoboy.Resolve.CurrentOrder do
   use Api, :resolver
 
-  alias Core.{Order, Motoboy}
+  alias Core.{Order, Motoboy, History}
 
   def handle(_, %{context: %{current_motoboy: motoboy}}) do
     case current_order(motoboy.id) do
@@ -26,8 +26,7 @@ defmodule Motoboy.Resolve.CurrentOrder do
   end
 
   defp next_order_in_queue!(motoboy) do
-    get_next_order_in_queue(motoboy)
-    |> case do
+    case get_next_order_in_queue(motoboy) do
       nil ->
         nil
 
@@ -72,4 +71,21 @@ defmodule Motoboy.Resolve.CurrentOrder do
     |> Motoboy.changeset(%{state: Motoboy.busy(), became_busy_at: Timex.local()})
     |> Repo.update!()
   end
+
+  defp add_order_pending_to_history(order_id, motoboy_id) do
+    Repo.insert(%History{
+      scope: "motoboy",
+      text: "Recebeu uma entrega",
+      order_id: order_id,
+      motoboy_id: motoboy_id
+    })
+
+    Repo.insert(%History{
+      scope: "order",
+      text: "Pedido enviado para o motoboy",
+      order_id: order_id,
+      motoboy_id: motoboy_id
+    })
+  end
+
 end

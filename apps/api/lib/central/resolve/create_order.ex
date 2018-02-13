@@ -138,7 +138,7 @@ defmodule Central.Resolve.CreateOrder do
 
     Repo.insert(%History{
       scope: "order",
-      text: "Pedido enviado",
+      text: "Pedido enviado para o motoboy",
       order_id: order_id,
       motoboy_id: motoboy_id
     })
