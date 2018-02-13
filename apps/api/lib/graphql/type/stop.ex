@@ -14,5 +14,10 @@ defmodule Graphql.Type.Stop do
     field(:city, :string)
     field(:uf, :string)
     field(:complement, :string)
+
+    @doc """
+    @deprecated Doesn't exist anymore
+    """
+    field(:location, :location, resolve: fn(_, _) -> {:ok, %{}} end)
   end
 end
