@@ -1,15 +1,30 @@
 defmodule Core.Order do
   use Core, :schema
 
+  @doc """
+  Order pending motoboy confirmation
+  """
   def pending, do: "pending"
+
+  @doc """
+  Order confirmed by motoboy
+  """
   def confirmed, do: "confirmed"
+
+  @doc """
+  Order finished
+  """
   def finished, do: "finished"
-  def canceled, do: "canceled"
-  def no_motoboys, do: "no_motoboys"
+
+  @doc """
+  Order is in queue waiting for the next available motoboy
+  """
+  def in_queue, do: "in_queue"
 
   schema "orders" do
     has_many(:stops, Core.Stop)
     has_many(:locations, through: [:stops, :location])
+    belongs_to(:central, Core.Central)
     belongs_to(:motoboy, Core.Motoboy)
     belongs_to(:company, Core.Company)
     belongs_to(:customer, Core.Customer)
@@ -18,7 +33,7 @@ defmodule Core.Order do
     field(:state, :string)
     field(:confirmed_at, Timex.Ecto.DateTime)
     field(:finished_at, Timex.Ecto.DateTime)
-    field(:canceled_at, Timex.Ecto.DateTime)
+    field(:queued_at, Timex.Ecto.DateTime)
 
     timestamps()
   end
@@ -26,6 +41,7 @@ defmodule Core.Order do
   def changeset(changeset, params \\ %{}) do
     changeset
     |> cast(params, [
+      :central_id,
       :motoboy_id,
       :customer_id,
       :company_id,
@@ -34,10 +50,10 @@ defmodule Core.Order do
       :state,
       :confirmed_at,
       :finished_at,
-      :canceled_at
+      :queued_at
     ])
     |> cast_assoc(:stops)
     |> validate_required([:state])
-    |> validate_inclusion(:state, [pending(), confirmed(), finished(), canceled(), no_motoboys()])
+    |> validate_inclusion(:state, [pending(), confirmed(), finished(), in_queue()])
   end
 end

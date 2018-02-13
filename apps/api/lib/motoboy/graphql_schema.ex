@@ -4,7 +4,11 @@ defmodule Motoboy.GraphqlSchema do
 
   query do
     field(:myself, :motoboy, resolve: &Motoboy.Resolve.MyData.myself/2)
-    field(:current_order, :order, resolve: &Motoboy.Resolve.MyData.current_order/2)
+
+    @doc """
+    Returns either the current order or the next order in queue
+    """
+    field(:current_order, :order, resolve: &Motoboy.Resolve.CurrentOrder.handle/2)
   end
 
   mutation do

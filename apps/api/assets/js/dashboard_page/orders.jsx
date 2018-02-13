@@ -21,16 +21,6 @@ export default class Orders extends React.Component {
     )
   }
 
-  finishedAndCanceledData(orders) {
-    const finished = orders.filter((order) => order.finished).length
-    const noMotoboy = orders.filter((order) => order.noMotoboy).length
-
-    return [
-      {name: 'Finalizadas', value: finished},
-      {name: 'Sem motoboy', value: noMotoboy},
-    ]
-  }
-
   finished(orders) {
     const finishedOrders = orders.filter((order) => order.finished)
     return finishedOrders.map((order, i) =>
@@ -41,8 +31,6 @@ export default class Orders extends React.Component {
   render() {
     const {orders} = this.props
     if (!orders) return null
-    const data = this.finishedAndCanceledData(orders)
-    const COLORS = ['#00C49F', '#FFBB28']
 
     return (
       <div className="row">

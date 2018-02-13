@@ -3,44 +3,73 @@ defmodule Central.Resolve.CreateOrder do
   alias Core.{CentralCustomer, Motoboy, Order, History}
 
   def handle(%{params: params, motoboy_id: motoboy_id}, %{context: %{current_central: central}}) do
-    with {:ok, _} <- ensure_my_customer!(params.central_customer_id, central.id),
-         {:ok, motoboy} <- get_motoboy_for_order(motoboy_id, central.id),
-         params <- Map.merge(params, %{motoboy_id: motoboy.id, central_id: central.id}),
-         {:ok, order} <- create_order(params) do
-      notify_motoboy_new_order(motoboy.one_signal_player_id)
-      add_to_history(order.id, motoboy.id)
-
-      {:ok, order}
+    with {:ok, _} <- ensure_my_customer(params.central_customer_id, central.id) do
+      send_or_enqueue_order(params, central.id, motoboy_id)
     end
   end
   def handle(_, _) do
     {:error, "Algo deu errado, por favor refaça login e tente novamente"}
   end
 
-  defp get_motoboy_for_order(motoboy_id, central_id) when motoboy_id == "next_in_queue" do
-    next_available_motoboy(central_id)
-  end
-  defp get_motoboy_for_order(motoboy_id, central_id) do
-    motoboy = Repo.get_by(Motoboy, id: motoboy_id, central_id: central_id)
-
-    busy = Motoboy.busy()
-    unavailable = Motoboy.unavailable()
+  defp send_or_enqueue_order(params, central_id, "next_in_queue") do
+    motoboy = get_next_motoboy(central_id)
 
     case motoboy do
-      nil ->
-        {:error, "Este motoboy não foi encontrado"}
-      %{state: state} when state == busy ->
-        {:error, "Este motoboy está ocupado"}
-      %{state: state} when state == unavailable ->
-        {:error, "Este motoboy está offline"}
-      %{active: active} when active == false ->
-        {:error, "Este motoboy está INATIVO. Ative-o para enviar um pedido"}
-      motoboy ->
-        make_motoboy_busy(motoboy)
+      nil -> create_order_in_queue(params, central_id, nil)
+      motoboy -> create_pending_order(params, central_id, motoboy.id)
+    end
+  end
+  defp send_or_enqueue_order(params, central_id, motoboy_id) do
+    with {:ok, motoboy} <- get_motoboy_for_order(motoboy_id, central_id) do
+      notify_motoboy_new_order(motoboy.one_signal_player_id)
+
+      available = Motoboy.available()
+      case motoboy.state do
+        ^available -> create_pending_order(params, motoboy, central_id)
+        _ -> create_order_in_queue(params, central_id, motoboy.id)
+      end
     end
   end
 
-  defp ensure_my_customer!(customer_id, central_id) do
+  defp create_order_in_queue(params, central_id, motoboy_id) do
+    {:ok, order} = create_order(Map.merge(params, %{
+      state: Order.in_queue(),
+      queued_at: Timex.local(),
+      motoboy_id: motoboy_id,
+      central_id: central_id
+    }))
+
+    add_order_in_queue_to_history(order.id)
+    {:ok, order}
+  end
+
+  defp create_pending_order(params, motoboy, central_id) do
+    make_motoboy_busy(motoboy)
+    {:ok, order} = create_order(Map.merge(params, %{
+      state: Order.pending(),
+      motoboy_id: motoboy.id,
+      central_id: central_id
+    }))
+
+    add_order_pending_to_history(order.id, motoboy.id)
+    {:ok, order}
+  end
+
+
+  defp get_motoboy_for_order(motoboy_id, central_id) do
+    motoboy = Repo.get_by(Motoboy, id: motoboy_id, central_id: central_id)
+
+    case motoboy do
+      nil ->
+        {:error, "Este motoboy não existe na sua central"}
+      %{active: active} when active == false ->
+        {:error, "Este motoboy está INATIVO. Ative-o para enviar um pedido"}
+      motoboy ->
+        motoboy
+    end
+  end
+
+  defp ensure_my_customer(customer_id, central_id) do
     from(
       c in CentralCustomer,
       where: c.id == ^customer_id,
@@ -54,22 +83,8 @@ defmodule Central.Resolve.CreateOrder do
   end
 
   defp create_order(params) do
-    order_params = Map.merge(params, %{state: Order.pending()})
-
-    %Order{}
-    |> Order.changeset(order_params)
+    Order.changeset(%Order{}, params)
     |> Repo.insert()
-  end
-
-  defp next_available_motoboy(central_id) do
-    Repo.transaction(fn ->
-      case get_next_motoboy(central_id) do
-        nil -> Repo.rollback("Nenhum motoboy disponível")
-        motoboy ->
-          make_motoboy_busy(motoboy)
-          motoboy
-      end
-    end)
   end
 
   defp get_next_motoboy(central_id) do
@@ -79,7 +94,7 @@ defmodule Central.Resolve.CreateOrder do
       where: m.state == ^Motoboy.available(),
       where: m.central_id == ^central_id,
       where: m.active == ^true,
-      order_by: [asc: m.became_available_at]
+      order_by: m.became_available_at
     )
     |> first
     |> Repo.one()
@@ -91,7 +106,7 @@ defmodule Central.Resolve.CreateOrder do
     |> Repo.update()
   end
 
-  defp add_to_history(order_id, motoboy_id) do
+  defp add_order_pending_to_history(order_id, motoboy_id) do
     Repo.insert(%History{
       scope: "motoboy",
       text: "Recebeu pedido",
@@ -104,6 +119,14 @@ defmodule Central.Resolve.CreateOrder do
       text: "Pedido enviado",
       order_id: order_id,
       motoboy_id: motoboy_id
+    })
+  end
+
+  defp add_order_in_queue_to_history(order_id) do
+    Repo.insert(%History{
+      scope: "order",
+      text: "Nenhum motoboy disponível. Pedido criado e enviado para a fila.",
+      order_id: order_id,
     })
   end
 

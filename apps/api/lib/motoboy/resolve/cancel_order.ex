@@ -6,21 +6,19 @@ defmodule Motoboy.Resolve.CancelOrder do
   @doc """
   returns the current motoboy because he's the one making this request
   """
-  def handle(%{order_id: order_id, reason: _reason}, %{
-        context: %{current_motoboy: current_motoboy}
-      }) do
-    order = Motoboy.SharedFunctions.get_order!(order_id, current_motoboy.id)
+  def handle(%{order_id: order_id, reason: _}, %{context: %{current_motoboy: motoboy}}) do
+    order = Motoboy.SharedFunctions.get_order!(order_id, motoboy.id)
 
     Repo.transaction(fn ->
-      add_cancel_to_history(order.id, current_motoboy.id)
+      add_cancel_to_history(order.id, motoboy.id)
 
-      get_next_motoboy(current_motoboy.id, current_motoboy.central_id)
+      get_next_motoboy(motoboy.id, motoboy.central_id)
       |> case do
         nil -> process_order_without_motoboy_available!(order)
         new_motoboy -> process_order_with_new_motoboy!(order, new_motoboy)
       end
 
-      make_motoboy_unavailable!(current_motoboy)
+      make_motoboy_unavailable!(motoboy)
     end)
   end
 
@@ -32,8 +30,8 @@ defmodule Motoboy.Resolve.CancelOrder do
   end
 
   defp process_order_without_motoboy_available!(order) do
-    set_no_motoboys!(order)
-    add_order_no_motoboys_to_history(order.id)
+    send_order_to_queue!(order)
+    add_order_in_queue_to_history(order.id)
   end
 
   defp get_next_motoboy(current_motoboy_id, central_id) do
@@ -61,9 +59,9 @@ defmodule Motoboy.Resolve.CancelOrder do
     |> Repo.update!()
   end
 
-  defp set_no_motoboys!(order) do
+  defp send_order_to_queue!(order) do
     order
-    |> Order.changeset(%{state: Order.no_motoboys(), motoboy_id: nil})
+    |> Order.changeset(%{state: Order.in_queue(), motoboy_id: nil})
     |> Repo.update!()
   end
 
@@ -99,10 +97,10 @@ defmodule Motoboy.Resolve.CancelOrder do
     })
   end
 
-  defp add_order_no_motoboys_to_history(order_id) do
+  defp add_order_in_queue_to_history(order_id) do
     Repo.insert(%History{
       scope: "order",
-      text: "Pedido cancelado, nenhum motoboy disponível",
+      text: "Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...",
       order_id: order_id
     })
   end

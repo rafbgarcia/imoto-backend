@@ -132,14 +132,19 @@ class NewOrderPage extends React.Component {
     apolloClient.mutate({
       mutation: gql`mutation createOrder($motoboyId: ID, $params: OrderParams) {
         order: createOrder(params: $params, motoboyId: $motoboyId) {
-          id
+          id inQueue
+          motoboy { name }
         }
       }`,
       variables: { params: order, motoboyId },
     })
     .then(({data: {order}}) => {
       this.setState(this.initialState())
-      showSnack("Pedido enviado!", "success")
+      if (order.inQueue) {
+        showSnack("Pedido enviado para a fila, aguardando o próximo motoboy disponível", "success")
+      } else {
+        showSnack(`Pedido enviado para ${order.motoboy.name}`, "success")
+      }
     })
     .catch((errors) => showSnack(errors, "error"))
   }

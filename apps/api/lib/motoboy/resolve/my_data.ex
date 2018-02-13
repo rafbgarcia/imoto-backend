@@ -1,23 +1,8 @@
 defmodule Motoboy.Resolve.MyData do
   use Api, :resolver
 
-  alias Core.{Order}
-
   def myself(_, %{context: %{current_motoboy: motoboy}}) do
     {:ok, motoboy}
-  end
-
-  def current_order(_, %{context: %{current_motoboy: motoboy}}) do
-    {:ok, current_order(motoboy.id)}
-  end
-  defp current_order(motoboy_id) do
-    from(
-      o in Order,
-      where: o.motoboy_id == ^motoboy_id,
-      where: o.state in [^Order.pending(), ^Order.confirmed()]
-    )
-    |> first
-    |> Repo.one()
   end
 
   def first_name(motoboy, _args, _ctx) do

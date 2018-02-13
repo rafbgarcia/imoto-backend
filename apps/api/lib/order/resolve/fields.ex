@@ -14,12 +14,8 @@ defmodule Order.Resolve.Fields do
     {:ok, state == Order.finished()}
   end
 
-  def no_motoboy(%{state: state}, _args, _ctx) do
-    {:ok, state == Order.no_motoboys()}
-  end
-
-  def canceled(%{state: state}, _args, _ctx) do
-    {:ok, state == Order.canceled()}
+  def in_queue(%{state: state}, _args, _ctx) do
+    {:ok, state == Order.in_queue()}
   end
 
   def formatted_price(%{price: price}, _args, _ctx) do

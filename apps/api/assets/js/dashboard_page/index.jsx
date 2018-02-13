@@ -90,7 +90,6 @@ export default graphql(gql`
       formattedPrice
       pending
       confirmed
-      noMotoboy
       finished
       insertedAt
       confirmedAt

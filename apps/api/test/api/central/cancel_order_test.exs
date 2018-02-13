@@ -25,7 +25,7 @@ defmodule Test.Central.CancelOrder do
 
     assert motoboy.state == Core.Motoboy.unavailable()
     assert motoboy.became_unavailable_at != nil
-    assert Repo.get(Core.Order, order.id).state == Core.Order.no_motoboys()
+    assert Repo.get(Core.Order, order.id).state == Core.Order.in_queue()
   end
 
   defp insert_motoboy(central_id, extra_data \\ %{}) do
