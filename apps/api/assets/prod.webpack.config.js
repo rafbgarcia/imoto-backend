@@ -1,13 +1,15 @@
+const path = require("path");
 var webpack = require('webpack');
 var CompressionPlugin = require('compression-webpack-plugin');
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
-  context: __dirname,
-  entry: __dirname + "/js/app.jsx",
+  entry: ["js/app.jsx", "css/app.scss"],
 
   output: {
-    path: __dirname + "/../priv/static/js",
-    filename: "app.js"
+    path: path.resolve(__dirname, "../priv/static"),
+    filename: "js/app.js"
   },
 
   module: {
