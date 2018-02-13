@@ -23,7 +23,7 @@ export default class FinishedOrder extends React.Component {
 
     return (
       <div className="col-md-6 mb-4">
-        <Paper elevation={1} className="mb-3 pt-2 pb-2 pl-3 pr-3">
+        <Paper elevation={3} className="mb-3 pt-2 pb-2 pl-3 pr-3">
           <header className="text-muted d-flex align-items-center justify-content-between">
             <div>
               Pedido #{order.id}
@@ -35,7 +35,9 @@ export default class FinishedOrder extends React.Component {
             </IconButton>
           </header>
 
-          <OrderInfo order={order} />
+          <div className={hidden}>
+            <OrderInfo order={order} />
+          </div>
         </Paper>
       </div>
     )

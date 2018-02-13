@@ -18,6 +18,10 @@ defmodule Order.Resolve.Fields do
     {:ok, state == Order.in_queue()}
   end
 
+  def canceled(%{state: state}, _args, _ctx) do
+    {:ok, state == Order.canceled()}
+  end
+
   def formatted_price(%{price: price}, _args, _ctx) do
     {:ok, Money.to_string(price || %Money{amount: 0})}
   end

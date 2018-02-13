@@ -10,11 +10,11 @@ export default class PendingOrder extends React.Component {
 
     return (
       <div className="col-md-6 mb-4">
-        <Paper elevation={1} className="pt-2 pb-2 pl-3 pr-3">
-          <header className="text-muted">
-            Pedido #{order.id}
+        <Paper elevation={3} className="pt-2 pb-2 pl-3 pr-3">
+          <header className="text-center text-muted">
+            <span>Pedido #{order.id}</span>
             <br />
-            <small>Confirmado <Moment fromNow>{order.insertedAt}</Moment></small>
+            <small>Enviado <Moment fromNow>{order.sentAt}</Moment></small>
           </header>
 
           <hr className="mt-2 mb-2" />

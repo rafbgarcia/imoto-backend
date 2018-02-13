@@ -16,10 +16,11 @@ export default class ConfirmedOrder extends React.Component {
 
     return (
       <div className="col-md-6 mb-4">
-        <Paper elevation={1} className="mb-3 pt-2 pb-2 pl-3 pr-3">
-          <header className="text-muted d-flex align-items-center justify-content-between">
+        <Paper elevation={3} className="mb-3 p-3">
+          <header className="text-center text-muted">
             <span>Pedido #{order.id}</span>
-            <span>confirmada <Moment fromNow>{order.confirmedAt}</Moment></span>
+            <br />
+            <small>Confirmado <Moment fromNow>{order.confirmedAt}</Moment></small>
           </header>
 
           <hr className="mt-2 mb-2" />
@@ -37,8 +38,8 @@ class Stop extends React.Component {
   render() {
     const {stop} = this.props
     return (
-      <section className="mt-4 mb-2">
-        <div className="mb-2"><strong>{stop.sequence+1}ª parada</strong></div>
+      <section className="mt-4 mb-2 fz-80">
+        <div className="mb-2 fw-500">{stop.sequence+1}ª parada</div>
         <div className="mb-2 d-flex align-items-center">
           <PlaceIcon className="mr-2" />
           {stop.line1}

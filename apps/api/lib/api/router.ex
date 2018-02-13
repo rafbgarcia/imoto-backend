@@ -13,7 +13,7 @@ defmodule Api.Router do
 
   scope "/motoboy" do
     pipe_through(:motoboy_api)
-    post("/", Absinthe.Plug, schema: Motoboy.GraphqlSchema)
+    post("/", Absinthe.Plug.GraphiQL, schema: Motoboy.GraphqlSchema)
   end
 
   pipeline :central_api do

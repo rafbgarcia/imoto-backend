@@ -23,7 +23,7 @@ export default class Motoboys extends React.Component {
     }
 
     return (
-      <div className="bg-light">
+      <div>
         <ListSubheader disableSticky>Motoboys</ListSubheader>
         {
           motoboys.map((motoboy, i) =>

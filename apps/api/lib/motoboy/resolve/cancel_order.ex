@@ -60,7 +60,11 @@ defmodule Motoboy.Resolve.CancelOrder do
 
   defp send_order_to_queue!(order) do
     order
-    |> Order.changeset(%{state: Order.in_queue(), motoboy_id: nil})
+    |> Order.changeset(%{
+      state: Order.in_queue(),
+      queued_at: order.inserted_at,
+      motoboy_id: nil
+    })
     |> Repo.update!()
   end
 

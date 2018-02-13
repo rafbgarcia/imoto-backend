@@ -87,7 +87,7 @@ export default graphql(gql`
       confirmed
       finished
       inQueue
-      insertedAt
+      sentAt
       confirmedAt
       finishedAt
       queuedAt

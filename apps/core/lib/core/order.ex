@@ -21,6 +21,11 @@ defmodule Core.Order do
   """
   def in_queue, do: "in_queue"
 
+  @doc """
+  Order was canceled by creator (Central, Company, Customer)
+  """
+  def canceled, do: "canceled"
+
   schema "orders" do
     has_many(:stops, Core.Stop)
     has_many(:locations, through: [:stops, :location])
@@ -33,7 +38,17 @@ defmodule Core.Order do
     field(:state, :string)
     field(:confirmed_at, Timex.Ecto.DateTime)
     field(:finished_at, Timex.Ecto.DateTime)
+
+    # Set when the order is created or canceled.
+    #
+    # Order might be created without going to the queue,
+    # so we need to set when the motoboy cancel's it.
     field(:queued_at, Timex.Ecto.DateTime)
+
+
+    # Set whenever the order is sent to a new motoboy
+    field(:sent_at, Timex.Ecto.DateTime)
+    field(:canceled_at, Timex.Ecto.DateTime)
 
     timestamps()
   end
@@ -50,7 +65,9 @@ defmodule Core.Order do
       :state,
       :confirmed_at,
       :finished_at,
-      :queued_at
+      :canceled_at,
+      :queued_at,
+      :sent_at
     ])
     |> cast_assoc(:stops)
     |> validate_required([:state])

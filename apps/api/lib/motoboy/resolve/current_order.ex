@@ -38,22 +38,32 @@ defmodule Motoboy.Resolve.CurrentOrder do
     end
   end
 
-  defp get_next_order_in_queue(%{motoboy_id: motoboy_id, central_id: central_id}) do
-    from(
-      o in Order,
-      lock: "FOR UPDATE",
-      where: o.central_id == ^central_id,
-      where: o.motoboy_id == ^motoboy_id or is_nil(o.motoboy_id),
-      where: o.state in [^Order.in_queue()],
-      order_by: o.queued_at
-    )
-    |> first
-    |> Repo.one()
+  defp get_next_order_in_queue(%Motoboy{id: id, central_id: central_id, state: state}) do
+    available = Motoboy.available()
+
+    with ^available <- state do
+      from(
+        o in Order,
+        lock: "FOR UPDATE",
+        where: o.central_id == ^central_id,
+        where: o.motoboy_id == ^id or is_nil(o.motoboy_id),
+        where: o.state in [^Order.in_queue()],
+        order_by: o.queued_at
+      )
+      |> first
+      |> Repo.one()
+    else
+      _ -> nil
+    end
   end
 
   defp update_order_with_new_motoboy!(order, motoboy_id) do
     order
-    |> Order.changeset(%{state: Order.pending(), motoboy_id: motoboy_id})
+    |> Order.changeset(%{
+      state: Order.pending(),
+      motoboy_id: motoboy_id,
+      sent_at: Timex.local
+    })
     |> Repo.update!()
   end
 

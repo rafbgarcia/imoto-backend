@@ -49,8 +49,8 @@ export default class Orders extends React.Component {
     return (
       <section>
         <div className="mb-5">
-          <h5 className="text-muted mb-3">
-            <span className="mr-2">Pedidos na fila</span>
+          <h5 className="text-muted mb-3 fw-300">
+            <span className="mr-2">Na fila</span>
             <span className="badge badge-info">{ordersInQueue.length}</span>
           </h5>
           <div className="row">
@@ -59,8 +59,8 @@ export default class Orders extends React.Component {
         </div>
 
         <div className="mb-5">
-          <h5 className="text-muted mb-3">
-            <span className="mr-2">Pedidos aguardando confirmação do motoboy</span>
+          <h5 className="text-muted mb-3 fw-300">
+            <span className="mr-2">Aguardando confirmação do motoboy</span>
             <span className="badge badge-info">{pendingOrders.length}</span>
           </h5>
           <div className="row">
@@ -69,8 +69,8 @@ export default class Orders extends React.Component {
         </div>
 
         <div className="mb-5">
-          <h5 className="text-muted mb-3">
-            <span className="mr-2">Pedidos em entrega</span>
+          <h5 className="text-muted mb-3 fw-300">
+            <span className="mr-2">Em entrega</span>
             <span className="badge badge-info">{confirmedOrders.length}</span>
           </h5>
           <div className="row">
@@ -79,8 +79,8 @@ export default class Orders extends React.Component {
         </div>
 
         <div>
-          <h5 className="text-muted mb-3">
-            <span className="mr-2">Pedidos finalizados</span>
+          <h5 className="text-muted mb-3 fw-300">
+            <span className="mr-2">Finalizados</span>
             <span className="badge badge-info">{finishedOrders.length}</span>
           </h5>
           <div className="row">

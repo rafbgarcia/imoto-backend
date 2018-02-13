@@ -100,7 +100,8 @@ defmodule Central.Resolve.CreateOrder do
   end
 
   defp create_order(params) do
-    Order.changeset(%Order{}, params)
+    %Order{}
+    |> Order.changeset(Map.merge(params, %{sent_at: Timex.local}))
     |> Repo.insert()
   end
 

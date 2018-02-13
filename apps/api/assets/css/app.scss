@@ -12,3 +12,23 @@
  * Bootstrap override
  */
 .bg-light { background: #eaeaea }
+
+body { background: #f7f8f9}
+
+.fw- {
+  &200 { font-weight: 200 }
+  &300 { font-weight: 300 }
+  &400 { font-weight: 400 }
+  &500 { font-weight: 500 }
+  &600 { font-weight: 600 }
+  &700 { font-weight: 700 }
+}
+
+.fz- {
+  &80 {
+    font-size: 80%; // same as <small></small> tag
+    [class*="MuiSvgIcon"] {
+      height: 20px;
+    }
+  }
+}
