@@ -6,7 +6,13 @@ defmodule Central.Resolve.CreateOrder do
     with {:ok, _} <- ensure_my_customer(params.central_customer_id, central.id) do
       Repo.transaction(fn ->
         case send_or_enqueue_order(params, central.id, motoboy_id) do
-          {:ok, order} -> order
+          {:ok, order} ->
+            if is_integer(order.motoboy_id) do
+              motoboy = Repo.get(Motoboy, order.motoboy_id)
+              Central.Shared.NotifyMotoboy.new_order(motoboy.one_signal_player_id)
+            end
+
+            order
           {:error, message} -> Repo.rollback(message)
         end
       end)
@@ -28,8 +34,6 @@ defmodule Central.Resolve.CreateOrder do
 
   defp send_or_enqueue_order(params, central_id, motoboy_id) do
     with {:ok, motoboy} <- get_motoboy(motoboy_id, central_id) do
-      Central.Shared.NotifyMotoboy.new_order(motoboy.one_signal_player_id)
-
       available = Motoboy.available()
 
       case motoboy.state do
