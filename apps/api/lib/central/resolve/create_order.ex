@@ -65,7 +65,9 @@ defmodule Central.Resolve.CreateOrder do
     Repo.transaction(fn ->
       case get_next_motoboy(central_id) do
         nil -> Repo.rollback("Nenhum motoboy disponível")
-        motoboy -> make_motoboy_busy(motoboy)
+        motoboy ->
+          make_motoboy_busy(motoboy)
+          motoboy
       end
     end)
   end
