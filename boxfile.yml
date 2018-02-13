@@ -14,10 +14,8 @@ run.config:
     - inotify-tools
 
   extra_steps:
-    # - (cd apps/api/assets && npm rebuild node-sass)
-    # - rm apps/api/assets/package-lock.json
-    - rm -rf apps/api/priv/static/js/app.js*
-    - (cd apps/api/assets && npm install && npm run build)
+    - (cd apps/api/assets && npm install)
+    - (cd apps/api/assets && npm rebuild node-sass --force)
 
   # cache node_modules
   # cache_dirs:
