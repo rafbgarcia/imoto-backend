@@ -1,15 +1,19 @@
 import React from 'react'
 import Moment from 'react-moment'
 import Paper from 'material-ui/Paper'
-import PersonIcon from 'material-ui-icons/Person'
-import PhoneIcon from 'material-ui-icons/Phone'
-import MotorcycleIcon from 'material-ui-icons/Motorcycle'
 import KeyboardArrowDownIcon from 'material-ui-icons/KeyboardArrowDown'
 import IconButton from 'material-ui/IconButton'
+
+import OrderInfo from "./OrderInfo"
 
 export default class FinishedOrder extends React.Component {
   state = {
     show: false
+  }
+
+  toggleDetails = () => {
+    const {show} = this.state
+    this.setState({ show: !show })
   }
 
   render() {
@@ -20,34 +24,18 @@ export default class FinishedOrder extends React.Component {
     return (
       <div className="col-md-6 mb-4">
         <Paper elevation={1} className="mb-3 pt-2 pb-2 pl-3 pr-3">
-          <div className="text-muted d-flex align-items-center justify-content-between">
-            <span>#{order.id}</span>
-
-            <IconButton
-              tooltip="Mostrar detalhes"
-              onClick={() => this.setState({show: !show})}
-            >
+          <header className="text-muted d-flex align-items-center justify-content-between">
+            <div>
+              Pedido #{order.id}
+              <br />
+              <small>Finalizado às <Moment format="HH:mm\h">{order.finishedAt}</Moment></small>
+            </div>
+            <IconButton tooltip="Mostrar detalhes" onClick={this.toggleDetails}>
               <KeyboardArrowDownIcon />
             </IconButton>
-          </div>
+          </header>
 
-          <div className={`mt-3 ${hidden}`}>
-            <div className="mb-2 d-flex align-items-center">
-              <PersonIcon />
-              <span className="ml-2">{order.customer.name}</span>
-            </div>
-            <div className="mb-2 d-flex align-items-center">
-              <PhoneIcon />
-              <span className="ml-2">{order.customer.phoneNumber}</span>
-            </div>
-            <div className="mb-2 d-flex align-items-center">
-              <MotorcycleIcon />
-              <span className="ml-2">{order.motoboy.name}</span>
-            </div>
-            <div className="text-muted">
-              <small>Finalizada <Moment fromNow>{order.finishedAt}</Moment></small>
-            </div>
-          </div>
+          <OrderInfo order={order} />
         </Paper>
       </div>
     )

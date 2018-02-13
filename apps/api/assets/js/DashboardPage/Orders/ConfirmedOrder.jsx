@@ -1,12 +1,10 @@
 import React from 'react'
 import Moment from 'react-moment'
 import Paper from 'material-ui/Paper';
-import PersonIcon from 'material-ui-icons/Person';
-import PhoneIcon from 'material-ui-icons/Phone';
-import MotorcycleIcon from 'material-ui-icons/Motorcycle';
 import PlaceIcon from 'material-ui-icons/Place';
 import ListIcon from 'material-ui-icons/List';
-import AttachMoneyIcon from 'material-ui-icons/AttachMoney';
+
+import OrderInfo from "./OrderInfo"
 
 export default class ConfirmedOrder extends React.Component {
   stops(stops) {
@@ -19,33 +17,14 @@ export default class ConfirmedOrder extends React.Component {
     return (
       <div className="col-md-6 mb-4">
         <Paper elevation={1} className="mb-3 pt-2 pb-2 pl-3 pr-3">
-          <div className="text-muted d-flex align-items-center justify-content-between">
-            <span>#{order.id}</span>
+          <header className="text-muted d-flex align-items-center justify-content-between">
+            <span>Pedido #{order.id}</span>
             <span>confirmada <Moment fromNow>{order.confirmedAt}</Moment></span>
-          </div>
+          </header>
 
-          <div className="mt-3 d-flex align-items-center justify-content-between">
-            <div>
-              <div className="mb-2 d-flex align-items-center">
-                <PersonIcon />
-                <span>{order.customer.name}</span>
-              </div>
-              <div className="d-flex align-items-center">
-                <PhoneIcon />
-                <span>{order.customer.phoneNumber}</span>
-              </div>
-            </div>
-            <div>
-              <div className="mb-2 d-flex align-items-center">
-                <MotorcycleIcon />
-                <span>{order.motoboy.name}</span>
-              </div>
-              <div className="d-flex align-items-center">
-                <AttachMoneyIcon />
-                <span>{order.formattedPrice}</span>
-              </div>
-            </div>
-          </div>
+          <hr className="mt-2 mb-2" />
+
+          <OrderInfo order={order} />
 
           {this.stops(order.stops)}
         </Paper>
