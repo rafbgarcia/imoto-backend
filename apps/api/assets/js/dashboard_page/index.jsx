@@ -100,7 +100,7 @@ export default graphql(gql`
         instructions
         reference line1
       }
-      customer: centralCustomer { id name phoneNumber}
+      customer { id name phoneNumber}
       motoboy { id name }
     }
 

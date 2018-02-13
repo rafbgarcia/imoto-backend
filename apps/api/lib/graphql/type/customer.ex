@@ -1,9 +1,6 @@
 defmodule Graphql.Type.Customer do
   use Api, :graphql_schema
 
-  object :customer_queries do
-  end
-
   object :customer do
     field(:id, :id)
     field(:name, :string)

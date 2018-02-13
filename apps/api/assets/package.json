@@ -4,7 +4,7 @@
   "description": "iMoto backend",
   "scripts": {
     "build": "webpack",
-    "build:prod": "webpack --optimize-minimize --config prod.webpack.config.js",
+    "build:prod": "NODE_ENV=production webpack -p --config prod.webpack.config.js",
     "watch": "webpack --watch-stdin --progress --color"
   },
   "dependencies": {
@@ -39,7 +39,18 @@
     "babel-preset-stage-1": "6.24.1",
     "babel-preset-stage-2": "6.24.1",
     "compression-webpack-plugin": "1.1.6",
+    "copy-webpack-plugin": "4.4.1",
+    "css-loader": "0.28.9",
+    "extract-text-webpack-plugin": "3.0.2",
+    "file-loader": "1.1.6",
+    "image-webpack-loader": "4.1.0",
+    "node-sass": "4.7.2",
+    "postcss": "6.0.17",
+    "postcss-loader": "2.1.0",
+    "sass-loader": "6.0.6",
+    "style-loader": "0.20.1",
     "uglifyjs-webpack-plugin": "1.1.8",
+    "url-loader": "0.6.2",
     "webpack": "3.11.0"
   }
 }

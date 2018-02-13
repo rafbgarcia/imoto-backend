@@ -6,6 +6,7 @@ defmodule Graphql.Type.Stop do
     field(:instructions, :string)
 
     field(:reference, :string)
+    field(:line1, :string, resolve: &Central.Resolve.Stop.Fields.line1/3)
     field(:street, :string)
     field(:number, :string)
     field(:neighborhood, :string)
@@ -13,6 +14,5 @@ defmodule Graphql.Type.Stop do
     field(:city, :string)
     field(:uf, :string)
     field(:complement, :string)
-    field(:line1, :string, resolve: &Central.Resolve.Stop.Fields.line1/3)
   end
 end

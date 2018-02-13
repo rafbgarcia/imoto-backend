@@ -1,6 +1,6 @@
-defmodule Api.Orders.Order do
-  use Api, :context
-  alias Core.Order
+defmodule Order.Resolve.Fields do
+  use Api, :resolver
+  alias Core.{Order, Stop}
 
   def pending(%{state: state}, _args, _ctx) do
     {:ok, state == Order.pending()}
@@ -22,7 +22,11 @@ defmodule Api.Orders.Order do
     {:ok, state == Order.canceled()}
   end
 
-  def formatted_price(%Order{} = order, _args, _ctx) do
-    {:ok, Money.to_string(order.price || %Money{amount: 0})}
+  def formatted_price(%{price: price}, _args, _ctx) do
+    {:ok, Money.to_string(price || %Money{amount: 0})}
+  end
+
+  def stops(order, _, _) do
+    {:ok, Repo.preload(order, stops: from(s in Stop, order_by: s.sequence)).stops}
   end
 end

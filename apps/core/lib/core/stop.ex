@@ -20,6 +20,10 @@ defmodule Core.Stop do
 
   def changeset(changeset, params \\ %{}) do
     changeset
-    |> cast(params, [:instructions, :sequence])
+    |> cast(params, [
+      :instructions, :sequence,
+      :street, :number, :neighborhood, :zipcode, :complement, :reference,
+      :city, :uf, :lat, :lng
+    ])
   end
 end

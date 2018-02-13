@@ -8,10 +8,9 @@ defmodule Motoboy.Resolve.MyData do
   end
 
   def current_order(_, %{context: %{current_motoboy: motoboy}}) do
-    {:ok, find_my_active_order(motoboy.id)}
+    {:ok, current_order(motoboy.id)}
   end
-
-  defp find_my_active_order(motoboy_id) do
+  defp current_order(motoboy_id) do
     from(
       o in Order,
       where: o.motoboy_id == ^motoboy_id,

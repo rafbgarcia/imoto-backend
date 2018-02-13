@@ -11,32 +11,100 @@ module.exports = {
   },
 
   module: {
-    loaders: [{
-      test: /\.(js|jsx)$/,
-      exclude: /node_modules/,
-      loader: "babel-loader",
-      options: {
-        babelrc: false,
-        presets: ["es2015", "react"],
-        plugins: [
-          ['transform-class-properties', {spec: true}],
-          ["transform-object-rest-spread"]
+    rules: [
+      {
+        test: /\.(js|jsx)$/,
+        exclude: /node_modules/,
+        loader: "babel-loader",
+        options: {
+          babelrc: false,
+          presets: ["es2015", "react"],
+          plugins: [
+            ['transform-class-properties', {spec: true}],
+            ["transform-object-rest-spread"]
+          ]
+        }
+      },
+
+      {
+        test: /\.(gif|png|jpe?g|svg)$/i,
+        exclude: /node_modules/,
+        loaders: [
+          'file-loader?name=images/[name].[ext]',
+          {
+            loader: 'image-webpack-loader',
+            options: {
+              query: {
+                mozjpeg: {
+                  progressive: true,
+                },
+                gifsicle: {
+                  interlaced: true,
+                },
+                optipng: {
+                  optimizationLevel: 7,
+                },
+                pngquant: {
+                  quality: '65-90',
+                  speed: 4
+                }
+              }
+            }
+          }
         ]
+      },
+
+      {
+        test: /\.(css|scss)$/,
+        exclude: /node_modules/,
+        use: ExtractTextPlugin.extract({
+          fallback: "style-loader",
+          use: [
+            {
+              loader: 'css-loader',
+              options: {
+                minimize: true,
+                sourceMap: true
+              }
+            },
+            {
+              loader: "postcss-loader",
+              options: {
+                minimize: true,
+                sourceMap: true
+              }
+            },
+            {
+              loader: 'sass-loader',
+              options: {
+                sourceMap: true
+              }
+            }
+          ],
+        })
       }
-    }]
+    ],
   },
 
   resolve: {
     alias: {
       "js": __dirname + "/js",
-      "react": "preact-compat",
-      "react-dom": "preact-compat",
     },
-    extensions: [ '.js', '.jsx', '.json' ],
-    modules: [ "node_modules", "js" ],
+    extensions: [".js", ".json", ".jsx", ".css", ".scss"],
+    modules: [ "node_modules", "js", __dirname ],
   },
 
   plugins: [
+    new CopyWebpackPlugin([{
+      from: "./static",
+      to: path.resolve(__dirname, "../priv/static"),
+      ignore: [".DS_Store"],
+    }]),
+    new ExtractTextPlugin({
+      filename: "css/app.css",
+      allChunks: true
+    }),
+
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify('production')
     }),

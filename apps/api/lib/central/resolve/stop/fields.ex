@@ -4,7 +4,6 @@ defmodule Central.Resolve.Stop.Fields do
   def line1(stop, _, _) do
     {:ok, line1(stop)}
   end
-
   defp line1(stop) do
     [
       stop.street,
