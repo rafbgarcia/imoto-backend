@@ -1,17 +1,15 @@
 import React from 'react'
 import AppBar from 'material-ui/AppBar';
 import Toolbar from 'material-ui/Toolbar';
-import Button from 'material-ui/Button';
 import { MenuItem } from 'material-ui/Menu'
-import AddIcon from 'material-ui-icons/Add'
-
-import Central from './central'
-import Auth from './auth'
-import DashboardPage from './dashboard_page'
-import MotoboysPage from './motoboys_page'
-import NewOrderPage from './NewOrderPage'
-
 import { Route, Link } from 'react-router-dom'
+
+import Central from 'js/central'
+import Auth from 'js/auth'
+import DashboardPage from 'js/DashboardPage'
+import MotoboysPage from 'js/MotoboysPage'
+import NewOrderPage from 'js/NewOrderPage'
+import Nav from './Nav'
 
 export default class Layout extends React.Component {
   logout = () => {
@@ -48,28 +46,7 @@ export default class Layout extends React.Component {
 
         <div className="pl-3 pr-3">
           <section className="row mt-4">
-            <nav className="col-sm-2">
-              <div className="mb-4">
-                <Link to="/central/nova-entrega">
-                  <Button
-                    fullWidth
-                    size="large"
-                    variant="raised"
-                    color={isSelected("/central/nova-entrega") ? "primary" : "default" }
-                  >
-                    <AddIcon className="mr-1" />
-                    Nova entrega
-                  </Button>
-                </Link>
-              </div>
-
-              <Link to="/central">
-                <MenuItem selected={isSelected("/central")}>Início</MenuItem>
-              </Link>
-              <Link to="/central/motoboys">
-                <MenuItem selected={isSelected("/central/motoboys")}>Motoboys</MenuItem>
-              </Link>
-            </nav>
+            <Nav />
 
             <main className="col-sm-10">
               <Route path="/central" exact={true} component={DashboardPage} />
@@ -85,9 +62,4 @@ export default class Layout extends React.Component {
       </div>
     )
   }
-}
-
-
-function isSelected(route) {
-  return route ==location.pathname
 }

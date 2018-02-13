@@ -14,6 +14,7 @@ defmodule Graphql.Type.OrderOrError do
     field(:confirmed_at, :datetime)
     field(:canceled_at, :datetime)
     field(:finished_at, :datetime)
+    field(:queued_at, :datetime)
 
     field(:customer, :customer, resolve: &Order.Resolve.GetCustomer.handle/3)
     # field(:central_customer, :central_customer, resolve: assoc(:central_customer))

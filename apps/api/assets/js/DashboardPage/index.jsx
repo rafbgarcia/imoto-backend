@@ -6,8 +6,8 @@ import AddIcon from 'material-ui-icons/Add'
 import RemoveIcon from 'material-ui-icons/Remove'
 import {Link} from 'react-router-dom'
 
-import Orders from './orders'
-import Motoboys from './motoboys'
+import Orders from './Orders'
+import Motoboys from './Motoboys'
 
 class DashboardPage extends React.Component{
   state = {
@@ -38,11 +38,6 @@ class DashboardPage extends React.Component{
     }
   }
 
-  onMakeOrder = () => {
-    this.setState({ hasNewOrder: true, newOrderOpen: false })
-    this.props.data.refetch()
-  }
-
   render() {
     const {data: {orders, motoboys, loading}} = this.props
     const {newOrderOpen} = this.state
@@ -60,11 +55,11 @@ class DashboardPage extends React.Component{
 
 
         <div className="row">
-          <div className="col-sm-3">
-            <Motoboys motoboys={motoboys} />
-          </div>
-          <div className="col-sm-9">
+          <div className="col-md-9">
             <Orders orders={orders} />
+          </div>
+          <div className="col-md-3">
+            <Motoboys motoboys={motoboys} />
           </div>
         </div>
       </main>
@@ -91,9 +86,11 @@ export default graphql(gql`
       pending
       confirmed
       finished
+      inQueue
       insertedAt
       confirmedAt
       finishedAt
+      queuedAt
       stops {
         sequence
         instructions

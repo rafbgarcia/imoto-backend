@@ -1,12 +1,12 @@
 import React from 'react'
+import Moment from 'react-moment'
 import gql from 'graphql-tag'
 import { graphql } from 'react-apollo'
 import { CircularProgress } from 'material-ui/Progress';
 import Modal from 'material-ui/Modal';
 import Table, { TableBody, TableCell, TableRow } from 'material-ui/Table';
-import {FormattedDate} from 'react-intl'
 
-function MotoboyDetails({motoboy, open, handleClose, data: {entries, loading}}) {
+function History({motoboy, open, handleClose, data: {entries, loading}}) {
   return (
     <Modal
       open={open}
@@ -42,11 +42,7 @@ function Entry(entry, index) {
     <TableRow hover key={index}>
       <TableCell>{entryText(entry)}</TableCell>
       <TableCell>
-        <FormattedDate
-          value={entry.insertedAt}
-          hour="numeric"
-          minute="numeric"
-        />h
+        <Moment format="HH:mm\h">{entry.insertedAt}</Moment>
       </TableCell>
     </TableRow>
   )
@@ -80,6 +76,8 @@ function innerDivStyles() {
     boxShadow: '0 5px 15px rgba(0, 0, 0, .5)',
     zIndex: 1,
     padding: "2rem",
+    overflow: "auto",
+    maxHeight: "60vh",
   };
 }
 
@@ -96,4 +94,4 @@ export default graphql(gql`query motoboyHistory($motoboyId: ID!) {
       variables: { motoboyId: id},
     }
   }
-})(MotoboyDetails)
+})(History)

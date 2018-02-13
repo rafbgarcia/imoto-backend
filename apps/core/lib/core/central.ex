@@ -3,7 +3,7 @@ defmodule Core.Central do
 
   schema "centrals" do
     has_many(:motoboys, Core.Motoboy)
-    has_many(:orders, through: [:motoboys, :orders])
+    has_many(:orders, Core.Order)
     has_many(:my_companies, Core.Company, foreign_key: :central_id)
     many_to_many(:companies, Core.Company, join_through: "companies_centrals")
 
