@@ -4,7 +4,12 @@ defmodule Central.Resolve.CreateOrder do
 
   def handle(%{params: params, motoboy_id: motoboy_id}, %{context: %{current_central: central}}) do
     with {:ok, _} <- ensure_my_customer(params.central_customer_id, central.id) do
-      send_or_enqueue_order(params, central.id, motoboy_id)
+      Repo.transaction(fn ->
+        case send_or_enqueue_order(params, central.id, motoboy_id) do
+          {:ok, order} -> order
+          {:error, message} -> Repo.rollback(message)
+        end
+      end)
     end
   end
   def handle(_, _) do

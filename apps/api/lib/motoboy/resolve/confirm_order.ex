@@ -5,11 +5,15 @@ defmodule Motoboy.Resolve.ConfirmOrder do
 
   def handle(%{order_id: order_id}, %{context: %{current_motoboy: current_motoboy}}) do
     Repo.transaction(fn ->
-      order = Motoboy.SharedFunctions.get_order!(order_id, current_motoboy.id)
-      make_motoboy_busy!(current_motoboy)
-      add_to_history(order.id, current_motoboy.id)
-      confirm_order!(order)
+      process!(order_id, current_motoboy)
     end)
+  end
+
+  defp process!(order_id, motoboy) do
+    order = Motoboy.SharedFunctions.get_order!(order_id, motoboy.id)
+    make_motoboy_busy!(motoboy)
+    add_to_history(order.id, motoboy.id)
+    confirm_order!(order)
   end
 
   defp confirm_order!(order) do

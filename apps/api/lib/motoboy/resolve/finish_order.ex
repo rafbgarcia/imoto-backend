@@ -5,11 +5,15 @@ defmodule Motoboy.Resolve.FinishOrder do
 
   def handle(%{order_id: order_id}, %{context: %{current_motoboy: current_motoboy}}) do
     Repo.transaction(fn ->
-      order = Motoboy.SharedFunctions.get_order!(order_id, current_motoboy.id)
-      make_motoboy_available(current_motoboy)
-      add_to_history(order.id, current_motoboy.id)
-      finish_order!(order)
+      process!(order_id, current_motoboy)
     end)
+  end
+
+  defp process!(order_id, motoboy) do
+    order = Motoboy.SharedFunctions.get_order!(order_id, motoboy.id)
+    make_motoboy_available!(motoboy)
+    add_to_history(order.id, motoboy.id)
+    finish_order!(order)
   end
 
   defp finish_order!(order) do
@@ -34,12 +38,12 @@ defmodule Motoboy.Resolve.FinishOrder do
     })
   end
 
-  defp make_motoboy_available(motoboy) do
+  defp make_motoboy_available!(motoboy) do
     motoboy
     |> Core.Motoboy.changeset(%{
       state: Core.Motoboy.available(),
       became_available_at: Timex.local()
     })
-    |> Repo.update()
+    |> Repo.update!()
   end
 end

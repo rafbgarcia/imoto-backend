@@ -7,19 +7,23 @@ defmodule Motoboy.Resolve.CancelOrder do
   returns the current motoboy because he's the one making this request
   """
   def handle(%{order_id: order_id, reason: _}, %{context: %{current_motoboy: motoboy}}) do
+    Repo.transaction(fn ->
+      process!(order_id, motoboy)
+    end)
+  end
+
+  defp process!(order_id, motoboy) do
     order = Motoboy.SharedFunctions.get_order!(order_id, motoboy.id)
 
-    Repo.transaction(fn ->
-      add_cancel_to_history(order.id, motoboy.id)
+    add_cancel_to_history(order.id, motoboy.id)
 
-      get_next_motoboy(motoboy.id, motoboy.central_id)
-      |> case do
-        nil -> process_order_without_motoboy_available!(order)
-        new_motoboy -> process_order_with_new_motoboy!(order, new_motoboy)
-      end
+    get_next_motoboy(motoboy.id, motoboy.central_id)
+    |> case do
+      nil -> process_order_without_motoboy_available!(order)
+      new_motoboy -> process_order_with_new_motoboy!(order, new_motoboy)
+    end
 
-      make_motoboy_unavailable!(motoboy)
-    end)
+    make_motoboy_unavailable!(motoboy)
   end
 
   defp process_order_with_new_motoboy!(order, new_motoboy) do
