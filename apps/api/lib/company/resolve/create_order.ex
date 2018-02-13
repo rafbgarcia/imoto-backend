@@ -6,7 +6,7 @@ defmodule Company.Resolve.CreateOrder do
     with {:ok, my_centrals_ids} <- get_centrals_ids(company.id),
          {:ok, motoboy} <- next_motoboy_or_error(my_centrals_ids),
          {:ok, order} <- create_order(company, motoboy, order_params) do
-      notify_motoboy_new_order(motoboy.one_signal_player_id)
+      Central.Shared.NotifyMotoboy.new_order(motoboy.one_signal_player_id)
       add_to_history(order.id, motoboy.id)
 
       {:ok, order}
@@ -80,9 +80,5 @@ defmodule Company.Resolve.CreateOrder do
       order_id: order_id,
       motoboy_id: motoboy_id
     })
-  end
-
-  defp notify_motoboy_new_order(player_id) do
-    Api.OneSignal.notify(player_id, "Você tem uma nova entrega!")
   end
 end

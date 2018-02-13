@@ -29,7 +29,7 @@ defmodule Motoboy.Resolve.CancelOrder do
   defp process_order_with_new_motoboy!(order, new_motoboy) do
     make_motoboy_busy!(new_motoboy)
     update_order_with_new_motoboy!(order, new_motoboy.id)
-    notify_new_motoboy(new_motoboy.one_signal_player_id)
+    Central.Shared.NotifyMotoboy.new_order(new_motoboy.one_signal_player_id)
     add_order_new_motoboy_to_history(order.id, new_motoboy.id)
   end
 
@@ -122,9 +122,5 @@ defmodule Motoboy.Resolve.CancelOrder do
     motoboy
     |> Core.Motoboy.changeset(%{state: Core.Motoboy.busy()})
     |> Repo.update!()
-  end
-
-  defp notify_new_motoboy(player_id) do
-    Api.OneSignal.notify(player_id, "Você tem uma nova entrega!")
   end
 end

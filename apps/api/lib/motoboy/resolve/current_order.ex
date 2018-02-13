@@ -29,7 +29,7 @@ defmodule Motoboy.Resolve.CurrentOrder do
     |> case do
       nil -> nil
       order ->
-        notify_motoboy_new_order(motoboy.one_signal_player_id)
+        Central.Shared.NotifyMotoboy.new_order(motoboy.one_signal_player_id)
         make_motoboy_busy!(motoboy)
         update_order_with_new_motoboy!(order, motoboy.id)
     end
@@ -46,10 +46,6 @@ defmodule Motoboy.Resolve.CurrentOrder do
     )
     |> first
     |> Repo.one()
-  end
-
-  defp notify_motoboy_new_order(player_id) do
-    Api.OneSignal.notify(player_id, "Você tem uma nova entrega!")
   end
 
   defp update_order_with_new_motoboy!(order, motoboy_id) do

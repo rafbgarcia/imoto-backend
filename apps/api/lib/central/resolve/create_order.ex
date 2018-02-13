@@ -26,7 +26,7 @@ defmodule Central.Resolve.CreateOrder do
   end
   defp send_or_enqueue_order(params, central_id, motoboy_id) do
     with {:ok, motoboy} <- get_motoboy(motoboy_id, central_id) do
-      notify_motoboy_new_order(motoboy.one_signal_player_id)
+      Central.Shared.NotifyMotoboy.new_order(motoboy.one_signal_player_id)
 
       available = Motoboy.available()
       case motoboy.state do
@@ -132,9 +132,5 @@ defmodule Central.Resolve.CreateOrder do
       text: "Nenhum motoboy disponível. Pedido criado e enviado para a fila.",
       order_id: order_id,
     })
-  end
-
-  defp notify_motoboy_new_order(player_id) do
-    Api.OneSignal.notify(player_id, "Você tem uma nova entrega!")
   end
 end
