@@ -15,7 +15,7 @@ defmodule Motoboy.Resolve.CancelOrder do
   defp process!(order_id, motoboy) do
     order = Motoboy.SharedFunctions.get_order!(order_id, motoboy.id)
 
-    add_cancel_to_history(order.id, motoboy.id)
+    add_order_cancelation_to_history(order.id, motoboy.id)
 
     next_available_motoboy(motoboy.central_id, motoboy.id)
     |> case do
@@ -35,7 +35,7 @@ defmodule Motoboy.Resolve.CancelOrder do
 
   defp process_order_without_motoboy_available!(order) do
     send_order_to_queue!(order)
-    add_order_in_queue_to_history(order.id)
+    add_order_sent_to_queue_to_history(order.id)
   end
 
   defp next_available_motoboy(central_id, current_motoboy_id) do
@@ -68,7 +68,7 @@ defmodule Motoboy.Resolve.CancelOrder do
     |> Repo.update!()
   end
 
-  defp add_cancel_to_history(order_id, motoboy_id) do
+  defp add_order_cancelation_to_history(order_id, motoboy_id) do
     Repo.insert(%History{
       scope: "motoboy",
       text: "Cancelou pedido",
@@ -100,7 +100,7 @@ defmodule Motoboy.Resolve.CancelOrder do
     })
   end
 
-  defp add_order_in_queue_to_history(order_id) do
+  defp add_order_sent_to_queue_to_history(order_id) do
     Repo.insert(%History{
       scope: "order",
       text: "Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...",
