@@ -141,7 +141,11 @@ class NewOrderPage extends React.Component {
     .then(({data: {order}}) => {
       this.setState(this.initialState())
       if (order.inQueue) {
-        showSnack("Pedido enviado para a fila, aguardando o próximo motoboy disponível", "success")
+        if (order.motoboy) {
+          showSnack(`Pedido na fila! Aguardando ${order.motoboy.name} ficar disponível...`, "success")
+        } else {
+          showSnack("Pedido na fila! Aguardando o próximo motoboy disponível", "success")
+        }
       } else {
         showSnack(`Pedido enviado para ${order.motoboy.name}`, "success")
       }

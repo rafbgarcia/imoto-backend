@@ -16,11 +16,11 @@ defmodule Central.Resolve.CreateOrder do
 
     case motoboy do
       nil -> create_order_in_queue(params, central_id, nil)
-      motoboy -> create_pending_order(params, central_id, motoboy.id)
+      motoboy -> create_pending_order(params, motoboy, central_id)
     end
   end
   defp send_or_enqueue_order(params, central_id, motoboy_id) do
-    with {:ok, motoboy} <- get_motoboy_for_order(motoboy_id, central_id) do
+    with {:ok, motoboy} <- get_motoboy(motoboy_id, central_id) do
       notify_motoboy_new_order(motoboy.one_signal_player_id)
 
       available = Motoboy.available()
@@ -55,17 +55,16 @@ defmodule Central.Resolve.CreateOrder do
     {:ok, order}
   end
 
-
-  defp get_motoboy_for_order(motoboy_id, central_id) do
+  defp get_motoboy(motoboy_id, central_id) do
     motoboy = Repo.get_by(Motoboy, id: motoboy_id, central_id: central_id)
 
     case motoboy do
       nil ->
-        {:error, "Este motoboy não existe na sua central"}
+        {:error, "Estranho, este motoboy não está cadastrado, entre em contato com o suporte técnico"}
       %{active: active} when active == false ->
         {:error, "Este motoboy está INATIVO. Ative-o para enviar um pedido"}
       motoboy ->
-        motoboy
+        {:ok, motoboy}
     end
   end
 
