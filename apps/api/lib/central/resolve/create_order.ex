@@ -17,7 +17,7 @@ defmodule Central.Resolve.CreateOrder do
   end
 
   defp send_or_enqueue_order(params, central_id, "next_in_queue") do
-    motoboy = get_next_motoboy(central_id)
+    motoboy = next_available_motoboy(central_id)
 
     case motoboy do
       nil -> create_order_in_queue(params, central_id, nil)
@@ -91,7 +91,7 @@ defmodule Central.Resolve.CreateOrder do
     |> Repo.insert()
   end
 
-  defp get_next_motoboy(central_id) do
+  defp next_available_motoboy(central_id) do
     from(
       m in Motoboy,
       lock: "FOR UPDATE",

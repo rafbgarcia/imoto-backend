@@ -17,7 +17,7 @@ defmodule Motoboy.Resolve.CancelOrder do
 
     add_cancel_to_history(order.id, motoboy.id)
 
-    get_next_motoboy(motoboy.id, motoboy.central_id)
+    next_available_motoboy(motoboy.central_id, motoboy.id)
     |> case do
       nil -> process_order_without_motoboy_available!(order)
       new_motoboy -> process_order_with_new_motoboy!(order, new_motoboy)
@@ -38,20 +38,15 @@ defmodule Motoboy.Resolve.CancelOrder do
     add_order_in_queue_to_history(order.id)
   end
 
-  defp get_next_motoboy(current_motoboy_id, central_id) do
+  defp next_available_motoboy(central_id, current_motoboy_id) do
     from(
       m in Core.Motoboy,
       lock: "FOR UPDATE",
-      where: m.state == ^Core.Motoboy.available(),
       where: m.id != ^current_motoboy_id,
-      order_by:
-        fragment(
-          """
-          CASE m0.central_id WHEN ? THEN 1 ELSE 2 END,
-          m0.became_available_at ASC
-          """,
-          ^central_id
-        )
+      where: m.state == ^Core.Motoboy.available(),
+      where: m.active == ^true,
+      where: m.central_id == ^central_id,
+      order_by: m.became_available_at
     )
     |> first
     |> Repo.one()

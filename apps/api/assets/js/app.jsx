@@ -8,7 +8,7 @@ import { indigo } from "material-ui/colors"
 import ptBR from 'react-intl/locale-data/pt'
 addLocaleData(ptBR)
 
-import Layout from './layout'
+import Layout from './Layout'
 import AuthenticateLayout from './AuthenticateLayout'
 import Central from './central'
 import client from './graphql_client'

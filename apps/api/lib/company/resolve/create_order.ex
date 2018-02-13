@@ -41,20 +41,21 @@ defmodule Company.Resolve.CreateOrder do
 
   defp next_motoboy_or_error(centrals_ids) do
     Repo.transaction(fn ->
-      case get_next_motoboy(centrals_ids) do
+      case next_available_motoboy(centrals_ids) do
         nil -> nil
         motoboy -> update_motoboy_state(motoboy)
       end
     end)
   end
 
-  defp get_next_motoboy(centrals_ids) do
+  defp next_available_motoboy(centrals_ids) do
     from(
       m in Motoboy,
       lock: "FOR UPDATE",
+      where: m.active == ^true,
       where: m.state == ^Motoboy.available(),
       where: m.central_id in ^centrals_ids,
-      order_by: [asc: m.became_available_at]
+      order_by: m.became_available_at
     )
     |> first
     |> Repo.one()
