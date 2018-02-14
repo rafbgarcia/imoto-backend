@@ -23,7 +23,8 @@ module.exports = {
           presets: ["es2015", "react"],
           plugins: [
             ['transform-class-properties', {spec: true}],
-            ["transform-object-rest-spread"]
+            ["transform-object-rest-spread"],
+            ["lodash"],
           ]
         }
       },
@@ -97,19 +98,21 @@ module.exports = {
   },
 
   plugins: [
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify('production')
+    }),
+
     new CopyWebpackPlugin([{
       from: "./static",
       to: path.resolve(__dirname, "../priv/static"),
       ignore: [".DS_Store"],
     }]),
+
     new ExtractTextPlugin({
       filename: "css/app.css",
       allChunks: true
     }),
 
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify('production')
-    }),
     new webpack.optimize.UglifyJsPlugin({
       mangle: true,
       compress: {
@@ -124,7 +127,9 @@ module.exports = {
       },
       exclude: [/\.min\.js$/gi] // skip pre-minified libs
     }),
+
     new webpack.optimize.AggressiveMergingPlugin(), // Merge chunks
+
     new CompressionPlugin({
       asset: "[path].gz[query]",
       algorithm: "gzip",
