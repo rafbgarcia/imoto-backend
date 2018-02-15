@@ -9,7 +9,7 @@ import {Link} from 'react-router-dom'
 import Orders from './Orders'
 import Motoboys from './Motoboys'
 
-class DashboardPage extends React.Component{
+class DashboardPage extends React.Component {
   state = {
     hasNewOrder: false,
     newOrderOpen: false,

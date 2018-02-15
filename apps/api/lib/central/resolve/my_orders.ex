@@ -5,6 +5,9 @@ defmodule Central.Resolve.MyOrders do
     {:ok, todays_orders(central)}
   end
 
+  def handle(_, _), do: {:error, "Algo errado, por favor refaça login"}
+  def handle, do: {:error, "Algo errado, por favor refaça login"}
+
   defp todays_orders(central) do
     from(
       o in assoc(central, :orders),
