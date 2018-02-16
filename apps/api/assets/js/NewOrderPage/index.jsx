@@ -70,7 +70,7 @@ class NewOrderPage extends React.Component {
     const selectedCustomer = customers.find(customer => customer.id == centralCustomerId)
 
     const firstStop = _.merge(this.newStop(0), {
-      instructions: "Falar com o responsável",
+      instructions: "",
       street: selectedCustomer.street || "",
       number: selectedCustomer.number || "",
       complement: selectedCustomer.complement || "",
