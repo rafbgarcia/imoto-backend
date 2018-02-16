@@ -36,44 +36,47 @@ defmodule Central.Resolve.CreateOrder do
   end
 
   defp create_order_in_queue(params, central_id, motoboy_id) do
-    {:ok, order} =
-      create_order(
-        Map.merge(params, %{
-          state: Order.in_queue(),
-          queued_at: Timex.local(),
-          motoboy_id: motoboy_id,
-          central_id: central_id
-        })
-      )
-
-    add_order_in_queue_to_history(order.id)
-    {:ok, order}
+    params
+    |> Map.merge(%{state: Order.in_queue()})
+    |> Map.merge(%{queued_at: Timex.local()})
+    |> Map.merge(%{motoboy_id: motoboy_id})
+    |> Map.merge(%{central_id: central_id})
+    |> create_order
+    |> case do
+      {:ok, order} ->
+        add_order_in_queue_to_history(order.id)
+        {:ok, order}
+      {:error, changeset} ->
+        {:error, Api.ErrorHelper.messages(changeset)}
+    end
   end
 
   defp create_pending_order(params, motoboy, central_id) do
-    make_motoboy_busy!(motoboy)
+    motoboy
+    |> make_busy!
 
-    {:ok, order} =
-      create_order(
-        Map.merge(params, %{
-          state: Order.pending(),
-          motoboy_id: motoboy.id,
-          central_id: central_id
-        })
-      )
+    params
+    |> Map.merge(%{state: Order.pending()})
+    |> Map.merge(%{motoboy_id: motoboy.id})
+    |> Map.merge(%{central_id: central_id})
+    |> create_order
+    |> case do
+      {:ok, order} ->
+        Central.Shared.NotifyMotoboy.new_order(motoboy.one_signal_player_id)
+        add_order_pending_to_history(order.id, motoboy.id)
+        {:ok, order}
 
-    Central.Shared.NotifyMotoboy.new_order(motoboy.one_signal_player_id)
-    add_order_pending_to_history(order.id, motoboy.id)
-    {:ok, order}
+      {:error, changeset} ->
+        {:error, Api.ErrorHelper.messages(changeset)}
+    end
   end
 
   defp get_motoboy(motoboy_id, central_id) do
-    motoboy = Repo.get_by(Motoboy, id: motoboy_id, central_id: central_id)
-
-    case motoboy do
+    Motoboy
+    |> Repo.get_by(id: motoboy_id, central_id: central_id)
+    |> case do
       nil ->
-        {:error,
-         "Estranho, este motoboy não está cadastrado, entre em contato com o suporte técnico"}
+        {:error, "Este motoboy não existe. Se isso é um erro, entre em contato conosco."}
 
       %{active: active} when active == false ->
         {:error, "Este motoboy está INATIVO. Ative-o para enviar um pedido"}
@@ -115,9 +118,10 @@ defmodule Central.Resolve.CreateOrder do
     |> Repo.one()
   end
 
-  defp make_motoboy_busy!(motoboy) do
+  defp make_busy!(motoboy) do
     motoboy
-    |> Motoboy.changeset(%{state: Motoboy.busy(), became_busy_at: Timex.local()})
+    |> Motoboy.changeset(%{state: Motoboy.busy()})
+    |> Motoboy.changeset(%{became_busy_at: Timex.local()})
     |> Repo.update!()
   end
 

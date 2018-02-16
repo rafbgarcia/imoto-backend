@@ -57,7 +57,8 @@ defmodule Api do
         History,
         Company,
         CentralCustomer,
-        MotoboyGeolocation
+        MotoboyGeolocation,
+        OrderCancelation
       }
     end
   end
@@ -78,7 +79,8 @@ defmodule Api do
         History,
         Company,
         CentralCustomer,
-        MotoboyGeolocation
+        MotoboyGeolocation,
+        OrderCancelation
       }
     end
   end

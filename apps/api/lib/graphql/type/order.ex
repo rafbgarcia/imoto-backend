@@ -1,7 +1,7 @@
 defmodule Graphql.Type.OrderOrError do
+  import Ecto.Query
   use Api, :graphql_schema
 
-  # Objects
   object :order do
     field(:id, :id)
     field(:price, :integer)
@@ -18,9 +18,12 @@ defmodule Graphql.Type.OrderOrError do
     field(:sent_at, :datetime)
 
     field(:customer, :customer, resolve: &Order.Resolve.GetCustomer.handle/3)
-    # field(:central_customer, :central_customer, resolve: assoc(:central_customer))
-    # field(:company, :company, resolve: assoc(:company))
     field(:motoboy, :motoboy, resolve: assoc(:motoboy))
-    field(:stops, list_of(:stop), resolve: &Order.Resolve.Fields.stops/3)
+    field(:stops, list_of(:stop), resolve: assoc(:stops, fn query, _, _ ->
+      query |> order_by(asc: :sequence)
+    end))
+    field(:cancelations, list_of(:order_cancelation), resolve: assoc(:cancelations, fn query, _, _ ->
+      query |> order_by(:inserted_at)
+    end))
   end
 end

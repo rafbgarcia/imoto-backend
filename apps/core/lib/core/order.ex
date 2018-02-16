@@ -28,6 +28,7 @@ defmodule Core.Order do
 
   schema "orders" do
     has_many(:stops, Core.Stop)
+    has_many(:cancelations, Core.OrderCancelation)
     has_many(:locations, through: [:stops, :location])
     belongs_to(:central, Core.Central)
     belongs_to(:motoboy, Core.Motoboy)

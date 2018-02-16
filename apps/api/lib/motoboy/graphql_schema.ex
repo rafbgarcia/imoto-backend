@@ -32,8 +32,7 @@ defmodule Motoboy.GraphqlSchema do
     end
 
     field :cancel_order, :motoboy do
-      arg(:order_id, non_null(:id))
-      arg(:reason, :string)
+      arg(:params, :cancel_order_params)
       resolve(&Motoboy.Resolve.CancelOrder.handle/2)
     end
 
@@ -51,6 +50,12 @@ defmodule Motoboy.GraphqlSchema do
       arg(:params, :location_params)
       resolve(&Motoboy.Resolve.TrackLocation.handle/2)
     end
+  end
+
+  input_object :cancel_order_params do
+    field(:order_id, non_null(:id))
+    field(:reason, :string)
+    field(:has_order_in_hands, :boolean)
   end
 
   input_object :location_params do

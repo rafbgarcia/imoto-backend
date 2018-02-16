@@ -1,4 +1,5 @@
 defmodule Graphql.Type.Motoboy do
+  import Ecto.Query
   use Api, :graphql_schema
 
   object :motoboy do
@@ -17,5 +18,6 @@ defmodule Graphql.Type.Motoboy do
     field(:unavailable, :boolean, resolve: &Motoboy.Resolve.MyData.unavailable/3)
 
     field(:central, :central, resolve: assoc(:central))
+    field(:geolocations, list_of(:motoboy_geolocation), resolve: assoc(:geolocations))
   end
 end
