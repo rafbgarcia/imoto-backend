@@ -98,7 +98,7 @@ defmodule Central.Resolve.CreateOrder do
 
   defp create_order(params) do
     %Order{}
-    |> Order.changeset(Map.merge(params, %{sent_at: Timex.local}))
+    |> Order.changeset(Map.merge(params, %{sent_at: Timex.local()}))
     |> Repo.insert()
   end
 

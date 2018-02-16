@@ -22,9 +22,7 @@ config :api, Api.Endpoint,
   check_origin: false,
   version: Application.spec(:api, :vsn)
 
-
-config :api, Api.Guardian,
-  secret_key: "${GUARDIAN_SECRET}"
+config :api, Api.Guardian, secret_key: "${GUARDIAN_SECRET}"
 
 # ## SSL Support
 #

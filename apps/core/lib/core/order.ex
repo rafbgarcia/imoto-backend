@@ -45,7 +45,6 @@ defmodule Core.Order do
     # so we need to set when the motoboy cancel's it.
     field(:queued_at, Timex.Ecto.DateTime)
 
-
     # Set whenever the order is sent to a new motoboy
     field(:sent_at, Timex.Ecto.DateTime)
     field(:canceled_at, Timex.Ecto.DateTime)

@@ -14,5 +14,4 @@ defmodule Motoboy.Resolve.TrackLocation do
     |> MotoboyGeolocation.changeset(%{motoboy_id: motoboy_id})
     |> Repo.insert()
   end
-
 end

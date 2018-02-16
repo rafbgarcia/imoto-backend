@@ -14,6 +14,6 @@ defmodule Motoboy.Resolve.OngoingOrders do
       where: o.state in [^Order.pending(), ^Order.confirmed()],
       order_by: o.inserted_at
     )
-    |> Repo.all
+    |> Repo.all()
   end
 end

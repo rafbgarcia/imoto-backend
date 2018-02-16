@@ -5,7 +5,9 @@ defmodule Motoboy.Resolve.NextOrderInQueue do
 
   def handle(_, %{context: %{current_motoboy: motoboy}}) do
     case Motoboy.SharedFunctions.has_ongoing_orders(motoboy) do
-      true -> {:ok, nil}
+      true ->
+        {:ok, nil}
+
       false ->
         Repo.transaction(fn -> handle(motoboy) end)
     end
@@ -13,18 +15,21 @@ defmodule Motoboy.Resolve.NextOrderInQueue do
 
   def handle(motoboy) do
     available = Core.Motoboy.available()
+
     case motoboy.state do
       ^available ->
         case assign_next_order_in_queue_to(motoboy) do
           {:error, message} -> Repo.rollback(message)
           {:ok, order} -> order
         end
-      _ -> nil
+
+      _ ->
+        nil
     end
   end
 
   defp assign_next_order_in_queue_to(motoboy) do
-    case next_order_in_queue(motoboy)  do
+    case next_order_in_queue(motoboy) do
       nil -> {:ok, nil}
       order -> {:ok, assign_to_motoboy!(order, motoboy)}
     end
@@ -55,7 +60,7 @@ defmodule Motoboy.Resolve.NextOrderInQueue do
     |> Order.changeset(%{
       state: Order.pending(),
       motoboy_id: motoboy_id,
-      sent_at: Timex.local
+      sent_at: Timex.local()
     })
     |> Repo.update!()
   end
@@ -81,5 +86,4 @@ defmodule Motoboy.Resolve.NextOrderInQueue do
       motoboy_id: motoboy_id
     })
   end
-
 end

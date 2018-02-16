@@ -8,7 +8,9 @@ defmodule Motoboy.Resolve.FinishOrder do
       order = finish_order!(order_id, motoboy)
 
       case Motoboy.SharedFunctions.has_ongoing_orders(motoboy) do
-        true -> order
+        true ->
+          order
+
         false ->
           make_motoboy_available!(motoboy)
           order

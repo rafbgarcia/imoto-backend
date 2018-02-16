@@ -10,9 +10,10 @@ defmodule Motoboy.Resolve.CancelOrder do
     Repo.transaction(fn ->
       new_motoboy = next_available_motoboy(motoboy)
 
-      order = Motoboy.SharedFunctions.get_order!(order_id, motoboy.id)
-      |> track_cancel(motoboy)
-      |> send_to_new_motoboy_or_queue!(new_motoboy)
+      order =
+        Motoboy.SharedFunctions.get_order!(order_id, motoboy.id)
+        |> track_cancel(motoboy)
+        |> send_to_new_motoboy_or_queue!(new_motoboy)
 
       motoboy
       |> track_cancel(order)
@@ -32,7 +33,7 @@ defmodule Motoboy.Resolve.CancelOrder do
     new_motoboy
     |> make_busy!
     |> track_new_order(order)
-    |> Central.Shared.NotifyMotoboy.new_order
+    |> Central.Shared.NotifyMotoboy.new_order()
   end
 
   defp make_unavailable_if_no_ongoing_orders!(motoboy) do
@@ -70,7 +71,7 @@ defmodule Motoboy.Resolve.CancelOrder do
   defp send_to_new_motoboy!(order, %Core.Motoboy{id: motoboy_id}) do
     order
     |> Order.changeset(%{motoboy_id: motoboy_id})
-    |> Order.changeset(%{sent_at: Timex.local})
+    |> Order.changeset(%{sent_at: Timex.local()})
     |> Repo.update!()
   end
 
@@ -81,6 +82,7 @@ defmodule Motoboy.Resolve.CancelOrder do
       order_id: order_id,
       motoboy_id: motoboy.id
     })
+
     motoboy
   end
 
@@ -91,6 +93,7 @@ defmodule Motoboy.Resolve.CancelOrder do
       order_id: order.id,
       motoboy_id: motoboy_id
     })
+
     order
   end
 
@@ -101,6 +104,7 @@ defmodule Motoboy.Resolve.CancelOrder do
       order_id: order.id,
       motoboy_id: motoboy.id
     })
+
     motoboy
   end
 
@@ -111,6 +115,7 @@ defmodule Motoboy.Resolve.CancelOrder do
       order_id: order.id,
       motoboy_id: motoboy.id
     })
+
     order
   end
 
@@ -120,6 +125,7 @@ defmodule Motoboy.Resolve.CancelOrder do
       text: "Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...",
       order_id: order.id
     })
+
     order
   end
 
@@ -133,7 +139,7 @@ defmodule Motoboy.Resolve.CancelOrder do
   defp make_busy!(motoboy) do
     motoboy
     |> Core.Motoboy.changeset(%{state: Core.Motoboy.busy()})
-    |> Core.Motoboy.changeset(%{became_busy_at: Timex.local})
+    |> Core.Motoboy.changeset(%{became_busy_at: Timex.local()})
     |> Repo.update!()
   end
 end

@@ -13,7 +13,7 @@ defmodule Core.MotoboyGeolocation do
     |> cast(params, [
       :motoboy_id,
       :lat,
-      :lng,
+      :lng
     ])
   end
 end
