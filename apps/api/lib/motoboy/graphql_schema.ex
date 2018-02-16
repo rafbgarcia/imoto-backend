@@ -4,11 +4,7 @@ defmodule Motoboy.GraphqlSchema do
 
   query do
     field(:myself, :motoboy, resolve: &Motoboy.Resolve.MyData.myself/2)
-
-    @doc """
-    Returns either the current order or the next order in queue
-    """
-    field(:current_order, :order, resolve: &Motoboy.Resolve.CurrentOrder.handle/2)
+    field(:ongoing_orders, list_of(:order), resolve: &Motoboy.Resolve.OngoingOrders.handle/2)
   end
 
   mutation do
@@ -45,6 +41,11 @@ defmodule Motoboy.GraphqlSchema do
       arg(:order_id, non_null(:id))
       resolve(&Motoboy.Resolve.FinishOrder.handle/2)
     end
+
+    @doc """
+    Check the queue and assigns an order to the motoboy, if there is one
+    """
+    field(:next_order_in_queue, :order, resolve: &Motoboy.Resolve.NextOrderInQueue.handle/2)
   end
 
   input_object :verify_code_params do

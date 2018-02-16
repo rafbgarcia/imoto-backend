@@ -3,15 +3,21 @@ defmodule Motoboy.Resolve.FinishOrder do
 
   alias Core.{Order, History}
 
-  def handle(%{order_id: order_id}, %{context: %{current_motoboy: current_motoboy}}) do
+  def handle(%{order_id: order_id}, %{context: %{current_motoboy: motoboy}}) do
     Repo.transaction(fn ->
-      process!(order_id, current_motoboy)
+      order = finish_order!(order_id, motoboy)
+
+      case Motoboy.SharedFunctions.has_ongoing_orders(motoboy) do
+        true -> order
+        false ->
+          make_motoboy_available!(motoboy)
+          order
+      end
     end)
   end
 
-  defp process!(order_id, motoboy) do
+  defp finish_order!(order_id, motoboy) do
     order = Motoboy.SharedFunctions.get_order!(order_id, motoboy.id)
-    make_motoboy_available!(motoboy)
     add_to_history(order.id, motoboy.id)
     finish_order!(order)
   end

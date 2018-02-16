@@ -3,21 +3,23 @@ defmodule Motoboy.Resolve.MakeAvailable do
 
   alias Core.{History}
 
-  def handle(_args, %{context: %{current_motoboy: current_motoboy}}) do
-    add_to_history(current_motoboy.id)
-    make_motoboy_available(current_motoboy)
+  def handle(_args, %{context: %{current_motoboy: motoboy}}) do
+    Repo.transaction(fn ->
+      motoboy
+      |> track_became_online
+      |> become_available!
+    end)
   end
 
-  defp make_motoboy_available(motoboy) do
+  defp become_available!(motoboy) do
     motoboy
-    |> Core.Motoboy.changeset(%{
-      state: Core.Motoboy.available(),
-      became_available_at: Timex.local()
-    })
-    |> Repo.update()
+    |> Core.Motoboy.changeset(%{state: Core.Motoboy.available()})
+    |> Core.Motoboy.changeset(%{became_available_at: Timex.local()})
+    |> Repo.update!()
   end
 
-  defp add_to_history(motoboy_id) do
-    Repo.insert(%History{scope: "motoboy", text: "Ficou online", motoboy_id: motoboy_id})
+  defp track_became_online(motoboy) do
+    Repo.insert(%History{scope: "motoboy", text: "Ficou online", motoboy_id: motoboy.id})
+    motoboy
   end
 end
