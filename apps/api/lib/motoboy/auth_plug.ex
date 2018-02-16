@@ -5,11 +5,24 @@ defmodule Motoboy.AuthPlug do
   def init(opts), do: opts
 
   def call(conn, _) do
-    get_token(conn)
+    case get_token(conn) do
+      token when token in [nil, "", []] -> conn
+      token -> current_resource_or_error(conn, token)
+    end
+  end
+
+  defp current_resource_or_error(conn, token) do
+    token
     |> current_resource
     |> case do
-      nil -> conn
-      resource -> put_private(conn, :absinthe, %{context: %{current_motoboy: resource}})
+      nil ->
+        conn
+        |> put_resp_content_type("application/json")
+        |> send_resp(403, "Seu token expirou, por favor refaça login")
+        |> halt
+
+      resource ->
+        put_private(conn, :absinthe, %{context: %{current_motoboy: resource}})
     end
   end
 
