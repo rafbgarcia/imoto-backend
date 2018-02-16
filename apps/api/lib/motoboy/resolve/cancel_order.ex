@@ -13,7 +13,7 @@ defmodule Motoboy.Resolve.CancelOrder do
 
       order =
         Motoboy.SharedFunctions.get_order!(params.order_id, motoboy.id)
-        |> add_to_order_cancelations!(params)
+        |> insert_cancelation!(params)
         |> track_cancel(motoboy)
         |> send_to_new_motoboy_or_queue!(new_motoboy)
 
@@ -23,11 +23,11 @@ defmodule Motoboy.Resolve.CancelOrder do
     end)
   end
 
-  defp add_to_order_cancelations!(order, %{reason: reason}) when reason in [nil, ""] do
+  defp insert_cancelation!(order, %{reason: reason}) when reason in [nil, ""] do
     order
   end
 
-  defp add_to_order_cancelations!(order, params) do
+  defp insert_cancelation!(order, params) do
     location = order |> motoboy_current_location
 
     %OrderCancelation{}
@@ -62,19 +62,19 @@ defmodule Motoboy.Resolve.CancelOrder do
 
     new_motoboy
     |> make_busy!
-    |> track_new_order(order)
+    |> track_my_new_order(order)
     |> Central.Shared.NotifyMotoboy.new_order()
   end
 
   defp send_to_queue!(order) do
     order
+    |> track_sent_to_queue
     |> Order.changeset(%{
       state: Order.in_queue(),
       queued_at: order.inserted_at,
       motoboy_id: nil
     })
     |> Repo.update!()
-    |> track_sent_to_queue
   end
 
   defp next_available_motoboy(%Core.Motoboy{central_id: central_id, id: id}) do
@@ -98,29 +98,29 @@ defmodule Motoboy.Resolve.CancelOrder do
     |> Repo.update!()
   end
 
-  defp track_cancel(%Core.Motoboy{} = motoboy, %Core.Order{id: order_id}) do
+  defp track_cancel(%Core.Motoboy{} = motoboy, %Core.Order{} = order) do
     Repo.insert(%History{
       scope: "motoboy",
       text: "Cancelou pedido",
-      order_id: order_id,
+      order_id: order.id,
       motoboy_id: motoboy.id
     })
 
     motoboy
   end
 
-  defp track_cancel(%Core.Order{} = order, %Core.Motoboy{id: motoboy_id}) do
+  defp track_cancel(%Core.Order{} = order, %Core.Motoboy{} = motoboy) do
     Repo.insert(%History{
       scope: "order",
       text: "Motoboy cancelou pedido",
       order_id: order.id,
-      motoboy_id: motoboy_id
+      motoboy_id: motoboy.id
     })
 
     order
   end
 
-  defp track_new_order(order, motoboy) do
+  defp track_my_new_order(%Core.Motoboy{} = motoboy, %Order{} = order) do
     Repo.insert(%History{
       scope: "motoboy",
       text: "Recebeu pedido",
@@ -131,7 +131,7 @@ defmodule Motoboy.Resolve.CancelOrder do
     motoboy
   end
 
-  defp track_sent_to_new_motoboy(order, motoboy) do
+  defp track_sent_to_new_motoboy(%Core.Order{} = order, %Core.Motoboy{} = motoboy) do
     Repo.insert(%History{
       scope: "order",
       text: "Pedido enviado a outro motoboy",
@@ -142,7 +142,7 @@ defmodule Motoboy.Resolve.CancelOrder do
     order
   end
 
-  defp track_sent_to_queue(order) do
+  defp track_sent_to_queue(%Order{} = order) do
     Repo.insert(%History{
       scope: "order",
       text: "Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...",
