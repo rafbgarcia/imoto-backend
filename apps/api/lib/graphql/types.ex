@@ -14,4 +14,5 @@ defmodule Graphql.Types do
   import_types(Graphql.Type.Central)
   import_types(Graphql.Type.History)
   import_types(Graphql.Type.CentralCustomer)
+  import_types(Graphql.Type.MotoboyGeolocation)
 end

@@ -56,7 +56,8 @@ defmodule Api do
         Stop,
         History,
         Company,
-        CentralCustomer
+        CentralCustomer,
+        MotoboyGeolocation
       }
     end
   end
@@ -76,7 +77,8 @@ defmodule Api do
         Stop,
         History,
         Company,
-        CentralCustomer
+        CentralCustomer,
+        MotoboyGeolocation
       }
     end
   end

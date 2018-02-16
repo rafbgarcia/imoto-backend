@@ -46,6 +46,16 @@ defmodule Motoboy.GraphqlSchema do
     Check the queue and assigns an order to the motoboy, if there is one
     """
     field(:next_order_in_queue, :order, resolve: &Motoboy.Resolve.NextOrderInQueue.handle/2)
+
+    field :track_location, :motoboy_geolocation do
+      arg(:params, :location_params)
+      resolve(&Motoboy.Resolve.TrackLocation.handle/2)
+    end
+  end
+
+  input_object :location_params do
+    field(:lat, :string)
+    field(:lng, :string)
   end
 
   input_object :verify_code_params do
