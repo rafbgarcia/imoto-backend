@@ -19,7 +19,7 @@ defmodule Motoboy.Resolve.CancelOrder do
 
       motoboy
       |> track_cancel(order)
-      |> make_unavailable_if_no_ongoing_orders!
+      |> make_unavailable!
     end)
   end
 
@@ -64,13 +64,6 @@ defmodule Motoboy.Resolve.CancelOrder do
     |> make_busy!
     |> track_new_order(order)
     |> Central.Shared.NotifyMotoboy.new_order()
-  end
-
-  defp make_unavailable_if_no_ongoing_orders!(motoboy) do
-    case Motoboy.SharedFunctions.has_ongoing_orders(motoboy) do
-      true -> motoboy
-      false -> make_motoboy_unavailable!(motoboy)
-    end
   end
 
   defp send_to_queue!(order) do
@@ -159,7 +152,7 @@ defmodule Motoboy.Resolve.CancelOrder do
     order
   end
 
-  defp make_motoboy_unavailable!(motoboy) do
+  defp make_unavailable!(motoboy) do
     motoboy
     |> Core.Motoboy.changeset(%{state: Core.Motoboy.unavailable()})
     |> Core.Motoboy.changeset(%{became_unavailable_at: Timex.local()})
