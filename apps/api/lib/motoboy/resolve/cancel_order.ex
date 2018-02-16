@@ -50,11 +50,13 @@ defmodule Motoboy.Resolve.CancelOrder do
     |> Repo.one()
   end
 
+  @spec send_to_new_motoboy_or_queue!(%Order{}, nil) :: %Order{}
   defp send_to_new_motoboy_or_queue!(order, nil) do
     order
     |> send_to_queue!()
   end
 
+  @spec send_to_new_motoboy_or_queue!(%Order{}, %Core.Motoboy{}) :: %Order{}
   defp send_to_new_motoboy_or_queue!(order, new_motoboy) do
     order
     |> send_to_new_motoboy!(new_motoboy)
@@ -64,6 +66,8 @@ defmodule Motoboy.Resolve.CancelOrder do
     |> make_busy!
     |> track_my_new_order(order)
     |> Central.Shared.NotifyMotoboy.new_order()
+
+    order
   end
 
   defp send_to_queue!(order) do
@@ -98,7 +102,7 @@ defmodule Motoboy.Resolve.CancelOrder do
     |> Repo.update!()
   end
 
-  defp track_cancel(%Core.Motoboy{} = motoboy, %Core.Order{} = order) do
+  defp track_cancel(%Core.Motoboy{} = motoboy, %Order{} = order) do
     Repo.insert(%History{
       scope: "motoboy",
       text: "Cancelou pedido",
@@ -109,7 +113,7 @@ defmodule Motoboy.Resolve.CancelOrder do
     motoboy
   end
 
-  defp track_cancel(%Core.Order{} = order, %Core.Motoboy{} = motoboy) do
+  defp track_cancel(%Order{} = order, %Core.Motoboy{} = motoboy) do
     Repo.insert(%History{
       scope: "order",
       text: "Motoboy cancelou pedido",
@@ -131,7 +135,7 @@ defmodule Motoboy.Resolve.CancelOrder do
     motoboy
   end
 
-  defp track_sent_to_new_motoboy(%Core.Order{} = order, %Core.Motoboy{} = motoboy) do
+  defp track_sent_to_new_motoboy(%Order{} = order, %Core.Motoboy{} = motoboy) do
     Repo.insert(%History{
       scope: "order",
       text: "Pedido enviado a outro motoboy",
