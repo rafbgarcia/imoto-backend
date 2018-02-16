@@ -9,19 +9,9 @@ import { graphql } from 'react-apollo'
 const Nav = () => {
   return (
     <nav className="col-sm-2">
-      <div className="mb-4">
-        <Link to="/central/nova-entrega">
-          <Button
-            fullWidth
-            size="large"
-            variant="raised"
-            color={isSelected("/central/nova-entrega") ? "primary" : "default" }
-          >
-            <AddIcon className="mr-1" />
-            Nova entrega
-          </Button>
-        </Link>
-      </div>
+      <Link to="/central/nova-entrega">
+        <MenuItem selected={isSelected("/central/nova-entrega")}>Nova entrega</MenuItem>
+      </Link>
 
       <Link to="/central">
         <MenuItem selected={isSelected("/central")}>Entregas de hoje</MenuItem>
