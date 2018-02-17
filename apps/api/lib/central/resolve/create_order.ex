@@ -57,6 +57,7 @@ defmodule Central.Resolve.CreateOrder do
 
     params
     |> Map.merge(%{state: Order.pending()})
+    |> Map.merge(%{sent_at: Timex.local()})
     |> Map.merge(%{motoboy_id: motoboy.id})
     |> Map.merge(%{central_id: central_id})
     |> create_order
@@ -101,7 +102,7 @@ defmodule Central.Resolve.CreateOrder do
 
   defp create_order(params) do
     %Order{}
-    |> Order.changeset(Map.merge(params, %{sent_at: Timex.local()}))
+    |> Order.changeset(params)
     |> Repo.insert()
   end
 

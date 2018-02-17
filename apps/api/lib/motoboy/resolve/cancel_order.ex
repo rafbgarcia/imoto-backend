@@ -76,6 +76,7 @@ defmodule Motoboy.Resolve.CancelOrder do
     |> Order.changeset(%{
       state: Order.in_queue(),
       queued_at: order.inserted_at,
+      confirmed_at: nil,
       motoboy_id: nil
     })
     |> Repo.update!()
@@ -97,8 +98,10 @@ defmodule Motoboy.Resolve.CancelOrder do
 
   defp send_to_new_motoboy!(order, %Core.Motoboy{id: motoboy_id}) do
     order
-    |> Order.changeset(%{motoboy_id: motoboy_id})
+    |> Order.changeset(%{state: Order.pending()})
     |> Order.changeset(%{sent_at: Timex.local()})
+    |> Order.changeset(%{motoboy_id: motoboy_id})
+    |> Order.changeset(%{confirmed_at: nil})
     |> Repo.update!()
   end
 
