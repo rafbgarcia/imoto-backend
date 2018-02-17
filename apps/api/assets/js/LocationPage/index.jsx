@@ -7,9 +7,27 @@ import { compose, withProps } from "recompose"
 import { MarkerWithLabel } from "react-google-maps/lib/components/addons/MarkerWithLabel"
 
 class LocationPage extends React.Component{
+  state = {
+    selectedMotoboy: {}
+  }
+
+  onClickMarker = (clickedMotoboy) => {
+    const {selectedMotoboy} = this.state
+
+    if (selectedMotoboy.id == clickedMotoboy.id) {
+      this.setState({ selectedMotoboy: {} })
+    } else {
+      this.setState({ selectedMotoboy: clickedMotoboy })
+    }
+  }
+
   render() {
     const {motoboys, loading} = this.props.data
-    if (loading) return <div>Carregando...</div>
+    const {selectedMotoboy} = this.state
+
+    if (loading) {
+      return <div>Carregando...</div>
+    }
 
     return (
       <div className="row">
@@ -25,7 +43,9 @@ class LocationPage extends React.Component{
         </div>
         <div className="col-sm-10">
           <Map
+            selectedMotoboy={selectedMotoboy}
             motoboys={motoboys}
+            onClickMarker={this.onClickMarker}
             containerElement={<div style={{ height: `80vh` }} />}
             mapElement={<div style={{ height: `100%` }} />}
           />
@@ -36,14 +56,11 @@ class LocationPage extends React.Component{
 }
 
 const Map = withGoogleMap((props) => {
-  const {motoboys} = props
+  const {motoboys, selectedMotoboy, onClickMarker} = props
+  const validMotoboys = (motoboys || []).filter(motoboy => !!motoboy.lat)
 
-  if (!motoboys || motoboys.length == 0 ) {
-    return null
-  }
-  const validMotoboys = motoboys.filter(m => !!m.lat)
   if (validMotoboys.length == 0) {
-    return null
+    return <div>Nenhum motoboy tem localização ainda...</div>
   }
 
   return (
@@ -51,14 +68,37 @@ const Map = withGoogleMap((props) => {
       defaultZoom={15}
       defaultCenter={{ lat: parseFloat(validMotoboys[0].lat), lng: parseFloat(validMotoboys[0].lng) }}
     >
-      {
-        validMotoboys.map(motoboy =>
-          <Marker key={motoboy.id} position={{ lat: parseFloat(motoboy.lat), lng: parseFloat(motoboy.lng) }} />
-        )
-      }
+      {validMotoboys.map(motoboy => MotoboyMarker({motoboy, selectedMotoboy, onClickMarker}))}
     </GoogleMap>
   )
 })
+
+const MotoboyMarker = ({motoboy, selectedMotoboy, onClickMarker}) => {
+  if (motoboy.id == selectedMotoboy.id) {
+    return (
+      <Marker
+        key={motoboy.id}
+        position={{ lat: parseFloat(motoboy.lat), lng: parseFloat(motoboy.lng) }}
+        onClick={() => onClickMarker(motoboy)}
+        zIndex={10}
+      >
+        InfoBox(motoboy, selectedMotoboy)
+      </Marker>
+    )
+  } else {
+    return (
+      <Marker
+        key={motoboy.id}
+        position={{ lat: parseFloat(motoboy.lat), lng: parseFloat(motoboy.lng) }}
+        onClick={() => onClickMarker(motoboy)}
+        zIndex={1}
+      >
+        <InfoWindow><div>{motoboy.name}</div></InfoWindow>
+      </Marker>
+    )
+  }
+}
+
 
 export default graphql(gql`
   query getMotoboys {
