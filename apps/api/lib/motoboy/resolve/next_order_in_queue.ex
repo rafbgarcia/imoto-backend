@@ -5,7 +5,7 @@ defmodule Motoboy.Resolve.NextOrdersInQueue do
 
   def handle(_, %{context: %{current_motoboy: motoboy}}) do
     motoboy
-    |> Motoboy.SharedFunctions.pending_orders()
+    |> Motoboy.SharedFunctions.ongoing_orders()
     |> case do
       [] ->
         Repo.transaction(fn -> get_my_next_order(motoboy) end)

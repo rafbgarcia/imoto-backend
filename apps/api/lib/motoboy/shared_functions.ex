@@ -13,11 +13,11 @@ defmodule Motoboy.SharedFunctions do
     |> Repo.one!()
   end
 
-  def pending_orders(%Core.Motoboy{id: id}) do
+  def ongoing_orders(%Core.Motoboy{id: id}) do
     from(
       o in Order,
       where: o.motoboy_id == ^id,
-      where: o.state == ^Order.pending(),
+      where: o.state in [^Order.pending(), ^Order.confirmed()],
       order_by: o.inserted_at
     )
     |> Repo.all()

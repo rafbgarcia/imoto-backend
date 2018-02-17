@@ -12,7 +12,7 @@ defmodule Motoboy.Resolve.FinishOrder do
 
       motoboy
       |> track_finish(order)
-      |> Motoboy.SharedFunctions.pending_orders()
+      |> Motoboy.SharedFunctions.ongoing_orders()
       |> case do
         [] ->
           motoboy |> make_available!
