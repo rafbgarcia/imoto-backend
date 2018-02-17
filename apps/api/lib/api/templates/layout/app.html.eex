@@ -17,6 +17,6 @@
     <main id="js_app"></main>
     <script src="https://cdn.ravenjs.com/3.22.1/raven.min.js" crossorigin="anonymous"></script>
     <script src="<%= static_path(@conn, "/js/app.js") %>"></script>
-    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=<%= @google_api_key %>&libraries=places&language=pt-BR"></script>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=<%= @google_api_key %>&libraries=places,geometry,drawing&language=pt-BR"></script>
   </body>
 </html>

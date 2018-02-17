@@ -9,6 +9,7 @@ import Auth from 'js/auth'
 import DashboardPage from 'js/DashboardPage'
 import MotoboysPage from 'js/MotoboysPage'
 import NewOrderPage from 'js/NewOrderPage'
+import LocationPage from 'js/LocationPage'
 import Nav from './Nav'
 
 export default class Layout extends React.Component {
@@ -52,6 +53,7 @@ export default class Layout extends React.Component {
               <Route path="/central" exact={true} component={DashboardPage} />
               <Route path="/central/motoboys" exact={false} component={MotoboysPage} />
               <Route path="/central/nova-entrega" exact={true} component={NewOrderPage} />
+              <Route path="/central/localizacao" exact={true} component={LocationPage} />
             </main>
           </section>
         </div>

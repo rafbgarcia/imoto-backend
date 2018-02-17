@@ -20,6 +20,10 @@ const Nav = () => {
       <Link to="/central/motoboys">
         <MenuItem selected={isSelected("/central/motoboys")}>Motoboys</MenuItem>
       </Link>
+
+      <Link to="/central/localizacao">
+        <MenuItem selected={isSelected("/central/localizacao")}>Locazalição dos motoboys</MenuItem>
+      </Link>
     </nav>
   )
 }
