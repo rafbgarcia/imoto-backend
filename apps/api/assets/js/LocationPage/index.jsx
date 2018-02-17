@@ -5,6 +5,11 @@ import { Route } from 'react-router-dom'
 import { withGoogleMap, GoogleMap, Marker, InfoWindow } from "react-google-maps"
 import { compose, withProps } from "recompose"
 import { MarkerWithLabel } from "react-google-maps/lib/components/addons/MarkerWithLabel"
+import { ListItem, ListItemIcon, ListItemText } from 'material-ui/List'
+import FiberManualRecordIcon from 'material-ui-icons/FiberManualRecord'
+import { red, green, orange } from 'material-ui/colors'
+
+import MotoboyItem from "js/DashboardPage/Motoboys/MotoboyItem"
 
 class LocationPage extends React.Component{
   state = {
@@ -21,6 +26,10 @@ class LocationPage extends React.Component{
     }
   }
 
+  isSelected(motoboy) {
+    return this.state.selectedMotoboy.id == motoboy.id
+  }
+
   render() {
     const {motoboys, loading} = this.props.data
     const {selectedMotoboy} = this.state
@@ -31,17 +40,34 @@ class LocationPage extends React.Component{
 
     return (
       <div className="row">
-        <div className="col-sm-2">
+        <div className="col-sm-3">
+          <p className="text-muted fz-80"> para ver sua localização</p>
           {
             motoboys.map(motoboy =>
-              <div className="mb-3 p-2" key={motoboy.id}>
-                {motoboy.name} <br />
-                {!motoboy.lat && <span className="badge badge-secondary">Sem localização</span> }
-              </div>
+              <ListItem
+                button
+                className={this.isSelected(motoboy) ? "bg-info" : ""}
+                disabled={!motoboy.lat}
+                key={motoboy.id}
+                onClick={() => this.onClickMarker(motoboy)}
+              >
+                <ListItemIcon>
+                  <FiberManualRecordIcon style={{color: getIconColor(motoboy), width: 20}} className="mr-2" />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <div>
+                      <span>{motoboy.name}</span>
+                      {!motoboy.lat && <div><span className="badge badge-secondary">Sem localização</span></div>}
+                    </div>
+                  }
+                  style={{lineHeight: 1.5, padding: 0, margin: 0}}
+                />
+              </ListItem>
             )
           }
         </div>
-        <div className="col-sm-10">
+        <div className="col-sm-9">
           <Map
             selectedMotoboy={selectedMotoboy}
             motoboys={motoboys}
@@ -63,10 +89,13 @@ const Map = withGoogleMap((props) => {
     return <div>Nenhum motoboy tem localização ainda...</div>
   }
 
+  const mapProps = selectedMotoboy.lat && {center: parseLatLng(selectedMotoboy)}
+
   return (
     <GoogleMap
-      defaultZoom={15}
-      defaultCenter={{ lat: parseFloat(validMotoboys[0].lat), lng: parseFloat(validMotoboys[0].lng) }}
+      defaultZoom={13.6}
+      defaultCenter={parseLatLng(validMotoboys[0])}
+      {...mapProps}
     >
       {validMotoboys.map(motoboy => MotoboyMarker({motoboy, selectedMotoboy, onClickMarker}))}
     </GoogleMap>
@@ -81,8 +110,9 @@ const MotoboyMarker = ({motoboy, selectedMotoboy, onClickMarker}) => {
         position={{ lat: parseFloat(motoboy.lat), lng: parseFloat(motoboy.lng) }}
         onClick={() => onClickMarker(motoboy)}
         zIndex={10}
+        opacity={1}
       >
-        InfoBox(motoboy, selectedMotoboy)
+        <InfoWindow><div>{motoboy.name}</div></InfoWindow>
       </Marker>
     )
   } else {
@@ -92,13 +122,28 @@ const MotoboyMarker = ({motoboy, selectedMotoboy, onClickMarker}) => {
         position={{ lat: parseFloat(motoboy.lat), lng: parseFloat(motoboy.lng) }}
         onClick={() => onClickMarker(motoboy)}
         zIndex={1}
-      >
-        <InfoWindow><div>{motoboy.name}</div></InfoWindow>
-      </Marker>
+        opacity={.7}
+      />
     )
   }
 }
 
+function parseLatLng({lat, lng}) {
+  return {
+    lat: parseFloat(lat),
+    lng: parseFloat(lng),
+  }
+}
+
+function getIconColor({available, busy}) {
+  if (available) {
+    return green[500]
+  } else if (busy) {
+    return orange[500]
+  } else {
+    return red[500]
+  }
+}
 
 export default graphql(gql`
   query getMotoboys {
