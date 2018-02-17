@@ -1,19 +1,21 @@
-defmodule Motoboy.Resolve.NextOrderInQueue do
+defmodule Motoboy.Resolve.NextOrdersInQueue do
   use Api, :resolver
 
   alias Core.{Order, History}
 
   def handle(_, %{context: %{current_motoboy: motoboy}}) do
-    case Motoboy.SharedFunctions.has_ongoing_orders(motoboy) do
-      true ->
-        {:ok, nil}
+    motoboy
+    |> Motoboy.SharedFunctions.pending_orders()
+    |> case do
+      [] ->
+        Repo.transaction(fn -> get_my_next_order(motoboy) end)
 
-      false ->
-        Repo.transaction(fn -> handle(motoboy) end)
+      orders ->
+        {:ok, orders}
     end
   end
 
-  def handle(motoboy) do
+  def get_my_next_order(motoboy) do
     available = Core.Motoboy.available()
 
     case motoboy.state do
