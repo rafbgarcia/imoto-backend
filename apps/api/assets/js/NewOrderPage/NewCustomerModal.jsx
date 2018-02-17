@@ -119,7 +119,7 @@ export default class NewCustomerModal extends React.Component {
         onClose={() => onCreate()}
         style={modalStyles()}
       >
-        <form style={innerDivStyles()} onSubmit={this.didClickCreateButton}>
+        <div style={innerDivStyles()}>
           <h5>Dados do cliente</h5>
 
           <section className={classes().formControlFlex}>
@@ -189,7 +189,7 @@ export default class NewCustomerModal extends React.Component {
               Cadastrar
             </Button>
           </div>
-        </form>
+        </div>
       </Modal>
     )
   }

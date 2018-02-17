@@ -50,7 +50,7 @@ export default class Layout extends React.Component {
 
             <main className="col-sm-10">
               <Route path="/central" exact={true} component={DashboardPage} />
-              <Route path="/central/motoboys" exact={true} component={MotoboysPage} />
+              <Route path="/central/motoboys" exact={false} component={MotoboysPage} />
               <Route path="/central/nova-entrega" exact={true} component={NewOrderPage} />
             </main>
           </section>

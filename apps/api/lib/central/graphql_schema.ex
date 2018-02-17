@@ -12,6 +12,11 @@ defmodule Central.GraphqlSchema do
       arg(:motoboy_id, non_null(:id))
       resolve(&Central.Resolve.MotoboyHistory.handle/2)
     end
+
+    field :motoboy, :motoboy do
+      arg(:id, non_null(:id))
+      resolve &Central.Resolve.GetMotoboy.handle/2
+    end
   end
 
   mutation do

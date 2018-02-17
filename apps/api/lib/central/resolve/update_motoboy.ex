@@ -5,16 +5,22 @@ defmodule Central.Resolve.UpdateMotoboy do
   def handle(%{id: motoboy_id, params: params}, %{context: %{current_central: central}}) do
     central
     |> get_motoboy(motoboy_id)
-    |> update_with(params)
+    |> update_with_state(params, params[:state])
     |> case do
       {:ok, motoboy} -> {:ok, motoboy}
       {:error, motoboy} -> {:error, Api.ErrorHelper.messages(motoboy)}
     end
   end
 
-  defp update_with(motoboy, %{state: state} = params)
-       when state in ["available", "unavailable"] do
+  defp update_with_state(motoboy, params, state) when state in ["available", "unavailable"] do
     motoboy
+    |> Motoboy.changeset(params)
+    |> Repo.update()
+  end
+
+  defp update_with_state(motoboy, params, _) do
+    motoboy
+    |> Map.delete(:state)
     |> Motoboy.changeset(params)
     |> Repo.update()
   end

@@ -1,78 +1,19 @@
 import React from 'react'
-import gql from 'graphql-tag'
-import apolloClient from 'js/graphql_client'
-import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Table'
-import Paper from 'material-ui/Paper'
-import _ from 'lodash'
+import { Route } from 'react-router-dom'
 
-import PhoneField from 'js/shared/phone_field'
-import MotoboyRow from './motoboy_row'
-import NewMotoboyForm from './new_motoboy_form'
+import List from './List'
+import New from './New'
+import Edit from './Edit'
 
 export default class MotoboysPage extends React.Component{
-  state = {
-    motoboys: [],
-  }
-
-  componentWillMount() {
-    apolloClient.query({query: gql`
-      query getMotoboys {
-        motoboys {
-          id
-          name
-          phoneNumber
-          active
-          state
-          busy
-        }
-      }
-    `})
-    .then(({data: {motoboys}}) => this.setState({motoboys}))
-  }
-
-  pushNewMotoboy = (motoboy) => {
-    const {motoboys} = this.state
-    this.setState({ motoboys: motoboys.concat(motoboy) })
-  }
-
   render() {
-    const {motoboys} = this.state
-    const clonedMotoboys = _.sortBy(_.cloneDeep(motoboys), 'name')
-
     return (
-      <div className="row">
-        <div className="col-sm-4">
-          <NewMotoboyForm onCreate={this.pushNewMotoboy} />
-        </div>
-
-        <div className="col-sm-8">
-          {MotoboysTable(clonedMotoboys)}
-        </div>
+      <div>
+        <Route path="/central/motoboys" exact={true} component={List} />
+        <Route path="/central/motoboys/novo" exact={true} component={New} />
+        <Route path="/central/motoboys/:id/editar" exact={true} component={Edit} />
       </div>
     )
   }
 }
 
-const MotoboysTable = (motoboys) => (
-  <Paper>
-    <Table>
-      <TableHead>
-        <TableRow>
-          <TableCell style={{width: "30%"}}>Motoboy</TableCell>
-          <TableCell style={{width: "30%"}}>Telefone</TableCell>
-          <TableCell>Status</TableCell>
-          <TableCell>Cadastro ativo?</TableCell>
-          <TableCell style={{width: "20%"}}>&nbsp;</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {motoboys.map(motoboy =>
-          <MotoboyRow
-            key={motoboy.id}
-            motoboy={motoboy}
-          />
-        )}
-      </TableBody>
-    </Table>
-  </Paper>
-)
