@@ -41,7 +41,7 @@ class LocationPage extends React.Component{
     return (
       <div className="row">
         <div className="col-sm-3">
-          <p className="text-muted fz-80"> para ver sua localização</p>
+          <p className="text-muted fz-80">Clique nos motoboys abaixo</p>
           {
             motoboys.map(motoboy =>
               <ListItem
