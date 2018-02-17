@@ -10,10 +10,6 @@ import { Link } from 'react-router-dom'
 import MotoboyRow from './MotoboyRow'
 
 class List extends React.Component{
-  componentWillMount() {
-    this.props.data.refetch()
-  }
-
   render() {
     const {motoboys, loading} = this.props.data
 

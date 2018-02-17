@@ -16,6 +16,10 @@ class LocationPage extends React.Component{
     selectedMotoboy: {}
   }
 
+  componentWillMount() {
+    this.props.data.refetch()
+  }
+
   onClickMarker = (clickedMotoboy) => {
     const {selectedMotoboy} = this.state
 
