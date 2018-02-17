@@ -12,14 +12,14 @@ defmodule Motoboy.Resolve.FinishOrder do
 
       motoboy
       |> track_finish(order)
-      |> Motoboy.SharedFunctions.ongoing_orders()
+      |> Motoboy.SharedFunctions.has_ongoing_orders()
       |> case do
-        [] ->
-          motoboy |> make_available!
+        true ->
           order
 
-        orders ->
-          orders
+        false ->
+          motoboy |> make_available!
+          order
       end
     end)
   end

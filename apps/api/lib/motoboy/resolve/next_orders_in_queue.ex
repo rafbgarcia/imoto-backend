@@ -1,4 +1,8 @@
 defmodule Motoboy.Resolve.NextOrdersInQueue do
+  @doc """
+  @returns Array<%Core.Order{}> Ongoing orders || Next order in queue || Empty array
+  """
+
   use Api, :resolver
 
   alias Core.{Order, History}
@@ -22,11 +26,12 @@ defmodule Motoboy.Resolve.NextOrdersInQueue do
       ^available ->
         case assign_next_order_in_queue_to(motoboy) do
           {:error, message} -> Repo.rollback(message)
-          {:ok, order} -> order
+          {:ok, nil} -> []
+          {:ok, order} -> [order]
         end
 
       _ ->
-        nil
+        []
     end
   end
 
@@ -38,10 +43,16 @@ defmodule Motoboy.Resolve.NextOrdersInQueue do
   end
 
   defp assign_to_motoboy!(order, motoboy) do
-    make_motoboy_busy!(motoboy)
-    order = update_order_with_new_motoboy!(order, motoboy.id)
-    Central.Shared.NotifyMotoboy.new_order(motoboy.one_signal_player_id)
-    add_order_pending_to_history(order.id, motoboy.id)
+    order =
+      order
+      |> update_with_new_motoboy!(motoboy)
+      |> track_sent_to_motoboy(motoboy)
+
+    motoboy
+    |> make_busy!
+    |> track_new_order(order)
+    |> Central.Shared.NotifyMotoboy.new_order()
+
     order
   end
 
@@ -57,35 +68,39 @@ defmodule Motoboy.Resolve.NextOrdersInQueue do
     |> Repo.one()
   end
 
-  defp update_order_with_new_motoboy!(order, motoboy_id) do
+  defp update_with_new_motoboy!(%Order{} = order, %Core.Motoboy{id: motoboy_id}) do
     order
-    |> Order.changeset(%{
-      state: Order.pending(),
-      motoboy_id: motoboy_id,
-      sent_at: Timex.local()
-    })
+    |> Order.changeset(%{state: Order.pending()})
+    |> Order.changeset(%{motoboy_id: motoboy_id})
+    |> Order.changeset(%{sent_at: Timex.local()})
     |> Repo.update!()
   end
 
-  defp make_motoboy_busy!(motoboy) do
+  defp make_busy!(motoboy) do
     motoboy
     |> Core.Motoboy.changeset(%{state: Core.Motoboy.busy(), became_busy_at: Timex.local()})
     |> Repo.update!()
   end
 
-  defp add_order_pending_to_history(order_id, motoboy_id) do
+  defp track_sent_to_motoboy(%Order{} = order, %Core.Motoboy{id: motoboy_id}) do
     Repo.insert(%History{
       scope: "motoboy",
       text: "Recebeu uma entrega",
-      order_id: order_id,
+      order_id: order.id,
       motoboy_id: motoboy_id
     })
 
+    order
+  end
+
+  def track_new_order(%Core.Motoboy{} = motoboy, %Order{id: order_id}) do
     Repo.insert(%History{
       scope: "order",
       text: "Pedido enviado para o motoboy",
       order_id: order_id,
-      motoboy_id: motoboy_id
+      motoboy_id: motoboy.id
     })
+
+    motoboy
   end
 end
