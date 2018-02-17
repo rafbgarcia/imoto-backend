@@ -24,13 +24,14 @@ defmodule Motoboy.SharedFunctions do
   end
 
   def has_ongoing_orders(%Core.Motoboy{id: id}) do
-    count = from(
-      o in Order,
-      where: o.motoboy_id == ^id,
-      where: o.state in [^Order.pending(), ^Order.confirmed()],
-      order_by: o.inserted_at
-    )
-    |> Repo.aggregate(:count, :id)
+    count =
+      from(
+        o in Order,
+        where: o.motoboy_id == ^id,
+        where: o.state in [^Order.pending(), ^Order.confirmed()],
+        order_by: o.inserted_at
+      )
+      |> Repo.aggregate(:count, :id)
 
     count > 0
   end

@@ -3,15 +3,18 @@ defmodule Central.Resolve.CreateCustomer do
   alias Core.CentralCustomer
 
   def handle(%{params: params}, %{context: %{current_central: central}}) do
-    case create_customer(params, central.id) do
+    params
+    |> Map.merge(%{central_id: central.id})
+    |> create_customer
+    |> case do
       {:ok, customer} -> {:ok, customer}
       {:error, customer} -> {:error, Api.ErrorHelper.messages(customer)}
     end
   end
 
-  defp create_customer(params, central_id) do
+  defp create_customer(params) do
     %CentralCustomer{}
-    |> CentralCustomer.changeset(Map.merge(params, %{central_id: central_id}))
+    |> CentralCustomer.changeset(params)
     |> Repo.insert()
   end
 end

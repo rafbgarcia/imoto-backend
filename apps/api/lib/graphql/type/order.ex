@@ -19,11 +19,23 @@ defmodule Graphql.Type.OrderOrError do
 
     field(:customer, :customer, resolve: &Order.Resolve.GetCustomer.handle/3)
     field(:motoboy, :motoboy, resolve: assoc(:motoboy))
-    field(:stops, list_of(:stop), resolve: assoc(:stops, fn query, _, _ ->
-      query |> order_by(asc: :sequence)
-    end))
-    field(:cancelations, list_of(:order_cancelation), resolve: assoc(:cancelations, fn query, _, _ ->
-      query |> order_by(:inserted_at)
-    end))
+
+    field(
+      :stops,
+      list_of(:stop),
+      resolve:
+        assoc(:stops, fn query, _, _ ->
+          query |> order_by(asc: :sequence)
+        end)
+    )
+
+    field(
+      :cancelations,
+      list_of(:order_cancelation),
+      resolve:
+        assoc(:cancelations, fn query, _, _ ->
+          query |> order_by(:inserted_at)
+        end)
+    )
   end
 end

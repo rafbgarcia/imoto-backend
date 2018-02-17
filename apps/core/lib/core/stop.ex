@@ -14,8 +14,11 @@ defmodule Core.Stop do
     field(:reference, :string)
     field(:city, :string)
     field(:uf, :string)
-    field(:lat, :decimal)
-    field(:lng, :decimal)
+
+    field(:address, :string)
+    field(:google_place_id, :string)
+    field(:lat, :string)
+    field(:lng, :string)
   end
 
   def changeset(changeset, params \\ %{}) do
@@ -31,6 +34,8 @@ defmodule Core.Stop do
       :reference,
       :city,
       :uf,
+      :address,
+      :google_place_id,
       :lat,
       :lng
     ])

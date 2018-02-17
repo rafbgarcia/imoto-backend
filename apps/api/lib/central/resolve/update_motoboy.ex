@@ -12,7 +12,8 @@ defmodule Central.Resolve.UpdateMotoboy do
     end
   end
 
-  defp update_with(motoboy, %{state: state} = params) when state in ["available", "unavailable"] do
+  defp update_with(motoboy, %{state: state} = params)
+       when state in ["available", "unavailable"] do
     motoboy
     |> Motoboy.changeset(params)
     |> Repo.update()

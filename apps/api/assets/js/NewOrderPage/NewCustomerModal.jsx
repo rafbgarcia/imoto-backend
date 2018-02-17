@@ -1,16 +1,20 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import linkState from 'linkstate';
+import update from 'immutability-helper';
 import gql from 'graphql-tag'
 import apolloClient from 'js/graphql_client'
 import Modal from 'material-ui/Modal';
 import Button from 'material-ui/Button';
 import TextField from 'material-ui/TextField'
 import AddIcon from 'material-ui-icons/Add'
+import PlaceIcon from 'material-ui-icons/Place'
 import Select from 'material-ui/Select';
 import { FormControl, FormHelperText } from 'material-ui/Form';
 import { MenuItem } from 'material-ui/Menu';
+import { CircularProgress } from 'material-ui/Progress';
 
+import PlaceSearchField from 'js/shared/PlaceSearchField'
 import PhoneField from 'js/shared/phone_field'
 import ZipcodeField from 'js/shared/zipcode_field'
 import * as validate from 'js/shared/validations'
@@ -19,12 +23,18 @@ export default class NewCustomerModal extends React.Component {
   state = {
     customer: this.emptyCustomer(),
     btnDisabled: false,
+    loadingLatLng: false,
   }
 
   emptyCustomer() {
     return {
       name: "",
       phoneNumber: "",
+      address: "",
+      googlePlaceId: "",
+      lat: undefined,
+      lng: undefined,
+
       street: "",
       number: "",
       complement: "",
@@ -54,7 +64,7 @@ export default class NewCustomerModal extends React.Component {
     })
     .then(({data: {customer}}) => {
       onCreate(customer)
-      this.setState({ btnDisabled: false })
+      this.setState({ customer: this.emptyCustomer(), btnDisabled: false })
       showSnack("Cliente criado com sucesso", "success")
     })
     .catch((errors) => {
@@ -64,13 +74,44 @@ export default class NewCustomerModal extends React.Component {
   }
 
   canCreate = () => {
-    const {customer, btnDisabled} = this.state
-    return btnDisabled || validate.notBlank(customer.name)
+    const {customer, btnDisabled, loadingLatLng} = this.state
+    return !loadingLatLng && !btnDisabled && validate.notBlank(customer.name)
+  }
+
+  placeFieldProps() {
+    const {customer} = this.state
+
+    return {
+      value: customer.address,
+      onChange: (address) => {
+        this.setState({customer: update(this.state.customer, {
+          address: {$set: address}
+        })})
+      },
+      onSelect: (address, placeId) => {
+        this.setState({
+          loadingLatLng: true,
+          customer: update(this.state.customer, {
+            address: {$set: address},
+            googlePlaceId: {$set: placeId},
+          })
+        })
+      },
+      onGeocode: (lat, lng) => {
+        this.setState({
+          loadingLatLng: false,
+          customer: update(this.state.customer, {
+            lat: {$set: lat},
+            lng: {$set: lng},
+          })
+        })
+      }
+    }
   }
 
   render() {
     const {open, onCreate} = this.props
-    const {customer} = this.state
+    const {customer, loadingLatLng} = this.state
 
     return (
       <Modal
@@ -78,8 +119,9 @@ export default class NewCustomerModal extends React.Component {
         onClose={() => onCreate()}
         style={modalStyles()}
       >
-        <div style={innerDivStyles()}>
+        <form style={innerDivStyles()} onSubmit={this.didClickCreateButton}>
           <h5>Dados do cliente</h5>
+
           <section className={classes().formControlFlex}>
             <FormControl className="w-50 mr-4">
               <TextField
@@ -102,48 +144,33 @@ export default class NewCustomerModal extends React.Component {
 
           <h5 className="mb-2 mt-5">Endereço do cliente</h5>
 
+          <div className="fz-80 alert alert-info mb-1">
+            <span class="fw-500">* Exemplos de busca</span>
+            <br/>
+            - av brasil 580 centro foz do iguacu
+            <br/>
+            - banco do brasil centro foz do iguacu
+          </div>
+          <div className="mb-3 d-flex align-items-center justify-content-between">
+            <PlaceSearchField {...this.placeFieldProps()} />
+            {loadingLatLng ? <CircularProgress size={20} color="secondary" className="ml-3" /> : null }
+          </div>
+
           <section className={classes().formControlFlex}>
-            <FormControl className="w-50">
-              <TextField
-                label="Logradouro"
-                onChange={linkState(this, 'customer.street')}
-                name="street"
-                value={customer.street}
-              />
-            </FormControl>
-            <FormControl className="w-25 mr-4 ml-4">
+            {/*<FormControl className="w-25 mr-4">
               <TextField
                 label="Número"
                 onChange={linkState(this, 'customer.number')}
                 name="number"
                 value={customer.number}
               />
-            </FormControl>
-            <FormControl className="w-25">
+            </FormControl>*/}
+            <FormControl className="w-50 mr-4">
               <TextField
                 label="Complemento"
                 onChange={linkState(this, 'customer.complement')}
                 name="complement"
                 value={customer.complement}
-              />
-            </FormControl>
-          </section>
-
-          <section className={classes().formControlFlex}>
-            <FormControl className="w-25">
-              <TextField
-                label="Bairro"
-                onChange={linkState(this, 'customer.neighborhood')}
-                name="neighborhood"
-                value={customer.neighborhood}
-              />
-            </FormControl>
-            <FormControl className="w-25 ml-4 mr-4">
-              <ZipcodeField
-                label="CEP"
-                onChange={linkState(this, 'customer.zipcode')}
-                name="zipcode"
-                value={customer.zipcode}
               />
             </FormControl>
             <FormControl className="w-50">
@@ -162,7 +189,7 @@ export default class NewCustomerModal extends React.Component {
               Cadastrar
             </Button>
           </div>
-        </div>
+        </form>
       </Modal>
     )
   }
@@ -189,7 +216,8 @@ function modalStyles() {
 
 function innerDivStyles() {
   return {
-    width: "40rem",
+    width: "80vw",
+    maxWidth: "50rem",
     margin: "5rem 0 auto",
     border: '1px solid #e5e5e5',
     backgroundColor: '#fff',

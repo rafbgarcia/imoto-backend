@@ -15,6 +15,9 @@ defmodule Core.CentralCustomer do
     field(:reference, :string)
     field(:city, :string)
     field(:uf, :string)
+
+    field(:address, :string)
+    field(:google_place_id, :string)
     field(:lat, :decimal)
     field(:lng, :decimal)
 
@@ -35,6 +38,8 @@ defmodule Core.CentralCustomer do
       :reference,
       :city,
       :uf,
+      :address,
+      :google_place_id,
       :lat,
       :lng
     ])

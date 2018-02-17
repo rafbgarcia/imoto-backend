@@ -66,14 +66,18 @@ defmodule Central.GraphqlSchema do
   input_object :central_customer_params do
     field(:name, non_null(:string))
     field(:phone_number, :string)
-    field(:street, :string)
+    field(:address, :string)
+    field(:google_place_id, :string)
+    field(:lat, :float)
+    field(:lng, :float)
     field(:number, :string)
     field(:complement, :string)
-    field(:neighborhood, :string)
-    field(:zipcode, :string)
     field(:reference, :string)
     field(:city, :string)
     field(:uf, :string)
+    field(:street, :string)
+    field(:neighborhood, :string)
+    field(:zipcode, :string)
   end
 
   input_object :motoboy_create_params do

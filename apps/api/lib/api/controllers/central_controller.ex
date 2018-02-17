@@ -2,7 +2,9 @@ defmodule Api.CentralController do
   use Api, :controller
 
   def jsapp(conn, _params) do
-    render(conn, "jsapp.html")
+    conn
+    |> assign(:google_api_key, Application.get_env(:api, :google_api_key))
+    |> render("jsapp.html")
   end
 
   def terms_of_use(conn, _) do

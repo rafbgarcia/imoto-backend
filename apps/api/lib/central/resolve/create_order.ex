@@ -46,6 +46,7 @@ defmodule Central.Resolve.CreateOrder do
       {:ok, order} ->
         add_order_in_queue_to_history(order.id)
         {:ok, order}
+
       {:error, changeset} ->
         {:error, Api.ErrorHelper.messages(changeset)}
     end

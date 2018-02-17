@@ -9,7 +9,8 @@ use Mix.Config
 config :api,
   namespace: Api,
   ecto_repos: [Db.Repo],
-  loggers: [Absinthe.Logger, Appsignal.Ecto, Ecto.LogEntry]
+  loggers: [Absinthe.Logger, Appsignal.Ecto, Ecto.LogEntry],
+  google_api_key: "AIzaSyCG1ehktpNiiCFlqIDc1uikmZjuJN3_fx0"
 
 # Configures the endpoint
 config :api, Api.Endpoint,
