@@ -7,6 +7,10 @@ defmodule Graphql.Type.Stop do
 
     field(:reference, :string)
     field(:line1, :string, resolve: &Central.Resolve.Stop.Fields.line1/3)
+    field(:address, :string)
+    field(:google_place_id, :string)
+    field(:lat, :string)
+    field(:lng, :string)
     field(:street, :string)
     field(:number, :string)
     field(:neighborhood, :string)

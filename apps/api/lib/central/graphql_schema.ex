@@ -68,8 +68,8 @@ defmodule Central.GraphqlSchema do
     field(:phone_number, :string)
     field(:address, :string)
     field(:google_place_id, :string)
-    field(:lat, :float)
-    field(:lng, :float)
+    field(:lat, :string)
+    field(:lng, :string)
     field(:number, :string)
     field(:complement, :string)
     field(:reference, :string)
@@ -101,13 +101,11 @@ defmodule Central.GraphqlSchema do
   input_object :stops_input do
     field(:sequence, :integer)
     field(:instructions, :string)
-    field(:street, :string)
-    field(:number, :string)
+    field(:address, :string)
+    field(:google_place_id, :string)
     field(:complement, :string)
-    field(:neighborhood, :string)
     field(:reference, :string)
-    field(:zipcode, :string)
-    field(:city, :string)
-    field(:uf, :string)
+    field(:lat, :string)
+    field(:lng, :string)
   end
 end

@@ -14,6 +14,8 @@ defmodule Graphql.Type.Motoboy do
     field(:became_busy_at, :datetime)
     field(:active, :boolean)
     field(:state, :string)
+    field(:lat, :string)
+    field(:lng, :string)
     field(:busy, :boolean, resolve: &Motoboy.Resolve.MyData.busy/3)
     field(:available, :boolean, resolve: &Motoboy.Resolve.MyData.available/3)
     field(:unavailable, :boolean, resolve: &Motoboy.Resolve.MyData.unavailable/3)

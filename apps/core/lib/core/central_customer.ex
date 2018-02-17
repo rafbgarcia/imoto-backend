@@ -18,8 +18,8 @@ defmodule Core.CentralCustomer do
 
     field(:address, :string)
     field(:google_place_id, :string)
-    field(:lat, :decimal)
-    field(:lng, :decimal)
+    field(:lat, :string)
+    field(:lng, :string)
 
     timestamps()
   end

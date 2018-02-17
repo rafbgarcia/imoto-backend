@@ -13,6 +13,8 @@ defmodule Graphql.Type.CentralCustomer do
     field(:reference, :string)
     field(:city, :string)
     field(:uf, :string)
+    field(:address, :string)
+    field(:google_place_id, :string)
     field(:lat, :string)
     field(:lng, :string)
     field(:line1, :string, resolve: &Central.Resolve.Customer.Fields.line1/3)

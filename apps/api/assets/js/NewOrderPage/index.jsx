@@ -27,6 +27,7 @@ import PhoneField from 'js/shared/phone_field'
 import ZipcodeField from 'js/shared/zipcode_field'
 import * as validate from 'js/shared/validations'
 import NewCustomerModal from './NewCustomerModal'
+import PlaceSearchField from 'js/shared/PlaceSearchField'
 
 class NewOrderPage extends React.Component {
   state = this.initialState()
@@ -46,12 +47,14 @@ class NewOrderPage extends React.Component {
   newStop(sequence) {
     return {
       sequence,
+      immutableKey: sequence,
       instructions: "",
-      street: "",
-      number: "",
+      address: "",
       complement: "",
-      neighborhood: "",
       reference: "",
+      googlePlaceId: "",
+      lat: "",
+      lng: "",
     }
   }
 
@@ -71,11 +74,12 @@ class NewOrderPage extends React.Component {
 
     const firstStop = _.merge(this.newStop(0), {
       instructions: "",
-      street: selectedCustomer.street || "",
-      number: selectedCustomer.number || "",
+      address: selectedCustomer.address || "",
       complement: selectedCustomer.complement || "",
-      neighborhood: selectedCustomer.neighborhood || "",
       reference: selectedCustomer.reference || "",
+      googlePlaceId: selectedCustomer.googlePlaceId || "",
+      lat: selectedCustomer.lat || "",
+      lng: selectedCustomer.lng || "",
     })
 
     this.setState({
@@ -126,6 +130,7 @@ class NewOrderPage extends React.Component {
   didClickSendButton = () => {
     const {order, motoboyId} = this.state
     const {showSnack} = this.context
+    order.stops.forEach((stop) => delete stop.immutableKey)
 
     showSnack("Enviando pedido...")
 
@@ -170,10 +175,21 @@ class NewOrderPage extends React.Component {
     const {data: {loading, customers, motoboys}} = this.props
     const {order, motoboyId, modalOpen} = this.state
 
+    const stops = _.sortBy(order.stops, "sequence").map((stop, i) => (
+      <StopElement
+        key={i}
+        index={stop.immutableKey}
+        stops={order.stops}
+        stop={stop}
+        parent={this}
+        moveStop={this.moveStop}
+      />)
+    )
+
     return (
       <section>
         <section className="row">
-          <div className="col-sm-4" role="Select the cliente">
+          <div role="Cliente" className="col-sm-4">
             <section className="mb-4 text-muted text-center">
               <h4><span className="badge badge-info">Passo 1</span></h4>
               <h5>Informe o cliente</h5>
@@ -205,7 +221,7 @@ class NewOrderPage extends React.Component {
             </Button>
           </div>
 
-          <div className="col-sm-4">
+          <div role="Instruções" className="col-sm-4">
             <section className="mb-4 text-muted text-center">
               <h4><span className="badge badge-info">Passo 2</span></h4>
               <h5>Diga ao motoboy aonde ir e o que fazer</h5>
@@ -216,16 +232,7 @@ class NewOrderPage extends React.Component {
             }
             {validate.notBlank(order.centralCustomerId) &&
               <div>
-                {_.sortBy(order.stops, "sequence").map((stop, i) =>
-                  <StopElement
-                    key={stop.sequence}
-                    index={i}
-                    stops={order.stops}
-                    stop={stop}
-                    parent={this}
-                    moveStop={this.moveStop}
-                  />
-                )}
+                {stops}
 
                 <Button onClick={this.addStop} variant="raised" fullWidth className="mt-3">
                   Adicionar {order.stops.length + 1}ª parada
@@ -234,7 +241,7 @@ class NewOrderPage extends React.Component {
             }
           </div>
 
-          <div className="col-sm-4">
+          <div role="Enviar para motoboy" className="col-sm-4">
             <section className="mb-4 text-muted text-center">
               <h4><span className="badge badge-info">Passo 3</span></h4>
               <h5>Envie para o motoboy</h5>
@@ -292,6 +299,41 @@ NewOrderPage.contextTypes = {
 }
 
 class StopElement extends React.Component {
+  placeFieldProps() {
+    const {stop, index, parent} = this.props
+
+    return {
+      value: stop.address,
+      onChange: (address) => {
+        parent.setState({
+          order: update(parent.state.order, {
+            stops: {[index]: {address: {$set: address}}}
+          })
+        })
+      },
+      onSelect: (address, placeId) => {
+        parent.setState({
+          order: update(parent.state.order, {
+            stops: {[index]: {
+              address: {$set: address},
+              googlePlaceId: {$set: placeId},
+            }},
+          })
+        })
+      },
+      onGeocode: (lat, lng) => {
+        parent.setState({
+          order: update(parent.state.order, {
+            stops: {[index]: {
+              lat: {$set: `${lat}`},
+              lng: {$set: `${lng}`},
+            }},
+          })
+        })
+      }
+    }
+  }
+
   render() {
     const {stops, stop, index, parent, moveStop} = this.props
 
@@ -315,46 +357,30 @@ class StopElement extends React.Component {
             <PlaceIcon className="mr-2" /> Localização
           </div>
 
-          <section className="d-flex align-items-center mb-3">
-            <FormControl className="w-75">
-              <TextField
-                label="Rua/Avenida"
-                onChange={linkState(parent, `order.stops.${index}.street`)}
-                value={stop.street}
-              />
-            </FormControl>
-            <FormControl className="w-25 ml-3">
-              <TextField
-                label="Número"
-                onChange={linkState(parent, `order.stops.${index}.number`)}
-                value={stop.number}
-              />
-            </FormControl>
-          </section>
+          {stop.immutableKey == 0 ? <div>{stop.address}</div> : null}
 
-          <section className="d-flex align-items-center mb-3">
-            <FormControl className="w-50 mr-3">
-              <TextField
-                label="Bairro"
-                onChange={linkState(parent, `order.stops.${index}.neighborhood`)}
-                value={stop.neighborhood}
-              />
-            </FormControl>
-            <FormControl className="w-50">
-              <TextField
-                label="Complemento"
-                onChange={linkState(parent, `order.stops.${index}.complement`)}
-                value={stop.complement}
-              />
-            </FormControl>
-          </section>
-          <FormControl fullWidth>
-            <TextField
-              label="Ponto de referência"
-              onChange={linkState(parent, `order.stops.${index}.reference`)}
-              value={stop.reference}
-            />
-          </FormControl>
+          {stop.immutableKey != 0 ? <div>
+            <div className="mb-3">
+              <PlaceSearchField {...this.placeFieldProps()} />
+            </div>
+
+            <section className="d-flex align-items-center mb-3">
+              <FormControl className="w-50 mr-3">
+                <TextField
+                  label="Complemento"
+                  onChange={linkState(parent, `order.stops.${index}.complement`)}
+                  value={stop.complement}
+                />
+              </FormControl>
+              <FormControl className="w-50">
+                <TextField
+                  label="Ponto de referência"
+                  onChange={linkState(parent, `order.stops.${index}.reference`)}
+                  value={stop.reference}
+                />
+              </FormControl>
+            </section>
+          </div> : null}
 
           <div className="d-flex align-items-center mt-5 mb-3 text-muted">
             <ListIcon className="mr-2" /> Instruções
@@ -396,7 +422,7 @@ function getCompaniesRadios(customers, selectedCustomerId) {
 export default graphql(gql`query getMyCustomersAndMotoboys {
   customers {
     id name phoneNumber
-    street number neighborhood complement reference
+    address complement reference googlePlaceId lat lng
   }
 
   motoboys {

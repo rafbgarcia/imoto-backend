@@ -32,8 +32,8 @@ export default class NewCustomerModal extends React.Component {
       phoneNumber: "",
       address: "",
       googlePlaceId: "",
-      lat: undefined,
-      lng: undefined,
+      lat: "",
+      lng: "",
 
       street: "",
       number: "",
@@ -101,8 +101,8 @@ export default class NewCustomerModal extends React.Component {
         this.setState({
           loadingLatLng: false,
           customer: update(this.state.customer, {
-            lat: {$set: lat},
-            lng: {$set: lng},
+            lat: {$set: `${lat}`},
+            lng: {$set: `${lng}`},
           })
         })
       }
@@ -145,7 +145,7 @@ export default class NewCustomerModal extends React.Component {
           <h5 className="mb-2 mt-5">Endereço do cliente</h5>
 
           <div className="fz-80 alert alert-info mb-1">
-            <span class="fw-500">* Exemplos de busca</span>
+            <span className="fw-500">* Exemplos de busca</span>
             <br/>
             - av brasil 580 centro foz do iguacu
             <br/>
