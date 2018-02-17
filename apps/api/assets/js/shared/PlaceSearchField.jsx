@@ -31,6 +31,8 @@ function placeFieldProps({value, onChange, onSelect, onGeocode}) {
 
     shouldFetchSuggestions: ({ value }) => value.length > 3,
 
+    onError: (status, clearSuggestions) => clearSuggestions(),
+
     renderSuggestion: ({ suggestion }) => (
       <div className="d-flex align-items-center">
         <PlaceIcon fontSize={true} className="m-0 p-0 mr-2" />
