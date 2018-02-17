@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import gql from 'graphql-tag'
-import apolloClient from 'js/graphql_client'
 import { TableCell, TableRow } from 'material-ui/Table'
 import TextField from 'material-ui/TextField'
 import Button from 'material-ui/Button'
@@ -11,15 +10,23 @@ import CancelIcon from 'material-ui-icons/Cancel'
 import { withStyles } from 'material-ui/styles'
 import IconButton from 'material-ui/IconButton'
 import Tooltip from 'material-ui/Tooltip'
-import PhoneField from 'js/shared/phone_field'
 import Switch from 'material-ui/Switch'
 import red from 'material-ui/colors/red'
+import _ from 'lodash'
+
+import apolloClient from 'js/graphql_client'
+import PhoneField from 'js/shared/phone_field'
 
 class MotoboyRow extends React.Component {
   state = {
     editMode: false,
-    motoboy: {name: "", phoneNumber: "", active: true},
-    motoboyBeforeEdit: [],
+    motoboyBeforeEdit: {},
+    motoboy: {
+      name: "",
+      phoneNumber: "",
+      active: true,
+      state: ""
+    },
   }
 
   componentWillMount() {
@@ -50,27 +57,30 @@ class MotoboyRow extends React.Component {
 
   saveMotoboy(motoboy) {
     const {showSnack} = this.context
-    const {id, name, phoneNumber, active} = motoboy
+    const {id} = motoboy
+    const params = _.pick(motoboy, "name", "phoneNumber", "state", "active")
+
+    showSnack("Salvando dados...")
 
     apolloClient.mutate({
       mutation: gql`
         mutation updateMotoboy($id: ID!, $params: MotoboyUpdateParams) {
           motoboy: updateMotoboy(id: $id, params: $params) {
-            id name phoneNumber active
+            id
           }
         }
       `,
-      variables: { id, params: {name, phoneNumber, active} },
+      variables: { id, params },
     })
-    .then(() => showSnack("Motoboy atualizado!"))
-    .catch((res) => {
-      const {motoboyBeforeEdit} = this.state
+    .then(() => showSnack("Motoboy atualizado!", "success"))
+    .catch((errors) => {
+      const { motoboyBeforeEdit } = this.state
 
       this.setState({
         motoboy: motoboyBeforeEdit,
         editMode: true,
       })
-      showSnack("Ops! Ocorreu um erro")
+      showSnack(errors, "error")
     })
 
     this.setState({editMode: false})
@@ -89,10 +99,10 @@ class MotoboyRow extends React.Component {
             value={motoboy.name}
             margin="normal"
             className={classes.textFieldContainer}
-            InputClassName={classes.input}
             fullWidth
           /> : motoboy.name}
         </TableCell>
+
         <TableCell>
           {
             editMode ? <PhoneField
@@ -105,6 +115,24 @@ class MotoboyRow extends React.Component {
             : motoboy.phoneNumber
           }
         </TableCell>
+
+        <TableCell>
+         {motoboy.busy ? <h6><span className="badge badge-warning">Em entrega</span></h6> : null}
+         {
+            !motoboy.busy && editMode ? <Switch
+              checked={motoboy.state == "available"}
+              onChange={() => this.updateMotoboyFields({state: motoboy.state == "available" ? "unavailable" : "available"})}
+            />
+            : !motoboy.busy && <div>
+                {
+                  motoboy.state == "available" ?
+                  <span className="text-success">Online</span>
+                  : <h6><span className="badge badge-danger">Offline</span></h6>
+                }
+              </div>
+        }
+        </TableCell>
+
         <TableCell>
          {editMode ? <Switch
             checked={motoboy.active}
@@ -112,6 +140,7 @@ class MotoboyRow extends React.Component {
             aria-label="Ativo?"
           /> : (motoboy.active ? "Sim" : "Não")}
         </TableCell>
+
         <TableCell className="d-flex align-items-center justify-content-between">
           <Tooltip title={editMode ? "Cancelar" : "Editar motoboy"} placement="top">
             <IconButton className={classes.button} onClick={() => this.toggleEditMode()}>
@@ -121,7 +150,7 @@ class MotoboyRow extends React.Component {
 
           {editMode &&
             <Tooltip title="Salvar" placement="top">
-              <Button fab color="primary" onClick={() => this.saveMotoboy(motoboy)}>
+              <Button variant="fab" mini color="primary" onClick={() => this.saveMotoboy(motoboy)}>
                 <DoneIcon />
               </Button>
             </Tooltip>

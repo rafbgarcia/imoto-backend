@@ -85,6 +85,7 @@ defmodule Central.GraphqlSchema do
     field(:name, non_null(:string))
     field(:phone_number, non_null(:string))
     field(:active, non_null(:boolean))
+    field(:state, :string)
   end
 
   input_object :order_params do

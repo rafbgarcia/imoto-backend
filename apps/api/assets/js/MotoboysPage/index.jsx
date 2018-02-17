@@ -5,7 +5,6 @@ import Table, { TableBody, TableCell, TableHead, TableRow } from 'material-ui/Ta
 import Paper from 'material-ui/Paper'
 import _ from 'lodash'
 
-import Central from 'js/central'
 import PhoneField from 'js/shared/phone_field'
 import MotoboyRow from './motoboy_row'
 import NewMotoboyForm from './new_motoboy_form'
@@ -23,6 +22,8 @@ export default class MotoboysPage extends React.Component{
           name
           phoneNumber
           active
+          state
+          busy
         }
       }
     `})
@@ -59,7 +60,8 @@ const MotoboysTable = (motoboys) => (
         <TableRow>
           <TableCell style={{width: "30%"}}>Motoboy</TableCell>
           <TableCell style={{width: "30%"}}>Telefone</TableCell>
-          <TableCell>Trabalhando para a {Central.current().name}?</TableCell>
+          <TableCell>Status</TableCell>
+          <TableCell>Cadastro ativo?</TableCell>
           <TableCell style={{width: "20%"}}>&nbsp;</TableCell>
         </TableRow>
       </TableHead>
