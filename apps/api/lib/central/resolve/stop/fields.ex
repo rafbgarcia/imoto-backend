@@ -7,10 +7,8 @@ defmodule Central.Resolve.Stop.Fields do
 
   defp line1(stop) do
     [
-      stop.street,
-      stop.number,
+      stop.address,
       stop.complement,
-      stop.neighborhood
     ]
     |> Enum.reject(&is_nil/1)
     |> Enum.join(", ")
