@@ -16,7 +16,7 @@ defmodule Central.Resolve.ToggleMotoboyState do
   end
 
   defp toggle_state(nil) do
-    {:error, "Este motoboy não existe, por favor entre em contato"}
+    {:error, "Este motoboy não existe. Caso isso seja um erro, entre em contato conosco."}
   end
 
   defp toggle_state(%{state: "available"} = motoboy) do
