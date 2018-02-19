@@ -9,12 +9,12 @@ import { graphql } from 'react-apollo'
 const Nav = () => {
   return (
     <nav className="col-sm-2">
-      <Link to="/central/nova-entrega">
-        <MenuItem selected={isSelected("/central/nova-entrega")}>Nova entrega</MenuItem>
-      </Link>
-
       <Link to="/central">
         <MenuItem selected={isSelected("/central")}>Entregas de hoje</MenuItem>
+      </Link>
+
+      <Link to="/central/nova-entrega">
+        <MenuItem selected={isSelected("/central/nova-entrega")}>Nova entrega</MenuItem>
       </Link>
 
       <Link to="/central/motoboys">

@@ -5,22 +5,19 @@ defmodule Central.Resolve.UpdateMotoboy do
   def handle(%{id: motoboy_id, params: params}, %{context: %{current_central: central}}) do
     central
     |> get_motoboy(motoboy_id)
-    |> update_with_state(params, params[:state])
+    |> update_motoboy(params)
     |> case do
       {:ok, motoboy} -> {:ok, motoboy}
       {:error, motoboy} -> {:error, Api.ErrorHelper.messages(motoboy)}
     end
   end
 
-  defp update_with_state(motoboy, params, state) when state in ["available", "unavailable"] do
-    motoboy
-    |> Motoboy.changeset(params)
-    |> Repo.update()
+  defp update_motoboy(nil, _) do
+    {:error, "Este motoboy não existe, por favor entre em contato"}
   end
 
-  defp update_with_state(motoboy, params, _) do
+  defp update_motoboy(motoboy, params) do
     motoboy
-    |> Map.delete(:state)
     |> Motoboy.changeset(params)
     |> Repo.update()
   end

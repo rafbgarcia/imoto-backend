@@ -3,15 +3,27 @@ defmodule Central.Resolve.MyMotoboys do
 
   alias Core.{Motoboy}
 
-  def handle(_args, %{context: %{current_central: current_central}}) do
-    {:ok, all(current_central.id)}
+  def handle(%{only_active: only_active}, %{context: %{current_central: central}}) do
+    {:ok, central |> motoboys(only_active)}
   end
 
-  defp all(central_id) do
+  defp motoboys(%Core.Central{} = central, false) do
+    central
+    |> motoboys_query
+    |> Repo.all()
+  end
+
+  defp motoboys(%Core.Central{} = central, true) do
+    central
+    |> motoboys_query
+    |> where(active: ^true)
+    |> Repo.all()
+  end
+
+  defp motoboys_query(central) do
     from(
       m in Motoboy,
-      where: m.active == ^true,
-      where: m.central_id == ^central_id,
+      where: m.central_id == ^central.id,
       order_by:
         fragment(
           """
@@ -24,6 +36,5 @@ defmodule Central.Resolve.MyMotoboys do
           ^Motoboy.busy()
         )
     )
-    |> Repo.all()
   end
 end

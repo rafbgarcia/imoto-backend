@@ -4,7 +4,10 @@ defmodule Central.GraphqlSchema do
 
   query do
     field(:orders, list_of(:order), resolve: &Central.Resolve.MyOrders.handle/2)
-    field(:motoboys, list_of(:motoboy), resolve: &Central.Resolve.MyMotoboys.handle/2)
+    field :motoboys, list_of(:motoboy) do
+      arg(:only_active, :boolean, default_value: true)
+      resolve(&Central.Resolve.MyMotoboys.handle/2)
+    end
     field(:customers, list_of(:central_customer), resolve: &Central.Resolve.MyCustomers.handle/2)
     field(:my_companies, list_of(:company), resolve: &Central.Resolve.MyCompanies.handle/2)
 
@@ -45,6 +48,11 @@ defmodule Central.GraphqlSchema do
       arg(:id, non_null(:id))
       arg(:params, :motoboy_update_params)
       resolve(&Central.Resolve.UpdateMotoboy.handle/2)
+    end
+
+    field :toggle_motoboy_state, :motoboy do
+      arg(:id, non_null(:id))
+      resolve(&Central.Resolve.ToggleMotoboyState.handle/2)
     end
 
     field :create_customer, :central_customer do
@@ -94,7 +102,6 @@ defmodule Central.GraphqlSchema do
     field(:name, non_null(:string))
     field(:phone_number, non_null(:string))
     field(:active, non_null(:boolean))
-    field(:state, :string)
   end
 
   input_object :order_params do

@@ -1,6 +1,4 @@
 import React from 'react'
-import PropTypes from 'prop-types'
-import gql from 'graphql-tag'
 import { TableCell, TableRow } from 'material-ui/Table'
 import TextField from 'material-ui/TextField'
 import Button from 'material-ui/Button'
@@ -10,27 +8,34 @@ import IconButton from 'material-ui/IconButton'
 import Tooltip from 'material-ui/Tooltip'
 import red from 'material-ui/colors/red'
 import { Link } from 'react-router-dom'
+import Switch from 'material-ui/Switch'
 
 import apolloClient from 'js/graphql_client'
 import PhoneField from 'js/shared/phone_field'
 
 class MotoboyRow extends React.Component {
   render() {
-    const {classes, motoboy} = this.props
+    const {classes, motoboy, index, toggleState} = this.props
 
     return (
-      <TableRow className={motoboy.active ? "" : classes.inactiveMotoboyRow}>
+      <TableRow hover className={motoboy.active ? "" : classes.inactiveMotoboyRow}>
         <TableCell>
           <span className="capitalize">{motoboy.name}</span>
+          <h6>
+            {!motoboy.active && <span className="badge badge-danger">Inativo</span>}
+          </h6>
+        </TableCell>
+
+        <TableCell>
           {formatState(motoboy.state)}
+          {motoboy.state != "busy" && <Switch
+            onChange={() => toggleState(index)}
+            checked={motoboy.state == "available"}
+          />}
         </TableCell>
 
         <TableCell>
           {motoboy.phoneNumber}
-        </TableCell>
-
-        <TableCell>
-         {motoboy.active ? "Sim" : "Não"}
         </TableCell>
 
         <TableCell className="d-flex align-items-center justify-content-between">
@@ -47,21 +52,18 @@ class MotoboyRow extends React.Component {
 
 const styles = theme => ({
   inactiveMotoboyRow: {
-    background: red[50]
+    opacity: 0.7,
+    background: "#f4f4f4"
   }
 })
 
-MotoboyRow.contextTypes = {
-  showSnack: PropTypes.func
-}
-
 function formatState(state) {
   if (state == "available") {
-    return <div><span className="badge badge-success">Online</span></div>
+    return <span>Online</span>
   } else if (state == "unavailable") {
-    return <div><span className="badge badge-secondary">Offline</span></div>
+    return <span>Offline</span>
   } else {
-    return <div><span className="badge badge-info">Em entrega</span></div>
+    return <h6><span className="badge badge-info">Em entrega</span></h6>
   }
 }
 

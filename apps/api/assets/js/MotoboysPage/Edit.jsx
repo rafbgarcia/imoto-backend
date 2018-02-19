@@ -90,6 +90,13 @@ class Edit extends React.Component {
             className="mt-4 mb-5"
             fullWidth
           />
+          <div>
+            Cadastro ativo?
+            <Switch
+              onChange={linkState(this, "motoboy.active")}
+              checked={motoboy.active}
+            />
+          </div>
           <div className="text-right">
             <Button variant="raised" onClick={this.saveMotoboy}>
               <AddIcon className="mr-2" />
