@@ -1,5 +1,4 @@
 defmodule Graphql.Type.Motoboy do
-  import Ecto.Query
   use Api, :graphql_schema
 
   object :motoboy do
