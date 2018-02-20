@@ -79,16 +79,15 @@ export default class RegisterPage extends React.Component {
         <div className="col-xs-10 col-sm-6 col-md-4 thumbnail">
           <h4>Dados da central</h4>
 
-          <div className="d-flex align-items-center">
             <TextField
               label="* Nome da central"
               onChange={linkState(this, "central.name")}
               value={central.name}
               margin="normal"
-              className="mr-4"
               name="name"
               fullWidth
             />
+
             <PhoneField
               label="* Telefone da central"
               name="phoneNumber"
@@ -97,7 +96,6 @@ export default class RegisterPage extends React.Component {
               value={central.phoneNumber}
               fullWidth
             />
-          </div>
 
           {/*<CnpjField
             label="* CNPJ"
@@ -111,7 +109,6 @@ export default class RegisterPage extends React.Component {
 
           <h4 className="mt-5">Dados para login</h4>
 
-          <div className="d-flex align-items-center">
             <TextField
               error={!validate.email(central.email)}
               label="* E-mail"
@@ -119,7 +116,6 @@ export default class RegisterPage extends React.Component {
               value={central.email}
               name="email"
               margin="normal"
-              className="mr-4"
               fullWidth
             />
             <TextField
@@ -131,7 +127,6 @@ export default class RegisterPage extends React.Component {
               margin="normal"
               type="password"
             />
-          </div>
           <FormControlLabel
             control={
               <Checkbox
