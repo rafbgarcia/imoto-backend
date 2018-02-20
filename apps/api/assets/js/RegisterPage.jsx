@@ -22,7 +22,7 @@ export default class RegisterPage extends React.Component {
       name: "",
       email: "",
       phoneNumber: "",
-      cnpj: "",
+      // cnpj: "",
       password: "",
       acceptedTermsOfUse: false,
     },
@@ -34,8 +34,8 @@ export default class RegisterPage extends React.Component {
   }
 
   canRegister() {
-    const {central: {acceptedTermsOfUse, name, email, phoneNumber, cnpj, password}} = this.state
-    return acceptedTermsOfUse === true && validate.notBlank(name, email, phoneNumber, cnpj, password)
+    const {central: {acceptedTermsOfUse, name, email, phoneNumber, password}} = this.state
+    return acceptedTermsOfUse === true && validate.notBlank(name, email, phoneNumber, password)
   }
 
   didClickRegisterButton = () => {
@@ -77,7 +77,7 @@ export default class RegisterPage extends React.Component {
     return (
       <section className="d-flex align-items-center justify-content-center mt-5">
         <div className="col-xs-10 col-sm-6 col-md-4 thumbnail">
-          <h3>Informe os dados abaixo</h3>
+          <h4>Dados da central</h4>
 
           <div className="d-flex align-items-center">
             <TextField
@@ -90,7 +90,7 @@ export default class RegisterPage extends React.Component {
               fullWidth
             />
             <PhoneField
-              label="* Telefone"
+              label="* Telefone da central"
               name="phoneNumber"
               margin="normal"
               onChange={linkState(this, "central.phoneNumber")}
@@ -99,7 +99,7 @@ export default class RegisterPage extends React.Component {
             />
           </div>
 
-          <CnpjField
+          {/*<CnpjField
             label="* CNPJ"
             name="cnpj"
             margin="normal"
@@ -107,7 +107,9 @@ export default class RegisterPage extends React.Component {
             value={central.cnpj}
             helperText="Para dar mais segurança aos clientes, checaremos se sua central realmente existe"
             fullWidth
-          />
+          />*/}
+
+          <h4 className="mt-5">Dados para login</h4>
 
           <div className="d-flex align-items-center">
             <TextField

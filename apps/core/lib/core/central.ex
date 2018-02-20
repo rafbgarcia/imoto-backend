@@ -30,7 +30,7 @@ defmodule Core.Central do
       :password_hash,
       :active
     ])
-    |> validate_required([:name, :cnpj, :accepted_terms_of_use])
+    |> validate_required([:name, :accepted_terms_of_use])
     |> unique_constraint(:email)
     |> unique_constraint(:cnpj)
   end
