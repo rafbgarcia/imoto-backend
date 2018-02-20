@@ -123,7 +123,7 @@ export default class NewCustomerModal extends React.Component {
           <h5>Dados do cliente</h5>
 
           <section className={classes().formControlFlex}>
-            <FormControl className="w-50 mr-4">
+            <FormControl fullWidth className="mb-3">
               <TextField
                 label="* Nome"
                 name="name"
@@ -132,7 +132,7 @@ export default class NewCustomerModal extends React.Component {
               />
             </FormControl>
 
-            <FormControl className="w-50">
+            <FormControl fullWidth>
               <PhoneField
                 label="Telefone"
                 name="phoneNumber"
@@ -165,7 +165,7 @@ export default class NewCustomerModal extends React.Component {
                 value={customer.number}
               />
             </FormControl>*/}
-            <FormControl className="w-50 mr-4">
+            <FormControl fullWidth className="mb-3">
               <TextField
                 label="Complemento"
                 onChange={linkState(this, 'customer.complement')}
@@ -173,7 +173,7 @@ export default class NewCustomerModal extends React.Component {
                 value={customer.complement}
               />
             </FormControl>
-            <FormControl className="w-50">
+            <FormControl fullWidth>
               <TextField
                 label="Ponto de referência"
                 onChange={linkState(this, 'customer.reference')}
@@ -203,7 +203,7 @@ NewCustomerModal.contextTypes = {
 function classes() {
   return {
     formControl: "mb-3",
-    formControlFlex: "mb-3 d-flex align-items-center",
+    // formControlFlex: "mb-3 d-flex align-items-center",
   }
 }
 
@@ -216,13 +216,15 @@ function modalStyles() {
 
 function innerDivStyles() {
   return {
-    width: "80vw",
-    maxWidth: "50rem",
+    width: "40rem",
+    maxWidth: "95vw",
+    maxHeight: "90vh",
     margin: "5rem 0 auto",
     border: '1px solid #e5e5e5',
     backgroundColor: '#fff',
     boxShadow: '0 5px 15px rgba(0, 0, 0, .5)',
     zIndex: 1,
     padding: "2rem",
+    overflow: "auto",
   };
 }

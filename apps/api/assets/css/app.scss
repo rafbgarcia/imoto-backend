@@ -44,3 +44,14 @@ body { background: #f7f8f9}
 h1, h2, h3, h4, h5, h6 {
   @extend .fw-300;
 }
+
+
+/**
+ * General use
+ */
+
+.ellipsis {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}

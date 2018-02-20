@@ -189,7 +189,7 @@ class NewOrderPage extends React.Component {
     return (
       <section>
         <section className="row">
-          <div role="Cliente" className="col-sm-4">
+          <div role="Cliente" className="col-md-4 mb-5">
             <section className="mb-4 text-muted text-center">
               <h4><span className="badge badge-info">Passo 1</span></h4>
               <h5>Informe o cliente</h5>
@@ -221,7 +221,7 @@ class NewOrderPage extends React.Component {
             </Button>
           </div>
 
-          <div role="Instruções" className="col-sm-4">
+          <div role="Instruções" className="col-md-4 mb-5">
             <section className="mb-4 text-muted text-center">
               <h4><span className="badge badge-info">Passo 2</span></h4>
               <h5>Diga ao motoboy aonde ir e o que fazer</h5>
@@ -241,7 +241,7 @@ class NewOrderPage extends React.Component {
             }
           </div>
 
-          <div role="Enviar para motoboy" className="col-sm-4">
+          <div role="Enviar para motoboy" className="col-md-4 mb-5">
             <section className="mb-4 text-muted text-center">
               <h4><span className="badge badge-info">Passo 3</span></h4>
               <h5>Envie para o motoboy</h5>

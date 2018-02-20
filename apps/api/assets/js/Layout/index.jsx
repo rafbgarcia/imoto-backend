@@ -26,15 +26,15 @@ export default class Layout extends React.Component {
         <AppBar position="static">
           <div className="pl-3 pr-3">
             <div className="row">
-              <Toolbar className="col-sm-4">
-                <h4>{Central.current().name}</h4>
+              <Toolbar className="col-4">
+                <h4 className="ellipsis">{Central.current().name}</h4>
               </Toolbar>
 
-              <div className="col-sm-4 text-center mt-3">
-                <img src="/images/logo_white.svg" width="120" />
+              <div className="col-4 text-center mt-3">
+                <img src="/images/logo_icon_white.svg" width="30" />
               </div>
 
-              <div className="col-sm-4 d-flex align-items-center flex-row-reverse">
+              <div className="col-4 d-flex align-items-center flex-row-reverse">
                 <Link to="/central">
                   <MenuItem onClick={this.logout} className="text-white">
                     Sair

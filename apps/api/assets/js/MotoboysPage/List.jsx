@@ -102,7 +102,7 @@ class List extends React.Component{
 }
 
 const MotoboysTable = (motoboys, toggleState) => (
-  <Paper>
+  <Paper style={{maxWidth: "100%"}}>
     <Table>
       <TableHead>
         <TableRow>

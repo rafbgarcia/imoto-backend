@@ -50,7 +50,7 @@ class New extends React.Component {
 
         <h3 className="mb-4">Novo motoboy</h3>
 
-        <Paper className="p-4" style={{width: "30rem"}}>
+        <Paper className="p-4" style={{width: "30rem", maxWidth: "100%"}}>
           <TextField
             label="Nome do motoboy"
             onChange={linkState(this, "motoboy.name")}

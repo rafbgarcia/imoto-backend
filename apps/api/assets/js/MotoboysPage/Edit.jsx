@@ -67,7 +67,7 @@ class Edit extends React.Component {
     const {motoboy} = this.state
 
     return (
-      <section className="p-4">
+      <div>
         <section className="text-muted fz-80 mb-3">
           <Link to="/central/motoboys">Motoboys</Link>
           <span className="ml-2 mr-2">></span>
@@ -76,7 +76,7 @@ class Edit extends React.Component {
 
         <h3 className="mb-4">Editando dados de {motoboy.name}</h3>
 
-        <Paper className="p-4" style={{width: "30rem"}}>
+        <Paper className="p-4" style={{width: "30rem", maxWidth: "100%"}}>
           <TextField
             label="Nome do motoboy"
             onChange={linkState(this, "motoboy.name")}
@@ -87,10 +87,10 @@ class Edit extends React.Component {
             label="Telefone com DDD"
             onChange={linkState(this, "motoboy.phoneNumber")}
             value={motoboy.phoneNumber}
-            className="mt-4 mb-5"
+            className="mt-4 mb-3"
             fullWidth
           />
-          <div>
+          <div className="mb-4">
             Cadastro ativo?
             <Switch
               onChange={linkState(this, "motoboy.active")}
@@ -104,7 +104,7 @@ class Edit extends React.Component {
             </Button>
           </div>
         </Paper>
-      </section>
+      </div>
     )
   }
 }

@@ -8,7 +8,7 @@ import { graphql } from 'react-apollo'
 
 const Nav = () => {
   return (
-    <nav className="col-sm-2">
+    <nav className="col-md-2 mb-5">
       <Link to="/central">
         <MenuItem selected={isSelected("/central")}>Entregas de hoje</MenuItem>
       </Link>
