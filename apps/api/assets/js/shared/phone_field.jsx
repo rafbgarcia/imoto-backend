@@ -18,6 +18,7 @@ export default class PhoneField extends React.Component {
           id="phoneNumber"
           value={value}
           name={name}
+          type="tel"
           className={InputClassName}
           onChange={onChange}
           inputComponent={PhoneFieldElement}
