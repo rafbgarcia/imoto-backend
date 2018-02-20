@@ -64,7 +64,8 @@ defmodule Central.Resolve.CreateOrder do
     |> create_order
     |> case do
       {:ok, order} ->
-        Central.Shared.NotifyMotoboy.new_order(motoboy.one_signal_player_id)
+        motoboy
+        |> Central.Shared.NotifyMotoboy.new_order()
         add_order_pending_to_history(order.id, motoboy.id)
         {:ok, order}
 

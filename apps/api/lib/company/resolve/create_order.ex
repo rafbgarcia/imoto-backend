@@ -6,7 +6,8 @@ defmodule Company.Resolve.CreateOrder do
     with {:ok, my_centrals_ids} <- get_centrals_ids(company.id),
          {:ok, motoboy} <- next_motoboy_or_error(my_centrals_ids),
          {:ok, order} <- create_order(company, motoboy, order_params) do
-      Central.Shared.NotifyMotoboy.new_order(motoboy.one_signal_player_id)
+      motoboy
+      |> Central.Shared.NotifyMotoboy.new_order()
       add_to_history(order.id, motoboy.id)
 
       {:ok, order}

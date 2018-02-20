@@ -21,6 +21,15 @@ config :api, Api.Endpoint,
   pubsub: [name: Api.PubSub, adapter: Phoenix.PubSub.PG2],
   instrumenters: [Appsignal.Phoenix.Instrumenter]
 
+# Configure Quantum's Scheduler
+config :api, Api.Scheduler,
+  jobs: [
+    # Every minute
+    {"* * * * *", {Motoboy.Task.CancelHangingOrders, :handle, []}},
+    # Runs every midnight:
+    # {"@daily", {Backup, :backup, []}}
+  ]
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

@@ -3,7 +3,7 @@
 defmodule Api.OneSignal do
   use HTTPoison.Base
 
-  def notify(player_id, message, data \\ %{}) do
+  def notify(player_id, message, extra_params \\ %{}, data \\ %{}) do
     params = %{
       app_id: "f5474ff0-c010-4eca-ad1a-240b6e57ad16",
       contents: %{en: message},
@@ -14,6 +14,7 @@ defmodule Api.OneSignal do
       # ttl: 60,
       data: data
     }
+    |> Map.merge(extra_params)
 
     with {:ok, response} <- do_post("/notifications", params) do
       {:ok, response.body}

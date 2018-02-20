@@ -23,6 +23,19 @@ defmodule Motoboy.Resolve.CancelOrder do
     end)
   end
 
+  @doc """
+  This is called from CancelHangingOrders.
+  It auto cancels an order if motoboy takes too long to confirm.
+  """
+  def auto_refuse(%Order{} = order, %Core.Motoboy{} = motoboy) do
+    Repo.transaction(fn ->
+      new_motoboy = next_available_motoboy(motoboy)
+
+      order |> send_to_new_motoboy_or_queue!(new_motoboy)
+      motoboy |> make_unavailable!
+    end)
+  end
+
   defp insert_cancelation!(order, %{reason: reason}) when reason in [nil, ""] do
     order
   end
@@ -73,12 +86,10 @@ defmodule Motoboy.Resolve.CancelOrder do
   defp send_to_queue!(order) do
     order
     |> track_sent_to_queue
-    |> Order.changeset(%{
-      state: Order.in_queue(),
-      queued_at: order.inserted_at,
-      confirmed_at: nil,
-      motoboy_id: nil
-    })
+    |> Order.changeset(%{state: Order.in_queue()})
+    |> Order.changeset(%{queued_at: order.inserted_at})
+    |> Order.changeset(%{confirmed_at: nil})
+    |> Order.changeset(%{motoboy_id: nil})
     |> Repo.update!()
   end
 
