@@ -38,12 +38,12 @@ export default class AuthenticateLayout extends React.Component {
 
         <section className="text-center mt-5">
           <Link to="/central" className="mr-4">
-            <Button variant={path === "/central" && "raised"} color="primary">
+            <Button variant={path === "/central" ? "raised" : "flat"} color="primary">
               Cadastre sua central
             </Button>
           </Link>
           <Link to="/central/login" className="mr-4">
-            <Button variant={path === "/central/login" && "raised"} color="primary">
+            <Button variant={path === "/central/login" ? "raised" : "flat"} color="primary">
               Faça login
             </Button>
           </Link>
