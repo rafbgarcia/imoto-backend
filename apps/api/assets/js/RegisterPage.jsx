@@ -134,7 +134,7 @@ export default class RegisterPage extends React.Component {
             control={
               <Checkbox
                 checked={central.acceptedTermsOfUse}
-                onChange={linkState(this, "central.acceptedTermsOfUse", "target.value")}
+                onChange={linkState(this, "central.acceptedTermsOfUse")}
                 name="acceptedTermsOfUse"
               />
             }
