@@ -15,7 +15,7 @@ run.config:
 
   extra_steps:
     - (cd apps/api/assets && npm install)
-    - (cd apps/api/assets && npm rebuild node-sass --force)
+    # - (cd apps/api/assets && npm rebuild node-sass --force)
 
   # cache node_modules
   # cache_dirs:
@@ -31,7 +31,7 @@ run.config:
 deploy.config:
   # generate the static assets digest
   extra_steps:
-    # - (cd apps/api/assets && npm run deploy)
+    - (cd apps/api/assets && npm run build:prod)
     - mix phx.digest
 
   # just before the new process comes online,

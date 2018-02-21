@@ -12,7 +12,8 @@ defmodule Api.Endpoint do
     Plug.Static,
     at: "/",
     from: :api,
-    gzip: true,
+    gzip: false,
+    brotli: true,
     only: ~w(css fonts images js favicon.ico robots.txt)
   )
 
