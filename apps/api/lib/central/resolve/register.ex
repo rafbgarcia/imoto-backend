@@ -19,7 +19,7 @@ defmodule Central.Resolve.Register do
 
   defp parse(params) do
     # TODO:
-    # Active should be false here in the future for us to validate the Central's CNPJ
+    # `active` should be false here in the future for us to validate the Central's CNPJ
 
     params
     |> Map.replace(:email, String.downcase(params.email))
