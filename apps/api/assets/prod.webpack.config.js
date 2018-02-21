@@ -3,6 +3,8 @@ var webpack = require('webpack');
 var CompressionPlugin = require('compression-webpack-plugin');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+var BrotliPlugin = require('brotli-webpack-plugin');
+
 
 module.exports = {
   entry: ["js/app.jsx", "css/app.scss"],
@@ -134,6 +136,13 @@ module.exports = {
       asset: "[path].gz[query]",
       algorithm: "gzip",
       test: /\.js$|\.css$|\.html$/,
+      threshold: 10240,
+      minRatio: 0.8
+    }),
+
+    new BrotliPlugin({
+      asset: '[path].br[query]',
+      test: /\.(js|css|html|svg)$/,
       threshold: 10240,
       minRatio: 0.8
     })
