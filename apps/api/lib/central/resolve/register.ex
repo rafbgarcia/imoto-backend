@@ -13,13 +13,16 @@ defmodule Central.Resolve.Register do
 
   defp create_central(params) do
     %Central{}
-    |> Central.changeset(add_needed_params(params))
+    |> Central.changeset(parse(params))
     |> Repo.insert()
   end
 
-  defp add_needed_params(params) do
-    # TODO: This has to be changed
+  defp parse(params) do
+    # TODO:
+    # Active should be false here in the future for us to validate the Central's CNPJ
+
     params
+    |> Map.replace(:email, String.downcase(params.email))
     |> Map.put(:active, true)
     |> Map.put(:password_hash, hashed_pw(params[:password]))
   end
