@@ -20,6 +20,12 @@ function placeFieldProps({value, onChange, onSelect, onGeocode}) {
       placeholder: "Digite sua busca *",
     },
 
+    options: {
+      componentRestrictions: {
+        country: "BR"
+      }
+    },
+
     styles: {
       root: {
         width: "100%",
