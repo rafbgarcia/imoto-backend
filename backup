@@ -1,0 +1,2064 @@
+--
+-- PostgreSQL database dump
+--
+
+-- Dumped from database version 9.6.5
+-- Dumped by pg_dump version 9.6.5
+
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SET check_function_bodies = false;
+SET client_min_messages = warning;
+SET row_security = off;
+
+SET search_path = public, pg_catalog;
+
+--
+-- Data for Name: centrals; Type: TABLE DATA; Schema: public; Owner: nanobox
+--
+
+COPY centrals (id, name, phone_number, email, password_hash, cnpj, accepted_terms_of_use, active, inserted_at, updated_at) FROM stdin;
+1    iMoto    (84) 98141-4140    rafbgarcia@gmail.com    $argon2i$v=19$m=65536,t=6,p=1$uVWs7Lkqtna4bo8JUg0iOw$NlafsNKBtMQkA0ncRCoPwy2jK7M/0h2JPLYVgQ6U2Rg    19.823.912/3129-83    t    f    2018-02-02 20:38:53    2018-02-02 20:38:53
+6    inovar moto frete    (45) 3028-7161    jeancarlosmotoboy@gmail.com    $argon2i$v=19$m=65536,t=6,p=1$7sQOcscSQrGNsNRXSkHzyw$MdZJSdv8Yol4Fn7Dhsc7gPUeD5ON4rMNEfXcI0WTQh0    00.000.000/0000-00    t    t    2018-02-10 17:56:33    2018-02-10 17:56:33
+10    líder moto frete     (45) 3253-9410    lidermotofreteterceirizadostri@gmail.com    $argon2i$v=19$m=65536,t=6,p=1$kQC1MDkkFuM7sQMHG/mGjg$Kt4gYX7IN6QmIQf8Q96ACS4ic68wZ8r58aMf/BqChZc    \N    t    t    2018-02-20 18:35:57    2018-02-20 18:35:57
+\.
+
+
+--
+-- Data for Name: central_customers; Type: TABLE DATA; Schema: public; Owner: nanobox
+--
+
+COPY central_customers (id, central_id, name, phone_number, street, number, neighborhood, zipcode, complement, reference, city, uf, lat, lng, inserted_at, updated_at, address, google_place_id) FROM stdin;
+1    1    Meu cliente    (84) 9239-1293    Rua Sem nome    s/n    Centro    84384-833    \N    Perto de casa    \N    \N    \N    \N    2018-02-13 07:06:27    2018-02-13 07:06:27    \N    \N
+2    6    TRILHA AÇAI    (45) 3028-0300    \N    \N    CENTRO    \N    \N    \N    \N    \N    \N    \N    2018-02-14 10:22:44    2018-02-14 10:22:44    \N    \N
+3    6    BOLOCOS LOJA     (45) 3029-6667    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N    2018-02-14 11:11:04    2018-02-14 11:11:04    \N    \N
+4    6    MIAKO    (45) 3028-1459    RUA PARIGOT DE SOUZA    258    VILA YOLANDA     \N    \N    \N    \N    \N    \N    \N    2018-02-14 11:14:56    2018-02-14 11:14:56    \N    \N
+5    6    URBANOS EXPRES    (45) 3026-727     \N    \N    CENTRO    \N    \N    DENTRO MERCOSUL    \N    \N    \N    \N    2018-02-14 13:57:19    2018-02-14 13:57:19    \N    \N
+6    6    URBANOS EXPRES    (45) 3026-727     \N    \N    CENTRO    \N    \N    DENTRO MERCOSUL    \N    \N    \N    \N    2018-02-14 13:58:52    2018-02-14 13:58:52    \N    \N
+7    1    Camarões    (84) 9999-8888    \N    \N    \N    \N    \N    \N    \N    \N    -5.8723353    -35.18047419999999    2018-02-20 14:04:06    2018-02-20 14:04:06    Camarões Restaurante - Avenida Engenheiro Roberto Freire - Ponta Negra, Natal - RN, Brasil    ChIJWbvTVSX_sgcRzyw84ymnSh8
+8    1    restaurante    \N    \N    \N    \N    \N    Shopping Catuai Palladium    \N    \N    \N    -25.568924    -54.5583532    2018-02-20 14:41:30    2018-02-20 14:41:30    Menta Limão - Avenida das Cataratas - Vila Yolanda, Foz do Iguaçu - PR, Brasil    ChIJxU2EnXCR9pQR2GF5_epttdg
+9    10    Bolo doce    (45) 3029-0116    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N    2018-02-20 18:59:05    2018-02-20 18:59:05    \N    \N
+\.
+
+
+--
+-- Name: central_customers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: nanobox
+--
+
+SELECT pg_catalog.setval('central_customers_id_seq', 9, true);
+
+
+--
+-- Name: centrals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: nanobox
+--
+
+SELECT pg_catalog.setval('centrals_id_seq', 10, true);
+
+
+--
+-- Data for Name: companies; Type: TABLE DATA; Schema: public; Owner: nanobox
+--
+
+COPY companies (id, central_id, name, email, password_hash, phone_number, inserted_at, updated_at) FROM stdin;
+\.
+
+
+--
+-- Data for Name: companies_centrals; Type: TABLE DATA; Schema: public; Owner: nanobox
+--
+
+COPY companies_centrals (id, central_id, company_id) FROM stdin;
+\.
+
+
+--
+-- Name: companies_centrals_id_seq; Type: SEQUENCE SET; Schema: public; Owner: nanobox
+--
+
+SELECT pg_catalog.setval('companies_centrals_id_seq', 1, false);
+
+
+--
+-- Name: companies_id_seq; Type: SEQUENCE SET; Schema: public; Owner: nanobox
+--
+
+SELECT pg_catalog.setval('companies_id_seq', 6, true);
+
+
+--
+-- Data for Name: customers; Type: TABLE DATA; Schema: public; Owner: nanobox
+--
+
+COPY customers (id, company_id, name, phone_number, inserted_at, updated_at) FROM stdin;
+\.
+
+
+--
+-- Name: customers_id_seq; Type: SEQUENCE SET; Schema: public; Owner: nanobox
+--
+
+SELECT pg_catalog.setval('customers_id_seq', 1, false);
+
+
+--
+-- Data for Name: motoboys; Type: TABLE DATA; Schema: public; Owner: nanobox
+--
+
+COPY motoboys (id, name, central_id, state, phone_number, one_signal_player_id, became_unavailable_at, became_available_at, became_busy_at, active, inserted_at, updated_at, lat, lng) FROM stdin;
+2    João Cláudio    1    unavailable    (84) 98143-4340    26ab771b-6b96-4103-af05-51f70a9af838    2018-03-08 20:16:55.070738    2018-03-08 20:15:30.802912    2018-03-08 20:16:18.333361    t    2018-02-08 16:00:24    2018-03-09 00:37:30    -25.5501947    -54.5899581
+5    caio    6    available    (45) 99841-9368    a25bb153-e81b-40cd-a755-a2746bab5282    2018-02-11 14:38:27.91303    2018-02-14 12:30:06.289893    \N    t    2018-02-10 18:39:53    2018-02-14 12:30:06    \N    \N
+32    Bonner     10    unavailable    (45) 99937-4869    \N    \N    \N    \N    t    2018-02-20 18:39:36    2018-02-20 18:39:36    \N    \N
+34    Bernardo    10    unavailable    (45) 99950-6013    1c84f086-f1c6-4679-a8d3-8dd319c58445    2018-02-21 20:18:01.165465    2018-02-21 20:17:34.665517    2018-02-20 18:59:55.72022    t    2018-02-20 18:53:52    2018-02-21 20:18:01    -25.5352427    -54.5728643
+8    gustavo alemao    6    unavailable    (45) 99834-0408    dba46b9e-fc64-4d87-b90f-0f9921fe7364    2018-02-15 02:14:37.101011    2018-02-15 00:25:55.680587    \N    t    2018-02-10 19:06:39    2018-02-15 03:00:38    \N    \N
+27    bill    6    unavailable    (45) 99906-2609    \N    \N    \N    \N    t    2018-02-11 14:54:38    2018-02-11 14:54:38    \N    \N
+6    luciano    6    unavailable    (45) 99805-7827    147103df-f857-4df6-8f2c-5d2531642583    2018-02-11 02:02:41.233073    2018-02-11 02:02:34.407275    \N    t    2018-02-10 18:59:03    2018-02-11 02:02:41    \N    \N
+23    jj    6    unavailable    (45) 99927-9128    \N    \N    \N    \N    t    2018-02-11 11:15:27    2018-02-11 11:15:27    \N    \N
+9    samuel    6    unavailable    (45) 99806-1109    \N    \N    \N    \N    t    2018-02-10 19:09:11    2018-02-10 19:09:11    \N    \N
+10    vito    6    unavailable    (45) 99904-1858    \N    \N    \N    \N    t    2018-02-10 19:09:58    2018-02-10 19:09:58    \N    \N
+11    eduardo    6    unavailable    (45) 99820-5079    \N    \N    \N    \N    t    2018-02-10 19:10:34    2018-02-10 19:10:34    \N    \N
+12    timbé    6    unavailable    (45) 99818-7024    \N    \N    \N    \N    t    2018-02-10 19:12:03    2018-02-10 19:12:03    \N    \N
+13    modesto    6    unavailable    (45) 99969-4122    \N    \N    \N    \N    t    2018-02-10 19:12:51    2018-02-10 19:12:51    \N    \N
+14    moises    6    unavailable    (99) 9720-021     \N    \N    \N    \N    t    2018-02-10 19:14:21    2018-02-10 19:14:21    \N    \N
+15    leandro bolita    6    unavailable    (45) 99806-0676    \N    \N    \N    \N    t    2018-02-10 19:14:54    2018-02-10 19:14:54    \N    \N
+16    cebolinha    6    unavailable    (45) 99966-5344    \N    \N    \N    \N    t    2018-02-10 19:15:45    2018-02-10 19:15:45    \N    \N
+17    welinton    6    unavailable    (45) 99906-0344    \N    \N    \N    \N    t    2018-02-10 19:16:23    2018-02-10 19:16:23    \N    \N
+18    edson    6    unavailable    (45) 99845-3851    \N    \N    \N    \N    t    2018-02-10 19:17:55    2018-02-10 19:17:55    \N    \N
+19    jonathan alemao    6    unavailable    (45) 99944-9225    \N    \N    \N    \N    t    2018-02-10 19:34:42    2018-02-10 19:34:42    \N    \N
+3    braian mboy    6    unavailable    (45) 99828-2566    a6cd74e1-ebd3-4a2a-8fb0-ba643ea6bb77    2018-02-10 18:46:12.095655    2018-02-10 19:13:49.88826    2018-02-10 20:01:44.182886    t    2018-02-10 17:59:21    2018-02-10 20:01:44    \N    \N
+25    jorge    6    unavailable    (45) 99810-6338    755ab942-70c5-4c4d-aa39-c60250cb9cdd    2018-02-11 11:31:07.785943    2018-02-11 11:30:32.808576    \N    t    2018-02-11 11:17:14    2018-02-11 11:31:07    \N    \N
+31    xandi    6    unavailable    (45) 99831-1255    \N    \N    \N    \N    t    2018-02-12 19:45:40    2018-02-12 19:45:40    \N    \N
+20    resende     6    unavailable    (45) 99148-2871    c538ca69-75ba-4b34-90da-b606e00431d3    2018-02-12 19:47:00.306562    2018-02-12 19:46:50.573857    2018-02-10 20:02:12.640959    t    2018-02-10 19:37:57    2018-02-12 19:47:00    \N    \N
+7    sergio    6    unavailable    (45) 99915-2377    edf6fa42-ce71-4f8c-8cc7-7686261074ad    2018-02-12 22:46:51.28981    2018-02-12 22:46:16.775963    \N    t    2018-02-10 19:03:34    2018-02-12 22:46:51    \N    \N
+21    RICARDINHO    6    unavailable    (45) 99947-1605    330883cb-9e26-4fda-93d0-78fa11198299    2018-02-10 20:06:54.758396    2018-02-10 20:06:20.65998    \N    t    2018-02-10 19:59:24    2018-02-10 20:06:54    \N    \N
+4    nilton    6    unavailable    (45) 99905-2990    2ad02ef0-701b-4133-96b1-181a5975a094    2018-02-11 13:36:29.162607    2018-02-12 14:57:30.184885    2018-02-10 18:46:34.894428    t    2018-02-10 18:39:16    2018-02-13 07:43:14    \N    \N
+24    jonathan tapejara    6    unavailable    (45) 99820-0369    83e990ef-4590-4aa1-aad6-0e1f0ac218bd    2018-02-11 11:34:17.80711    2018-02-11 11:34:24.525013    \N    t    2018-02-11 11:15:57    2018-02-11 13:43:53    \N    \N
+22    TABORDA    6    unavailable    (45) 99155-0498    56ada43c-3bb0-4714-b17d-09d68c5b663f    2018-02-11 13:43:53.679616    2018-02-10 21:47:23.108353    2018-02-11 11:35:04.452562    t    2018-02-10 20:03:59    2018-02-11 13:43:53    \N    \N
+33    Martins    10    available    (45) 99832-2067    63b18bdf-beff-467d-b2bb-d8cfa970d64f    2018-02-22 22:35:40.721934    2018-02-25 17:13:28.630829    \N    t    2018-02-20 18:40:58    2018-02-25 17:13:52    -25.4925084    -54.5815668
+30    marcos manobra    6    unavailable    (45) 99912-6640    f671dee4-647f-4ff0-b738-3c13a7771c62    2018-02-22 10:47:45.443625    2018-02-22 10:47:32.409102    \N    t    2018-02-12 19:41:30    2018-03-02 23:12:43    -25.5228468    -54.58865366
+1    Rafael Garcia    1    available    (84) 98141-4140    b7b86bbb-4700-4e3b-b942-ec965e09491e    2018-03-08 20:15:00.008038    2018-03-08 20:17:17.80013    2018-03-08 20:17:14.105037    t    2018-02-02 23:27:38    2018-03-08 20:17:17    -24.9645182    -53.4629441
+\.
+
+
+--
+-- Data for Name: orders; Type: TABLE DATA; Schema: public; Owner: nanobox
+--
+
+COPY orders (id, motoboy_id, company_id, customer_id, price, state, confirmed_at, finished_at, last_order_received_at, inserted_at, updated_at, central_customer_id, queued_at, central_id, canceled_at, sent_at) FROM stdin;
+68    1    \N    \N    300    finished    2018-02-13 07:34:17.280798    2018-02-13 07:42:08.463476    \N    2018-02-13 07:31:51    2018-02-13 07:42:08    1    \N    \N    \N    \N
+69    4    \N    \N    800    pending    \N    \N    \N    2018-02-13 07:43:08    2018-02-13 07:43:14    1    \N    \N    \N    \N
+70    1    \N    \N    400    finished    2018-02-16 05:55:02.888577    2018-02-16 05:55:06.625249    \N    2018-02-16 05:54:54    2018-02-16 05:55:06    1    \N    1    \N    2018-02-16 05:54:54.665895
+92    1    \N    \N    \N    finished    2018-02-18 21:08:17.419701    2018-02-18 21:08:20.716014    \N    2018-02-18 21:08:12    2018-02-18 21:08:20    1    \N    1    \N    2018-02-18 21:08:12.184705
+72    1    \N    \N    200    finished    2018-02-16 05:55:57.245576    2018-02-16 05:56:00.114829    \N    2018-02-16 05:55:36    2018-02-16 05:56:00    1    \N    1    \N    2018-02-16 05:55:36.09497
+71    1    \N    \N    1200    finished    2018-02-16 05:56:07.310943    2018-02-16 05:56:10.165212    \N    2018-02-16 05:55:20    2018-02-16 05:56:10    1    2018-02-16 05:55:20    1    \N    2018-02-16 05:56:00.603675
+86    1    \N    \N    400    finished    2018-02-17 02:51:30.538934    2018-02-17 02:51:33.593119    \N    2018-02-17 02:01:25    2018-02-17 02:51:33    1    2018-02-17 02:01:25    1    \N    2018-02-17 02:51:24.275451
+73    1    \N    \N    300    finished    2018-02-16 05:56:12.747007    2018-02-16 05:56:15.914953    \N    2018-02-16 05:55:39    2018-02-16 05:56:15    1    2018-02-16 05:55:39.051733    1    \N    2018-02-16 05:56:10.7548
+75    2    \N    \N    400    finished    2018-02-17 01:56:08.17137    2018-02-17 01:56:22.516272    \N    2018-02-16 20:42:40    2018-02-17 01:56:22    1    2018-02-16 20:42:40    1    \N    2018-02-17 01:47:42.74284
+74    2    \N    \N    1000    finished    2018-02-16 20:39:48.982689    2018-02-16 20:40:12.328303    \N    2018-02-16 20:37:33    2018-02-16 20:40:12    1    \N    1    \N    2018-02-16 20:37:33.289181
+76    2    \N    \N    400    finished    2018-02-16 20:54:25.387412    2018-02-16 20:54:36.584762    \N    2018-02-16 20:52:20    2018-02-16 20:54:36    1    2018-02-16 20:52:20    1    \N    2018-02-16 20:54:12.938846
+93    2    \N    \N    \N    finished    2018-02-18 21:08:59.340497    2018-02-18 21:09:03.084152    \N    2018-02-18 21:08:24    2018-02-18 21:09:03    1    \N    1    \N    2018-02-18 21:08:24.100527
+112    2    \N    \N    800    finished    2018-02-20 14:43:55.649544    2018-02-20 21:28:43.944741    \N    2018-02-20 14:42:37    2018-02-20 21:28:43    8    \N    1    \N    2018-02-20 14:43:01.192808
+80    2    \N    \N    200    finished    2018-02-17 01:57:25.482556    2018-02-17 01:57:29.895003    \N    2018-02-17 01:56:35    2018-02-17 01:57:29    1    2018-02-17 01:56:35    1    \N    2018-02-17 01:57:22.891484
+111    2    \N    \N    1000    finished    2018-02-20 14:21:15.744499    2018-02-20 14:21:19.992333    \N    2018-02-20 14:05:10    2018-02-20 14:21:19    7    2018-02-20 14:05:10    1    \N    2018-02-20 14:21:13.831581
+94    1    \N    \N    \N    finished    2018-02-18 21:09:08.703529    2018-02-18 21:09:14.218244    \N    2018-02-18 21:08:26    2018-02-18 21:09:14    1    \N    1    \N    2018-02-18 21:08:26.301774
+82    2    \N    \N    500    finished    2018-02-17 01:57:33.636625    2018-02-17 01:57:39.433166    \N    2018-02-17 01:56:42    2018-02-17 01:57:39    1    2018-02-17 01:56:42.109267    1    \N    2018-02-17 01:57:30.794516
+84    1    \N    \N    500    finished    2018-02-17 01:57:06.021919    2018-02-17 01:57:50.384118    \N    2018-02-17 01:56:50    2018-02-17 01:57:50    1    \N    1    \N    2018-02-17 01:56:50.184197
+78    2    \N    \N    800    finished    2018-02-16 21:28:09.45911    2018-02-16 21:28:23.524071    \N    2018-02-16 21:27:44    2018-02-16 21:28:23    1    \N    1    \N    2018-02-16 21:27:44.555551
+103    2    \N    \N    \N    finished    2018-02-20 13:16:40.403    2018-02-20 13:16:45.273747    \N    2018-02-20 13:15:23    2018-02-20 13:16:45    1    2018-02-20 13:15:23    1    \N    2018-02-20 13:16:34.450465
+96    2    \N    \N    \N    finished    2018-02-18 21:09:57.774225    2018-02-18 21:10:05.282958    \N    2018-02-18 21:09:28    2018-02-18 21:10:05    1    \N    1    \N    2018-02-18 21:09:28.411504
+95    1    \N    \N    \N    finished    2018-02-18 21:10:53.066205    2018-02-18 21:10:56.515558    \N    2018-02-18 21:08:38    2018-02-18 21:10:56    1    2018-02-18 21:08:38.295496    1    \N    2018-02-18 21:09:19.321753
+77    2    \N    \N    1000    finished    2018-02-16 21:32:14.79604    2018-02-16 21:32:31.179687    \N    2018-02-16 21:27:38    2018-02-16 21:32:31    1    \N    1    \N    2018-02-16 21:27:38.579622
+83    1    \N    \N    700    finished    2018-02-17 01:59:45.570916    2018-02-17 01:59:48.125721    \N    2018-02-17 01:56:44    2018-02-17 01:59:48    1    2018-02-17 01:56:44    1    \N    2018-02-17 01:57:50.901756
+89    2    \N    \N    \N    finished    2018-02-17 02:52:39.706505    2018-02-17 02:52:53.042764    \N    2018-02-17 02:51:45    2018-02-17 02:52:53    1    2018-02-17 02:51:45    1    \N    2018-02-17 02:52:29.358325
+81    1    \N    \N    400    finished    2018-02-17 01:59:50.020066    2018-02-17 01:59:52.49324    \N    2018-02-17 01:56:39    2018-02-17 01:59:52    1    2018-02-17 01:56:39    1    \N    2018-02-17 01:59:48.589805
+79    1    \N    \N    900    finished    2018-02-16 21:33:06.000493    2018-02-16 21:33:08.93454    \N    2018-02-16 21:27:50    2018-02-16 21:33:08    1    2018-02-16 21:27:50    1    \N    2018-02-16 21:33:03.220304
+97    2    \N    \N    \N    finished    2018-02-18 21:11:16.061873    2018-02-18 21:11:20.636533    \N    2018-02-18 21:10:10    2018-02-18 21:11:20    1    \N    1    \N    2018-02-18 21:10:10.420328
+88    1    \N    \N    \N    finished    2018-02-17 02:52:45.292751    2018-02-17 02:53:00.665944    \N    2018-02-17 02:51:44    2018-02-17 02:53:00    1    2018-02-17 02:51:44    1    \N    2018-02-17 02:52:41.730317
+109    2    \N    \N    \N    finished    2018-02-20 14:03:00.198757    2018-02-20 14:03:08.008965    \N    2018-02-20 14:02:34    2018-02-20 14:03:08    1    2018-02-20 14:02:35.001747    1    \N    2018-02-20 14:02:38.858048
+98    2    \N    \N    \N    finished    2018-02-18 21:12:06.75785    2018-02-18 21:12:11.002481    \N    2018-02-18 21:11:29    2018-02-18 21:12:11    1    \N    1    \N    2018-02-18 21:11:29.182927
+85    1    \N    \N    300    finished    2018-02-17 02:01:38.515301    2018-02-17 02:02:01.667264    \N    2018-02-17 02:01:14    2018-02-17 02:02:01    1    \N    1    \N    2018-02-17 02:01:14.481838
+90    2    \N    \N    \N    finished    2018-02-17 02:53:00.826456    2018-02-17 02:53:16.355538    \N    2018-02-17 02:51:47    2018-02-17 02:53:16    1    2018-02-17 02:51:47.375394    1    \N    2018-02-17 02:52:53.800522
+87    1    \N    \N    400    finished    2018-02-17 02:01:54.491891    2018-02-17 02:51:00.653314    \N    2018-02-17 02:01:50    2018-02-17 02:51:00    1    \N    1    \N    2018-02-17 02:01:50.446122
+100    1    \N    \N    \N    finished    2018-02-18 21:13:14.232963    2018-02-18 21:13:18.890126    \N    2018-02-18 21:13:10    2018-02-18 21:13:18    1    \N    1    \N    2018-02-18 21:13:10.396642
+116    2    \N    \N    \N    finished    2018-02-21 10:23:22.154217    2018-02-21 10:23:26.476467    \N    2018-02-21 10:20:33    2018-02-21 10:23:26    1    2018-02-21 10:20:33    1    \N    2018-02-21 10:23:16.4524
+99    2    \N    \N    \N    finished    2018-02-18 21:13:20.398779    2018-02-18 21:13:25.806015    \N    2018-02-18 21:12:55    2018-02-18 21:13:25    1    \N    1    \N    2018-02-18 21:12:55.375712
+101    2    \N    \N    \N    finished    2018-02-19 13:08:10.306741    2018-02-19 13:08:13.921869    \N    2018-02-19 13:08:03    2018-02-19 13:08:13    1    \N    1    \N    2018-02-19 13:08:03.48774
+105    1    \N    \N    \N    finished    2018-02-20 13:19:51.051805    2018-02-20 13:28:03.647933    \N    2018-02-20 13:19:39    2018-02-20 13:28:03    1    \N    1    \N    2018-02-20 13:19:39.640424
+91    2    \N    \N    \N    finished    2018-02-17 02:53:57.546855    2018-02-17 02:54:01.481143    \N    2018-02-17 02:51:49    2018-02-17 02:54:01    1    2018-02-17 02:51:49    1    \N    2018-02-17 02:53:53.643181
+108    2    \N    \N    \N    finished    2018-02-20 14:03:11.24149    2018-02-20 14:03:14.88575    \N    2018-02-20 14:02:32    2018-02-20 14:03:14    1    2018-02-20 14:02:32    1    \N    2018-02-20 14:03:08.709704
+102    2    \N    \N    \N    finished    2018-02-20 13:15:37.302923    2018-02-20 13:15:40.804871    \N    2018-02-20 13:15:19    2018-02-20 13:15:40    1    \N    1    \N    2018-02-20 13:15:19.543534
+104    2    \N    \N    \N    finished    2018-02-20 13:31:56.699276    2018-02-20 13:38:02.627425    \N    2018-02-20 13:16:53    2018-02-20 13:38:02    1    2018-02-20 13:16:53    1    \N    2018-02-20 13:31:00.005009
+106    1    \N    \N    \N    finished    2018-02-20 13:39:45.607923    2018-02-20 13:39:51.158463    \N    2018-02-20 13:38:28    2018-02-20 13:39:51    1    \N    1    \N    2018-02-20 13:38:28.559373
+107    1    \N    \N    \N    finished    2018-02-20 13:42:13.41324    2018-02-20 13:42:16.845845    \N    2018-02-20 13:38:30    2018-02-20 13:42:16    1    \N    1    \N    2018-02-20 13:41:00.005811
+114    34    \N    \N    600    finished    2018-02-20 18:59:55.723443    2018-02-20 19:00:11.289193    \N    2018-02-20 18:59:23    2018-02-20 19:00:11    9    \N    10    \N    2018-02-20 18:59:23.482755
+110    2    \N    \N    \N    finished    2018-02-20 14:21:09.489098    2018-02-20 14:21:12.914311    \N    2018-02-20 14:03:25    2018-02-20 14:21:12    1    2018-02-20 14:03:25    1    \N    2018-02-20 14:21:06.984732
+115    1    \N    \N    800    finished    2018-02-21 10:20:04.596817    2018-02-21 10:20:53.684111    \N    2018-02-21 10:19:38    2018-02-21 10:20:53    1    \N    1    \N    2018-02-21 10:19:38.226515
+119    1    \N    \N    \N    finished    2018-03-08 20:17:14.10793    2018-03-08 20:17:17.796326    \N    2018-03-08 20:15:40    2018-03-08 20:17:17    7    2018-03-08 20:15:40    1    \N    2018-03-08 20:17:03.28286
+113    1    \N    \N    \N    finished    2018-02-20 21:28:34.782643    2018-02-20 21:28:37.860618    \N    2018-02-20 14:45:21    2018-02-20 21:28:37    7    2018-02-20 14:45:21    1    \N    2018-02-20 21:28:24.65926
+118    2    \N    \N    800    finished    2018-03-08 20:15:17.492288    2018-03-08 20:15:23.169565    \N    2018-03-08 20:14:26    2018-03-08 20:15:23    7    \N    1    \N    2018-03-08 20:14:26.112976
+117    2    \N    \N    1000    finished    2018-03-08 20:15:27.104548    2018-03-08 20:15:30.798843    \N    2018-03-08 20:12:02    2018-03-08 20:15:30    7    2018-03-08 20:12:02    1    \N    2018-03-08 20:15:24.076478
+\.
+
+
+--
+-- Data for Name: history; Type: TABLE DATA; Schema: public; Owner: nanobox
+--
+
+COPY history (id, order_id, motoboy_id, scope, text, inserted_at, updated_at) FROM stdin;
+1    \N    1    motoboy    Ficou online    2018-02-02 23:33:44    2018-02-02 23:33:44
+2    \N    1    motoboy    Ficou online    2018-02-02 23:51:15    2018-02-02 23:51:15
+3    \N    1    motoboy    Ficou offline    2018-02-02 23:51:15    2018-02-02 23:51:15
+4    \N    1    motoboy    Ficou online    2018-02-03 00:09:13    2018-02-03 00:09:13
+5    \N    1    motoboy    Ficou offline    2018-02-03 00:09:16    2018-02-03 00:09:16
+6    \N    1    motoboy    Ficou online    2018-02-03 00:09:19    2018-02-03 00:09:19
+7    \N    1    motoboy    Ficou offline    2018-02-03 00:09:48    2018-02-03 00:09:48
+8    \N    1    motoboy    Ficou online    2018-02-03 00:15:00    2018-02-03 00:15:00
+9    \N    1    motoboy    Ficou offline    2018-02-03 00:27:22    2018-02-03 00:27:22
+10    \N    1    motoboy    Ficou online    2018-02-03 00:36:52    2018-02-03 00:36:52
+11    \N    1    motoboy    Ficou offline    2018-02-03 02:59:56    2018-02-03 02:59:56
+12    \N    1    motoboy    Ficou online    2018-02-03 02:59:57    2018-02-03 02:59:57
+13    \N    1    motoboy    Ficou offline    2018-02-03 03:10:36    2018-02-03 03:10:36
+14    \N    1    motoboy    Ficou online    2018-02-03 03:10:49    2018-02-03 03:10:49
+699    \N    1    motoboy    Ficou offline    2018-02-13 07:31:27    2018-02-13 07:31:27
+766    \N    2    motoboy    Ficou online    2018-02-16 20:37:12    2018-02-16 20:37:12
+787    75    2    order    Motoboy cancelou pedido    2018-02-16 20:53:21    2018-02-16 20:53:21
+788    75    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-16 20:53:21    2018-02-16 20:53:21
+19    \N    1    motoboy    Ficou online    2018-02-03 03:13:42    2018-02-03 03:13:42
+789    75    2    motoboy    Cancelou pedido    2018-02-16 20:53:21    2018-02-16 20:53:21
+791    75    2    motoboy    Recebeu uma entrega    2018-02-16 20:53:47    2018-02-16 20:53:47
+792    75    2    order    Pedido enviado para o motoboy    2018-02-16 20:53:47    2018-02-16 20:53:47
+793    75    2    order    Motoboy cancelou pedido    2018-02-16 20:54:07    2018-02-16 20:54:07
+794    75    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-16 20:54:07    2018-02-16 20:54:07
+795    75    2    motoboy    Cancelou pedido    2018-02-16 20:54:07    2018-02-16 20:54:07
+894    \N    1    motoboy    Ficou online    2018-02-17 01:28:43    2018-02-17 01:28:43
+27    \N    1    motoboy    Ficou online    2018-02-03 14:56:18    2018-02-03 14:56:18
+903    75    2    motoboy    Recebeu uma entrega    2018-02-17 01:28:57    2018-02-17 01:28:57
+904    75    2    order    Pedido enviado para o motoboy    2018-02-17 01:28:57    2018-02-17 01:28:57
+1024    \N    1    motoboy    Ficou online    2018-02-17 02:51:15    2018-02-17 02:51:15
+1066    \N    2    motoboy    Ficou online    2018-02-17 02:52:29    2018-02-17 02:52:29
+33    \N    1    motoboy    Ficou online    2018-02-03 14:57:48    2018-02-03 14:57:48
+34    \N    1    motoboy    Ficou offline    2018-02-03 15:28:47    2018-02-03 15:28:47
+35    \N    1    motoboy    Ficou online    2018-02-03 15:28:48    2018-02-03 15:28:48
+36    \N    1    motoboy    Ficou offline    2018-02-03 15:28:50    2018-02-03 15:28:50
+37    \N    1    motoboy    Ficou online    2018-02-03 15:28:51    2018-02-03 15:28:51
+38    \N    1    motoboy    Ficou offline    2018-02-03 15:28:52    2018-02-03 15:28:52
+39    \N    1    motoboy    Ficou online    2018-02-03 15:29:05    2018-02-03 15:29:05
+40    \N    1    motoboy    Ficou offline    2018-02-03 15:29:23    2018-02-03 15:29:23
+41    \N    1    motoboy    Ficou online    2018-02-03 15:31:39    2018-02-03 15:31:39
+42    \N    1    motoboy    Ficou offline    2018-02-03 15:31:41    2018-02-03 15:31:41
+43    \N    1    motoboy    Ficou online    2018-02-03 15:31:53    2018-02-03 15:31:53
+44    \N    1    motoboy    Ficou offline    2018-02-03 15:31:55    2018-02-03 15:31:55
+45    \N    1    motoboy    Ficou online    2018-02-03 15:31:56    2018-02-03 15:31:56
+46    \N    1    motoboy    Ficou offline    2018-02-03 15:32:08    2018-02-03 15:32:08
+47    \N    1    motoboy    Ficou online    2018-02-03 15:32:09    2018-02-03 15:32:09
+48    \N    1    motoboy    Ficou offline    2018-02-03 15:32:24    2018-02-03 15:32:24
+49    \N    1    motoboy    Ficou online    2018-02-03 15:32:31    2018-02-03 15:32:31
+50    \N    1    motoboy    Ficou offline    2018-02-03 15:32:33    2018-02-03 15:32:33
+51    \N    1    motoboy    Ficou online    2018-02-03 15:32:37    2018-02-03 15:32:37
+52    \N    1    motoboy    Ficou offline    2018-02-03 15:32:39    2018-02-03 15:32:39
+53    \N    1    motoboy    Ficou online    2018-02-03 15:32:40    2018-02-03 15:32:40
+54    \N    1    motoboy    Ficou offline    2018-02-03 15:32:43    2018-02-03 15:32:43
+55    \N    1    motoboy    Ficou online    2018-02-03 15:32:52    2018-02-03 15:32:52
+56    \N    1    motoboy    Ficou offline    2018-02-03 15:32:55    2018-02-03 15:32:55
+57    \N    1    motoboy    Ficou online    2018-02-03 15:32:56    2018-02-03 15:32:56
+58    \N    1    motoboy    Ficou offline    2018-02-03 15:32:57    2018-02-03 15:32:57
+59    \N    1    motoboy    Ficou online    2018-02-03 15:32:58    2018-02-03 15:32:58
+60    \N    1    motoboy    Ficou offline    2018-02-03 15:32:59    2018-02-03 15:32:59
+61    \N    1    motoboy    Ficou online    2018-02-03 15:33:05    2018-02-03 15:33:05
+62    \N    1    motoboy    Ficou offline    2018-02-03 15:33:06    2018-02-03 15:33:06
+63    \N    1    motoboy    Ficou online    2018-02-03 15:33:07    2018-02-03 15:33:07
+64    \N    1    motoboy    Ficou offline    2018-02-03 15:33:11    2018-02-03 15:33:11
+65    \N    1    motoboy    Ficou online    2018-02-03 15:33:11    2018-02-03 15:33:11
+66    \N    1    motoboy    Ficou offline    2018-02-03 15:34:13    2018-02-03 15:34:13
+67    \N    1    motoboy    Ficou online    2018-02-03 15:34:21    2018-02-03 15:34:21
+68    \N    1    motoboy    Ficou offline    2018-02-03 15:34:28    2018-02-03 15:34:28
+69    \N    1    motoboy    Ficou online    2018-02-03 15:34:33    2018-02-03 15:34:33
+70    \N    1    motoboy    Ficou offline    2018-02-03 15:34:35    2018-02-03 15:34:35
+71    \N    1    motoboy    Ficou online    2018-02-03 15:34:39    2018-02-03 15:34:39
+72    \N    1    motoboy    Ficou offline    2018-02-03 15:34:41    2018-02-03 15:34:41
+73    \N    1    motoboy    Ficou online    2018-02-03 15:34:54    2018-02-03 15:34:54
+74    \N    1    motoboy    Ficou offline    2018-02-03 15:35:00    2018-02-03 15:35:00
+75    \N    1    motoboy    Ficou online    2018-02-03 15:35:01    2018-02-03 15:35:01
+76    \N    1    motoboy    Ficou offline    2018-02-03 15:35:06    2018-02-03 15:35:06
+77    \N    1    motoboy    Ficou online    2018-02-03 15:35:10    2018-02-03 15:35:10
+78    \N    1    motoboy    Ficou offline    2018-02-03 15:35:11    2018-02-03 15:35:11
+79    \N    1    motoboy    Ficou online    2018-02-03 15:35:15    2018-02-03 15:35:15
+80    \N    1    motoboy    Ficou offline    2018-02-03 15:35:20    2018-02-03 15:35:20
+81    \N    1    motoboy    Ficou online    2018-02-03 15:35:24    2018-02-03 15:35:24
+82    \N    1    motoboy    Ficou offline    2018-02-03 15:35:27    2018-02-03 15:35:27
+83    \N    1    motoboy    Ficou online    2018-02-03 15:35:28    2018-02-03 15:35:28
+84    \N    1    motoboy    Ficou offline    2018-02-03 15:35:30    2018-02-03 15:35:30
+85    \N    1    motoboy    Ficou online    2018-02-03 15:35:33    2018-02-03 15:35:33
+86    \N    1    motoboy    Ficou offline    2018-02-03 15:35:38    2018-02-03 15:35:38
+87    \N    1    motoboy    Ficou online    2018-02-03 15:35:38    2018-02-03 15:35:38
+88    \N    1    motoboy    Ficou offline    2018-02-03 15:35:40    2018-02-03 15:35:40
+89    \N    1    motoboy    Ficou online    2018-02-03 15:35:43    2018-02-03 15:35:43
+90    \N    1    motoboy    Ficou offline    2018-02-03 15:35:44    2018-02-03 15:35:44
+91    \N    1    motoboy    Ficou online    2018-02-03 15:35:45    2018-02-03 15:35:45
+92    \N    1    motoboy    Ficou offline    2018-02-03 15:35:50    2018-02-03 15:35:50
+93    \N    1    motoboy    Ficou online    2018-02-03 15:35:51    2018-02-03 15:35:51
+94    \N    1    motoboy    Ficou offline    2018-02-03 15:35:52    2018-02-03 15:35:52
+95    \N    1    motoboy    Ficou online    2018-02-03 15:35:53    2018-02-03 15:35:53
+105    \N    1    motoboy    Ficou online    2018-02-03 15:36:10    2018-02-03 15:36:10
+115    \N    1    motoboy    Ficou online    2018-02-03 15:36:41    2018-02-03 15:36:41
+122    \N    1    motoboy    Recebeu pedido    2018-02-03 15:38:41    2018-02-03 15:38:41
+700    \N    1    motoboy    Ficou online    2018-02-13 07:31:27    2018-02-13 07:31:27
+767    \N    1    motoboy    Ficou online    2018-02-16 20:37:14    2018-02-16 20:37:14
+782    76    1    motoboy    Recebeu pedido    2018-02-16 20:52:20    2018-02-16 20:52:20
+783    76    1    order    Pedido enviado para o motoboy    2018-02-16 20:52:20    2018-02-16 20:52:20
+796    \N    1    motoboy    Ficou online    2018-02-16 20:54:11    2018-02-16 20:54:11
+895    75    1    motoboy    Recebeu uma entrega    2018-02-17 01:28:44    2018-02-17 01:28:44
+896    75    1    order    Pedido enviado para o motoboy    2018-02-17 01:28:44    2018-02-17 01:28:44
+897    75    1    motoboy    Confirmou pedido    2018-02-17 01:28:46    2018-02-17 01:28:46
+898    75    1    order    Pedido confirmado    2018-02-17 01:28:46    2018-02-17 01:28:46
+899    75    1    order    Motoboy cancelou pedido    2018-02-17 01:28:51    2018-02-17 01:28:51
+900    75    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-17 01:28:51    2018-02-17 01:28:51
+901    75    1    motoboy    Cancelou pedido    2018-02-17 01:28:51    2018-02-17 01:28:51
+1025    86    2    motoboy    Confirmou pedido    2018-02-17 02:51:18    2018-02-17 02:51:18
+1026    86    2    order    Pedido confirmado    2018-02-17 02:51:18    2018-02-17 02:51:18
+1035    \N    1    motoboy    Ficou offline    2018-02-17 02:51:35    2018-02-17 02:51:35
+1055    \N    1    motoboy    Ficou online    2018-02-17 02:52:18    2018-02-17 02:52:18
+1069    88    1    order    Motoboy cancelou pedido    2018-02-17 02:52:35    2018-02-17 02:52:35
+1070    88    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-17 02:52:35    2018-02-17 02:52:35
+1071    88    1    motoboy    Cancelou pedido    2018-02-17 02:52:35    2018-02-17 02:52:35
+1105    91    1    order    Motoboy cancelou pedido    2018-02-17 02:53:34    2018-02-17 02:53:34
+1106    91    2    order    Pedido enviado a outro motoboy    2018-02-17 02:53:34    2018-02-17 02:53:34
+1107    91    2    motoboy    Recebeu pedido    2018-02-17 02:53:34    2018-02-17 02:53:34
+1108    91    1    motoboy    Cancelou pedido    2018-02-17 02:53:34    2018-02-17 02:53:34
+1120    \N    1    motoboy    Ficou online    2018-02-17 02:53:55    2018-02-17 02:53:55
+1126    \N    2    motoboy    Ficou offline    2018-02-17 02:54:07    2018-02-17 02:54:07
+1211    102    2    motoboy    Confirmou pedido    2018-02-20 13:15:37    2018-02-20 13:15:37
+1212    102    2    order    Pedido confirmado    2018-02-20 13:15:37    2018-02-20 13:15:37
+1213    102    2    order    Pedido finalizado    2018-02-20 13:15:40    2018-02-20 13:15:40
+1214    102    2    motoboy    Finalizou pedido    2018-02-20 13:15:40    2018-02-20 13:15:40
+1247    105    1    motoboy    Confirmou pedido    2018-02-20 13:19:51    2018-02-20 13:19:51
+1248    105    1    order    Pedido confirmado    2018-02-20 13:19:51    2018-02-20 13:19:51
+1249    104    2    motoboy    Não confirmou o pedido a tempo    2018-02-20 13:22:00    2018-02-20 13:22:00
+1250    104    2    order    Cancelamento automático    2018-02-20 13:22:00    2018-02-20 13:22:00
+1251    104    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-20 13:22:00    2018-02-20 13:22:00
+1257    104    1    motoboy    Não confirmou o pedido a tempo    2018-02-20 13:31:00    2018-02-20 13:31:00
+1258    104    1    order    Cancelamento automático    2018-02-20 13:31:00    2018-02-20 13:31:00
+1259    104    2    order    Pedido enviado a outro motoboy    2018-02-20 13:31:00    2018-02-20 13:31:00
+1260    104    2    motoboy    Recebeu pedido    2018-02-20 13:31:00    2018-02-20 13:31:00
+1272    106    1    order    Pedido finalizado    2018-02-20 13:39:51    2018-02-20 13:39:51
+1273    106    1    motoboy    Finalizou pedido    2018-02-20 13:39:51    2018-02-20 13:39:51
+1278    107    1    motoboy    Confirmou pedido    2018-02-20 13:42:13    2018-02-20 13:42:13
+1279    107    1    order    Pedido confirmado    2018-02-20 13:42:13    2018-02-20 13:42:13
+1286    109    2    motoboy    Recebeu uma entrega    2018-02-20 14:02:38    2018-02-20 14:02:38
+1287    109    2    order    Pedido enviado para o motoboy    2018-02-20 14:02:38    2018-02-20 14:02:38
+1293    109    2    motoboy    Confirmou pedido    2018-02-20 14:03:00    2018-02-20 14:03:00
+1294    109    2    order    Pedido confirmado    2018-02-20 14:03:00    2018-02-20 14:03:00
+1295    109    2    order    Pedido finalizado    2018-02-20 14:03:08    2018-02-20 14:03:08
+1296    109    2    motoboy    Finalizou pedido    2018-02-20 14:03:08    2018-02-20 14:03:08
+1299    108    2    motoboy    Confirmou pedido    2018-02-20 14:03:11    2018-02-20 14:03:11
+1300    108    2    order    Pedido confirmado    2018-02-20 14:03:11    2018-02-20 14:03:11
+1378    \N    1    motoboy    Ficou online    2018-02-21 09:56:06    2018-02-21 09:56:06
+1380    \N    2    motoboy    Ficou offline    2018-02-21 10:06:26    2018-02-21 10:06:26
+1407    \N    2    motoboy    Ficou online    2018-02-21 10:23:15    2018-02-21 10:23:15
+96    \N    1    motoboy    Ficou offline    2018-02-03 15:35:58    2018-02-03 15:35:58
+106    \N    1    motoboy    Ficou offline    2018-02-03 15:36:11    2018-02-03 15:36:11
+116    \N    1    motoboy    Ficou offline    2018-02-03 15:36:44    2018-02-03 15:36:44
+123    \N    1    order    Pedido enviado    2018-02-03 15:38:41    2018-02-03 15:38:41
+701    68    1    motoboy    Recebeu pedido    2018-02-13 07:31:52    2018-02-13 07:31:52
+768    74    2    motoboy    Recebeu pedido    2018-02-16 20:37:33    2018-02-16 20:37:33
+769    74    2    order    Pedido enviado para o motoboy    2018-02-16 20:37:33    2018-02-16 20:37:33
+775    74    2    order    Pedido finalizado    2018-02-16 20:40:12    2018-02-16 20:40:12
+776    74    2    motoboy    Finalizou pedido    2018-02-16 20:40:12    2018-02-16 20:40:12
+790    \N    2    motoboy    Ficou online    2018-02-16 20:53:47    2018-02-16 20:53:47
+804    76    2    order    Pedido finalizado    2018-02-16 20:54:36    2018-02-16 20:54:36
+805    76    2    motoboy    Finalizou pedido    2018-02-16 20:54:36    2018-02-16 20:54:36
+912    \N    2    motoboy    Ficou online    2018-02-17 01:29:30    2018-02-17 01:29:30
+917    \N    1    motoboy    Ficou online    2018-02-17 01:38:54    2018-02-17 01:38:54
+1027    86    2    order    Motoboy cancelou pedido    2018-02-17 02:51:24    2018-02-17 02:51:24
+1028    86    1    order    Pedido enviado a outro motoboy    2018-02-17 02:51:24    2018-02-17 02:51:24
+1029    86    1    motoboy    Recebeu pedido    2018-02-17 02:51:24    2018-02-17 02:51:24
+1030    86    2    motoboy    Cancelou pedido    2018-02-17 02:51:24    2018-02-17 02:51:24
+1039    88    1    motoboy    Recebeu pedido    2018-02-17 02:51:44    2018-02-17 02:51:44
+1040    88    1    order    Pedido enviado para o motoboy    2018-02-17 02:51:44    2018-02-17 02:51:44
+1045    89    2    motoboy    Recebeu uma entrega    2018-02-17 02:51:52    2018-02-17 02:51:52
+1046    89    2    order    Pedido enviado para o motoboy    2018-02-17 02:51:52    2018-02-17 02:51:52
+1047    88    1    order    Motoboy cancelou pedido    2018-02-17 02:51:58    2018-02-17 02:51:58
+1048    88    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-17 02:51:58    2018-02-17 02:51:58
+1049    88    1    motoboy    Cancelou pedido    2018-02-17 02:51:58    2018-02-17 02:51:58
+1058    88    1    order    Motoboy cancelou pedido    2018-02-17 02:52:23    2018-02-17 02:52:23
+1059    88    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-17 02:52:23    2018-02-17 02:52:23
+1060    88    1    motoboy    Cancelou pedido    2018-02-17 02:52:23    2018-02-17 02:52:23
+1092    90    2    order    Pedido finalizado    2018-02-17 02:53:16    2018-02-17 02:53:16
+1093    90    2    motoboy    Finalizou pedido    2018-02-17 02:53:16    2018-02-17 02:53:16
+1217    103    1    order    Motoboy cancelou pedido    2018-02-20 13:15:56    2018-02-20 13:15:56
+1218    103    2    order    Pedido enviado a outro motoboy    2018-02-20 13:15:56    2018-02-20 13:15:56
+1219    103    2    motoboy    Recebeu pedido    2018-02-20 13:15:56    2018-02-20 13:15:56
+1220    103    1    motoboy    Cancelou pedido    2018-02-20 13:15:56    2018-02-20 13:15:56
+1379    \N    2    motoboy    Ficou online    2018-02-21 10:06:24    2018-02-21 10:06:24
+1392    115    1    motoboy    Confirmou pedido    2018-02-21 10:20:04    2018-02-21 10:20:04
+1393    115    1    order    Pedido confirmado    2018-02-21 10:20:04    2018-02-21 10:20:04
+1412    116    2    order    Pedido finalizado    2018-02-21 10:23:26    2018-02-21 10:23:26
+1413    116    2    motoboy    Finalizou pedido    2018-02-21 10:23:26    2018-02-21 10:23:26
+97    \N    1    motoboy    Ficou online    2018-02-03 15:35:59    2018-02-03 15:35:59
+107    \N    1    motoboy    Ficou online    2018-02-03 15:36:16    2018-02-03 15:36:16
+117    \N    1    motoboy    Ficou online    2018-02-03 15:36:45    2018-02-03 15:36:45
+702    68    1    order    Pedido enviado    2018-02-13 07:31:52    2018-02-13 07:31:52
+802    76    2    motoboy    Confirmou pedido    2018-02-16 20:54:25    2018-02-16 20:54:25
+803    76    2    order    Pedido confirmado    2018-02-16 20:54:25    2018-02-16 20:54:25
+913    75    1    order    Motoboy cancelou pedido    2018-02-17 01:29:41    2018-02-17 01:29:41
+914    75    2    order    Pedido enviado a outro motoboy    2018-02-17 01:29:41    2018-02-17 01:29:41
+915    75    2    motoboy    Recebeu pedido    2018-02-17 01:29:41    2018-02-17 01:29:41
+916    75    1    motoboy    Cancelou pedido    2018-02-17 01:29:41    2018-02-17 01:29:41
+918    75    2    order    Motoboy cancelou pedido    2018-02-17 01:39:13    2018-02-17 01:39:13
+919    75    1    order    Pedido enviado a outro motoboy    2018-02-17 01:39:13    2018-02-17 01:39:13
+920    75    1    motoboy    Recebeu pedido    2018-02-17 01:39:13    2018-02-17 01:39:13
+921    75    2    motoboy    Cancelou pedido    2018-02-17 01:39:13    2018-02-17 01:39:13
+1033    86    1    order    Pedido finalizado    2018-02-17 02:51:33    2018-02-17 02:51:33
+1034    86    1    motoboy    Finalizou pedido    2018-02-17 02:51:33    2018-02-17 02:51:33
+1036    \N    1    motoboy    Ficou online    2018-02-17 02:51:36    2018-02-17 02:51:36
+1052    89    2    order    Motoboy cancelou pedido    2018-02-17 02:52:12    2018-02-17 02:52:12
+1053    89    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-17 02:52:12    2018-02-17 02:52:12
+1054    89    2    motoboy    Cancelou pedido    2018-02-17 02:52:12    2018-02-17 02:52:12
+1094    91    2    motoboy    Recebeu uma entrega    2018-02-17 02:53:17    2018-02-17 02:53:17
+1095    91    2    order    Pedido enviado para o motoboy    2018-02-17 02:53:17    2018-02-17 02:53:17
+1112    \N    1    motoboy    Ficou online    2018-02-17 02:53:46    2018-02-17 02:53:46
+1221    \N    1    motoboy    Ficou online    2018-02-20 13:16:15    2018-02-20 13:16:15
+1232    103    2    motoboy    Confirmou pedido    2018-02-20 13:16:40    2018-02-20 13:16:40
+1233    103    2    order    Pedido confirmado    2018-02-20 13:16:40    2018-02-20 13:16:40
+1262    104    2    motoboy    Confirmou pedido    2018-02-20 13:31:56    2018-02-20 13:31:56
+1263    104    2    order    Pedido confirmado    2018-02-20 13:31:56    2018-02-20 13:31:56
+1288    108    1    motoboy    Confirmou pedido    2018-02-20 14:02:49    2018-02-20 14:02:49
+1289    108    1    order    Pedido confirmado    2018-02-20 14:02:49    2018-02-20 14:02:49
+1305    \N    2    motoboy    Ficou offline    2018-02-20 14:03:20    2018-02-20 14:03:20
+1382    \N    2    motoboy    Ficou offline    2018-02-21 10:06:51    2018-02-21 10:06:51
+1385    \N    1    motoboy    Ficou offline    2018-02-21 10:09:09    2018-02-21 10:09:09
+98    \N    1    motoboy    Ficou offline    2018-02-03 15:36:00    2018-02-03 15:36:00
+108    \N    1    motoboy    Ficou offline    2018-02-03 15:36:17    2018-02-03 15:36:17
+118    \N    1    motoboy    Ficou offline    2018-02-03 15:36:46    2018-02-03 15:36:46
+703    68    1    motoboy    Confirmou pedido    2018-02-13 07:34:17    2018-02-13 07:34:17
+704    68    1    order    Pedido confirmado    2018-02-13 07:34:17    2018-02-13 07:34:17
+777    75    2    motoboy    Recebeu pedido    2018-02-16 20:42:40    2018-02-16 20:42:40
+778    75    2    order    Pedido enviado para o motoboy    2018-02-16 20:42:40    2018-02-16 20:42:40
+784    76    1    order    Motoboy cancelou pedido    2018-02-16 20:52:46    2018-02-16 20:52:46
+785    76    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-16 20:52:46    2018-02-16 20:52:46
+786    76    1    motoboy    Cancelou pedido    2018-02-16 20:52:46    2018-02-16 20:52:46
+922    \N    2    motoboy    Ficou online    2018-02-17 01:44:13    2018-02-17 01:44:13
+1042    90    \N    order    Nenhum motoboy disponível, pedido enviado para a fila.    2018-02-17 02:51:47    2018-02-17 02:51:47
+1115    \N    2    motoboy    Ficou online    2018-02-17 02:53:47    2018-02-17 02:53:47
+1222    103    2    order    Motoboy cancelou pedido    2018-02-20 13:16:21    2018-02-20 13:16:21
+1223    103    1    order    Pedido enviado a outro motoboy    2018-02-20 13:16:21    2018-02-20 13:16:21
+1224    103    1    motoboy    Recebeu pedido    2018-02-20 13:16:21    2018-02-20 13:16:21
+1225    103    2    motoboy    Cancelou pedido    2018-02-20 13:16:21    2018-02-20 13:16:21
+1242    104    2    motoboy    Recebeu uma entrega    2018-02-20 13:19:22    2018-02-20 13:19:22
+1243    104    2    order    Pedido enviado para o motoboy    2018-02-20 13:19:22    2018-02-20 13:19:22
+1264    104    2    order    Pedido finalizado    2018-02-20 13:38:02    2018-02-20 13:38:02
+1265    104    2    motoboy    Finalizou pedido    2018-02-20 13:38:02    2018-02-20 13:38:02
+1387    \N    1    motoboy    Ficou offline    2018-02-21 10:09:14    2018-02-21 10:09:14
+1396    116    2    motoboy    Confirmou pedido    2018-02-21 10:20:40    2018-02-21 10:20:40
+1397    116    2    order    Pedido confirmado    2018-02-21 10:20:40    2018-02-21 10:20:40
+1416    \N    34    motoboy    Ficou online    2018-02-21 20:17:34    2018-02-21 20:17:34
+99    \N    1    motoboy    Ficou online    2018-02-03 15:36:01    2018-02-03 15:36:01
+109    \N    1    motoboy    Ficou online    2018-02-03 15:36:18    2018-02-03 15:36:18
+119    \N    1    motoboy    Ficou online    2018-02-03 15:36:58    2018-02-03 15:36:58
+705    68    1    order    Pedido finalizado    2018-02-13 07:42:08    2018-02-13 07:42:08
+706    68    1    motoboy    Finalizou pedido    2018-02-13 07:42:08    2018-02-13 07:42:08
+797    75    1    motoboy    Recebeu uma entrega    2018-02-16 20:54:11    2018-02-16 20:54:11
+798    75    1    order    Pedido enviado para o motoboy    2018-02-16 20:54:11    2018-02-16 20:54:11
+923    75    1    order    Motoboy cancelou pedido    2018-02-17 01:47:42    2018-02-17 01:47:42
+924    75    2    order    Pedido enviado a outro motoboy    2018-02-17 01:47:42    2018-02-17 01:47:42
+925    75    2    motoboy    Recebeu pedido    2018-02-17 01:47:42    2018-02-17 01:47:42
+926    75    1    motoboy    Cancelou pedido    2018-02-17 01:47:42    2018-02-17 01:47:42
+937    83    \N    order    Nenhum motoboy disponível, pedido enviado para a fila.    2018-02-17 01:56:44    2018-02-17 01:56:44
+942    84    1    motoboy    Confirmou pedido    2018-02-17 01:57:06    2018-02-17 01:57:06
+943    84    1    order    Pedido confirmado    2018-02-17 01:57:06    2018-02-17 01:57:06
+967    83    1    motoboy    Recebeu uma entrega    2018-02-17 01:57:50    2018-02-17 01:57:50
+968    83    1    order    Pedido enviado para o motoboy    2018-02-17 01:57:50    2018-02-17 01:57:50
+985    81    1    order    Pedido finalizado    2018-02-17 01:59:52    2018-02-17 01:59:52
+986    81    1    motoboy    Finalizou pedido    2018-02-17 01:59:52    2018-02-17 01:59:52
+1043    91    \N    order    Nenhum motoboy disponível, pedido enviado para a fila.    2018-02-17 02:51:49    2018-02-17 02:51:49
+1056    88    1    motoboy    Recebeu uma entrega    2018-02-17 02:52:18    2018-02-17 02:52:18
+1057    88    1    order    Pedido enviado para o motoboy    2018-02-17 02:52:18    2018-02-17 02:52:18
+1083    88    1    order    Pedido finalizado    2018-02-17 02:53:00    2018-02-17 02:53:00
+1084    88    1    motoboy    Finalizou pedido    2018-02-17 02:53:00    2018-02-17 02:53:00
+1109    91    2    order    Motoboy cancelou pedido    2018-02-17 02:53:44    2018-02-17 02:53:44
+1110    91    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-17 02:53:44    2018-02-17 02:53:44
+1111    91    2    motoboy    Cancelou pedido    2018-02-17 02:53:44    2018-02-17 02:53:44
+1116    91    1    order    Motoboy cancelou pedido    2018-02-17 02:53:53    2018-02-17 02:53:53
+1117    91    2    order    Pedido enviado a outro motoboy    2018-02-17 02:53:53    2018-02-17 02:53:53
+1118    91    2    motoboy    Recebeu pedido    2018-02-17 02:53:53    2018-02-17 02:53:53
+1119    91    1    motoboy    Cancelou pedido    2018-02-17 02:53:53    2018-02-17 02:53:53
+1229    \N    2    motoboy    Ficou online    2018-02-20 13:16:34    2018-02-20 13:16:34
+1230    103    2    motoboy    Recebeu uma entrega    2018-02-20 13:16:34    2018-02-20 13:16:34
+1231    103    2    order    Pedido enviado para o motoboy    2018-02-20 13:16:34    2018-02-20 13:16:34
+1236    104    2    motoboy    Recebeu pedido    2018-02-20 13:16:53    2018-02-20 13:16:53
+1237    104    2    order    Pedido enviado para o motoboy    2018-02-20 13:16:53    2018-02-20 13:16:53
+1245    105    1    motoboy    Recebeu pedido    2018-02-20 13:19:39    2018-02-20 13:19:39
+1246    105    1    order    Pedido enviado para o motoboy    2018-02-20 13:19:39    2018-02-20 13:19:39
+1252    105    1    order    Pedido finalizado    2018-02-20 13:28:03    2018-02-20 13:28:03
+1253    105    1    motoboy    Finalizou pedido    2018-02-20 13:28:03    2018-02-20 13:28:03
+1297    108    2    motoboy    Recebeu uma entrega    2018-02-20 14:03:08    2018-02-20 14:03:08
+1298    108    2    order    Pedido enviado para o motoboy    2018-02-20 14:03:08    2018-02-20 14:03:08
+1303    \N    2    motoboy    Ficou offline    2018-02-20 14:03:18    2018-02-20 14:03:18
+1388    \N    1    motoboy    Ficou online    2018-02-21 10:11:49    2018-02-21 10:11:49
+1404    116    1    order    Motoboy cancelou pedido    2018-02-21 10:23:00    2018-02-21 10:23:00
+1405    116    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-21 10:23:00    2018-02-21 10:23:00
+1406    116    1    motoboy    Cancelou pedido    2018-02-21 10:23:00    2018-02-21 10:23:00
+1414    \N    33    motoboy    Ficou offline    2018-02-21 11:59:18    2018-02-21 11:59:18
+100    \N    1    motoboy    Ficou offline    2018-02-03 15:36:03    2018-02-03 15:36:03
+110    \N    1    motoboy    Ficou offline    2018-02-03 15:36:30    2018-02-03 15:36:30
+120    \N    1    motoboy    Ficou offline    2018-02-03 15:37:10    2018-02-03 15:37:10
+126    \N    1    motoboy    Ficou online    2018-02-03 15:38:52    2018-02-03 15:38:52
+124    \N    1    motoboy    Confirmou pedido    2018-02-03 15:38:48    2018-02-03 15:38:48
+125    \N    1    order    Pedido confirmado    2018-02-03 15:38:48    2018-02-03 15:38:48
+127    \N    1    order    Pedido finalizado    2018-02-03 15:38:52    2018-02-03 15:38:52
+128    \N    1    motoboy    Finalizou pedido    2018-02-03 15:38:52    2018-02-03 15:38:52
+707    69    1    motoboy    Recebeu pedido    2018-02-13 07:43:09    2018-02-13 07:43:09
+799    \N    2    motoboy    Ficou online    2018-02-16 20:54:12    2018-02-16 20:54:12
+927    75    2    motoboy    Confirmou pedido    2018-02-17 01:56:08    2018-02-17 01:56:08
+928    75    2    order    Pedido confirmado    2018-02-17 01:56:08    2018-02-17 01:56:08
+1072    89    2    motoboy    Confirmou pedido    2018-02-17 02:52:39    2018-02-17 02:52:39
+1073    89    2    order    Pedido confirmado    2018-02-17 02:52:39    2018-02-17 02:52:39
+1079    89    2    order    Pedido finalizado    2018-02-17 02:52:53    2018-02-17 02:52:53
+1080    89    2    motoboy    Finalizou pedido    2018-02-17 02:52:53    2018-02-17 02:52:53
+1099    \N    1    motoboy    Ficou online    2018-02-17 02:53:25    2018-02-17 02:53:25
+1102    \N    2    motoboy    Ficou online    2018-02-17 02:53:27    2018-02-17 02:53:27
+1103    91    1    motoboy    Confirmou pedido    2018-02-17 02:53:31    2018-02-17 02:53:31
+1104    91    1    order    Pedido confirmado    2018-02-17 02:53:31    2018-02-17 02:53:31
+1125    \N    1    motoboy    Ficou offline    2018-02-17 02:54:05    2018-02-17 02:54:05
+1241    \N    2    motoboy    Ficou online    2018-02-20 13:19:22    2018-02-20 13:19:22
+1256    \N    2    motoboy    Ficou online    2018-02-20 13:28:08    2018-02-20 13:28:08
+1285    \N    2    motoboy    Ficou online    2018-02-20 14:02:38    2018-02-20 14:02:38
+1400    116    2    order    Motoboy cancelou pedido    2018-02-21 10:22:27    2018-02-21 10:22:27
+1401    116    1    order    Pedido enviado a outro motoboy    2018-02-21 10:22:27    2018-02-21 10:22:27
+1402    116    1    motoboy    Recebeu pedido    2018-02-21 10:22:27    2018-02-21 10:22:27
+1403    116    2    motoboy    Cancelou pedido    2018-02-21 10:22:27    2018-02-21 10:22:27
+1415    \N    33    motoboy    Ficou online    2018-02-21 11:59:29    2018-02-21 11:59:29
+1417    \N    34    motoboy    Ficou offline    2018-02-21 20:18:01    2018-02-21 20:18:01
+101    \N    1    motoboy    Ficou online    2018-02-03 15:36:04    2018-02-03 15:36:04
+111    \N    1    motoboy    Ficou online    2018-02-03 15:36:31    2018-02-03 15:36:31
+121    \N    1    motoboy    Ficou online    2018-02-03 15:38:29    2018-02-03 15:38:29
+708    69    1    order    Pedido enviado    2018-02-13 07:43:09    2018-02-13 07:43:09
+929    75    2    order    Pedido finalizado    2018-02-17 01:56:22    2018-02-17 01:56:22
+930    75    2    motoboy    Finalizou pedido    2018-02-17 01:56:22    2018-02-17 01:56:22
+944    80    2    order    Motoboy cancelou pedido    2018-02-17 01:57:13    2018-02-17 01:57:13
+945    80    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-17 01:57:13    2018-02-17 01:57:13
+946    80    2    motoboy    Cancelou pedido    2018-02-17 01:57:13    2018-02-17 01:57:13
+971    81    1    order    Pedido finalizado    2018-02-17 01:59:31    2018-02-17 01:59:31
+972    81    1    motoboy    Finalizou pedido    2018-02-17 01:59:31    2018-02-17 01:59:31
+976    \N    1    motoboy    Ficou online    2018-02-17 01:59:43    2018-02-17 01:59:43
+1127    \N    1    motoboy    Ficou online    2018-02-18 21:07:24    2018-02-18 21:07:24
+1244    \N    1    motoboy    Ficou online    2018-02-20 13:19:31    2018-02-20 13:19:31
+1268    107    2    motoboy    Recebeu pedido    2018-02-20 13:38:30    2018-02-20 13:38:30
+1269    107    2    order    Pedido enviado para o motoboy    2018-02-20 13:38:30    2018-02-20 13:38:30
+1270    106    1    motoboy    Confirmou pedido    2018-02-20 13:39:45    2018-02-20 13:39:45
+1271    106    1    order    Pedido confirmado    2018-02-20 13:39:45    2018-02-20 13:39:45
+1282    108    1    motoboy    Recebeu pedido    2018-02-20 14:02:32    2018-02-20 14:02:32
+1283    108    1    order    Pedido enviado para o motoboy    2018-02-20 14:02:32    2018-02-20 14:02:32
+1307    110    1    motoboy    Recebeu pedido    2018-02-20 14:03:25    2018-02-20 14:03:25
+1308    110    1    order    Pedido enviado para o motoboy    2018-02-20 14:03:25    2018-02-20 14:03:25
+1418    \N    30    motoboy    Ficou online    2018-02-22 10:47:32    2018-02-22 10:47:32
+1422    \N    33    motoboy    Ficou offline    2018-02-22 22:35:40    2018-02-22 22:35:40
+102    \N    1    motoboy    Ficou offline    2018-02-03 15:36:06    2018-02-03 15:36:06
+112    \N    1    motoboy    Ficou offline    2018-02-03 15:36:35    2018-02-03 15:36:35
+709    69    1    motoboy    Cancelou pedido    2018-02-13 07:43:14    2018-02-13 07:43:14
+710    69    1    order    Motoboy cancelou pedido    2018-02-13 07:43:14    2018-02-13 07:43:14
+711    69    4    order    Pedido enviado a outro motoboy    2018-02-13 07:43:14    2018-02-13 07:43:14
+712    69    4    motoboy    Recebeu pedido    2018-02-13 07:43:14    2018-02-13 07:43:14
+931    \N    1    motoboy    Ficou online    2018-02-17 01:56:25    2018-02-17 01:56:25
+936    82    \N    order    Nenhum motoboy disponível, pedido enviado para a fila.    2018-02-17 01:56:42    2018-02-17 01:56:42
+1128    \N    2    motoboy    Ficou online    2018-02-18 21:08:06    2018-02-18 21:08:06
+1131    92    1    motoboy    Confirmou pedido    2018-02-18 21:08:17    2018-02-18 21:08:17
+1132    92    1    order    Pedido confirmado    2018-02-18 21:08:17    2018-02-18 21:08:17
+1309    \N    2    motoboy    Ficou online    2018-02-20 14:03:55    2018-02-20 14:03:55
+1318    \N    2    motoboy    Ficou online    2018-02-20 14:21:06    2018-02-20 14:21:06
+1346    \N    1    motoboy    Ficou online    2018-02-20 14:44:07    2018-02-20 14:44:07
+1347    113    1    motoboy    Recebeu pedido    2018-02-20 14:45:21    2018-02-20 14:45:21
+1348    113    1    order    Pedido enviado para o motoboy    2018-02-20 14:45:21    2018-02-20 14:45:21
+1349    113    1    motoboy    Não confirmou o pedido a tempo    2018-02-20 14:48:00    2018-02-20 14:48:00
+1350    113    1    order    Cancelamento automático    2018-02-20 14:48:00    2018-02-20 14:48:00
+1351    113    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-20 14:48:00    2018-02-20 14:48:00
+1419    \N    30    motoboy    Ficou offline    2018-02-22 10:47:45    2018-02-22 10:47:45
+103    \N    1    motoboy    Ficou online    2018-02-03 15:36:07    2018-02-03 15:36:07
+113    \N    1    motoboy    Ficou online    2018-02-03 15:36:36    2018-02-03 15:36:36
+713    \N    1    motoboy    Ficou online    2018-02-14 10:07:27    2018-02-14 10:07:27
+932    80    2    motoboy    Recebeu pedido    2018-02-17 01:56:35    2018-02-17 01:56:35
+933    80    2    order    Pedido enviado para o motoboy    2018-02-17 01:56:35    2018-02-17 01:56:35
+948    80    2    motoboy    Recebeu uma entrega    2018-02-17 01:57:22    2018-02-17 01:57:22
+949    80    2    order    Pedido enviado para o motoboy    2018-02-17 01:57:22    2018-02-17 01:57:22
+950    80    2    motoboy    Confirmou pedido    2018-02-17 01:57:25    2018-02-17 01:57:25
+951    80    2    order    Pedido confirmado    2018-02-17 01:57:25    2018-02-17 01:57:25
+958    82    2    order    Pedido finalizado    2018-02-17 01:57:39    2018-02-17 01:57:39
+959    82    2    motoboy    Finalizou pedido    2018-02-17 01:57:39    2018-02-17 01:57:39
+979    83    1    order    Pedido finalizado    2018-02-17 01:59:48    2018-02-17 01:59:48
+980    83    1    motoboy    Finalizou pedido    2018-02-17 01:59:48    2018-02-17 01:59:48
+983    81    1    motoboy    Confirmou pedido    2018-02-17 01:59:50    2018-02-17 01:59:50
+984    81    1    order    Pedido confirmado    2018-02-17 01:59:50    2018-02-17 01:59:50
+1129    92    1    motoboy    Recebeu pedido    2018-02-18 21:08:12    2018-02-18 21:08:12
+1130    92    1    order    Pedido enviado para o motoboy    2018-02-18 21:08:12    2018-02-18 21:08:12
+1142    93    2    motoboy    Confirmou pedido    2018-02-18 21:08:59    2018-02-18 21:08:59
+1143    93    2    order    Pedido confirmado    2018-02-18 21:08:59    2018-02-18 21:08:59
+1310    111    2    motoboy    Recebeu pedido    2018-02-20 14:05:10    2018-02-20 14:05:10
+1311    111    2    order    Pedido enviado para o motoboy    2018-02-20 14:05:10    2018-02-20 14:05:10
+1331    \N    2    motoboy    Ficou offline    2018-02-20 14:21:22    2018-02-20 14:21:22
+1332    \N    1    motoboy    Ficou online    2018-02-20 14:39:34    2018-02-20 14:39:34
+1333    \N    2    motoboy    Ficou online    2018-02-20 14:39:43    2018-02-20 14:39:43
+1334    \N    2    motoboy    Ficou offline    2018-02-20 14:39:45    2018-02-20 14:39:45
+1342    \N    2    motoboy    Ficou offline    2018-02-20 14:43:36    2018-02-20 14:43:36
+1344    112    2    motoboy    Confirmou pedido    2018-02-20 14:43:55    2018-02-20 14:43:55
+1345    112    2    order    Pedido confirmado    2018-02-20 14:43:55    2018-02-20 14:43:55
+1420    \N    1    motoboy    Ficou online    2018-02-22 11:42:35    2018-02-22 11:42:35
+104    \N    1    motoboy    Ficou offline    2018-02-03 15:36:08    2018-02-03 15:36:08
+114    \N    1    motoboy    Ficou offline    2018-02-03 15:36:40    2018-02-03 15:36:40
+714    \N    8    motoboy    Ficou online    2018-02-14 12:10:26    2018-02-14 12:10:26
+818    75    1    order    Motoboy cancelou pedido    2018-02-16 21:26:20    2018-02-16 21:26:20
+819    75    2    order    Pedido enviado a outro motoboy    2018-02-16 21:26:20    2018-02-16 21:26:20
+820    75    2    motoboy    Recebeu pedido    2018-02-16 21:26:20    2018-02-16 21:26:20
+821    75    1    motoboy    Cancelou pedido    2018-02-16 21:26:20    2018-02-16 21:26:20
+134    \N    1    motoboy    Ficou online    2018-02-03 15:42:54    2018-02-03 15:42:54
+830    \N    2    motoboy    Ficou online    2018-02-16 21:27:09    2018-02-16 21:27:09
+840    78    2    motoboy    Confirmou pedido    2018-02-16 21:28:09    2018-02-16 21:28:09
+841    78    2    order    Pedido confirmado    2018-02-16 21:28:09    2018-02-16 21:28:09
+842    78    2    order    Pedido finalizado    2018-02-16 21:28:23    2018-02-16 21:28:23
+843    78    2    motoboy    Finalizou pedido    2018-02-16 21:28:23    2018-02-16 21:28:23
+140    \N    1    motoboy    Ficou online    2018-02-03 15:45:38    2018-02-03 15:45:38
+141    \N    1    motoboy    Ficou offline    2018-02-03 15:50:14    2018-02-03 15:50:14
+142    \N    1    motoboy    Ficou online    2018-02-03 15:50:20    2018-02-03 15:50:20
+934    81    1    motoboy    Recebeu pedido    2018-02-17 01:56:39    2018-02-17 01:56:39
+935    81    1    order    Pedido enviado para o motoboy    2018-02-17 01:56:39    2018-02-17 01:56:39
+145    \N    1    motoboy    Ficou offline    2018-02-03 15:51:37    2018-02-03 15:51:37
+146    \N    1    motoboy    Ficou online    2018-02-03 15:51:53    2018-02-03 15:51:53
+981    81    1    motoboy    Recebeu uma entrega    2018-02-17 01:59:48    2018-02-17 01:59:48
+982    81    1    order    Pedido enviado para o motoboy    2018-02-17 01:59:48    2018-02-17 01:59:48
+1133    92    1    order    Pedido finalizado    2018-02-18 21:08:20    2018-02-18 21:08:20
+150    \N    1    motoboy    Ficou online    2018-02-03 15:55:22    2018-02-03 15:55:22
+1134    92    1    motoboy    Finalizou pedido    2018-02-18 21:08:20    2018-02-18 21:08:20
+1312    110    1    motoboy    Não confirmou o pedido a tempo    2018-02-20 14:05:59    2018-02-20 14:05:59
+1313    110    1    order    Cancelamento automático    2018-02-20 14:05:59    2018-02-20 14:05:59
+1314    110    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-20 14:05:59    2018-02-20 14:05:59
+155    \N    1    motoboy    Ficou online    2018-02-03 16:03:39    2018-02-03 16:03:39
+1338    112    1    order    Motoboy cancelou pedido    2018-02-20 14:43:01    2018-02-20 14:43:01
+1339    112    2    order    Pedido enviado a outro motoboy    2018-02-20 14:43:01    2018-02-20 14:43:01
+1340    112    2    motoboy    Recebeu pedido    2018-02-20 14:43:01    2018-02-20 14:43:01
+1341    112    1    motoboy    Cancelou pedido    2018-02-20 14:43:01    2018-02-20 14:43:01
+1421    \N    1    motoboy    Ficou offline    2018-02-22 11:42:36    2018-02-22 11:42:36
+163    \N    1    motoboy    Ficou online    2018-02-03 16:04:24    2018-02-03 16:04:24
+169    \N    1    motoboy    Ficou online    2018-02-03 16:04:51    2018-02-03 16:04:51
+175    \N    1    motoboy    Ficou online    2018-02-03 16:06:15    2018-02-03 16:06:15
+181    \N    1    motoboy    Ficou online    2018-02-03 16:07:14    2018-02-03 16:07:14
+187    \N    1    motoboy    Ficou online    2018-02-03 16:08:01    2018-02-03 16:08:01
+192    \N    1    motoboy    Ficou online    2018-02-03 16:08:54    2018-02-03 16:08:54
+200    \N    1    motoboy    Ficou online    2018-02-03 16:09:25    2018-02-03 16:09:25
+206    \N    1    motoboy    Ficou online    2018-02-03 16:10:06    2018-02-03 16:10:06
+212    \N    1    motoboy    Ficou online    2018-02-03 16:10:20    2018-02-03 16:10:20
+236    \N    1    motoboy    Ficou online    2018-02-03 16:20:07    2018-02-03 16:20:07
+214    \N    1    order    Pedido enviado    2018-02-03 16:10:25    2018-02-03 16:10:25
+216    \N    1    order    Pedido cancelado    2018-02-03 16:10:47    2018-02-03 16:10:47
+235    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 16:20:07    2018-02-03 16:20:07
+238    \N    1    order    Pedido enviado    2018-02-03 18:15:17    2018-02-03 18:15:17
+262    \N    1    motoboy    Recebeu pedido    2018-02-03 18:16:19    2018-02-03 18:16:19
+271    \N    1    order    Pedido cancelado    2018-02-03 18:16:52    2018-02-03 18:16:52
+715    \N    8    motoboy    Ficou offline    2018-02-14 12:10:28    2018-02-14 12:10:28
+822    \N    1    motoboy    Ficou online    2018-02-16 21:26:48    2018-02-16 21:26:48
+938    84    1    motoboy    Recebeu pedido    2018-02-17 01:56:50    2018-02-17 01:56:50
+939    84    1    order    Pedido enviado para o motoboy    2018-02-17 01:56:50    2018-02-17 01:56:50
+965    84    1    order    Pedido finalizado    2018-02-17 01:57:50    2018-02-17 01:57:50
+966    84    1    motoboy    Finalizou pedido    2018-02-17 01:57:50    2018-02-17 01:57:50
+1135    93    2    motoboy    Recebeu pedido    2018-02-18 21:08:24    2018-02-18 21:08:24
+1136    93    2    order    Pedido enviado para o motoboy    2018-02-18 21:08:24    2018-02-18 21:08:24
+1315    111    2    motoboy    Não confirmou o pedido a tempo    2018-02-20 14:07:59    2018-02-20 14:07:59
+1316    111    2    order    Cancelamento automático    2018-02-20 14:07:59    2018-02-20 14:07:59
+1317    111    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-20 14:08:00    2018-02-20 14:08:00
+1335    \N    2    motoboy    Ficou online    2018-02-20 14:39:49    2018-02-20 14:39:49
+1423    \N    33    motoboy    Ficou online    2018-02-25 17:13:28    2018-02-25 17:13:28
+215    \N    1    motoboy    Cancelou pedido    2018-02-03 16:10:47    2018-02-03 16:10:47
+220    \N    1    order    Pedido enviado    2018-02-03 16:11:25    2018-02-03 16:11:25
+244    \N    1    motoboy    Recebeu pedido    2018-02-03 18:15:34    2018-02-03 18:15:34
+716    \N    5    motoboy    Ficou online    2018-02-14 12:30:06    2018-02-14 12:30:06
+823    75    2    order    Motoboy cancelou pedido    2018-02-16 21:26:51    2018-02-16 21:26:51
+824    75    1    order    Pedido enviado a outro motoboy    2018-02-16 21:26:51    2018-02-16 21:26:51
+825    75    1    motoboy    Recebeu pedido    2018-02-16 21:26:51    2018-02-16 21:26:51
+826    75    2    motoboy    Cancelou pedido    2018-02-16 21:26:51    2018-02-16 21:26:51
+940    81    1    motoboy    Confirmou pedido    2018-02-17 01:57:04    2018-02-17 01:57:04
+941    81    1    order    Pedido confirmado    2018-02-17 01:57:04    2018-02-17 01:57:04
+947    \N    2    motoboy    Ficou online    2018-02-17 01:57:22    2018-02-17 01:57:22
+952    80    2    order    Pedido finalizado    2018-02-17 01:57:29    2018-02-17 01:57:29
+953    80    2    motoboy    Finalizou pedido    2018-02-17 01:57:29    2018-02-17 01:57:29
+973    81    1    order    Motoboy cancelou pedido    2018-02-17 01:59:41    2018-02-17 01:59:41
+974    81    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-17 01:59:41    2018-02-17 01:59:41
+975    81    1    motoboy    Cancelou pedido    2018-02-17 01:59:41    2018-02-17 01:59:41
+1137    94    1    motoboy    Recebeu pedido    2018-02-18 21:08:26    2018-02-18 21:08:26
+1138    94    1    order    Pedido enviado para o motoboy    2018-02-18 21:08:26    2018-02-18 21:08:26
+1141    \N    2    motoboy    Ficou online    2018-02-18 21:08:54    2018-02-18 21:08:54
+1319    110    2    motoboy    Recebeu uma entrega    2018-02-20 14:21:06    2018-02-20 14:21:06
+1320    110    2    order    Pedido enviado para o motoboy    2018-02-20 14:21:06    2018-02-20 14:21:06
+1321    110    2    motoboy    Confirmou pedido    2018-02-20 14:21:09    2018-02-20 14:21:09
+1322    110    2    order    Pedido confirmado    2018-02-20 14:21:09    2018-02-20 14:21:09
+1343    \N    2    motoboy    Ficou online    2018-02-20 14:43:36    2018-02-20 14:43:36
+1424    \N    1    motoboy    Ficou online    2018-03-08 20:08:32    2018-03-08 20:08:32
+1426    \N    1    motoboy    Ficou online    2018-03-08 20:08:47    2018-03-08 20:08:47
+1427    117    1    motoboy    Recebeu pedido    2018-03-08 20:12:02    2018-03-08 20:12:02
+1428    117    1    order    Pedido enviado para o motoboy    2018-03-08 20:12:02    2018-03-08 20:12:02
+1431    118    2    motoboy    Recebeu pedido    2018-03-08 20:14:26    2018-03-08 20:14:26
+1432    118    2    order    Pedido enviado para o motoboy    2018-03-08 20:14:26    2018-03-08 20:14:26
+1440    117    2    motoboy    Recebeu uma entrega    2018-03-08 20:15:24    2018-03-08 20:15:24
+1441    117    2    order    Pedido enviado para o motoboy    2018-03-08 20:15:24    2018-03-08 20:15:24
+1442    117    2    motoboy    Confirmou pedido    2018-03-08 20:15:27    2018-03-08 20:15:27
+1443    117    2    order    Pedido confirmado    2018-03-08 20:15:27    2018-03-08 20:15:27
+218    \N    1    motoboy    Ficou online    2018-02-03 16:10:47    2018-02-03 16:10:47
+217    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 16:10:47    2018-02-03 16:10:47
+237    \N    1    motoboy    Recebeu pedido    2018-02-03 18:15:17    2018-02-03 18:15:17
+250    \N    1    motoboy    Recebeu pedido    2018-02-03 18:15:44    2018-02-03 18:15:44
+259    \N    1    order    Pedido cancelado    2018-02-03 18:16:15    2018-02-03 18:16:15
+717    \N    8    motoboy    Ficou online    2018-02-15 00:25:55    2018-02-15 00:25:55
+721    \N    8    motoboy    Ficou offline    2018-02-15 02:12:43    2018-02-15 02:12:43
+827    75    1    order    Motoboy cancelou pedido    2018-02-16 21:27:05    2018-02-16 21:27:05
+828    75    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-16 21:27:05    2018-02-16 21:27:05
+829    75    1    motoboy    Cancelou pedido    2018-02-16 21:27:05    2018-02-16 21:27:05
+954    82    2    motoboy    Recebeu uma entrega    2018-02-17 01:57:30    2018-02-17 01:57:30
+955    82    2    order    Pedido enviado para o motoboy    2018-02-17 01:57:30    2018-02-17 01:57:30
+956    82    2    motoboy    Confirmou pedido    2018-02-17 01:57:33    2018-02-17 01:57:33
+957    82    2    order    Pedido confirmado    2018-02-17 01:57:33    2018-02-17 01:57:33
+1139    95    \N    order    Nenhum motoboy disponível, pedido enviado para a fila.    2018-02-18 21:08:38    2018-02-18 21:08:38
+1323    110    2    order    Pedido finalizado    2018-02-20 14:21:12    2018-02-20 14:21:12
+1324    110    2    motoboy    Finalizou pedido    2018-02-20 14:21:12    2018-02-20 14:21:12
+1336    112    1    motoboy    Recebeu pedido    2018-02-20 14:42:37    2018-02-20 14:42:37
+1337    112    1    order    Pedido enviado para o motoboy    2018-02-20 14:42:37    2018-02-20 14:42:37
+1425    \N    1    motoboy    Ficou offline    2018-03-08 20:08:43    2018-03-08 20:08:43
+1450    119    2    order    Motoboy cancelou pedido    2018-03-08 20:16:55    2018-03-08 20:16:55
+1451    119    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-03-08 20:16:55    2018-03-08 20:16:55
+1452    119    2    motoboy    Cancelou pedido    2018-03-08 20:16:55    2018-03-08 20:16:55
+224    \N    1    motoboy    Ficou online    2018-02-03 16:11:34    2018-02-03 16:11:34
+241    \N    1    motoboy    Ficou online    2018-02-03 18:15:25    2018-02-03 18:15:25
+255    \N    1    motoboy    Ficou online    2018-02-03 18:15:53    2018-02-03 18:15:53
+273    \N    1    motoboy    Ficou online    2018-02-03 18:16:52    2018-02-03 18:16:52
+219    \N    1    motoboy    Recebeu pedido    2018-02-03 16:11:25    2018-02-03 16:11:25
+223    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 16:11:34    2018-02-03 16:11:34
+231    \N    1    motoboy    Recebeu pedido    2018-02-03 16:18:43    2018-02-03 16:18:43
+239    \N    1    motoboy    Confirmou pedido    2018-02-03 18:15:23    2018-02-03 18:15:23
+240    \N    1    order    Pedido confirmado    2018-02-03 18:15:23    2018-02-03 18:15:23
+242    \N    1    order    Pedido finalizado    2018-02-03 18:15:25    2018-02-03 18:15:25
+243    \N    1    motoboy    Finalizou pedido    2018-02-03 18:15:25    2018-02-03 18:15:25
+246    \N    1    motoboy    Cancelou pedido    2018-02-03 18:15:38    2018-02-03 18:15:38
+251    \N    1    order    Pedido enviado    2018-02-03 18:15:44    2018-02-03 18:15:44
+254    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 18:15:53    2018-02-03 18:15:53
+258    \N    1    motoboy    Cancelou pedido    2018-02-03 18:16:15    2018-02-03 18:16:15
+263    \N    1    order    Pedido enviado    2018-02-03 18:16:19    2018-02-03 18:16:19
+272    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 18:16:52    2018-02-03 18:16:52
+718    \N    8    motoboy    Ficou offline    2018-02-15 00:25:58    2018-02-15 00:25:58
+720    \N    8    motoboy    Ficou offline    2018-02-15 02:11:39    2018-02-15 02:11:39
+831    75    2    motoboy    Recebeu uma entrega    2018-02-16 21:27:09    2018-02-16 21:27:09
+832    75    2    order    Pedido enviado para o motoboy    2018-02-16 21:27:09    2018-02-16 21:27:09
+833    \N    1    motoboy    Ficou online    2018-02-16 21:27:12    2018-02-16 21:27:12
+844    79    2    order    Motoboy cancelou pedido    2018-02-16 21:28:29    2018-02-16 21:28:29
+845    79    1    order    Pedido enviado a outro motoboy    2018-02-16 21:28:29    2018-02-16 21:28:29
+846    79    1    motoboy    Recebeu pedido    2018-02-16 21:28:29    2018-02-16 21:28:29
+847    79    2    motoboy    Cancelou pedido    2018-02-16 21:28:29    2018-02-16 21:28:29
+960    83    2    motoboy    Recebeu uma entrega    2018-02-17 01:57:40    2018-02-17 01:57:40
+961    83    2    order    Pedido enviado para o motoboy    2018-02-17 01:57:40    2018-02-17 01:57:40
+962    83    2    order    Motoboy cancelou pedido    2018-02-17 01:57:46    2018-02-17 01:57:46
+963    83    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-17 01:57:46    2018-02-17 01:57:46
+964    83    2    motoboy    Cancelou pedido    2018-02-17 01:57:46    2018-02-17 01:57:46
+969    81    1    order    Pedido finalizado    2018-02-17 01:57:59    2018-02-17 01:57:59
+970    81    1    motoboy    Finalizou pedido    2018-02-17 01:57:59    2018-02-17 01:57:59
+977    83    1    motoboy    Confirmou pedido    2018-02-17 01:59:45    2018-02-17 01:59:45
+978    83    1    order    Pedido confirmado    2018-02-17 01:59:45    2018-02-17 01:59:45
+1140    \N    2    motoboy    Ficou offline    2018-02-18 21:08:53    2018-02-18 21:08:53
+1325    111    2    motoboy    Recebeu uma entrega    2018-02-20 14:21:13    2018-02-20 14:21:13
+1326    111    2    order    Pedido enviado para o motoboy    2018-02-20 14:21:13    2018-02-20 14:21:13
+1327    111    2    motoboy    Confirmou pedido    2018-02-20 14:21:15    2018-02-20 14:21:15
+1328    111    2    order    Pedido confirmado    2018-02-20 14:21:15    2018-02-20 14:21:15
+1429    \N    2    motoboy    Ficou offline    2018-03-08 20:13:09    2018-03-08 20:13:09
+249    \N    1    motoboy    Ficou online    2018-02-03 18:15:38    2018-02-03 18:15:38
+221    \N    1    motoboy    Cancelou pedido    2018-02-03 16:11:34    2018-02-03 16:11:34
+226    \N    1    order    Pedido enviado    2018-02-03 16:11:38    2018-02-03 16:11:38
+228    \N    1    order    Pedido cancelado    2018-02-03 16:11:46    2018-02-03 16:11:46
+248    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 18:15:38    2018-02-03 18:15:38
+268    \N    1    motoboy    Recebeu pedido    2018-02-03 18:16:41    2018-02-03 18:16:41
+719    \N    8    motoboy    Ficou offline    2018-02-15 01:31:35    2018-02-15 01:31:35
+834    77    2    motoboy    Recebeu pedido    2018-02-16 21:27:38    2018-02-16 21:27:38
+835    77    2    order    Pedido enviado para o motoboy    2018-02-16 21:27:38    2018-02-16 21:27:38
+836    78    2    motoboy    Recebeu pedido    2018-02-16 21:27:44    2018-02-16 21:27:44
+837    78    2    order    Pedido enviado para o motoboy    2018-02-16 21:27:44    2018-02-16 21:27:44
+987    85    1    motoboy    Recebeu pedido    2018-02-17 02:01:14    2018-02-17 02:01:14
+988    85    1    order    Pedido enviado para o motoboy    2018-02-17 02:01:14    2018-02-17 02:01:14
+1001    85    1    order    Pedido finalizado    2018-02-17 02:02:01    2018-02-17 02:02:01
+1002    85    1    motoboy    Finalizou pedido    2018-02-17 02:02:01    2018-02-17 02:02:01
+1144    93    2    order    Pedido finalizado    2018-02-18 21:09:03    2018-02-18 21:09:03
+1145    93    2    motoboy    Finalizou pedido    2018-02-18 21:09:03    2018-02-18 21:09:03
+1156    \N    2    motoboy    Ficou online    2018-02-18 21:09:22    2018-02-18 21:09:22
+1173    97    2    order    Pedido finalizado    2018-02-18 21:11:20    2018-02-18 21:11:20
+1174    97    2    motoboy    Finalizou pedido    2018-02-18 21:11:20    2018-02-18 21:11:20
+1193    99    2    motoboy    Confirmou pedido    2018-02-18 21:13:20    2018-02-18 21:13:20
+1194    99    2    order    Pedido confirmado    2018-02-18 21:13:20    2018-02-18 21:13:20
+1195    99    2    order    Pedido finalizado    2018-02-18 21:13:25    2018-02-18 21:13:25
+1196    99    2    motoboy    Finalizou pedido    2018-02-18 21:13:25    2018-02-18 21:13:25
+1199    101    2    motoboy    Recebeu pedido    2018-02-19 13:08:03    2018-02-19 13:08:03
+1200    101    2    order    Pedido enviado para o motoboy    2018-02-19 13:08:03    2018-02-19 13:08:03
+1329    111    2    order    Pedido finalizado    2018-02-20 14:21:19    2018-02-20 14:21:19
+1330    111    2    motoboy    Finalizou pedido    2018-02-20 14:21:19    2018-02-20 14:21:19
+1430    \N    2    motoboy    Ficou online    2018-03-08 20:13:10    2018-03-08 20:13:10
+1444    117    2    order    Pedido finalizado    2018-03-08 20:15:30    2018-03-08 20:15:30
+1445    117    2    motoboy    Finalizou pedido    2018-03-08 20:15:30    2018-03-08 20:15:30
+222    \N    1    order    Pedido cancelado    2018-02-03 16:11:34    2018-02-03 16:11:34
+265    \N    1    order    Pedido cancelado    2018-02-03 18:16:34    2018-02-03 18:16:34
+722    \N    8    motoboy    Ficou offline    2018-02-15 02:14:37    2018-02-15 02:14:37
+838    79    2    motoboy    Recebeu pedido    2018-02-16 21:27:50    2018-02-16 21:27:50
+839    79    2    order    Pedido enviado para o motoboy    2018-02-16 21:27:50    2018-02-16 21:27:50
+989    \N    2    motoboy    Ficou online    2018-02-17 02:01:21    2018-02-17 02:01:21
+1003    86    1    motoboy    Recebeu uma entrega    2018-02-17 02:02:02    2018-02-17 02:02:02
+1004    86    1    order    Pedido enviado para o motoboy    2018-02-17 02:02:02    2018-02-17 02:02:02
+1146    95    2    motoboy    Recebeu uma entrega    2018-02-18 21:09:04    2018-02-18 21:09:04
+1147    95    2    order    Pedido enviado para o motoboy    2018-02-18 21:09:04    2018-02-18 21:09:04
+1198    \N    2    motoboy    Ficou online    2018-02-19 12:54:20    2018-02-19 12:54:20
+1352    \N    33    motoboy    Ficou online    2018-02-20 18:47:05    2018-02-20 18:47:05
+1354    \N    34    motoboy    Ficou offline    2018-02-20 18:56:37    2018-02-20 18:56:37
+1366    113    1    motoboy    Recebeu uma entrega    2018-02-20 21:28:24    2018-02-20 21:28:24
+1367    113    1    order    Pedido enviado para o motoboy    2018-02-20 21:28:24    2018-02-20 21:28:24
+1433    117    1    motoboy    Não confirmou o pedido a tempo    2018-03-08 20:14:59    2018-03-08 20:14:59
+1434    117    1    order    Cancelamento automático    2018-03-08 20:14:59    2018-03-08 20:14:59
+1435    117    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-03-08 20:15:00    2018-03-08 20:15:00
+1454    119    1    motoboy    Recebeu uma entrega    2018-03-08 20:17:03    2018-03-08 20:17:03
+1455    119    1    order    Pedido enviado para o motoboy    2018-03-08 20:17:03    2018-03-08 20:17:03
+225    \N    1    motoboy    Recebeu pedido    2018-02-03 16:11:38    2018-02-03 16:11:38
+227    \N    1    motoboy    Cancelou pedido    2018-02-03 16:11:46    2018-02-03 16:11:46
+253    \N    1    order    Pedido cancelado    2018-02-03 18:15:53    2018-02-03 18:15:53
+257    \N    1    order    Pedido enviado    2018-02-03 18:15:59    2018-02-03 18:15:59
+264    \N    1    motoboy    Cancelou pedido    2018-02-03 18:16:34    2018-02-03 18:16:34
+269    \N    1    order    Pedido enviado    2018-02-03 18:16:41    2018-02-03 18:16:41
+723    \N    1    motoboy    Ficou offline    2018-02-16 05:49:23    2018-02-16 05:49:23
+758    \N    1    motoboy    Ficou online    2018-02-16 06:02:47    2018-02-16 06:02:47
+848    \N    2    motoboy    Ficou online    2018-02-16 21:28:58    2018-02-16 21:28:58
+858    75    2    order    Motoboy cancelou pedido    2018-02-16 21:32:08    2018-02-16 21:32:08
+859    75    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-16 21:32:08    2018-02-16 21:32:08
+860    75    2    motoboy    Cancelou pedido    2018-02-16 21:32:08    2018-02-16 21:32:08
+990    86    2    motoboy    Recebeu pedido    2018-02-17 02:01:25    2018-02-17 02:01:25
+991    86    2    order    Pedido enviado para o motoboy    2018-02-17 02:01:25    2018-02-17 02:01:25
+997    87    1    motoboy    Recebeu pedido    2018-02-17 02:01:50    2018-02-17 02:01:50
+998    87    1    order    Pedido enviado para o motoboy    2018-02-17 02:01:50    2018-02-17 02:01:50
+1148    94    1    motoboy    Confirmou pedido    2018-02-18 21:09:08    2018-02-18 21:09:08
+1149    94    1    order    Pedido confirmado    2018-02-18 21:09:08    2018-02-18 21:09:08
+1150    94    1    order    Pedido finalizado    2018-02-18 21:09:14    2018-02-18 21:09:14
+1151    94    1    motoboy    Finalizou pedido    2018-02-18 21:09:14    2018-02-18 21:09:14
+1157    96    2    motoboy    Recebeu pedido    2018-02-18 21:09:28    2018-02-18 21:09:28
+1158    96    2    order    Pedido enviado para o motoboy    2018-02-18 21:09:28    2018-02-18 21:09:28
+1159    96    2    motoboy    Confirmou pedido    2018-02-18 21:09:57    2018-02-18 21:09:57
+1160    96    2    order    Pedido confirmado    2018-02-18 21:09:57    2018-02-18 21:09:57
+1182    \N    2    motoboy    Ficou online    2018-02-18 21:12:46    2018-02-18 21:12:46
+1185    100    1    motoboy    Recebeu pedido    2018-02-18 21:13:10    2018-02-18 21:13:10
+1186    100    1    order    Pedido enviado para o motoboy    2018-02-18 21:13:10    2018-02-18 21:13:10
+1353    \N    34    motoboy    Ficou online    2018-02-20 18:55:07    2018-02-20 18:55:07
+1362    \N    34    motoboy    Ficou offline    2018-02-20 20:30:32    2018-02-20 20:30:32
+1372    112    2    order    Pedido finalizado    2018-02-20 21:28:43    2018-02-20 21:28:43
+1373    112    2    motoboy    Finalizou pedido    2018-02-20 21:28:43    2018-02-20 21:28:43
+1436    118    2    motoboy    Confirmou pedido    2018-03-08 20:15:17    2018-03-08 20:15:17
+1437    118    2    order    Pedido confirmado    2018-03-08 20:15:17    2018-03-08 20:15:17
+1438    118    2    order    Pedido finalizado    2018-03-08 20:15:23    2018-03-08 20:15:23
+1439    118    2    motoboy    Finalizou pedido    2018-03-08 20:15:23    2018-03-08 20:15:23
+1446    119    2    motoboy    Recebeu pedido    2018-03-08 20:15:40    2018-03-08 20:15:40
+1447    119    2    order    Pedido enviado para o motoboy    2018-03-08 20:15:40    2018-03-08 20:15:40
+1456    119    1    motoboy    Confirmou pedido    2018-03-08 20:17:14    2018-03-08 20:17:14
+1457    119    1    order    Pedido confirmado    2018-03-08 20:17:14    2018-03-08 20:17:14
+230    \N    1    motoboy    Ficou online    2018-02-03 16:11:46    2018-02-03 16:11:46
+261    \N    1    motoboy    Ficou online    2018-02-03 18:16:15    2018-02-03 18:16:15
+274    \N    1    motoboy    Ficou offline    2018-02-03 18:16:57    2018-02-03 18:16:57
+229    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 16:11:46    2018-02-03 16:11:46
+232    \N    1    order    Pedido enviado    2018-02-03 16:18:43    2018-02-03 16:18:43
+247    \N    1    order    Pedido cancelado    2018-02-03 18:15:38    2018-02-03 18:15:38
+260    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 18:16:15    2018-02-03 18:16:15
+724    \N    1    motoboy    Ficou online    2018-02-16 05:49:24    2018-02-16 05:49:24
+725    70    1    motoboy    Recebeu pedido    2018-02-16 05:54:54    2018-02-16 05:54:54
+726    70    1    order    Pedido enviado para o motoboy    2018-02-16 05:54:54    2018-02-16 05:54:54
+755    \N    1    motoboy    Ficou offline    2018-02-16 05:56:17    2018-02-16 05:56:17
+760    \N    1    motoboy    Ficou online    2018-02-16 06:15:35    2018-02-16 06:15:35
+849    \N    2    motoboy    Ficou offline    2018-02-16 21:29:00    2018-02-16 21:29:00
+852    \N    2    motoboy    Ficou online    2018-02-16 21:29:26    2018-02-16 21:29:26
+877    \N    1    motoboy    Ficou offline    2018-02-16 21:33:11    2018-02-16 21:33:11
+992    86    2    order    Motoboy cancelou pedido    2018-02-17 02:01:34    2018-02-17 02:01:34
+993    86    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-17 02:01:34    2018-02-17 02:01:34
+994    86    2    motoboy    Cancelou pedido    2018-02-17 02:01:34    2018-02-17 02:01:34
+1152    95    2    order    Motoboy cancelou pedido    2018-02-18 21:09:19    2018-02-18 21:09:19
+1153    95    1    order    Pedido enviado a outro motoboy    2018-02-18 21:09:19    2018-02-18 21:09:19
+1154    95    1    motoboy    Recebeu pedido    2018-02-18 21:09:19    2018-02-18 21:09:19
+1155    95    2    motoboy    Cancelou pedido    2018-02-18 21:09:19    2018-02-18 21:09:19
+1183    99    2    motoboy    Recebeu pedido    2018-02-18 21:12:55    2018-02-18 21:12:55
+1184    99    2    order    Pedido enviado para o motoboy    2018-02-18 21:12:55    2018-02-18 21:12:55
+1189    \N    2    motoboy    Ficou offline    2018-02-18 21:13:15    2018-02-18 21:13:15
+1191    100    1    order    Pedido finalizado    2018-02-18 21:13:18    2018-02-18 21:13:18
+1192    100    1    motoboy    Finalizou pedido    2018-02-18 21:13:18    2018-02-18 21:13:18
+1355    \N    34    motoboy    Ficou online    2018-02-20 18:58:02    2018-02-20 18:58:02
+1364    \N    34    motoboy    Ficou offline    2018-02-20 20:36:09    2018-02-20 20:36:09
+1448    119    2    motoboy    Confirmou pedido    2018-03-08 20:16:18    2018-03-08 20:16:18
+1449    119    2    order    Pedido confirmado    2018-03-08 20:16:18    2018-03-08 20:16:18
+1458    119    1    order    Pedido finalizado    2018-03-08 20:17:17    2018-03-08 20:17:17
+1459    119    1    motoboy    Finalizou pedido    2018-03-08 20:17:17    2018-03-08 20:17:17
+267    \N    1    motoboy    Ficou online    2018-02-03 18:16:34    2018-02-03 18:16:34
+233    \N    1    motoboy    Cancelou pedido    2018-02-03 16:20:07    2018-02-03 16:20:07
+252    \N    1    motoboy    Cancelou pedido    2018-02-03 18:15:53    2018-02-03 18:15:53
+256    \N    1    motoboy    Recebeu pedido    2018-02-03 18:15:59    2018-02-03 18:15:59
+266    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 18:16:34    2018-02-03 18:16:34
+727    70    1    motoboy    Confirmou pedido    2018-02-16 05:55:02    2018-02-16 05:55:02
+728    70    1    order    Pedido confirmado    2018-02-16 05:55:02    2018-02-16 05:55:02
+850    \N    2    motoboy    Ficou online    2018-02-16 21:29:03    2018-02-16 21:29:03
+870    \N    1    motoboy    Ficou online    2018-02-16 21:33:03    2018-02-16 21:33:03
+995    85    1    motoboy    Confirmou pedido    2018-02-17 02:01:38    2018-02-17 02:01:38
+996    85    1    order    Pedido confirmado    2018-02-17 02:01:38    2018-02-17 02:01:38
+1161    96    2    order    Pedido finalizado    2018-02-18 21:10:05    2018-02-18 21:10:05
+1162    96    2    motoboy    Finalizou pedido    2018-02-18 21:10:05    2018-02-18 21:10:05
+1197    \N    2    motoboy    Ficou offline    2018-02-19 12:54:17    2018-02-19 12:54:17
+1201    101    2    motoboy    Confirmou pedido    2018-02-19 13:08:10    2018-02-19 13:08:10
+1202    101    2    order    Pedido confirmado    2018-02-19 13:08:10    2018-02-19 13:08:10
+1356    114    34    motoboy    Recebeu pedido    2018-02-20 18:59:23    2018-02-20 18:59:23
+1357    114    34    order    Pedido enviado para o motoboy    2018-02-20 18:59:23    2018-02-20 18:59:23
+1368    113    1    motoboy    Confirmou pedido    2018-02-20 21:28:34    2018-02-20 21:28:34
+1369    113    1    order    Pedido confirmado    2018-02-20 21:28:34    2018-02-20 21:28:34
+1453    \N    1    motoboy    Ficou online    2018-03-08 20:17:03    2018-03-08 20:17:03
+729    70    1    order    Pedido finalizado    2018-02-16 05:55:06    2018-02-16 05:55:06
+730    70    1    motoboy    Finalizou pedido    2018-02-16 05:55:06    2018-02-16 05:55:06
+736    71    1    order    Motoboy cancelou pedido    2018-02-16 05:55:47    2018-02-16 05:55:47
+275    \N    1    motoboy    Ficou online    2018-02-03 18:56:59    2018-02-03 18:56:59
+737    71    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-16 05:55:47    2018-02-16 05:55:47
+738    71    1    motoboy    Cancelou pedido    2018-02-16 05:55:47    2018-02-16 05:55:47
+756    \N    1    motoboy    Ficou online    2018-02-16 06:02:43    2018-02-16 06:02:43
+851    \N    2    motoboy    Ficou offline    2018-02-16 21:29:04    2018-02-16 21:29:04
+280    \N    1    motoboy    Ficou online    2018-02-03 19:49:41    2018-02-03 19:49:41
+854    79    1    motoboy    Confirmou pedido    2018-02-16 21:30:44    2018-02-16 21:30:44
+855    79    1    order    Pedido confirmado    2018-02-16 21:30:44    2018-02-16 21:30:44
+283    \N    1    motoboy    Ficou offline    2018-02-03 19:54:48    2018-02-03 19:54:48
+284    \N    1    motoboy    Ficou online    2018-02-03 19:54:50    2018-02-03 19:54:50
+285    \N    1    motoboy    Ficou offline    2018-02-03 19:54:51    2018-02-03 19:54:51
+286    \N    1    motoboy    Ficou online    2018-02-03 19:54:58    2018-02-03 19:54:58
+287    \N    1    motoboy    Ficou offline    2018-02-03 19:54:59    2018-02-03 19:54:59
+288    \N    1    motoboy    Ficou online    2018-02-03 19:55:47    2018-02-03 19:55:47
+289    \N    1    motoboy    Ficou offline    2018-02-03 19:55:54    2018-02-03 19:55:54
+290    \N    1    motoboy    Ficou online    2018-02-03 19:55:54    2018-02-03 19:55:54
+291    \N    1    motoboy    Ficou offline    2018-02-03 19:55:56    2018-02-03 19:55:56
+292    \N    1    motoboy    Ficou online    2018-02-03 19:55:56    2018-02-03 19:55:56
+293    \N    1    motoboy    Ficou offline    2018-02-03 19:55:58    2018-02-03 19:55:58
+294    \N    1    motoboy    Ficou online    2018-02-03 19:56:10    2018-02-03 19:56:10
+295    \N    1    motoboy    Ficou offline    2018-02-03 19:56:11    2018-02-03 19:56:11
+296    \N    1    motoboy    Ficou online    2018-02-03 19:56:11    2018-02-03 19:56:11
+297    \N    1    motoboy    Ficou offline    2018-02-03 19:56:13    2018-02-03 19:56:13
+298    \N    1    motoboy    Ficou online    2018-02-03 19:56:14    2018-02-03 19:56:14
+299    \N    1    motoboy    Ficou offline    2018-02-03 19:56:16    2018-02-03 19:56:16
+300    \N    1    motoboy    Ficou online    2018-02-03 19:56:22    2018-02-03 19:56:22
+301    \N    1    motoboy    Ficou offline    2018-02-03 19:56:23    2018-02-03 19:56:23
+302    \N    1    motoboy    Ficou online    2018-02-03 19:57:03    2018-02-03 19:57:03
+871    79    1    motoboy    Recebeu uma entrega    2018-02-16 21:33:03    2018-02-16 21:33:03
+872    79    1    order    Pedido enviado para o motoboy    2018-02-16 21:33:03    2018-02-16 21:33:03
+873    79    1    motoboy    Confirmou pedido    2018-02-16 21:33:05    2018-02-16 21:33:05
+874    79    1    order    Pedido confirmado    2018-02-16 21:33:05    2018-02-16 21:33:05
+999    87    1    motoboy    Confirmou pedido    2018-02-17 02:01:54    2018-02-17 02:01:54
+308    \N    1    motoboy    Ficou online    2018-02-03 19:58:48    2018-02-03 19:58:48
+1000    87    1    order    Pedido confirmado    2018-02-17 02:01:54    2018-02-17 02:01:54
+1163    97    2    motoboy    Recebeu pedido    2018-02-18 21:10:10    2018-02-18 21:10:10
+1164    97    2    order    Pedido enviado para o motoboy    2018-02-18 21:10:10    2018-02-18 21:10:10
+1181    \N    2    motoboy    Ficou offline    2018-02-18 21:12:45    2018-02-18 21:12:45
+313    \N    1    motoboy    Ficou online    2018-02-03 20:06:55    2018-02-03 20:06:55
+1358    114    34    motoboy    Confirmou pedido    2018-02-20 18:59:55    2018-02-20 18:59:55
+1359    114    34    order    Pedido confirmado    2018-02-20 18:59:55    2018-02-20 18:59:55
+321    \N    1    motoboy    Ficou online    2018-02-03 20:07:26    2018-02-03 20:07:26
+327    \N    1    motoboy    Ficou online    2018-02-03 20:15:59    2018-02-03 20:15:59
+332    \N    1    motoboy    Ficou online    2018-02-03 20:17:35    2018-02-03 20:17:35
+339    \N    1    motoboy    Ficou online    2018-02-03 20:17:51    2018-02-03 20:17:51
+346    \N    1    motoboy    Ficou online    2018-02-03 20:18:32    2018-02-03 20:18:32
+353    \N    1    motoboy    Ficou online    2018-02-03 20:18:53    2018-02-03 20:18:53
+360    \N    1    motoboy    Ficou online    2018-02-03 20:20:28    2018-02-03 20:20:28
+380    \N    1    motoboy    Ficou online    2018-02-03 20:23:18    2018-02-03 20:23:18
+361    \N    1    order    Pedido finalizado    2018-02-03 20:20:28    2018-02-03 20:20:28
+362    \N    1    motoboy    Finalizou pedido    2018-02-03 20:20:28    2018-02-03 20:20:28
+363    \N    1    motoboy    Recebeu pedido    2018-02-03 20:20:35    2018-02-03 20:20:35
+364    \N    1    order    Pedido enviado    2018-02-03 20:20:35    2018-02-03 20:20:35
+370    \N    1    motoboy    Recebeu pedido    2018-02-03 20:22:31    2018-02-03 20:22:31
+372    \N    1    motoboy    Cancelou pedido    2018-02-03 20:22:40    2018-02-03 20:22:40
+376    \N    1    motoboy    Recebeu pedido    2018-02-03 20:22:43    2018-02-03 20:22:43
+377    \N    1    order    Pedido enviado    2018-02-03 20:22:43    2018-02-03 20:22:43
+378    \N    1    motoboy    Confirmou pedido    2018-02-03 20:22:57    2018-02-03 20:22:57
+379    \N    1    order    Pedido confirmado    2018-02-03 20:22:57    2018-02-03 20:22:57
+381    \N    1    order    Pedido finalizado    2018-02-03 20:23:18    2018-02-03 20:23:18
+382    \N    1    motoboy    Finalizou pedido    2018-02-03 20:23:18    2018-02-03 20:23:18
+731    71    1    motoboy    Recebeu pedido    2018-02-16 05:55:20    2018-02-16 05:55:20
+732    71    1    order    Pedido enviado para o motoboy    2018-02-16 05:55:20    2018-02-16 05:55:20
+735    73    \N    order    Nenhum motoboy disponível, pedido enviado para a fila.    2018-02-16 05:55:39    2018-02-16 05:55:39
+753    73    1    order    Pedido finalizado    2018-02-16 05:56:15    2018-02-16 05:56:15
+754    73    1    motoboy    Finalizou pedido    2018-02-16 05:56:15    2018-02-16 05:56:15
+853    \N    2    motoboy    Ficou offline    2018-02-16 21:29:28    2018-02-16 21:29:28
+1005    87    1    order    Pedido finalizado    2018-02-17 02:15:42    2018-02-17 02:15:42
+1006    87    1    motoboy    Finalizou pedido    2018-02-17 02:15:42    2018-02-17 02:15:42
+1165    95    1    motoboy    Confirmou pedido    2018-02-18 21:10:53    2018-02-18 21:10:53
+1166    95    1    order    Pedido confirmado    2018-02-18 21:10:53    2018-02-18 21:10:53
+1360    114    34    order    Pedido finalizado    2018-02-20 19:00:11    2018-02-20 19:00:11
+1361    114    34    motoboy    Finalizou pedido    2018-02-20 19:00:11    2018-02-20 19:00:11
+733    72    1    motoboy    Recebeu pedido    2018-02-16 05:55:36    2018-02-16 05:55:36
+734    72    1    order    Pedido enviado para o motoboy    2018-02-16 05:55:36    2018-02-16 05:55:36
+367    \N    1    motoboy    Ficou online    2018-02-03 20:22:22    2018-02-03 20:22:22
+739    72    1    motoboy    Confirmou pedido    2018-02-16 05:55:57    2018-02-16 05:55:57
+740    72    1    order    Pedido confirmado    2018-02-16 05:55:57    2018-02-16 05:55:57
+757    \N    1    motoboy    Ficou offline    2018-02-16 06:02:44    2018-02-16 06:02:44
+759    \N    1    motoboy    Ficou offline    2018-02-16 06:02:48    2018-02-16 06:02:48
+856    75    2    motoboy    Confirmou pedido    2018-02-16 21:31:38    2018-02-16 21:31:38
+375    \N    1    motoboy    Ficou online    2018-02-03 20:22:40    2018-02-03 20:22:40
+383    \N    1    motoboy    Ficou offline    2018-02-04 00:41:07    2018-02-04 00:41:07
+384    \N    1    motoboy    Ficou online    2018-02-04 00:41:10    2018-02-04 00:41:10
+385    \N    1    motoboy    Ficou offline    2018-02-04 00:41:12    2018-02-04 00:41:12
+386    \N    1    motoboy    Ficou online    2018-02-04 16:33:28    2018-02-04 16:33:28
+387    \N    1    motoboy    Ficou offline    2018-02-04 16:34:44    2018-02-04 16:34:44
+388    \N    1    motoboy    Ficou online    2018-02-04 16:34:48    2018-02-04 16:34:48
+857    75    2    order    Pedido confirmado    2018-02-16 21:31:38    2018-02-16 21:31:38
+865    75    2    motoboy    Recebeu uma entrega    2018-02-16 21:32:31    2018-02-16 21:32:31
+866    75    2    order    Pedido enviado para o motoboy    2018-02-16 21:32:31    2018-02-16 21:32:31
+867    79    1    order    Motoboy cancelou pedido    2018-02-16 21:33:00    2018-02-16 21:33:00
+393    \N    1    motoboy    Ficou online    2018-02-04 16:36:42    2018-02-04 16:36:42
+868    79    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-16 21:33:00    2018-02-16 21:33:00
+869    79    1    motoboy    Cancelou pedido    2018-02-16 21:33:00    2018-02-16 21:33:00
+396    \N    1    motoboy    Ficou offline    2018-02-04 18:40:34    2018-02-04 18:40:34
+397    \N    1    motoboy    Ficou online    2018-02-04 18:40:38    2018-02-04 18:40:38
+1007    87    1    order    Pedido finalizado    2018-02-17 02:15:56    2018-02-17 02:15:56
+1008    87    1    motoboy    Finalizou pedido    2018-02-17 02:15:56    2018-02-17 02:15:56
+1167    95    1    order    Pedido finalizado    2018-02-18 21:10:56    2018-02-18 21:10:56
+1168    95    1    motoboy    Finalizou pedido    2018-02-18 21:10:56    2018-02-18 21:10:56
+402    \N    1    motoboy    Ficou online    2018-02-04 18:41:58    2018-02-04 18:41:58
+1170    \N    2    motoboy    Ficou online    2018-02-18 21:11:06    2018-02-18 21:11:06
+1179    98    2    order    Pedido finalizado    2018-02-18 21:12:11    2018-02-18 21:12:11
+405    \N    1    motoboy    Ficou offline    2018-02-04 18:52:12    2018-02-04 18:52:12
+406    \N    1    motoboy    Ficou online    2018-02-04 18:52:13    2018-02-04 18:52:13
+407    \N    1    motoboy    Ficou offline    2018-02-04 18:52:18    2018-02-04 18:52:18
+408    \N    1    motoboy    Ficou online    2018-02-04 18:52:20    2018-02-04 18:52:20
+1180    98    2    motoboy    Finalizou pedido    2018-02-18 21:12:11    2018-02-18 21:12:11
+1187    100    1    motoboy    Confirmou pedido    2018-02-18 21:13:14    2018-02-18 21:13:14
+1188    100    1    order    Pedido confirmado    2018-02-18 21:13:14    2018-02-18 21:13:14
+1190    \N    2    motoboy    Ficou online    2018-02-18 21:13:17    2018-02-18 21:13:17
+413    \N    1    motoboy    Ficou online    2018-02-04 18:52:39    2018-02-04 18:52:39
+1203    101    2    order    Pedido finalizado    2018-02-19 13:08:13    2018-02-19 13:08:13
+1204    101    2    motoboy    Finalizou pedido    2018-02-19 13:08:13    2018-02-19 13:08:13
+416    \N    1    motoboy    Ficou offline    2018-02-04 18:52:43    2018-02-04 18:52:43
+417    \N    1    motoboy    Ficou online    2018-02-04 18:55:28    2018-02-04 18:55:28
+1363    \N    34    motoboy    Ficou online    2018-02-20 20:30:38    2018-02-20 20:30:38
+1370    113    1    order    Pedido finalizado    2018-02-20 21:28:37    2018-02-20 21:28:37
+1371    113    1    motoboy    Finalizou pedido    2018-02-20 21:28:37    2018-02-20 21:28:37
+422    \N    1    motoboy    Ficou online    2018-02-04 18:58:26    2018-02-04 18:58:26
+425    \N    1    motoboy    Ficou offline    2018-02-04 19:35:21    2018-02-04 19:35:21
+426    \N    1    motoboy    Ficou online    2018-02-04 19:47:21    2018-02-04 19:47:21
+431    \N    1    motoboy    Ficou online    2018-02-04 19:47:44    2018-02-04 19:47:44
+434    \N    1    motoboy    Ficou offline    2018-02-04 19:47:47    2018-02-04 19:47:47
+435    \N    1    motoboy    Ficou online    2018-02-04 19:57:11    2018-02-04 19:57:11
+436    \N    1    motoboy    Ficou offline    2018-02-04 19:57:12    2018-02-04 19:57:12
+437    \N    1    motoboy    Ficou online    2018-02-04 19:57:14    2018-02-04 19:57:14
+438    \N    1    motoboy    Ficou offline    2018-02-04 19:57:15    2018-02-04 19:57:15
+439    \N    1    motoboy    Ficou online    2018-02-04 19:57:16    2018-02-04 19:57:16
+440    \N    1    motoboy    Ficou offline    2018-02-04 19:57:20    2018-02-04 19:57:20
+441    \N    1    motoboy    Ficou online    2018-02-04 22:50:06    2018-02-04 22:50:06
+442    \N    1    motoboy    Ficou offline    2018-02-04 22:50:10    2018-02-04 22:50:10
+443    \N    1    motoboy    Ficou online    2018-02-05 04:26:14    2018-02-05 04:26:14
+444    \N    1    motoboy    Ficou offline    2018-02-05 04:26:22    2018-02-05 04:26:22
+445    \N    1    motoboy    Ficou online    2018-02-05 04:26:23    2018-02-05 04:26:23
+446    \N    1    motoboy    Ficou offline    2018-02-05 04:26:29    2018-02-05 04:26:29
+447    \N    1    motoboy    Ficou online    2018-02-05 04:26:38    2018-02-05 04:26:38
+448    \N    1    motoboy    Ficou offline    2018-02-05 04:29:27    2018-02-05 04:29:27
+449    \N    1    motoboy    Ficou online    2018-02-05 04:29:28    2018-02-05 04:29:28
+450    \N    1    motoboy    Ficou offline    2018-02-05 04:29:33    2018-02-05 04:29:33
+451    \N    1    motoboy    Ficou online    2018-02-05 04:29:44    2018-02-05 04:29:44
+452    \N    1    motoboy    Ficou offline    2018-02-05 04:29:53    2018-02-05 04:29:53
+453    \N    1    motoboy    Ficou online    2018-02-05 15:06:38    2018-02-05 15:06:38
+454    \N    1    motoboy    Ficou offline    2018-02-05 15:06:41    2018-02-05 15:06:41
+455    \N    1    motoboy    Ficou online    2018-02-05 15:08:29    2018-02-05 15:08:29
+456    \N    1    motoboy    Ficou offline    2018-02-05 17:16:18    2018-02-05 17:16:18
+457    \N    1    motoboy    Ficou online    2018-02-05 17:19:07    2018-02-05 17:19:07
+458    \N    1    motoboy    Ficou offline    2018-02-05 17:34:13    2018-02-05 17:34:13
+459    \N    1    motoboy    Ficou online    2018-02-05 23:21:43    2018-02-05 23:21:43
+460    \N    1    motoboy    Ficou offline    2018-02-05 23:21:45    2018-02-05 23:21:45
+461    \N    1    motoboy    Ficou online    2018-02-05 23:22:12    2018-02-05 23:22:12
+462    \N    1    motoboy    Ficou offline    2018-02-05 23:22:16    2018-02-05 23:22:16
+463    \N    1    motoboy    Ficou online    2018-02-06 16:38:37    2018-02-06 16:38:37
+464    \N    1    motoboy    Ficou offline    2018-02-06 17:21:54    2018-02-06 17:21:54
+465    \N    1    motoboy    Ficou online    2018-02-06 17:59:38    2018-02-06 17:59:38
+741    72    1    order    Pedido finalizado    2018-02-16 05:56:00    2018-02-16 05:56:00
+742    72    1    motoboy    Finalizou pedido    2018-02-16 05:56:00    2018-02-16 05:56:00
+861    77    2    motoboy    Confirmou pedido    2018-02-16 21:32:14    2018-02-16 21:32:14
+862    77    2    order    Pedido confirmado    2018-02-16 21:32:14    2018-02-16 21:32:14
+470    \N    1    motoboy    Ficou online    2018-02-06 18:01:25    2018-02-06 18:01:25
+863    77    2    order    Pedido finalizado    2018-02-16 21:32:31    2018-02-16 21:32:31
+864    77    2    motoboy    Finalizou pedido    2018-02-16 21:32:31    2018-02-16 21:32:31
+473    \N    1    motoboy    Ficou offline    2018-02-06 23:10:29    2018-02-06 23:10:29
+474    \N    1    motoboy    Ficou online    2018-02-06 23:26:04    2018-02-06 23:26:04
+475    \N    1    motoboy    Ficou offline    2018-02-06 23:26:05    2018-02-06 23:26:05
+476    \N    1    motoboy    Ficou online    2018-02-06 23:54:02    2018-02-06 23:54:02
+875    79    1    order    Pedido finalizado    2018-02-16 21:33:08    2018-02-16 21:33:08
+876    79    1    motoboy    Finalizou pedido    2018-02-16 21:33:08    2018-02-16 21:33:08
+878    \N    1    motoboy    Ficou online    2018-02-16 21:33:12    2018-02-16 21:33:12
+1009    87    1    order    Pedido finalizado    2018-02-17 02:43:53    2018-02-17 02:43:53
+1010    87    1    motoboy    Finalizou pedido    2018-02-17 02:43:53    2018-02-17 02:43:53
+1169    \N    2    motoboy    Ficou offline    2018-02-18 21:11:05    2018-02-18 21:11:05
+1171    97    2    motoboy    Confirmou pedido    2018-02-18 21:11:16    2018-02-18 21:11:16
+1172    97    2    order    Pedido confirmado    2018-02-18 21:11:16    2018-02-18 21:11:16
+1365    \N    1    motoboy    Ficou online    2018-02-20 21:28:24    2018-02-20 21:28:24
+498    \N    1    motoboy    Ficou offline    2018-02-07 01:28:29    2018-02-07 01:28:29
+499    \N    1    motoboy    Ficou online    2018-02-07 04:10:02    2018-02-07 04:10:02
+500    \N    1    motoboy    Ficou offline    2018-02-07 04:10:03    2018-02-07 04:10:03
+501    \N    1    motoboy    Ficou online    2018-02-07 05:31:58    2018-02-07 05:31:58
+508    \N    1    motoboy    Ficou offline    2018-02-07 20:00:33    2018-02-07 20:00:33
+509    \N    1    motoboy    Ficou online    2018-02-07 20:03:09    2018-02-07 20:03:09
+521    \N    1    motoboy    Ficou offline    2018-02-07 20:06:26    2018-02-07 20:06:26
+522    \N    1    motoboy    Ficou online    2018-02-08 14:25:07    2018-02-08 14:25:07
+534    \N    1    motoboy    Ficou offline    2018-02-08 14:26:35    2018-02-08 14:26:35
+535    \N    1    motoboy    Ficou online    2018-02-08 16:00:53    2018-02-08 16:00:53
+536    \N    1    motoboy    Ficou offline    2018-02-08 16:00:56    2018-02-08 16:00:56
+537    \N    1    motoboy    Ficou online    2018-02-08 16:00:57    2018-02-08 16:00:57
+538    \N    2    motoboy    Ficou online    2018-02-08 16:01:48    2018-02-08 16:01:48
+743    71    1    motoboy    Recebeu uma entrega    2018-02-16 05:56:00    2018-02-16 05:56:00
+744    71    1    order    Pedido enviado para o motoboy    2018-02-16 05:56:00    2018-02-16 05:56:00
+745    71    1    motoboy    Confirmou pedido    2018-02-16 05:56:07    2018-02-16 05:56:07
+746    71    1    order    Pedido confirmado    2018-02-16 05:56:07    2018-02-16 05:56:07
+879    \N    1    motoboy    Ficou offline    2018-02-16 21:33:13    2018-02-16 21:33:13
+1011    87    1    order    Pedido finalizado    2018-02-17 02:51:00    2018-02-17 02:51:00
+1012    87    1    motoboy    Finalizou pedido    2018-02-17 02:51:00    2018-02-17 02:51:00
+1017    86    1    motoboy    Recebeu uma entrega    2018-02-17 02:51:07    2018-02-17 02:51:07
+1018    86    1    order    Pedido enviado para o motoboy    2018-02-17 02:51:07    2018-02-17 02:51:07
+1038    \N    1    motoboy    Ficou online    2018-02-17 02:51:38    2018-02-17 02:51:38
+1050    89    2    motoboy    Confirmou pedido    2018-02-17 02:52:03    2018-02-17 02:52:03
+1051    89    2    order    Pedido confirmado    2018-02-17 02:52:03    2018-02-17 02:52:03
+1062    88    1    motoboy    Recebeu uma entrega    2018-02-17 02:52:24    2018-02-17 02:52:24
+566    \N    1    motoboy    Ficou offline    2018-02-08 16:35:23    2018-02-08 16:35:23
+567    \N    1    motoboy    Ficou online    2018-02-08 16:42:13    2018-02-08 16:42:13
+1063    88    1    order    Pedido enviado para o motoboy    2018-02-17 02:52:24    2018-02-17 02:52:24
+1064    88    1    motoboy    Confirmou pedido    2018-02-17 02:52:26    2018-02-17 02:52:26
+1065    88    1    order    Pedido confirmado    2018-02-17 02:52:26    2018-02-17 02:52:26
+1074    \N    1    motoboy    Ficou online    2018-02-17 02:52:41    2018-02-17 02:52:41
+1077    88    1    motoboy    Confirmou pedido    2018-02-17 02:52:45    2018-02-17 02:52:45
+1078    88    1    order    Pedido confirmado    2018-02-17 02:52:45    2018-02-17 02:52:45
+1081    90    2    motoboy    Recebeu uma entrega    2018-02-17 02:52:53    2018-02-17 02:52:53
+1082    90    2    order    Pedido enviado para o motoboy    2018-02-17 02:52:53    2018-02-17 02:52:53
+1096    91    2    order    Motoboy cancelou pedido    2018-02-17 02:53:23    2018-02-17 02:53:23
+1097    91    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-17 02:53:23    2018-02-17 02:53:23
+1098    91    2    motoboy    Cancelou pedido    2018-02-17 02:53:23    2018-02-17 02:53:23
+579    \N    1    motoboy    Ficou online    2018-02-08 17:45:38    2018-02-08 17:45:38
+1123    91    2    order    Pedido finalizado    2018-02-17 02:54:01    2018-02-17 02:54:01
+1124    91    2    motoboy    Finalizou pedido    2018-02-17 02:54:01    2018-02-17 02:54:01
+1175    98    2    motoboy    Recebeu pedido    2018-02-18 21:11:29    2018-02-18 21:11:29
+1176    98    2    order    Pedido enviado para o motoboy    2018-02-18 21:11:29    2018-02-18 21:11:29
+1177    98    2    motoboy    Confirmou pedido    2018-02-18 21:12:06    2018-02-18 21:12:06
+1178    98    2    order    Pedido confirmado    2018-02-18 21:12:06    2018-02-18 21:12:06
+586    \N    1    motoboy    Ficou offline    2018-02-09 17:47:58    2018-02-09 17:47:58
+587    \N    1    motoboy    Ficou offline    2018-02-09 18:03:06    2018-02-09 18:03:06
+588    \N    1    motoboy    Ficou online    2018-02-09 18:03:08    2018-02-09 18:03:08
+1374    \N    2    motoboy    Ficou offline    2018-02-21 09:55:56    2018-02-21 09:55:56
+1383    \N    1    motoboy    Ficou offline    2018-02-21 10:09:07    2018-02-21 10:09:07
+1398    115    1    order    Pedido finalizado    2018-02-21 10:20:53    2018-02-21 10:20:53
+1399    115    1    motoboy    Finalizou pedido    2018-02-21 10:20:53    2018-02-21 10:20:53
+601    \N    3    motoboy    Ficou online    2018-02-10 18:01:18    2018-02-10 18:01:18
+610    \N    3    motoboy    Ficou offline    2018-02-10 18:36:29    2018-02-10 18:36:29
+611    \N    3    motoboy    Ficou online    2018-02-10 18:36:30    2018-02-10 18:36:30
+616    \N    3    motoboy    Ficou online    2018-02-10 18:38:16    2018-02-10 18:38:16
+617    \N    4    motoboy    Ficou online    2018-02-10 18:43:58    2018-02-10 18:43:58
+628    \N    4    motoboy    Ficou offline    2018-02-10 18:54:20    2018-02-10 18:54:20
+629    \N    4    motoboy    Ficou online    2018-02-10 18:54:25    2018-02-10 18:54:25
+630    \N    4    motoboy    Ficou offline    2018-02-10 18:54:29    2018-02-10 18:54:29
+631    \N    6    motoboy    Ficou online    2018-02-10 19:06:48    2018-02-10 19:06:48
+632    \N    6    motoboy    Ficou offline    2018-02-10 19:07:15    2018-02-10 19:07:15
+633    \N    6    motoboy    Ficou online    2018-02-10 19:07:32    2018-02-10 19:07:32
+634    \N    6    motoboy    Ficou offline    2018-02-10 19:07:55    2018-02-10 19:07:55
+635    \N    3    motoboy    Ficou online    2018-02-10 19:13:49    2018-02-10 19:13:49
+636    \N    7    motoboy    Ficou online    2018-02-10 19:14:13    2018-02-10 19:14:13
+637    \N    7    motoboy    Ficou offline    2018-02-10 19:52:56    2018-02-10 19:52:56
+638    \N    20    motoboy    Ficou online    2018-02-10 19:58:58    2018-02-10 19:58:58
+639    \N    20    motoboy    Ficou offline    2018-02-10 20:01:08    2018-02-10 20:01:08
+640    \N    20    motoboy    Ficou online    2018-02-10 20:01:16    2018-02-10 20:01:16
+641    \N    3    motoboy    Recebeu pedido    2018-02-10 20:01:44    2018-02-10 20:01:44
+747    71    1    order    Pedido finalizado    2018-02-16 05:56:10    2018-02-16 05:56:10
+748    71    1    motoboy    Finalizou pedido    2018-02-16 05:56:10    2018-02-16 05:56:10
+751    73    1    motoboy    Confirmou pedido    2018-02-16 05:56:12    2018-02-16 05:56:12
+752    73    1    order    Pedido confirmado    2018-02-16 05:56:12    2018-02-16 05:56:12
+763    \N    1    motoboy    Ficou offline    2018-02-16 14:23:24    2018-02-16 14:23:24
+880    75    2    order    Motoboy cancelou pedido    2018-02-17 01:27:41    2018-02-17 01:27:41
+881    75    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-17 01:27:41    2018-02-17 01:27:41
+882    75    2    motoboy    Cancelou pedido    2018-02-17 01:27:41    2018-02-17 01:27:41
+886    \N    2    motoboy    Ficou online    2018-02-17 01:28:29    2018-02-17 01:28:29
+1013    86    1    order    Motoboy cancelou pedido    2018-02-17 02:51:05    2018-02-17 02:51:05
+1014    86    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-17 02:51:05    2018-02-17 02:51:05
+1015    86    1    motoboy    Cancelou pedido    2018-02-17 02:51:05    2018-02-17 02:51:05
+1044    \N    2    motoboy    Ficou online    2018-02-17 02:51:52    2018-02-17 02:51:52
+1100    91    1    motoboy    Recebeu uma entrega    2018-02-17 02:53:25    2018-02-17 02:53:25
+1101    91    1    order    Pedido enviado para o motoboy    2018-02-17 02:53:25    2018-02-17 02:53:25
+1205    \N    2    motoboy    Ficou online    2018-02-20 13:15:10    2018-02-20 13:15:10
+1207    102    2    motoboy    Recebeu pedido    2018-02-20 13:15:19    2018-02-20 13:15:19
+1208    102    2    order    Pedido enviado para o motoboy    2018-02-20 13:15:19    2018-02-20 13:15:19
+1234    103    2    order    Pedido finalizado    2018-02-20 13:16:45    2018-02-20 13:16:45
+1235    103    2    motoboy    Finalizou pedido    2018-02-20 13:16:45    2018-02-20 13:16:45
+1274    107    2    motoboy    Não confirmou o pedido a tempo    2018-02-20 13:41:00    2018-02-20 13:41:00
+1275    107    2    order    Cancelamento automático    2018-02-20 13:41:00    2018-02-20 13:41:00
+1276    107    1    order    Pedido enviado a outro motoboy    2018-02-20 13:41:00    2018-02-20 13:41:00
+1277    107    1    motoboy    Recebeu pedido    2018-02-20 13:41:00    2018-02-20 13:41:00
+1280    107    1    order    Pedido finalizado    2018-02-20 13:42:16    2018-02-20 13:42:16
+1281    107    1    motoboy    Finalizou pedido    2018-02-20 13:42:16    2018-02-20 13:42:16
+1375    \N    1    motoboy    Ficou offline    2018-02-21 09:56:03    2018-02-21 09:56:03
+1381    \N    2    motoboy    Ficou online    2018-02-21 10:06:50    2018-02-21 10:06:50
+1384    \N    1    motoboy    Ficou online    2018-02-21 10:09:09    2018-02-21 10:09:09
+1389    \N    2    motoboy    Ficou online    2018-02-21 10:18:23    2018-02-21 10:18:23
+1390    115    1    motoboy    Recebeu pedido    2018-02-21 10:19:38    2018-02-21 10:19:38
+1391    115    1    order    Pedido enviado para o motoboy    2018-02-21 10:19:38    2018-02-21 10:19:38
+644    \N    20    order    Pedido enviado    2018-02-10 20:02:12    2018-02-10 20:02:12
+642    \N    3    order    Pedido enviado    2018-02-10 20:01:44    2018-02-10 20:01:44
+749    73    1    motoboy    Recebeu uma entrega    2018-02-16 05:56:10    2018-02-16 05:56:10
+750    73    1    order    Pedido enviado para o motoboy    2018-02-16 05:56:10    2018-02-16 05:56:10
+761    \N    1    motoboy    Ficou offline    2018-02-16 06:15:37    2018-02-16 06:15:37
+762    \N    1    motoboy    Ficou online    2018-02-16 14:23:23    2018-02-16 14:23:23
+883    \N    1    motoboy    Ficou online    2018-02-17 01:27:44    2018-02-17 01:27:44
+887    75    1    order    Motoboy cancelou pedido    2018-02-17 01:28:34    2018-02-17 01:28:34
+888    75    2    order    Pedido enviado a outro motoboy    2018-02-17 01:28:34    2018-02-17 01:28:34
+889    75    2    motoboy    Recebeu pedido    2018-02-17 01:28:34    2018-02-17 01:28:34
+890    75    1    motoboy    Cancelou pedido    2018-02-17 01:28:34    2018-02-17 01:28:34
+902    \N    2    motoboy    Ficou online    2018-02-17 01:28:57    2018-02-17 01:28:57
+1016    \N    1    motoboy    Ficou online    2018-02-17 02:51:06    2018-02-17 02:51:06
+1037    \N    1    motoboy    Ficou offline    2018-02-17 02:51:37    2018-02-17 02:51:37
+1061    \N    1    motoboy    Ficou online    2018-02-17 02:52:24    2018-02-17 02:52:24
+1067    89    2    motoboy    Recebeu uma entrega    2018-02-17 02:52:29    2018-02-17 02:52:29
+1068    89    2    order    Pedido enviado para o motoboy    2018-02-17 02:52:29    2018-02-17 02:52:29
+1087    91    1    motoboy    Recebeu uma entrega    2018-02-17 02:53:01    2018-02-17 02:53:01
+1088    91    1    order    Pedido enviado para o motoboy    2018-02-17 02:53:01    2018-02-17 02:53:01
+1089    91    1    order    Motoboy cancelou pedido    2018-02-17 02:53:11    2018-02-17 02:53:11
+1090    91    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-17 02:53:11    2018-02-17 02:53:11
+1091    91    1    motoboy    Cancelou pedido    2018-02-17 02:53:11    2018-02-17 02:53:11
+1121    91    2    motoboy    Confirmou pedido    2018-02-17 02:53:57    2018-02-17 02:53:57
+1122    91    2    order    Pedido confirmado    2018-02-17 02:53:57    2018-02-17 02:53:57
+1206    \N    1    motoboy    Ficou online    2018-02-20 13:15:13    2018-02-20 13:15:13
+1226    103    1    order    Motoboy cancelou pedido    2018-02-20 13:16:29    2018-02-20 13:16:29
+1227    103    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-20 13:16:29    2018-02-20 13:16:29
+1228    103    1    motoboy    Cancelou pedido    2018-02-20 13:16:29    2018-02-20 13:16:29
+1238    104    2    motoboy    Não confirmou o pedido a tempo    2018-02-20 13:19:00    2018-02-20 13:19:00
+1239    104    2    order    Cancelamento automático    2018-02-20 13:19:00    2018-02-20 13:19:00
+1240    104    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-20 13:19:00    2018-02-20 13:19:00
+1266    106    1    motoboy    Recebeu pedido    2018-02-20 13:38:28    2018-02-20 13:38:28
+1267    106    1    order    Pedido enviado para o motoboy    2018-02-20 13:38:28    2018-02-20 13:38:28
+1284    109    \N    order    Nenhum motoboy disponível, pedido enviado para a fila.    2018-02-20 14:02:34    2018-02-20 14:02:34
+1290    108    1    order    Motoboy cancelou pedido    2018-02-20 14:02:54    2018-02-20 14:02:54
+1291    108    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-20 14:02:54    2018-02-20 14:02:54
+1292    108    1    motoboy    Cancelou pedido    2018-02-20 14:02:54    2018-02-20 14:02:54
+1306    \N    1    motoboy    Ficou online    2018-02-20 14:03:21    2018-02-20 14:03:21
+1376    \N    1    motoboy    Ficou online    2018-02-21 09:56:04    2018-02-21 09:56:04
+1408    116    2    motoboy    Recebeu uma entrega    2018-02-21 10:23:16    2018-02-21 10:23:16
+1409    116    2    order    Pedido enviado para o motoboy    2018-02-21 10:23:16    2018-02-21 10:23:16
+764    \N    1    motoboy    Ficou online    2018-02-16 20:36:43    2018-02-16 20:36:43
+773    74    2    motoboy    Confirmou pedido    2018-02-16 20:39:48    2018-02-16 20:39:48
+774    74    2    order    Pedido confirmado    2018-02-16 20:39:48    2018-02-16 20:39:48
+884    75    1    motoboy    Recebeu uma entrega    2018-02-17 01:28:13    2018-02-17 01:28:13
+648    \N    21    motoboy    Ficou online    2018-02-10 20:05:45    2018-02-10 20:05:45
+649    \N    21    motoboy    Ficou offline    2018-02-10 20:06:09    2018-02-10 20:06:09
+650    \N    21    motoboy    Ficou online    2018-02-10 20:06:20    2018-02-10 20:06:20
+651    \N    21    motoboy    Ficou offline    2018-02-10 20:06:54    2018-02-10 20:06:54
+652    \N    20    motoboy    Ficou online    2018-02-10 21:08:51    2018-02-10 21:08:51
+653    \N    20    motoboy    Ficou offline    2018-02-10 21:09:17    2018-02-10 21:09:17
+654    \N    22    motoboy    Ficou online    2018-02-10 21:47:23    2018-02-10 21:47:23
+655    \N    6    motoboy    Ficou online    2018-02-11 02:02:34    2018-02-11 02:02:34
+656    \N    6    motoboy    Ficou offline    2018-02-11 02:02:41    2018-02-11 02:02:41
+657    \N    5    motoboy    Ficou online    2018-02-11 10:34:21    2018-02-11 10:34:21
+658    \N    5    motoboy    Ficou offline    2018-02-11 10:34:50    2018-02-11 10:34:50
+659    \N    25    motoboy    Ficou online    2018-02-11 11:30:02    2018-02-11 11:30:02
+660    \N    25    motoboy    Ficou offline    2018-02-11 11:30:10    2018-02-11 11:30:10
+661    \N    25    motoboy    Ficou online    2018-02-11 11:30:11    2018-02-11 11:30:11
+662    \N    25    motoboy    Ficou offline    2018-02-11 11:30:28    2018-02-11 11:30:28
+663    \N    25    motoboy    Ficou online    2018-02-11 11:30:32    2018-02-11 11:30:32
+664    \N    25    motoboy    Ficou offline    2018-02-11 11:31:07    2018-02-11 11:31:07
+665    \N    24    motoboy    Ficou online    2018-02-11 11:33:48    2018-02-11 11:33:48
+666    \N    24    motoboy    Ficou offline    2018-02-11 11:34:17    2018-02-11 11:34:17
+667    \N    24    motoboy    Ficou online    2018-02-11 11:34:24    2018-02-11 11:34:24
+885    75    1    order    Pedido enviado para o motoboy    2018-02-17 01:28:13    2018-02-17 01:28:13
+905    \N    1    motoboy    Ficou online    2018-02-17 01:28:58    2018-02-17 01:28:58
+670    \N    5    motoboy    Ficou online    2018-02-11 13:28:23    2018-02-11 13:28:23
+671    \N    5    motoboy    Ficou offline    2018-02-11 13:28:31    2018-02-11 13:28:31
+672    \N    4    motoboy    Ficou online    2018-02-11 13:35:32    2018-02-11 13:35:32
+673    \N    4    motoboy    Ficou offline    2018-02-11 13:36:29    2018-02-11 13:36:29
+906    75    2    motoboy    Confirmou pedido    2018-02-17 01:29:04    2018-02-17 01:29:04
+907    75    2    order    Pedido confirmado    2018-02-17 01:29:04    2018-02-17 01:29:04
+908    75    2    order    Motoboy cancelou pedido    2018-02-17 01:29:11    2018-02-17 01:29:11
+909    75    1    order    Pedido enviado a outro motoboy    2018-02-17 01:29:11    2018-02-17 01:29:11
+678    \N    5    motoboy    Ficou online    2018-02-11 14:38:22    2018-02-11 14:38:22
+679    \N    5    motoboy    Ficou offline    2018-02-11 14:38:27    2018-02-11 14:38:27
+910    75    1    motoboy    Recebeu pedido    2018-02-17 01:29:11    2018-02-17 01:29:11
+911    75    2    motoboy    Cancelou pedido    2018-02-17 01:29:11    2018-02-17 01:29:11
+1019    \N    2    motoboy    Ficou online    2018-02-17 02:51:08    2018-02-17 02:51:08
+683    \N    7    motoboy    Ficou online    2018-02-12 11:06:20    2018-02-12 11:06:20
+684    \N    4    motoboy    Ficou online    2018-02-12 14:57:30    2018-02-12 14:57:30
+685    \N    7    motoboy    Ficou offline    2018-02-12 15:18:55    2018-02-12 15:18:55
+686    \N    1    motoboy    Ficou offline    2018-02-12 16:55:58    2018-02-12 16:55:58
+687    \N    30    motoboy    Ficou online    2018-02-12 19:42:34    2018-02-12 19:42:34
+688    \N    20    motoboy    Ficou online    2018-02-12 19:46:50    2018-02-12 19:46:50
+689    \N    20    motoboy    Ficou offline    2018-02-12 19:47:00    2018-02-12 19:47:00
+690    \N    7    motoboy    Ficou online    2018-02-12 22:46:16    2018-02-12 22:46:16
+691    \N    7    motoboy    Ficou offline    2018-02-12 22:46:51    2018-02-12 22:46:51
+692    \N    1    motoboy    Ficou online    2018-02-13 07:05:41    2018-02-13 07:05:41
+693    \N    1    motoboy    Ficou offline    2018-02-13 07:05:44    2018-02-13 07:05:44
+694    \N    1    motoboy    Ficou online    2018-02-13 07:06:03    2018-02-13 07:06:03
+695    \N    1    motoboy    Ficou offline    2018-02-13 07:11:16    2018-02-13 07:11:16
+696    \N    1    motoboy    Ficou online    2018-02-13 07:11:17    2018-02-13 07:11:17
+697    \N    1    motoboy    Ficou offline    2018-02-13 07:14:51    2018-02-13 07:14:51
+698    \N    1    motoboy    Ficou online    2018-02-13 07:14:51    2018-02-13 07:14:51
+15    \N    1    motoboy    Recebeu pedido    2018-02-03 03:12:01    2018-02-03 03:12:01
+16    \N    1    order    Pedido enviado    2018-02-03 03:12:01    2018-02-03 03:12:01
+17    \N    1    motoboy    Confirmou pedido    2018-02-03 03:13:18    2018-02-03 03:13:18
+18    \N    1    order    Pedido confirmado    2018-02-03 03:13:18    2018-02-03 03:13:18
+20    \N    1    order    Pedido finalizado    2018-02-03 03:13:42    2018-02-03 03:13:42
+21    \N    1    motoboy    Finalizou pedido    2018-02-03 03:13:42    2018-02-03 03:13:42
+22    \N    1    motoboy    Recebeu pedido    2018-02-03 14:52:14    2018-02-03 14:52:14
+23    \N    1    order    Pedido enviado    2018-02-03 14:52:14    2018-02-03 14:52:14
+24    \N    1    motoboy    Cancelou pedido    2018-02-03 14:56:18    2018-02-03 14:56:18
+25    \N    1    order    Pedido cancelado    2018-02-03 14:56:18    2018-02-03 14:56:18
+26    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 14:56:18    2018-02-03 14:56:18
+28    \N    1    motoboy    Recebeu pedido    2018-02-03 14:57:07    2018-02-03 14:57:07
+29    \N    1    order    Pedido enviado    2018-02-03 14:57:07    2018-02-03 14:57:07
+30    \N    1    motoboy    Cancelou pedido    2018-02-03 14:57:48    2018-02-03 14:57:48
+31    \N    1    order    Pedido cancelado    2018-02-03 14:57:48    2018-02-03 14:57:48
+32    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 14:57:48    2018-02-03 14:57:48
+510    \N    1    motoboy    Recebeu pedido    2018-02-07 20:03:20    2018-02-07 20:03:20
+511    \N    1    order    Pedido enviado    2018-02-07 20:03:20    2018-02-07 20:03:20
+512    \N    1    motoboy    Cancelou pedido    2018-02-07 20:03:33    2018-02-07 20:03:33
+513    \N    1    order    Pedido cancelado    2018-02-07 20:03:33    2018-02-07 20:03:33
+514    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-07 20:03:33    2018-02-07 20:03:33
+129    \N    1    motoboy    Recebeu pedido    2018-02-03 15:39:26    2018-02-03 15:39:26
+130    \N    1    order    Pedido enviado    2018-02-03 15:39:26    2018-02-03 15:39:26
+131    \N    1    motoboy    Cancelou pedido    2018-02-03 15:42:54    2018-02-03 15:42:54
+132    \N    1    order    Pedido cancelado    2018-02-03 15:42:54    2018-02-03 15:42:54
+133    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 15:42:54    2018-02-03 15:42:54
+135    \N    1    motoboy    Recebeu pedido    2018-02-03 15:45:15    2018-02-03 15:45:15
+136    \N    1    order    Pedido enviado    2018-02-03 15:45:15    2018-02-03 15:45:15
+137    \N    1    motoboy    Cancelou pedido    2018-02-03 15:45:38    2018-02-03 15:45:38
+138    \N    1    order    Pedido cancelado    2018-02-03 15:45:38    2018-02-03 15:45:38
+139    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 15:45:38    2018-02-03 15:45:38
+143    \N    1    motoboy    Recebeu pedido    2018-02-03 15:51:11    2018-02-03 15:51:11
+144    \N    1    order    Pedido enviado    2018-02-03 15:51:11    2018-02-03 15:51:11
+147    \N    1    motoboy    Cancelou pedido    2018-02-03 15:55:22    2018-02-03 15:55:22
+148    \N    1    order    Pedido cancelado    2018-02-03 15:55:22    2018-02-03 15:55:22
+149    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 15:55:22    2018-02-03 15:55:22
+356    \N    1    motoboy    Recebeu pedido    2018-02-03 20:19:20    2018-02-03 20:19:20
+357    \N    1    order    Pedido enviado    2018-02-03 20:19:20    2018-02-03 20:19:20
+358    \N    1    motoboy    Confirmou pedido    2018-02-03 20:20:23    2018-02-03 20:20:23
+359    \N    1    order    Pedido confirmado    2018-02-03 20:20:23    2018-02-03 20:20:23
+151    \N    1    motoboy    Recebeu pedido    2018-02-03 15:56:20    2018-02-03 15:56:20
+152    \N    1    order    Pedido enviado    2018-02-03 15:56:20    2018-02-03 15:56:20
+153    \N    1    motoboy    Confirmou pedido    2018-02-03 15:57:16    2018-02-03 15:57:16
+154    \N    1    order    Pedido confirmado    2018-02-03 15:57:16    2018-02-03 15:57:16
+156    \N    1    order    Pedido finalizado    2018-02-03 16:03:39    2018-02-03 16:03:39
+157    \N    1    motoboy    Finalizou pedido    2018-02-03 16:03:39    2018-02-03 16:03:39
+158    \N    1    motoboy    Recebeu pedido    2018-02-03 16:04:01    2018-02-03 16:04:01
+159    \N    1    order    Pedido enviado    2018-02-03 16:04:01    2018-02-03 16:04:01
+160    \N    1    motoboy    Cancelou pedido    2018-02-03 16:04:24    2018-02-03 16:04:24
+161    \N    1    order    Pedido cancelado    2018-02-03 16:04:24    2018-02-03 16:04:24
+162    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 16:04:24    2018-02-03 16:04:24
+164    \N    1    motoboy    Recebeu pedido    2018-02-03 16:04:49    2018-02-03 16:04:49
+165    \N    1    order    Pedido enviado    2018-02-03 16:04:49    2018-02-03 16:04:49
+166    \N    1    motoboy    Cancelou pedido    2018-02-03 16:04:51    2018-02-03 16:04:51
+167    \N    1    order    Pedido cancelado    2018-02-03 16:04:51    2018-02-03 16:04:51
+168    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 16:04:51    2018-02-03 16:04:51
+170    \N    1    motoboy    Recebeu pedido    2018-02-03 16:04:56    2018-02-03 16:04:56
+171    \N    1    order    Pedido enviado    2018-02-03 16:04:56    2018-02-03 16:04:56
+172    \N    1    motoboy    Cancelou pedido    2018-02-03 16:06:15    2018-02-03 16:06:15
+173    \N    1    order    Pedido cancelado    2018-02-03 16:06:15    2018-02-03 16:06:15
+174    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 16:06:15    2018-02-03 16:06:15
+176    \N    1    motoboy    Recebeu pedido    2018-02-03 16:07:08    2018-02-03 16:07:08
+177    \N    1    order    Pedido enviado    2018-02-03 16:07:08    2018-02-03 16:07:08
+178    \N    1    motoboy    Cancelou pedido    2018-02-03 16:07:14    2018-02-03 16:07:14
+179    \N    1    order    Pedido cancelado    2018-02-03 16:07:14    2018-02-03 16:07:14
+180    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 16:07:14    2018-02-03 16:07:14
+182    \N    1    motoboy    Recebeu pedido    2018-02-03 16:07:19    2018-02-03 16:07:19
+183    \N    1    order    Pedido enviado    2018-02-03 16:07:19    2018-02-03 16:07:19
+184    \N    1    motoboy    Cancelou pedido    2018-02-03 16:08:01    2018-02-03 16:08:01
+185    \N    1    order    Pedido cancelado    2018-02-03 16:08:01    2018-02-03 16:08:01
+186    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 16:08:01    2018-02-03 16:08:01
+188    \N    1    motoboy    Recebeu pedido    2018-02-03 16:08:05    2018-02-03 16:08:05
+189    \N    1    order    Pedido enviado    2018-02-03 16:08:05    2018-02-03 16:08:05
+190    \N    1    motoboy    Confirmou pedido    2018-02-03 16:08:51    2018-02-03 16:08:51
+191    \N    1    order    Pedido confirmado    2018-02-03 16:08:51    2018-02-03 16:08:51
+193    \N    1    order    Pedido finalizado    2018-02-03 16:08:54    2018-02-03 16:08:54
+194    \N    1    motoboy    Finalizou pedido    2018-02-03 16:08:54    2018-02-03 16:08:54
+195    \N    1    motoboy    Recebeu pedido    2018-02-03 16:09:08    2018-02-03 16:09:08
+196    \N    1    order    Pedido enviado    2018-02-03 16:09:08    2018-02-03 16:09:08
+197    \N    1    motoboy    Cancelou pedido    2018-02-03 16:09:25    2018-02-03 16:09:25
+198    \N    1    order    Pedido cancelado    2018-02-03 16:09:25    2018-02-03 16:09:25
+199    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 16:09:25    2018-02-03 16:09:25
+201    \N    1    motoboy    Recebeu pedido    2018-02-03 16:09:29    2018-02-03 16:09:29
+202    \N    1    order    Pedido enviado    2018-02-03 16:09:29    2018-02-03 16:09:29
+203    \N    1    motoboy    Cancelou pedido    2018-02-03 16:10:06    2018-02-03 16:10:06
+204    \N    1    order    Pedido cancelado    2018-02-03 16:10:06    2018-02-03 16:10:06
+205    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 16:10:06    2018-02-03 16:10:06
+207    \N    1    motoboy    Recebeu pedido    2018-02-03 16:10:10    2018-02-03 16:10:10
+208    \N    1    order    Pedido enviado    2018-02-03 16:10:10    2018-02-03 16:10:10
+209    \N    1    motoboy    Cancelou pedido    2018-02-03 16:10:19    2018-02-03 16:10:19
+210    \N    1    order    Pedido cancelado    2018-02-03 16:10:19    2018-02-03 16:10:19
+211    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 16:10:19    2018-02-03 16:10:19
+213    \N    1    motoboy    Recebeu pedido    2018-02-03 16:10:25    2018-02-03 16:10:25
+234    \N    1    order    Pedido cancelado    2018-02-03 16:20:07    2018-02-03 16:20:07
+245    \N    1    order    Pedido enviado    2018-02-03 18:15:34    2018-02-03 18:15:34
+270    \N    1    motoboy    Cancelou pedido    2018-02-03 18:16:52    2018-02-03 18:16:52
+365    \N    1    motoboy    Confirmou pedido    2018-02-03 20:22:18    2018-02-03 20:22:18
+366    \N    1    order    Pedido confirmado    2018-02-03 20:22:18    2018-02-03 20:22:18
+368    \N    1    order    Pedido finalizado    2018-02-03 20:22:22    2018-02-03 20:22:22
+369    \N    1    motoboy    Finalizou pedido    2018-02-03 20:22:22    2018-02-03 20:22:22
+276    \N    1    motoboy    Recebeu pedido    2018-02-03 19:49:33    2018-02-03 19:49:33
+277    \N    1    order    Pedido enviado    2018-02-03 19:49:33    2018-02-03 19:49:33
+278    \N    1    motoboy    Confirmou pedido    2018-02-03 19:49:38    2018-02-03 19:49:38
+279    \N    1    order    Pedido confirmado    2018-02-03 19:49:38    2018-02-03 19:49:38
+281    \N    1    order    Pedido finalizado    2018-02-03 19:49:41    2018-02-03 19:49:41
+282    \N    1    motoboy    Finalizou pedido    2018-02-03 19:49:41    2018-02-03 19:49:41
+303    \N    1    motoboy    Recebeu pedido    2018-02-03 19:57:09    2018-02-03 19:57:09
+304    \N    1    order    Pedido enviado    2018-02-03 19:57:09    2018-02-03 19:57:09
+305    \N    1    motoboy    Cancelou pedido    2018-02-03 19:58:48    2018-02-03 19:58:48
+306    \N    1    order    Pedido cancelado    2018-02-03 19:58:48    2018-02-03 19:58:48
+307    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 19:58:48    2018-02-03 19:58:48
+309    \N    1    motoboy    Recebeu pedido    2018-02-03 19:59:21    2018-02-03 19:59:21
+310    \N    1    order    Pedido enviado    2018-02-03 19:59:21    2018-02-03 19:59:21
+311    \N    1    motoboy    Confirmou pedido    2018-02-03 20:01:30    2018-02-03 20:01:30
+312    \N    1    order    Pedido confirmado    2018-02-03 20:01:30    2018-02-03 20:01:30
+314    \N    1    order    Pedido finalizado    2018-02-03 20:06:55    2018-02-03 20:06:55
+315    \N    1    motoboy    Finalizou pedido    2018-02-03 20:06:55    2018-02-03 20:06:55
+316    \N    1    motoboy    Recebeu pedido    2018-02-03 20:07:08    2018-02-03 20:07:08
+317    \N    1    order    Pedido enviado    2018-02-03 20:07:08    2018-02-03 20:07:08
+318    \N    1    motoboy    Cancelou pedido    2018-02-03 20:07:26    2018-02-03 20:07:26
+319    \N    1    order    Pedido cancelado    2018-02-03 20:07:26    2018-02-03 20:07:26
+320    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 20:07:26    2018-02-03 20:07:26
+322    \N    1    motoboy    Recebeu pedido    2018-02-03 20:07:32    2018-02-03 20:07:32
+323    \N    1    order    Pedido enviado    2018-02-03 20:07:32    2018-02-03 20:07:32
+324    \N    1    motoboy    Cancelou pedido    2018-02-03 20:15:59    2018-02-03 20:15:59
+325    \N    1    order    Pedido cancelado    2018-02-03 20:15:59    2018-02-03 20:15:59
+326    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 20:15:59    2018-02-03 20:15:59
+371    \N    1    order    Pedido enviado    2018-02-03 20:22:31    2018-02-03 20:22:31
+373    \N    1    order    Pedido cancelado    2018-02-03 20:22:40    2018-02-03 20:22:40
+374    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-03 20:22:40    2018-02-03 20:22:40
+328    \N    1    motoboy    Recebeu pedido    2018-02-03 20:16:09    2018-02-03 20:16:09
+329    \N    1    order    Pedido enviado    2018-02-03 20:16:09    2018-02-03 20:16:09
+330    \N    1    motoboy    Confirmou pedido    2018-02-03 20:16:17    2018-02-03 20:16:17
+331    \N    1    order    Pedido confirmado    2018-02-03 20:16:17    2018-02-03 20:16:17
+333    \N    1    order    Pedido finalizado    2018-02-03 20:17:35    2018-02-03 20:17:35
+334    \N    1    motoboy    Finalizou pedido    2018-02-03 20:17:35    2018-02-03 20:17:35
+335    \N    1    motoboy    Recebeu pedido    2018-02-03 20:17:46    2018-02-03 20:17:46
+336    \N    1    order    Pedido enviado    2018-02-03 20:17:46    2018-02-03 20:17:46
+337    \N    1    motoboy    Confirmou pedido    2018-02-03 20:17:49    2018-02-03 20:17:49
+338    \N    1    order    Pedido confirmado    2018-02-03 20:17:49    2018-02-03 20:17:49
+340    \N    1    order    Pedido finalizado    2018-02-03 20:17:51    2018-02-03 20:17:51
+341    \N    1    motoboy    Finalizou pedido    2018-02-03 20:17:51    2018-02-03 20:17:51
+342    \N    1    motoboy    Recebeu pedido    2018-02-03 20:18:19    2018-02-03 20:18:19
+343    \N    1    order    Pedido enviado    2018-02-03 20:18:19    2018-02-03 20:18:19
+344    \N    1    motoboy    Confirmou pedido    2018-02-03 20:18:23    2018-02-03 20:18:23
+345    \N    1    order    Pedido confirmado    2018-02-03 20:18:23    2018-02-03 20:18:23
+347    \N    1    order    Pedido finalizado    2018-02-03 20:18:32    2018-02-03 20:18:32
+348    \N    1    motoboy    Finalizou pedido    2018-02-03 20:18:32    2018-02-03 20:18:32
+349    \N    1    motoboy    Recebeu pedido    2018-02-03 20:18:36    2018-02-03 20:18:36
+350    \N    1    order    Pedido enviado    2018-02-03 20:18:36    2018-02-03 20:18:36
+351    \N    1    motoboy    Confirmou pedido    2018-02-03 20:18:41    2018-02-03 20:18:41
+352    \N    1    order    Pedido confirmado    2018-02-03 20:18:41    2018-02-03 20:18:41
+354    \N    1    order    Pedido finalizado    2018-02-03 20:18:53    2018-02-03 20:18:53
+355    \N    1    motoboy    Finalizou pedido    2018-02-03 20:18:53    2018-02-03 20:18:53
+515    \N    1    motoboy    Recebeu pedido    2018-02-07 20:03:39    2018-02-07 20:03:39
+516    \N    1    order    Pedido enviado    2018-02-07 20:03:39    2018-02-07 20:03:39
+517    \N    1    motoboy    Confirmou pedido    2018-02-07 20:03:44    2018-02-07 20:03:44
+518    \N    1    order    Pedido confirmado    2018-02-07 20:03:44    2018-02-07 20:03:44
+519    \N    1    order    Pedido finalizado    2018-02-07 20:03:57    2018-02-07 20:03:57
+520    \N    1    motoboy    Finalizou pedido    2018-02-07 20:03:57    2018-02-07 20:03:57
+389    \N    1    motoboy    Recebeu pedido    2018-02-04 16:36:19    2018-02-04 16:36:19
+390    \N    1    order    Pedido enviado    2018-02-04 16:36:19    2018-02-04 16:36:19
+391    \N    1    motoboy    Confirmou pedido    2018-02-04 16:36:35    2018-02-04 16:36:35
+392    \N    1    order    Pedido confirmado    2018-02-04 16:36:35    2018-02-04 16:36:35
+394    \N    1    order    Pedido finalizado    2018-02-04 16:36:42    2018-02-04 16:36:42
+395    \N    1    motoboy    Finalizou pedido    2018-02-04 16:36:42    2018-02-04 16:36:42
+398    \N    1    motoboy    Recebeu pedido    2018-02-04 18:40:48    2018-02-04 18:40:48
+399    \N    1    order    Pedido enviado    2018-02-04 18:40:48    2018-02-04 18:40:48
+400    \N    1    motoboy    Confirmou pedido    2018-02-04 18:41:09    2018-02-04 18:41:09
+401    \N    1    order    Pedido confirmado    2018-02-04 18:41:09    2018-02-04 18:41:09
+403    \N    1    order    Pedido finalizado    2018-02-04 18:41:58    2018-02-04 18:41:58
+404    \N    1    motoboy    Finalizou pedido    2018-02-04 18:41:58    2018-02-04 18:41:58
+523    \N    1    motoboy    Recebeu pedido    2018-02-08 14:25:22    2018-02-08 14:25:22
+524    \N    1    order    Pedido enviado    2018-02-08 14:25:22    2018-02-08 14:25:22
+525    \N    1    motoboy    Cancelou pedido    2018-02-08 14:25:48    2018-02-08 14:25:48
+526    \N    1    order    Motoboy cancelou pedido    2018-02-08 14:25:48    2018-02-08 14:25:48
+527    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-08 14:25:48    2018-02-08 14:25:48
+409    \N    1    motoboy    Recebeu pedido    2018-02-04 18:52:28    2018-02-04 18:52:28
+410    \N    1    order    Pedido enviado    2018-02-04 18:52:28    2018-02-04 18:52:28
+411    \N    1    motoboy    Confirmou pedido    2018-02-04 18:52:36    2018-02-04 18:52:36
+412    \N    1    order    Pedido confirmado    2018-02-04 18:52:36    2018-02-04 18:52:36
+414    \N    1    order    Pedido finalizado    2018-02-04 18:52:39    2018-02-04 18:52:39
+415    \N    1    motoboy    Finalizou pedido    2018-02-04 18:52:39    2018-02-04 18:52:39
+418    \N    1    motoboy    Recebeu pedido    2018-02-04 18:57:35    2018-02-04 18:57:35
+419    \N    1    order    Pedido enviado    2018-02-04 18:57:35    2018-02-04 18:57:35
+420    \N    1    motoboy    Confirmou pedido    2018-02-04 18:57:43    2018-02-04 18:57:43
+421    \N    1    order    Pedido confirmado    2018-02-04 18:57:43    2018-02-04 18:57:43
+423    \N    1    order    Pedido finalizado    2018-02-04 18:58:26    2018-02-04 18:58:26
+424    \N    1    motoboy    Finalizou pedido    2018-02-04 18:58:26    2018-02-04 18:58:26
+643    \N    20    motoboy    Recebeu pedido    2018-02-10 20:02:12    2018-02-10 20:02:12
+645    \N    20    motoboy    Cancelou pedido    2018-02-10 20:02:35    2018-02-10 20:02:35
+646    \N    20    order    Motoboy cancelou pedido    2018-02-10 20:02:35    2018-02-10 20:02:35
+647    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-10 20:02:35    2018-02-10 20:02:35
+427    \N    1    motoboy    Recebeu pedido    2018-02-04 19:47:36    2018-02-04 19:47:36
+428    \N    1    order    Pedido enviado    2018-02-04 19:47:36    2018-02-04 19:47:36
+429    \N    1    motoboy    Confirmou pedido    2018-02-04 19:47:43    2018-02-04 19:47:43
+430    \N    1    order    Pedido confirmado    2018-02-04 19:47:43    2018-02-04 19:47:43
+432    \N    1    order    Pedido finalizado    2018-02-04 19:47:44    2018-02-04 19:47:44
+433    \N    1    motoboy    Finalizou pedido    2018-02-04 19:47:44    2018-02-04 19:47:44
+528    \N    1    motoboy    Recebeu pedido    2018-02-08 14:26:25    2018-02-08 14:26:25
+529    \N    1    order    Pedido enviado    2018-02-08 14:26:25    2018-02-08 14:26:25
+530    \N    1    motoboy    Confirmou pedido    2018-02-08 14:26:29    2018-02-08 14:26:29
+531    \N    1    order    Pedido confirmado    2018-02-08 14:26:29    2018-02-08 14:26:29
+532    \N    1    order    Pedido finalizado    2018-02-08 14:26:32    2018-02-08 14:26:32
+533    \N    1    motoboy    Finalizou pedido    2018-02-08 14:26:32    2018-02-08 14:26:32
+466    \N    1    motoboy    Recebeu pedido    2018-02-06 18:00:26    2018-02-06 18:00:26
+467    \N    1    order    Pedido enviado    2018-02-06 18:00:26    2018-02-06 18:00:26
+468    \N    1    motoboy    Confirmou pedido    2018-02-06 18:01:21    2018-02-06 18:01:21
+469    \N    1    order    Pedido confirmado    2018-02-06 18:01:21    2018-02-06 18:01:21
+471    \N    1    order    Pedido finalizado    2018-02-06 18:01:25    2018-02-06 18:01:25
+472    \N    1    motoboy    Finalizou pedido    2018-02-06 18:01:25    2018-02-06 18:01:25
+477    \N    1    motoboy    Recebeu pedido    2018-02-06 23:54:16    2018-02-06 23:54:16
+478    \N    1    order    Pedido enviado    2018-02-06 23:54:16    2018-02-06 23:54:16
+479    \N    1    motoboy    Confirmou pedido    2018-02-06 23:54:26    2018-02-06 23:54:26
+480    \N    1    order    Pedido confirmado    2018-02-06 23:54:26    2018-02-06 23:54:26
+481    \N    1    order    Pedido finalizado    2018-02-06 23:54:28    2018-02-06 23:54:28
+482    \N    1    motoboy    Finalizou pedido    2018-02-06 23:54:28    2018-02-06 23:54:28
+483    \N    1    motoboy    Recebeu pedido    2018-02-06 23:54:40    2018-02-06 23:54:40
+484    \N    1    order    Pedido enviado    2018-02-06 23:54:40    2018-02-06 23:54:40
+485    \N    1    motoboy    Cancelou pedido    2018-02-06 23:54:45    2018-02-06 23:54:45
+486    \N    1    order    Pedido cancelado    2018-02-06 23:54:45    2018-02-06 23:54:45
+487    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-06 23:54:45    2018-02-06 23:54:45
+488    \N    1    motoboy    Recebeu pedido    2018-02-06 23:59:22    2018-02-06 23:59:22
+489    \N    1    order    Pedido enviado    2018-02-06 23:59:22    2018-02-06 23:59:22
+490    \N    1    motoboy    Cancelou pedido    2018-02-06 23:59:30    2018-02-06 23:59:30
+491    \N    1    order    Pedido cancelado    2018-02-06 23:59:30    2018-02-06 23:59:30
+492    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-06 23:59:30    2018-02-06 23:59:30
+493    \N    1    motoboy    Recebeu pedido    2018-02-06 23:59:40    2018-02-06 23:59:40
+494    \N    1    order    Pedido enviado    2018-02-06 23:59:40    2018-02-06 23:59:40
+495    \N    1    motoboy    Cancelou pedido    2018-02-07 00:00:00    2018-02-07 00:00:00
+496    \N    1    order    Pedido cancelado    2018-02-07 00:00:00    2018-02-07 00:00:00
+497    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-07 00:00:00    2018-02-07 00:00:00
+502    \N    1    motoboy    Recebeu pedido    2018-02-07 05:46:53    2018-02-07 05:46:53
+503    \N    1    order    Pedido enviado    2018-02-07 05:46:53    2018-02-07 05:46:53
+504    \N    1    motoboy    Confirmou pedido    2018-02-07 05:46:59    2018-02-07 05:46:59
+505    \N    1    order    Pedido confirmado    2018-02-07 05:46:59    2018-02-07 05:46:59
+506    \N    1    order    Pedido finalizado    2018-02-07 05:47:01    2018-02-07 05:47:01
+507    \N    1    motoboy    Finalizou pedido    2018-02-07 05:47:01    2018-02-07 05:47:01
+539    \N    1    motoboy    Recebeu pedido    2018-02-08 16:03:47    2018-02-08 16:03:47
+540    \N    1    order    Pedido enviado    2018-02-08 16:03:47    2018-02-08 16:03:47
+543    \N    1    motoboy    Cancelou pedido    2018-02-08 16:04:47    2018-02-08 16:04:47
+544    \N    1    order    Motoboy cancelou pedido    2018-02-08 16:04:47    2018-02-08 16:04:47
+545    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-08 16:04:47    2018-02-08 16:04:47
+589    \N    1    motoboy    Recebeu pedido    2018-02-09 18:05:58    2018-02-09 18:05:58
+590    \N    1    order    Pedido enviado    2018-02-09 18:05:58    2018-02-09 18:05:58
+591    \N    1    motoboy    Confirmou pedido    2018-02-09 18:06:05    2018-02-09 18:06:05
+592    \N    1    order    Pedido confirmado    2018-02-09 18:06:05    2018-02-09 18:06:05
+593    \N    1    order    Pedido finalizado    2018-02-09 18:06:11    2018-02-09 18:06:11
+594    \N    1    motoboy    Finalizou pedido    2018-02-09 18:06:11    2018-02-09 18:06:11
+595    \N    1    motoboy    Recebeu pedido    2018-02-10 17:38:44    2018-02-10 17:38:44
+596    \N    1    order    Pedido enviado    2018-02-10 17:38:44    2018-02-10 17:38:44
+597    \N    1    motoboy    Confirmou pedido    2018-02-10 17:38:55    2018-02-10 17:38:55
+598    \N    1    order    Pedido confirmado    2018-02-10 17:38:55    2018-02-10 17:38:55
+599    \N    1    order    Pedido finalizado    2018-02-10 17:38:59    2018-02-10 17:38:59
+600    \N    1    motoboy    Finalizou pedido    2018-02-10 17:38:59    2018-02-10 17:38:59
+668    \N    22    motoboy    Recebeu pedido    2018-02-11 11:35:04    2018-02-11 11:35:04
+669    \N    22    order    Pedido enviado    2018-02-11 11:35:04    2018-02-11 11:35:04
+674    \N    22    motoboy    Cancelou pedido    2018-02-11 13:43:53    2018-02-11 13:43:53
+675    \N    22    order    Motoboy cancelou pedido    2018-02-11 13:43:53    2018-02-11 13:43:53
+676    \N    24    order    Pedido enviado a outro motoboy    2018-02-11 13:43:53    2018-02-11 13:43:53
+677    \N    24    motoboy    Recebeu pedido    2018-02-11 13:43:53    2018-02-11 13:43:53
+541    \N    2    motoboy    Recebeu pedido    2018-02-08 16:04:36    2018-02-08 16:04:36
+542    \N    2    order    Pedido enviado    2018-02-08 16:04:36    2018-02-08 16:04:36
+546    \N    2    motoboy    Cancelou pedido    2018-02-08 16:04:50    2018-02-08 16:04:50
+547    \N    2    order    Motoboy cancelou pedido    2018-02-08 16:04:50    2018-02-08 16:04:50
+548    \N    1    order    Pedido enviado a outro motoboy    2018-02-08 16:04:50    2018-02-08 16:04:50
+549    \N    1    motoboy    Recebeu pedido    2018-02-08 16:04:50    2018-02-08 16:04:50
+550    \N    1    motoboy    Cancelou pedido    2018-02-08 16:05:45    2018-02-08 16:05:45
+551    \N    1    order    Motoboy cancelou pedido    2018-02-08 16:05:45    2018-02-08 16:05:45
+552    \N    2    order    Pedido enviado a outro motoboy    2018-02-08 16:05:45    2018-02-08 16:05:45
+553    \N    2    motoboy    Recebeu pedido    2018-02-08 16:05:45    2018-02-08 16:05:45
+556    \N    2    motoboy    Cancelou pedido    2018-02-08 16:29:52    2018-02-08 16:29:52
+557    \N    2    order    Motoboy cancelou pedido    2018-02-08 16:29:52    2018-02-08 16:29:52
+558    \N    1    order    Pedido enviado a outro motoboy    2018-02-08 16:29:53    2018-02-08 16:29:53
+559    \N    1    motoboy    Recebeu pedido    2018-02-08 16:29:53    2018-02-08 16:29:53
+560    \N    1    motoboy    Cancelou pedido    2018-02-08 16:30:20    2018-02-08 16:30:20
+561    \N    1    order    Motoboy cancelou pedido    2018-02-08 16:30:20    2018-02-08 16:30:20
+562    \N    2    order    Pedido enviado a outro motoboy    2018-02-08 16:30:21    2018-02-08 16:30:21
+563    \N    2    motoboy    Recebeu pedido    2018-02-08 16:30:21    2018-02-08 16:30:21
+564    \N    2    motoboy    Confirmou pedido    2018-02-08 16:33:24    2018-02-08 16:33:24
+565    \N    2    order    Pedido confirmado    2018-02-08 16:33:24    2018-02-08 16:33:24
+568    \N    2    order    Pedido finalizado    2018-02-08 16:48:41    2018-02-08 16:48:41
+569    \N    2    motoboy    Finalizou pedido    2018-02-08 16:48:41    2018-02-08 16:48:41
+602    \N    3    motoboy    Recebeu pedido    2018-02-10 18:05:41    2018-02-10 18:05:41
+603    \N    3    order    Pedido enviado    2018-02-10 18:05:41    2018-02-10 18:05:41
+604    \N    3    motoboy    Confirmou pedido    2018-02-10 18:06:07    2018-02-10 18:06:07
+605    \N    3    order    Pedido confirmado    2018-02-10 18:06:07    2018-02-10 18:06:07
+606    \N    3    order    Pedido finalizado    2018-02-10 18:06:16    2018-02-10 18:06:16
+607    \N    3    motoboy    Finalizou pedido    2018-02-10 18:06:16    2018-02-10 18:06:16
+570    \N    1    motoboy    Recebeu pedido    2018-02-08 16:53:54    2018-02-08 16:53:54
+571    \N    1    order    Pedido enviado    2018-02-08 16:53:54    2018-02-08 16:53:54
+572    \N    1    motoboy    Cancelou pedido    2018-02-08 16:53:58    2018-02-08 16:53:58
+573    \N    1    order    Motoboy cancelou pedido    2018-02-08 16:53:58    2018-02-08 16:53:58
+574    \N    2    order    Pedido enviado a outro motoboy    2018-02-08 16:53:59    2018-02-08 16:53:59
+575    \N    2    motoboy    Recebeu pedido    2018-02-08 16:53:59    2018-02-08 16:53:59
+576    \N    2    motoboy    Cancelou pedido    2018-02-08 16:54:07    2018-02-08 16:54:07
+577    \N    2    order    Motoboy cancelou pedido    2018-02-08 16:54:07    2018-02-08 16:54:07
+578    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-08 16:54:07    2018-02-08 16:54:07
+580    \N    1    motoboy    Recebeu pedido    2018-02-09 17:47:44    2018-02-09 17:47:44
+581    \N    1    order    Pedido enviado    2018-02-09 17:47:44    2018-02-09 17:47:44
+582    \N    1    motoboy    Confirmou pedido    2018-02-09 17:47:50    2018-02-09 17:47:50
+583    \N    1    order    Pedido confirmado    2018-02-09 17:47:50    2018-02-09 17:47:50
+584    \N    1    order    Pedido finalizado    2018-02-09 17:47:53    2018-02-09 17:47:53
+585    \N    1    motoboy    Finalizou pedido    2018-02-09 17:47:53    2018-02-09 17:47:53
+608    \N    3    motoboy    Recebeu pedido    2018-02-10 18:25:26    2018-02-10 18:25:26
+609    \N    3    order    Pedido enviado    2018-02-10 18:25:26    2018-02-10 18:25:26
+612    \N    3    motoboy    Cancelou pedido    2018-02-10 18:38:10    2018-02-10 18:38:10
+613    \N    3    order    Motoboy cancelou pedido    2018-02-10 18:38:10    2018-02-10 18:38:10
+614    \N    1    order    Pedido enviado a outro motoboy    2018-02-10 18:38:11    2018-02-10 18:38:11
+615    \N    1    motoboy    Recebeu pedido    2018-02-10 18:38:11    2018-02-10 18:38:11
+680    \N    1    motoboy    Cancelou pedido    2018-02-11 15:22:49    2018-02-11 15:22:49
+681    \N    1    order    Motoboy cancelou pedido    2018-02-11 15:22:49    2018-02-11 15:22:49
+682    \N    \N    order    Pedido cancelado, nenhum motoboy disponível    2018-02-11 15:22:49    2018-02-11 15:22:49
+618    \N    3    motoboy    Recebeu pedido    2018-02-10 18:45:57    2018-02-10 18:45:57
+619    \N    3    order    Pedido enviado    2018-02-10 18:45:57    2018-02-10 18:45:57
+620    \N    3    motoboy    Cancelou pedido    2018-02-10 18:46:11    2018-02-10 18:46:11
+621    \N    3    order    Motoboy cancelou pedido    2018-02-10 18:46:11    2018-02-10 18:46:11
+622    \N    4    order    Pedido enviado a outro motoboy    2018-02-10 18:46:12    2018-02-10 18:46:12
+623    \N    4    motoboy    Recebeu pedido    2018-02-10 18:46:12    2018-02-10 18:46:12
+624    \N    4    motoboy    Confirmou pedido    2018-02-10 18:46:34    2018-02-10 18:46:34
+625    \N    4    order    Pedido confirmado    2018-02-10 18:46:34    2018-02-10 18:46:34
+626    \N    4    order    Pedido finalizado    2018-02-10 18:47:11    2018-02-10 18:47:11
+627    \N    4    motoboy    Finalizou pedido    2018-02-10 18:47:11    2018-02-10 18:47:11
+765    \N    1    motoboy    Ficou offline    2018-02-16 20:37:06    2018-02-16 20:37:06
+800    76    2    motoboy    Recebeu uma entrega    2018-02-16 20:54:12    2018-02-16 20:54:12
+801    76    2    order    Pedido enviado para o motoboy    2018-02-16 20:54:12    2018-02-16 20:54:12
+891    75    2    order    Motoboy cancelou pedido    2018-02-17 01:28:40    2018-02-17 01:28:40
+892    75    \N    order    Pedido cancelado e enviado para a fila. Aguardando o próximo motoboy disponível...    2018-02-17 01:28:40    2018-02-17 01:28:40
+893    75    2    motoboy    Cancelou pedido    2018-02-17 01:28:40    2018-02-17 01:28:40
+1020    86    1    order    Motoboy cancelou pedido    2018-02-17 02:51:11    2018-02-17 02:51:11
+1021    86    2    order    Pedido enviado a outro motoboy    2018-02-17 02:51:11    2018-02-17 02:51:11
+1022    86    2    motoboy    Recebeu pedido    2018-02-17 02:51:11    2018-02-17 02:51:11
+1023    86    1    motoboy    Cancelou pedido    2018-02-17 02:51:11    2018-02-17 02:51:11
+1031    86    1    motoboy    Confirmou pedido    2018-02-17 02:51:30    2018-02-17 02:51:30
+1032    86    1    order    Pedido confirmado    2018-02-17 02:51:30    2018-02-17 02:51:30
+1041    89    \N    order    Nenhum motoboy disponível, pedido enviado para a fila.    2018-02-17 02:51:45    2018-02-17 02:51:45
+1075    88    1    motoboy    Recebeu uma entrega    2018-02-17 02:52:41    2018-02-17 02:52:41
+1076    88    1    order    Pedido enviado para o motoboy    2018-02-17 02:52:41    2018-02-17 02:52:41
+1085    90    2    motoboy    Confirmou pedido    2018-02-17 02:53:00    2018-02-17 02:53:00
+1086    90    2    order    Pedido confirmado    2018-02-17 02:53:00    2018-02-17 02:53:00
+1113    91    1    motoboy    Recebeu uma entrega    2018-02-17 02:53:46    2018-02-17 02:53:46
+1114    91    1    order    Pedido enviado para o motoboy    2018-02-17 02:53:46    2018-02-17 02:53:46
+1209    103    1    motoboy    Recebeu pedido    2018-02-20 13:15:23    2018-02-20 13:15:23
+1210    103    1    order    Pedido enviado para o motoboy    2018-02-20 13:15:23    2018-02-20 13:15:23
+1215    103    1    motoboy    Confirmou pedido    2018-02-20 13:15:44    2018-02-20 13:15:44
+1216    103    1    order    Pedido confirmado    2018-02-20 13:15:44    2018-02-20 13:15:44
+1254    104    1    motoboy    Recebeu uma entrega    2018-02-20 13:28:04    2018-02-20 13:28:04
+1255    104    1    order    Pedido enviado para o motoboy    2018-02-20 13:28:04    2018-02-20 13:28:04
+1261    \N    1    motoboy    Ficou online    2018-02-20 13:31:40    2018-02-20 13:31:40
+1301    108    2    order    Pedido finalizado    2018-02-20 14:03:14    2018-02-20 14:03:14
+1302    108    2    motoboy    Finalizou pedido    2018-02-20 14:03:14    2018-02-20 14:03:14
+1304    \N    2    motoboy    Ficou online    2018-02-20 14:03:19    2018-02-20 14:03:19
+1377    \N    1    motoboy    Ficou offline    2018-02-21 09:56:05    2018-02-21 09:56:05
+1386    \N    1    motoboy    Ficou online    2018-02-21 10:09:10    2018-02-21 10:09:10
+1394    116    2    motoboy    Recebeu pedido    2018-02-21 10:20:33    2018-02-21 10:20:33
+1395    116    2    order    Pedido enviado para o motoboy    2018-02-21 10:20:33    2018-02-21 10:20:33
+1410    116    2    motoboy    Confirmou pedido    2018-02-21 10:23:22    2018-02-21 10:23:22
+1411    116    2    order    Pedido confirmado    2018-02-21 10:23:22    2018-02-21 10:23:22
+\.
+
+
+--
+-- Name: history_id_seq; Type: SEQUENCE SET; Schema: public; Owner: nanobox
+--
+
+SELECT pg_catalog.setval('history_id_seq', 1459, true);
+
+
+--
+-- Data for Name: locations; Type: TABLE DATA; Schema: public; Owner: nanobox
+--
+
+COPY locations (id, customer_id, company_id, name, street, number, neighborhood, zipcode, complement, reference, city, uf, lat, lng, formatted_address, formatted_phone_number, google_place_id, used_count, last_used_at) FROM stdin;
+\.
+
+
+--
+-- Name: locations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: nanobox
+--
+
+SELECT pg_catalog.setval('locations_id_seq', 6, true);
+
+
+--
+-- Data for Name: motoboy_geolocations; Type: TABLE DATA; Schema: public; Owner: nanobox
+--
+
+COPY motoboy_geolocations (id, motoboy_id, lat, lng, inserted_at, updated_at) FROM stdin;
+1    1    -25.5501958    -54.5898317    2018-02-16 05:49:46    2018-02-16 05:49:46
+2    1    -25.5501062    -54.58999907    2018-02-16 05:52:28    2018-02-16 05:52:28
+3    1    -25.55022282    -54.58968313    2018-02-16 05:53:06    2018-02-16 05:53:06
+4    1    -25.55002906    -54.58981096    2018-02-16 06:07:58    2018-02-16 06:07:58
+5    1    -25.55017263    -54.58988853    2018-02-16 06:09:25    2018-02-16 06:09:25
+6    1    -25.55013289    -54.58983568    2018-02-16 06:14:56    2018-02-16 06:14:56
+7    1    -25.55010053    -54.5898584    2018-02-16 06:15:39    2018-02-16 06:15:39
+8    1    -25.55019298    -54.59000302    2018-02-16 06:16:32    2018-02-16 06:16:32
+9    1    -25.5502556    -54.589887    2018-02-16 06:54:15    2018-02-16 06:54:15
+10    1    -25.55027869    -54.58967792    2018-02-16 06:56:54    2018-02-16 06:56:54
+11    1    -25.55010191    -54.58995873    2018-02-16 07:08:15    2018-02-16 07:08:15
+12    1    -25.5505024    -54.59023613    2018-02-16 07:22:54    2018-02-16 07:22:54
+13    1    -25.55060848    -54.59062674    2018-02-16 07:33:36    2018-02-16 07:33:36
+14    1    -25.55070089    -54.5896019    2018-02-16 07:44:12    2018-02-16 07:44:12
+15    1    -25.55023919    -54.58991535    2018-02-16 07:54:46    2018-02-16 07:54:46
+16    1    -25.5499024    -54.58961233    2018-02-16 08:05:37    2018-02-16 08:05:37
+17    1    -25.54963256    -54.58957434    2018-02-16 08:05:42    2018-02-16 08:05:42
+18    1    -25.55045905    -54.59031009    2018-02-16 08:15:55    2018-02-16 08:15:55
+19    1    -25.55028091    -54.58921667    2018-02-16 08:27:10    2018-02-16 08:27:10
+20    1    -25.55020024    -54.59024202    2018-02-16 08:37:23    2018-02-16 08:37:23
+21    1    -25.55017923    -54.58984184    2018-02-16 08:47:33    2018-02-16 08:47:33
+22    1    -25.54973175    -54.59029844    2018-02-16 08:57:52    2018-02-16 08:57:52
+23    1    -25.55026889    -54.59007405    2018-02-16 09:08:37    2018-02-16 09:08:37
+24    1    -25.55006498    -54.5891756    2018-02-16 09:33:34    2018-02-16 09:33:34
+25    1    -25.55054062    -54.59012485    2018-02-16 09:44:25    2018-02-16 09:44:25
+26    1    -25.54980388    -54.59078451    2018-02-16 09:55:31    2018-02-16 09:55:31
+27    1    -25.55069703    -54.58893101    2018-02-16 10:15:25    2018-02-16 10:15:25
+28    1    -25.55024101    -54.58934604    2018-02-16 10:28:24    2018-02-16 10:28:24
+29    1    -25.55034488    -54.58904257    2018-02-16 10:40:04    2018-02-16 10:40:04
+30    1    -25.54999377    -54.58963671    2018-02-16 10:50:44    2018-02-16 10:50:44
+31    1    -25.55032527    -54.58990325    2018-02-16 11:01:14    2018-02-16 11:01:14
+32    1    -25.55008247    -54.58970338    2018-02-16 11:12:55    2018-02-16 11:12:55
+33    1    -25.55070849    -54.58911954    2018-02-16 11:24:27    2018-02-16 11:24:27
+34    1    -25.55032654    -54.58867077    2018-02-16 11:44:36    2018-02-16 11:44:36
+35    1    -25.55007706    -54.58988334    2018-02-16 11:55:00    2018-02-16 11:55:00
+36    1    -25.55029517    -54.59010174    2018-02-16 12:05:34    2018-02-16 12:05:34
+37    1    -25.54984055    -54.590018    2018-02-16 12:16:56    2018-02-16 12:16:56
+38    1    -25.55019687    -54.58965362    2018-02-16 12:29:37    2018-02-16 12:29:37
+39    1    -25.5495214    -54.58942988    2018-02-16 12:41:19    2018-02-16 12:41:19
+40    1    -25.55045758    -54.58918841    2018-02-16 12:52:01    2018-02-16 12:52:01
+41    1    -25.55003373    -54.58957782    2018-02-16 13:03:28    2018-02-16 13:03:28
+42    1    -25.55076216    -54.5879886    2018-02-16 13:16:04    2018-02-16 13:16:04
+43    1    -25.54986977    -54.58914271    2018-02-16 13:26:51    2018-02-16 13:26:51
+44    1    -25.55043211    -54.58967886    2018-02-16 13:38:10    2018-02-16 13:38:10
+45    1    -25.55052219    -54.5904532    2018-02-16 13:48:39    2018-02-16 13:48:39
+46    1    -25.55033914    -54.58966726    2018-02-16 13:59:19    2018-02-16 13:59:19
+47    1    -25.55031132    -54.58927441    2018-02-16 14:11:31    2018-02-16 14:11:31
+48    1    -25.549973    -54.59036258    2018-02-16 14:23:22    2018-02-16 14:23:22
+49    1    -25.54982324    -54.58990804    2018-02-16 18:30:01    2018-02-16 18:30:01
+50    2    -25.550115    -54.5897032    2018-02-16 19:44:23    2018-02-16 19:44:23
+51    2    -25.5502316    -54.5899103    2018-02-16 19:45:59    2018-02-16 19:45:59
+52    2    -25.550097    -54.5896229    2018-02-16 20:09:00    2018-02-16 20:09:00
+53    2    -25.55025    -54.5899254    2018-02-16 20:35:36    2018-02-16 20:35:36
+54    1    -25.5501418    -54.5897335    2018-02-16 20:36:50    2018-02-16 20:36:50
+55    1    -25.5502472    -54.5898987    2018-02-16 20:38:30    2018-02-16 20:38:30
+56    2    -25.5500789    -54.5896834    2018-02-16 20:49:50    2018-02-16 20:49:50
+57    2    -25.5502593    -54.5899185    2018-02-16 20:53:47    2018-02-16 20:53:47
+58    2    -25.5502815    -54.5899289    2018-02-16 20:57:09    2018-02-16 20:57:09
+59    1    -25.55029366    -54.58954755    2018-02-16 21:06:45    2018-02-16 21:06:45
+60    2    -25.5499824    -54.5895955    2018-02-16 21:26:49    2018-02-16 21:26:49
+61    1    -25.55039701    -54.58997644    2018-02-16 21:32:30    2018-02-16 21:32:30
+62    2    -25.5501188    -54.5897417    2018-02-17 01:28:47    2018-02-17 01:28:47
+63    1    -25.5502623    -54.5898944    2018-02-17 01:29:05    2018-02-17 01:29:05
+64    2    -25.550094    -54.5896332    2018-02-17 01:30:26    2018-02-17 01:30:26
+65    1    -25.5503181    -54.5898977    2018-02-17 01:31:06    2018-02-17 01:31:06
+66    1    -25.55024311    -54.58934759    2018-02-17 01:56:42    2018-02-17 01:56:42
+67    2    -25.550259    -54.5899013    2018-02-17 02:21:05    2018-02-17 02:21:05
+68    2    -25.5500626    -54.5896124    2018-02-17 02:35:20    2018-02-17 02:35:20
+69    1    -25.55010888    -54.58966683    2018-02-17 02:40:59    2018-02-17 02:40:59
+70    2    -25.5502975    -54.5898931    2018-02-17 02:49:50    2018-02-17 02:49:50
+71    2    -25.5499627    -54.5894597    2018-02-17 03:15:05    2018-02-17 03:15:05
+72    2    -25.5502231    -54.5898439    2018-02-17 03:30:04    2018-02-17 03:30:04
+73    2    -25.5500766    -54.589571    2018-02-17 03:59:35    2018-02-17 03:59:35
+74    2    -25.55025    -54.5898643    2018-02-17 04:24:39    2018-02-17 04:24:39
+75    2    -25.5500527    -54.5896187    2018-02-17 04:44:36    2018-02-17 04:44:36
+76    2    -25.5502477    -54.5898691    2018-02-17 05:44:38    2018-02-17 05:44:38
+77    2    -25.549981    -54.5893792    2018-02-17 05:54:39    2018-02-17 05:54:39
+78    2    -25.5502094    -54.589898    2018-02-17 06:09:31    2018-02-17 06:09:31
+79    2    -25.5500843    -54.5896101    2018-02-17 06:34:35    2018-02-17 06:34:35
+80    2    -25.5502208    -54.5898848    2018-02-17 06:54:41    2018-02-17 06:54:41
+81    2    -25.550098    -54.5895332    2018-02-17 07:09:33    2018-02-17 07:09:33
+82    2    -25.5502441    -54.589917    2018-02-17 07:24:41    2018-02-17 07:24:41
+83    2    -25.5500498    -54.5895742    2018-02-17 07:44:41    2018-02-17 07:44:41
+84    2    -25.5502266    -54.5898608    2018-02-17 07:59:41    2018-02-17 07:59:41
+85    2    -25.5499425    -54.5894351    2018-02-17 08:47:47    2018-02-17 08:47:47
+86    2    -25.550188    -54.5898066    2018-02-17 08:58:52    2018-02-17 08:58:52
+87    2    -25.5499383    -54.5894533    2018-02-17 09:43:51    2018-02-17 09:43:51
+88    2    -25.5502484    -54.5898828    2018-02-17 09:59:01    2018-02-17 09:59:01
+89    2    -25.5501445    -54.5895795    2018-02-17 11:09:05    2018-02-17 11:09:05
+90    2    -25.5502461    -54.5898634    2018-02-17 11:29:09    2018-02-17 11:29:09
+91    2    -25.5500551    -54.5890799    2018-02-17 12:07:57    2018-02-17 12:07:57
+92    2    -25.5501792    -54.5896758    2018-02-17 12:18:42    2018-02-17 12:18:42
+93    2    -25.5499743    -54.589385    2018-02-17 12:33:38    2018-02-17 12:33:38
+94    2    -25.5502116    -54.5897862    2018-02-17 12:48:34    2018-02-17 12:48:34
+95    2    -25.5501275    -54.5894257    2018-02-17 13:33:21    2018-02-17 13:33:21
+96    2    -25.5502284    -54.5899023    2018-02-17 13:58:31    2018-02-17 13:58:31
+97    2    -25.5500683    -54.5893494    2018-02-17 15:32:05    2018-02-17 15:32:05
+98    2    -25.550106    -54.589715    2018-02-17 15:47:07    2018-02-17 15:47:07
+99    2    -25.5499419    -54.5891381    2018-02-17 16:52:06    2018-02-17 16:52:06
+100    2    -25.5502415    -54.5898986    2018-02-17 17:02:14    2018-02-17 17:02:14
+101    2    -25.5500427    -54.5896245    2018-02-17 17:56:59    2018-02-17 17:56:59
+102    2    -25.5502559    -54.5898985    2018-02-17 18:07:01    2018-02-17 18:07:01
+103    2    -25.55006    -54.5896775    2018-02-17 18:17:19    2018-02-17 18:17:19
+104    2    -25.550268    -54.58992    2018-02-17 19:07:07    2018-02-17 19:07:07
+105    2    -25.5500425    -54.5895802    2018-02-17 19:32:05    2018-02-17 19:32:05
+106    2    -25.5502527    -54.5899253    2018-02-17 20:12:00    2018-02-17 20:12:00
+107    2    -25.5501881    -54.5896023    2018-02-17 20:32:26    2018-02-17 20:32:26
+108    2    -25.549934    -54.5892642    2018-02-17 21:12:05    2018-02-17 21:12:05
+109    2    -25.5501175    -54.5897235    2018-02-17 21:22:05    2018-02-17 21:22:05
+110    2    -25.5502766    -54.5899791    2018-02-17 23:07:07    2018-02-17 23:07:07
+111    2    -25.550071    -54.5896972    2018-02-17 23:22:05    2018-02-17 23:22:05
+112    2    -25.5502716    -54.5899197    2018-02-18 01:17:05    2018-02-18 01:17:05
+113    2    -25.5500681    -54.5896466    2018-02-18 01:37:06    2018-02-18 01:37:06
+114    2    -25.5502608    -54.5899105    2018-02-18 01:52:04    2018-02-18 01:52:04
+115    2    -25.5500664    -54.5896441    2018-02-18 02:02:06    2018-02-18 02:02:06
+116    2    -25.5502526    -54.5898694    2018-02-18 02:27:04    2018-02-18 02:27:04
+117    2    -25.5500245    -54.5896387    2018-02-18 02:37:04    2018-02-18 02:37:04
+118    2    -25.5502671    -54.5899209    2018-02-18 03:22:04    2018-02-18 03:22:04
+119    2    -25.5500209    -54.5896137    2018-02-18 03:42:01    2018-02-18 03:42:01
+120    2    -25.5502452    -54.5898815    2018-02-18 03:57:06    2018-02-18 03:57:06
+121    2    -25.5500231    -54.5896391    2018-02-18 04:22:04    2018-02-18 04:22:04
+122    2    -25.5502468    -54.5898801    2018-02-18 04:32:07    2018-02-18 04:32:07
+123    2    -25.5500737    -54.5896034    2018-02-18 06:07:04    2018-02-18 06:07:04
+124    2    -25.5502536    -54.5899374    2018-02-18 06:17:04    2018-02-18 06:17:04
+125    2    -25.5500966    -54.5896551    2018-02-18 06:52:04    2018-02-18 06:52:04
+126    2    -25.5502387    -54.5899382    2018-02-18 07:17:05    2018-02-18 07:17:05
+127    2    -25.550078    -54.5895989    2018-02-18 08:46:20    2018-02-18 08:46:20
+128    2    -25.5502329    -54.5898573    2018-02-18 09:05:21    2018-02-18 09:05:21
+129    2    -25.5500467    -54.589579    2018-02-18 12:00:31    2018-02-18 12:00:31
+130    2    -25.5502175    -54.5898211    2018-02-18 12:10:32    2018-02-18 12:10:32
+131    2    -25.5499655    -54.5895348    2018-02-18 12:30:35    2018-02-18 12:30:35
+132    2    -25.5502453    -54.5898799    2018-02-18 12:50:34    2018-02-18 12:50:34
+133    2    -25.5499935    -54.5895714    2018-02-18 13:10:34    2018-02-18 13:10:34
+134    2    -25.5502344    -54.5898434    2018-02-18 13:20:35    2018-02-18 13:20:35
+135    2    -25.5501191    -54.58927    2018-02-18 14:05:17    2018-02-18 14:05:17
+136    2    -25.5500575    -54.5896719    2018-02-18 14:15:34    2018-02-18 14:15:34
+137    2    -25.5502491    -54.5899124    2018-02-18 14:30:34    2018-02-18 14:30:34
+138    2    -25.5500733    -54.5896719    2018-02-18 15:05:38    2018-02-18 15:05:38
+139    2    -25.5502439    -54.5899365    2018-02-18 15:25:38    2018-02-18 15:25:38
+140    2    -25.5500701    -54.5895901    2018-02-18 15:35:40    2018-02-18 15:35:40
+141    2    -25.5502412    -54.5898533    2018-02-18 15:50:39    2018-02-18 15:50:39
+142    2    -25.5500605    -54.5896205    2018-02-18 16:10:39    2018-02-18 16:10:39
+143    2    -25.5502591    -54.5898628    2018-02-18 16:20:40    2018-02-18 16:20:40
+144    2    -25.5500432    -54.5896009    2018-02-18 16:40:39    2018-02-18 16:40:39
+145    2    -25.5502401    -54.5899321    2018-02-18 16:50:41    2018-02-18 16:50:41
+146    2    -25.5500205    -54.5896093    2018-02-18 17:25:40    2018-02-18 17:25:40
+147    2    -25.5502477    -54.589896    2018-02-18 17:35:42    2018-02-18 17:35:42
+148    2    -25.5500669    -54.5895798    2018-02-18 18:00:32    2018-02-18 18:00:32
+149    2    -25.5502406    -54.5899192    2018-02-18 18:20:43    2018-02-18 18:20:43
+150    2    -25.5500686    -54.5895904    2018-02-18 18:35:44    2018-02-18 18:35:44
+151    2    -25.5502619    -54.5899004    2018-02-18 18:55:44    2018-02-18 18:55:44
+152    2    -25.550061    -54.5895747    2018-02-18 19:20:45    2018-02-18 19:20:45
+153    2    -25.5502567    -54.5899188    2018-02-18 19:35:46    2018-02-18 19:35:46
+154    2    -25.5500913    -54.5896427    2018-02-18 19:50:46    2018-02-18 19:50:46
+155    2    -25.550253    -54.5899367    2018-02-18 20:05:48    2018-02-18 20:05:48
+156    2    -25.5500494    -54.5895561    2018-02-18 20:20:48    2018-02-18 20:20:48
+157    2    -25.5502911    -54.5899001    2018-02-18 20:50:30    2018-02-18 20:50:30
+158    1    -25.536522    -54.57905766    2018-02-18 21:07:22    2018-02-18 21:07:22
+159    2    -25.5363251    -54.5791083    2018-02-18 21:08:06    2018-02-18 21:08:06
+160    2    -25.5363131    -54.5790981    2018-02-18 21:10:25    2018-02-18 21:10:25
+161    2    -25.5365088    -54.5789481    2018-02-18 21:13:22    2018-02-18 21:13:22
+162    2    -25.5364811    -54.5789762    2018-02-18 21:14:44    2018-02-18 21:14:44
+163    2    -25.5372387    -54.5761938    2018-02-18 21:27:07    2018-02-18 21:27:07
+164    2    -25.5375606    -54.576212    2018-02-18 21:39:49    2018-02-18 21:39:49
+165    2    -25.5501002    -54.5895823    2018-02-18 22:02:27    2018-02-18 22:02:27
+166    2    -25.5502669    -54.5898788    2018-02-18 22:24:33    2018-02-18 22:24:33
+167    2    -25.5500828    -54.589655    2018-02-18 22:48:36    2018-02-18 22:48:36
+168    2    -25.5502584    -54.5899082    2018-02-19 02:18:50    2018-02-19 02:18:50
+169    2    -25.5500379    -54.5896126    2018-02-19 02:38:52    2018-02-19 02:38:52
+170    2    -25.5502805    -54.5899176    2018-02-19 02:53:53    2018-02-19 02:53:53
+171    2    -25.5502351    -54.589919    2018-02-19 12:55:20    2018-02-19 12:55:20
+172    2    -25.5502159    -54.5899219    2018-02-19 12:56:50    2018-02-19 12:56:50
+173    2    -25.550023    -54.589668    2018-02-19 15:30:41    2018-02-19 15:30:41
+174    2    -25.5502241    -54.5899487    2018-02-19 15:40:40    2018-02-19 15:40:40
+175    2    -25.549986    -54.5897555    2018-02-19 16:11:38    2018-02-19 16:11:38
+176    2    -25.5502157    -54.5899204    2018-02-20 13:14:10    2018-02-20 13:14:10
+177    1    -25.5501449    -54.5897295    2018-02-20 13:14:27    2018-02-20 13:14:27
+178    2    -25.5502235    -54.589929    2018-02-20 13:15:39    2018-02-20 13:15:39
+179    1    -25.54970961    -54.58878584    2018-02-20 13:16:29    2018-02-20 13:16:29
+180    1    -25.5501023    -54.58999588    2018-02-20 13:19:54    2018-02-20 13:19:54
+181    1    -25.55016548    -54.58920963    2018-02-20 13:24:54    2018-02-20 13:24:54
+182    1    -25.55021041    -54.58980454    2018-02-20 13:31:29    2018-02-20 13:31:29
+183    1    -25.55017377    -54.5898266    2018-02-20 13:37:33    2018-02-20 13:37:33
+184    2    -25.5501995    -54.5899073    2018-02-20 13:38:21    2018-02-20 13:38:21
+185    2    -25.550209    -54.589913    2018-02-20 13:39:47    2018-02-20 13:39:47
+186    1    -25.55018854    -54.58982868    2018-02-20 13:42:08    2018-02-20 13:42:08
+187    1    -25.55019982    -54.58984324    2018-02-20 13:43:25    2018-02-20 13:43:25
+188    1    -25.55044609    -54.58911923    2018-02-20 14:02:46    2018-02-20 14:02:46
+189    2    -25.5502161    -54.5899267    2018-02-20 14:03:04    2018-02-20 14:03:04
+190    1    -25.55021528    -54.5899117    2018-02-20 14:04:04    2018-02-20 14:04:04
+191    2    -25.5502282    -54.5899482    2018-02-20 14:04:32    2018-02-20 14:04:32
+192    2    -25.5366068    -54.5791341    2018-02-20 14:38:39    2018-02-20 14:38:39
+193    1    -25.53647551    -54.57919034    2018-02-20 14:49:34    2018-02-20 14:49:34
+194    2    -25.5369736    -54.5790594    2018-02-20 15:14:25    2018-02-20 15:14:25
+195    2    -25.5499649    -54.5899324    2018-02-20 15:25:14    2018-02-20 15:25:14
+196    2    -25.5502414    -54.5897653    2018-02-20 16:53:27    2018-02-20 16:53:27
+197    33    -25.536551666666664    -54.57970999999999    2018-02-20 18:46:38    2018-02-20 18:46:38
+198    33    -25.536575000000003    -54.57928833333334    2018-02-20 18:47:41    2018-02-20 18:47:41
+199    33    -25.53652833333333    -54.57913666666666    2018-02-20 18:48:28    2018-02-20 18:48:28
+200    33    -25.536476666666665    -54.57917666666667    2018-02-20 18:48:46    2018-02-20 18:48:46
+201    34    -25.5352427    -54.5728643    2018-02-20 19:25:23    2018-02-20 19:25:23
+202    33    -25.536461666666664    -54.57895666666666    2018-02-20 19:40:49    2018-02-20 19:40:49
+203    33    -25.536433333333335    -54.57863166666666    2018-02-20 19:41:58    2018-02-20 19:41:58
+204    33    -25.536550000000002    -54.57908333333333    2018-02-20 19:52:00    2018-02-20 19:52:00
+205    33    -25.495508333333337    -54.57421166666666    2018-02-20 20:42:00    2018-02-20 20:42:00
+206    33    -25.49257    -54.581535    2018-02-20 20:47:33    2018-02-20 20:47:33
+207    33    -25.49258166666667    -54.58153333333333    2018-02-20 20:48:42    2018-02-20 20:48:42
+208    1    -25.5502247    -54.5899479    2018-02-21 09:26:42    2018-02-21 09:26:42
+209    1    -25.5502406    -54.5899528    2018-02-21 09:27:35    2018-02-21 09:27:35
+210    2    -25.5502348    -54.5899601    2018-02-21 09:28:52    2018-02-21 09:28:52
+211    1    -25.5502412    -54.5899657    2018-02-21 09:30:06    2018-02-21 09:30:06
+212    2    -25.5502205    -54.5899382    2018-02-21 09:30:19    2018-02-21 09:30:19
+213    1    -25.550238    -54.5899682    2018-02-21 09:31:36    2018-02-21 09:31:36
+214    1    -25.5502341    -54.5899672    2018-02-21 09:48:04    2018-02-21 09:48:04
+215    2    -25.5501678    -54.5897601    2018-02-21 10:07:16    2018-02-21 10:07:16
+216    2    -25.5501704    -54.5898138    2018-02-21 10:09:14    2018-02-21 10:09:14
+217    1    -25.55040654    -54.58972192    2018-02-21 10:20:10    2018-02-21 10:20:10
+218    1    -25.5502337    -54.5899528    2018-02-21 10:21:35    2018-02-21 10:21:35
+219    1    -25.550142    -54.589733    2018-02-21 10:23:02    2018-02-21 10:23:02
+220    1    -25.55017608    -54.59014541    2018-02-21 10:24:39    2018-02-21 10:24:39
+221    33    -25.536675    -54.579043333333324    2018-02-21 11:59:15    2018-02-21 11:59:15
+222    33    -25.53678    -54.57921666666666    2018-02-21 12:00:40    2018-02-21 12:00:40
+223    33    -25.536816666666663    -54.57892166666667    2018-02-21 12:02:38    2018-02-21 12:02:38
+224    33    -25.492645    -54.581738333333334    2018-02-21 23:41:28    2018-02-21 23:41:28
+225    30    -25.52288042    -54.58843397    2018-02-22 10:47:31    2018-02-22 10:47:31
+226    33    -25.492348333333332    -54.58163    2018-02-22 22:35:35    2018-02-22 22:35:35
+227    33    -25.4925084    -54.5815668    2018-02-25 17:13:52    2018-02-25 17:13:52
+228    30    -25.5228468    -54.58865366    2018-03-02 23:12:43    2018-03-02 23:12:43
+229    1    -24.964402    -53.4631024    2018-03-08 20:09:17    2018-03-08 20:09:17
+230    2    -24.964415    -53.4630996    2018-03-08 20:13:46    2018-03-08 20:13:46
+231    1    -24.9645182    -53.4629441    2018-03-08 20:14:38    2018-03-08 20:14:38
+232    2    -24.964408    -53.4631036    2018-03-08 20:15:18    2018-03-08 20:15:18
+233    1    -24.9645182    -53.4629441    2018-03-08 20:16:18    2018-03-08 20:16:18
+234    2    -25.5501947    -54.5899581    2018-03-09 00:37:30    2018-03-09 00:37:30
+\.
+
+
+--
+-- Name: motoboy_geolocations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: nanobox
+--
+
+SELECT pg_catalog.setval('motoboy_geolocations_id_seq', 234, true);
+
+
+--
+-- Name: motoboys_id_seq; Type: SEQUENCE SET; Schema: public; Owner: nanobox
+--
+
+SELECT pg_catalog.setval('motoboys_id_seq', 34, true);
+
+
+--
+-- Data for Name: order_cancelations; Type: TABLE DATA; Schema: public; Owner: nanobox
+--
+
+COPY order_cancelations (id, order_id, motoboy_id, reason, has_order_in_hands, lat, lng, inserted_at, updated_at) FROM stdin;
+1    75    2    Acidente de trânsito    t    -25.5499824    -25.5499824    2018-02-16 21:32:08    2018-02-16 21:32:08
+2    79    1    Acidente de trânsito    f    -25.55039701    -25.55039701    2018-02-16 21:33:00    2018-02-16 21:33:00
+3    75    1    Acidente de trânsito    t    -25.55039701    -25.55039701    2018-02-17 01:28:51    2018-02-17 01:28:51
+4    75    2    A moto quebrou    f    -25.5501188    -25.5501188    2018-02-17 01:29:11    2018-02-17 01:29:11
+5    75    1    A moto quebrou    f    -25.5502623    -25.5502623    2018-02-17 01:29:41    2018-02-17 01:29:41
+6    75    2    Acidente de trânsito    t    -25.550094    -25.550094    2018-02-17 01:39:13    2018-02-17 01:39:13
+7    75    1    Acidente de trânsito    t    -25.5503181    -25.5503181    2018-02-17 01:47:42    2018-02-17 01:47:42
+8    81    1    Acidente de trânsito    t    -25.55024311    -25.55024311    2018-02-17 01:59:41    2018-02-17 01:59:41
+9    86    2    Acidente de trânsito    t    -25.5502975    -25.5502975    2018-02-17 02:51:24    2018-02-17 02:51:24
+10    89    2    Acidente de trânsito    t    -25.5502975    -25.5502975    2018-02-17 02:52:12    2018-02-17 02:52:12
+11    88    1    Acidente de trânsito    t    -25.55010888    -25.55010888    2018-02-17 02:52:35    2018-02-17 02:52:35
+12    91    1    Acidente de trânsito    t    -25.55010888    -25.55010888    2018-02-17 02:53:34    2018-02-17 02:53:34
+13    103    1    Acidente de trânsito    t    -25.5501449    -25.5501449    2018-02-20 13:15:56    2018-02-20 13:15:56
+14    108    1    A moto quebrou    t    -25.55044609    -25.55044609    2018-02-20 14:02:54    2018-02-20 14:02:54
+15    116    2    A moto quebrou    t    -25.5501704    -25.5501704    2018-02-21 10:22:27    2018-02-21 10:22:27
+16    119    2    Acidente de trânsito    t    -24.964408    -24.964408    2018-03-08 20:16:55    2018-03-08 20:16:55
+\.
+
+
+--
+-- Name: order_cancelations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: nanobox
+--
+
+SELECT pg_catalog.setval('order_cancelations_id_seq', 16, true);
+
+
+--
+-- Name: orders_id_seq; Type: SEQUENCE SET; Schema: public; Owner: nanobox
+--
+
+SELECT pg_catalog.setval('orders_id_seq', 119, true);
+
+
+--
+-- Data for Name: schema_migrations; Type: TABLE DATA; Schema: public; Owner: nanobox
+--
+
+COPY schema_migrations (version, inserted_at) FROM stdin;
+20171103113420    2018-02-02 18:56:24.93223
+20180211043537    2018-02-13 04:41:02.5525
+20180211050708    2018-02-13 04:41:02.602512
+20180211175108    2018-02-13 04:41:02.724522
+20180213050953    2018-02-13 22:28:28.172707
+20180213062321    2018-02-13 22:28:28.239727
+20180213135940    2018-02-13 22:28:28.262707
+20180213213809    2018-02-13 22:28:28.284713
+20180215041800    2018-02-15 14:11:30.929974
+20180216150727    2018-02-16 18:12:03.474652
+20180216171850    2018-02-16 18:12:03.523162
+20180217102056    2018-02-17 14:11:17.462583
+20180217135720    2018-02-17 14:11:17.569962
+\.
+
+
+--
+-- Data for Name: stops; Type: TABLE DATA; Schema: public; Owner: nanobox
+--
+
+COPY stops (id, order_id, sequence, instructions, street, number, neighborhood, zipcode, complement, reference, city, uf, lat, lng, address, google_place_id) FROM stdin;
+68    68    0    Falar com o responsável    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+69    68    1    aqui    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N
+70    68    2    fazer nada    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N
+71    69    0    Falar com o responsável    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+72    70    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+73    71    0    Nada nada nada nada....    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+74    72    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+75    73    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+76    74    0    Sai dai doida    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+77    75    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+78    76    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+79    77    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+80    78    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+81    79    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+82    80    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+83    81    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+84    82    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+85    83    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+86    84    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+87    85    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+88    86    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+89    87    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+90    88    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+91    89    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+92    90    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+93    91    0    \N    Rua Sem nome    s/n    Centro    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+94    92    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+95    93    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+96    94    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+97    95    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+98    96    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+99    97    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+100    98    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+101    99    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+102    100    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+103    101    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+104    102    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+105    103    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+106    104    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+107    105    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+108    106    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+109    107    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+110    108    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+111    109    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+112    110    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+113    111    0    Pegar pedido em nome de Rafael    \N    \N    \N    \N    \N    \N    \N    \N    -5.8723353    -35.18047419999999    Camarões Restaurante - Avenida Engenheiro Roberto Freire - Ponta Negra, Natal - RN, Brasil    ChIJWbvTVSX_sgcRzyw84ymnSh8
+114    111    1    Ligar na portaria    \N    \N    \N    \N    apt 1502, bloco B    Próximo a Cabo telecom    \N    \N    -5.8365361    -35.213800900000024    Rua Lafayette Lamartine, 1876 - Candelária, Natal - RN, Brasil    EjlSdWEgTGFmYXlldHRlIExhbWFydGluZSAtIENhbmRlbMOhcmlhLCBOYXRhbCAtIFJOLCBCcmFzaWw
+115    112    0    Pegar pedido    \N    \N    \N    \N    Shopping Catuai Palladium    \N    \N    \N    -25.568924    -54.5583532    Menta Limão - Avenida das Cataratas - Vila Yolanda, Foz do Iguaçu - PR, Brasil    ChIJxU2EnXCR9pQR2GF5_epttdg
+116    112    1    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N
+117    113    0    \N    \N    \N    \N    \N    \N    \N    \N    \N    -5.8723353    -35.18047419999999    Camarões Restaurante - Avenida Engenheiro Roberto Freire - Ponta Negra, Natal - RN, Brasil    ChIJWbvTVSX_sgcRzyw84ymnSh8
+118    114    0    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N
+119    115    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+120    115    1    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N    \N
+121    116    0    \N    \N    \N    \N    \N    \N    Perto de casa    \N    \N    \N    \N    \N    \N
+122    117    0    Pegar pedido em nome de Rafael    \N    \N    \N    \N    \N    \N    \N    \N    -5.8723353    -35.18047419999999    Camarões Restaurante - Avenida Engenheiro Roberto Freire - Ponta Negra, Natal - RN, Brasil    ChIJWbvTVSX_sgcRzyw84ymnSh8
+123    117    1    Tocar interfone no apt 501    \N    \N    \N    \N    apt 501    \N    \N    \N    -25.5520211    -54.589809100000025    Rua Dom Pedro II, 519 - Centro, Foz do Iguaçu - PR, Brasil    EjtSdWEgRG9tIFBlZHJvIElJLCA1MTkgLSBDZW50cm8sIEZveiBkbyBJZ3Vhw6d1IC0gUFIsIEJyYXNpbA
+124    118    0    \N    \N    \N    \N    \N    \N    \N    \N    \N    -5.8723353    -35.18047419999999    Camarões Restaurante - Avenida Engenheiro Roberto Freire - Ponta Negra, Natal - RN, Brasil    ChIJWbvTVSX_sgcRzyw84ymnSh8
+125    119    0    \N    \N    \N    \N    \N    \N    \N    \N    \N    -5.8723353    -35.18047419999999    Camarões Restaurante - Avenida Engenheiro Roberto Freire - Ponta Negra, Natal - RN, Brasil    ChIJWbvTVSX_sgcRzyw84ymnSh8
+\.
+
+
+--
+-- Name: stops_id_seq; Type: SEQUENCE SET; Schema: public; Owner: nanobox
+--
+
+SELECT pg_catalog.setval('stops_id_seq', 125, true);
+
+
+--
+-- PostgreSQL database dump complete
+--
